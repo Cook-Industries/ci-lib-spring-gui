@@ -1,0 +1,35 @@
+/**
+ * Copyright(c) 2019 sebastian koch/CI. All rights reserved. mailto:
+ * koch.sebastian@cook-industries.de
+ *
+ * Created on : 11.07.2019 Author : sebastian koch <koch.sebastian@cook-industries.de>
+ */
+package com.ci.lib.spring.web.hmi.input;
+
+import java.util.List;
+
+import com.ci.lib.spring.web.hmi.container.TableRow;
+
+import lombok.Getter;
+import lombok.experimental.SuperBuilder;
+
+/**
+ *
+ * @author sebastian koch <koch.sebastian@cook-industries.de>
+ */
+@SuperBuilder
+@Getter
+public class Table extends Input
+{
+
+    private final Boolean        editable;
+    private final List<String>   colNames;
+    private final List<TableRow> rows;
+
+    @Override
+    protected InputType inferType()
+    {
+        return InputType.TABLE;
+    }
+
+}

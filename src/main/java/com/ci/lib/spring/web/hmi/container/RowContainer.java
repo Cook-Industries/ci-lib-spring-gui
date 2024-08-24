@@ -1,0 +1,29 @@
+package com.ci.lib.spring.web.hmi.container;
+
+import java.util.List;
+
+import io.micrometer.common.lang.NonNull;
+import lombok.Getter;
+import lombok.Singular;
+import lombok.experimental.SuperBuilder;
+
+/**
+ *
+ * @author sebastian koch <koch.sebastian@cook-industries.de>
+ */
+@SuperBuilder
+@Getter
+public class RowContainer extends Container
+{
+
+    @NonNull
+    @Singular
+    private final List<ColumnContainer> columns;
+
+    @Override
+    protected ContainerType inferType()
+    {
+        return ContainerType.ROW;
+    }
+
+}

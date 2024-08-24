@@ -1,0 +1,263 @@
+body, html {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.bgc-black {
+    background-color: black;
+    color: white;
+}
+
+.bgc-white {
+    background-color: white;
+    color: black;
+}
+
+.bgc-blue {
+    background-color: #0099ff;
+    color: white;
+}
+
+.bgc-light-green {
+    background-color: lightgreen;
+    color: black;
+}
+
+.bgc-light-red {
+    background-color: rgba(255, 0, 0, 0.5);
+    color: black;
+}
+
+.bgc-light-yellow {
+    background-color: lightgoldenrodyellow;
+    color: black;
+}
+
+.bgc-magenta {
+    background-color: rgb(153, 51, 153);
+    color: black;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* === > notifications ========================================================================== */
+#error-overlay {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    z-index: 499;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+#error-border-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(64, 64, 64, 1);
+    border: 0.25rem solid black;
+    border-radius: 0.5rem;
+}
+
+#error-holder {
+    display: flex;
+    flex-direction: column;
+    /*justify-content: center;*/
+    align-items: stretch;
+    max-height: 65rem;
+    overflow: auto;
+}
+
+.message-container {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    max-width: 50rem;
+    z-index: 500;
+}
+
+.message-container>* {
+    margin-left: 1rem;
+}
+
+#popup-holder {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    padding: 2rem;
+    z-index: 490;
+}
+
+.pop-up {
+    padding: 0.25rem;
+    background-color: lightgrey;
+    border-radius: 0.5rem;
+}
+
+.pop-up-fade-out {
+    opacity: 1;
+    animation-name: fadeOutAnimation;
+    animation-duration: 3s;
+    /* Duration of the fade effect */
+    animation-delay: 3s;
+    /* Delay before the fade effect starts */
+    animation-fill-mode: forwards;
+    /* Keeps the element in the final state of animation */
+}
+
+@keyframes fadeOutAnimation {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+#maintenance-overlay {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    z-index: 400;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+#maintenance-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 10em;
+    height: 10em;
+    padding: 1em;
+    background-color: #6699cc;
+    border-radius: 1em;
+}
+
+.alert {
+    margin: 0.25rem;
+    padding: 0.25rem 2.5rem;
+    border: solid 0.25rem;
+    border-radius: 0.5rem;
+}
+
+.error {
+    margin: 0.15rem;
+    padding: 0.5rem;
+    background-color: rgba(255, 0, 0, 0.25);
+    border: 0.25rem solid rgba(255, 0, 0, 0.5);
+    border-radius: 0.5rem;
+    color: white;
+}
+
+.error-icon {
+    color: red;
+}
+
+.warning {
+    margin: 0.15rem;
+    padding: 0.5rem;
+    background-color: rgba(255, 179, 0, 0.25);
+    border: 0.25rem solid rgba(255, 179, 0, 0.5);
+    border-radius: 0.5rem;
+    color: black;
+}
+
+.success {
+    margin: 0.15rem;
+    padding: 0.5rem;
+    background-color: rgba(0, 255, 0, 0.25);
+    border: 0.25rem solid rgba(0, 255, 0, 0.5);
+    border-radius: 0.5rem;
+    color: black;
+}
+
+.notification {
+    margin: 0.15rem;
+    padding: 0.5rem;
+    background-color: rgba(0, 59, 209, 0.5);
+    border: 0.25rem solid rgba(0, 59, 209, 1);
+    color: white;
+}
+
+/* === < notifications ========================================================================== */
+/* === > loader  ================================================================================ */
+#global-loader-overlay {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 400;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+#global-loader {
+    padding: 1rem;
+    background-color: #6699cc;
+    border-radius: 1rem;
+}
+
+#global-loader-text {
+    padding: 1rem;
+    background-color: #6699cc;
+    border-radius: 1rem;
+    font-size: 150%;
+    margin: 1rem
+}
+
+/* === < loader ================================================================================= */
+/* === > modal ================================================================================== */
+.modal-overlay {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-name {
+    font-weight: bold;
+    margin: 1rem;
+}
+
+.modal-inlay {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    background: rgba(102, 153, 204, 1);
+    border-radius: 1rem;
+    min-width: 40rem;
+    max-height: 75%;
+}
+
+.modal-input {
+    overflow-y: auto;
+}
+/* === < modal ================================================================================== */
+/* === > ci ===================================================================================== */
+/* === < ci ===================================================================================== */

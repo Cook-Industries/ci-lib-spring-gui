@@ -1,0 +1,49 @@
+/**
+ * Copyright(c) 2019 sebastian koch/CI. All rights reserved. mailto:
+ * koch.sebastian@cook-industries.de
+ *
+ * Created on : 11.07.2019 Author : sebastian koch <koch.sebastian@cook-industries.de>
+ */
+package com.ci.lib.spring.web.hmi.input;
+
+import lombok.Getter;
+import lombok.NonNull;
+
+import lombok.Builder.Default;
+import lombok.experimental.SuperBuilder;
+
+/**
+ * {@link Textfield} represents a text input field.<br>
+ * <br>
+ * Required fields are: {@link Textfield#uid}, {@link Textfield#name}, {@link Textfield#submitAs},
+ * {@link Textfield#value}, {@link Textfield#placeholder},
+ * 
+ * @author sebastian koch <koch.sebastian@cook-industries.de>
+ */
+@SuperBuilder
+@Getter
+public class Textfield extends SubmittableInput
+{
+
+    @NonNull
+    @Default
+    private String  value         = "";
+    @NonNull
+    @Default
+    private String  placeholder   = "";
+    @Default
+    private String  prefix       = "";
+    @Default
+    private String  suffix     = "";
+    @Default
+    private Integer maxCharacters = Integer.MAX_VALUE;
+    @Default
+    private String  onKeydown     = "";
+
+    @Override
+    protected InputType inferType()
+    {
+        return InputType.TEXTFIELD;
+    }
+
+}
