@@ -51,7 +51,7 @@ final class HtmlElementMapper
                 .append(getAttributes())
                 .append(SPACE)
                 .append(StringAdapter.withPrefixAndSuffix("class=\"", StringAdapter.withSeparatorFrom(classes, SPACE), QTM))
-                .append(SPACE)
+                .append(!classes.isEmpty(), SPACE)
                 .append(getDataAttributes())
                 .append(GT)
                 .append(!isSingleTag, content)

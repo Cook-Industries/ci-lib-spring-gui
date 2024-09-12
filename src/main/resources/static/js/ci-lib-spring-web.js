@@ -1,3 +1,5 @@
+export { showGlobalLoader, hideGlobalLoader, getModal, GET, POST, sendFromForm, registerFunction };
+
 /*
  *  Copyright(c) 2019 sebastian koch/CI. All rights reserved.
  *  mailto: koch.sebastian@cook-industries.de
@@ -5,15 +7,17 @@
  *  Created on : 29.07.2019
  *  Author     : <a href="mailto:koch.sebastian@cook-industries.de">sebastian koch</a>
  */
-$(document).ready(function ()
-{
+
+const version = "";
+const customFunctionMap = new Map();
+
+$(document).ready(function () {
     console.log("ci-lib-dev-build");
 
     /**
      * OnClick function
      */
-    $("body").on("click", ".modal-overlay", function (event)
-    {
+    $("body").on("click", ".modal-overlay", function (event) {
         event.stopPropagation();
         if (event.target === this) {
             if ($(sprintf("#modal-overlay-%d", openModals)).attr("data-close-on-overlay") === "true") {
@@ -22,50 +26,56 @@ $(document).ready(function ()
         }
     });
 
+    window.dismissErrors = () => { dismissErrors(); };
+
     hideGlobalLoader();
 });
 
 // === > global functions ==========================================================================
-function GET(endpointUrl, dataToSend = {})
-{
-    return new Promise((resolve, reject) =>
-    {
+/**
+ * 
+ * @param {*} endpointUrl 
+ * @param {*} dataToSend 
+ * 
+ * @returns a Promise
+ */
+function GET(endpointUrl, dataToSend = {}) {
+    return new Promise((resolve, reject) => {
         fetch(endpointUrl,
-        {
-            method: 'GET'
-        })
-            .then(response =>
             {
+                method: 'GET'
+            })
+            .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
                 return response.json();
             })
-            .then(json =>
-            {
+            .then(json => {
                 handleResponse(json);
                 return json;
             })
-            .then(responseData =>
-            {
+            .then(responseData => {
                 resolve(responseData);
             })
-            .catch(error =>
-            {
+            .catch(error => {
                 reject(error);
             });
     });
 }
 
-function POST(endpointUrl, dataToSend = {})
-{
-    if(endpointUrl === undefined || endpointUrl === "")
-    {
+/**
+ * 
+ * @param {*} endpointUrl 
+ * @param {*} dataToSend 
+ * @returns a Promise
+ */
+function POST(endpointUrl, dataToSend = {}) {
+    if (endpointUrl === undefined || endpointUrl === "") {
         throw new Error("POST URL cannot be undefined/empty");
     }
 
-    return new Promise((resolve, reject) =>
-    {
+    return new Promise((resolve, reject) => {
         fetch(endpointUrl, {
             method: 'POST',
             headers: {
@@ -97,19 +107,16 @@ function POST(endpointUrl, dataToSend = {})
  * @param {*} id of form to grab values from
  * @param {*} url to call on backend
  */
-function sendFromForm(id, url)
-{
+async function sendFromForm(id, url) {
     showGlobalLoader("send form data");
-    let data = extractValuesToSubmit(id);
+    const data = await extractValuesToSubmit(id);
     POST(url, data);
 }
 
-function handleResponse(response)
-{
+function handleResponse(response) {
     triggerResponse(response.messages);
 
-    switch (response.action)
-    {
+    switch (response.action) {
         case "NOTIFICATION":
             break;
 
@@ -138,40 +145,55 @@ function handleResponse(response)
             break;
 
         case "REPLACE":
-            replaceContent(msg);
+            replaceContent(response);
             break;
 
         case "REMOVE":
-            removeContent(msg);
+            removeContent(response);
             break;
 
         case "COMPOUND":
-            for (let s in msg.results.list) {
-                let data = msg.statements[s];
+            for (let s in response.results.list) {
+                let data = response.statements[s];
 
                 handleResponse(data);
             }
             break;
 
         case "audio_control":
-            audioControl(msg);
+            audioControl(response);
             break;
 
         case "LOADING_PROGRESS":
-            changeGlobalLoaderText(msg.text);
+            changeGlobalLoaderText(response.text);
             break;
 
         default:
-            clientsideError(sprintf("could not recognice response action '%s'", response.action));
+            tryCustomFunction(response);
     }
 
     call(response.calls);
 }
 
-function call(calls)
-{
-    for (let func in calls)
-    {
+function tryCustomFunction(response) {
+    const key = response.action;
+
+    if (customFunctionMap.has(key)) {
+        const func = customFunctionMap.get(key);
+
+        return func(response);
+    }
+    else {
+        clientsideError(sprintf("could not recognice response action [%s]", key));
+    }
+}
+
+function registerFunction(key, func) {
+    customFunctionMap.set(key, func);
+}
+
+function call(calls) {
+    for (let func in calls) {
         let call = calls[func];
         let fn = window[call.functionName];
 
@@ -190,10 +212,8 @@ function call(calls)
  * @param {type} text - text to be shown in loader if neccessary
  * @returns {undefined}
  */
-function showGlobalLoader(text = "")
-{
-    if (text !== undefined)
-    {
+function showGlobalLoader(text = "") {
+    if (text !== undefined) {
         $("#global-loader-text").html(text);
     }
 
@@ -205,14 +225,12 @@ function showGlobalLoader(text = "")
  *
  * @returns {undefined}
  */
-function hideGlobalLoader()
-{
+function hideGlobalLoader() {
     $("#global-loader-text").html("loading...");
     $("#global-loader-overlay").addClass("hidden");
 }
 
-function changeGlobalLoaderText(text)
-{
+function changeGlobalLoaderText(text) {
     $("#global-loader-text").html(text);
 }
 // === < global loader =============================================================================
@@ -222,8 +240,7 @@ function changeGlobalLoaderText(text)
  * @param {type} btnName - label for the "ok" btn
  * @returns {undefined}
  */
-function triggerResponse(messages, btnName = "")
-{
+function triggerResponse(messages, btnName = "") {
     hideGlobalLoader();
 
     let needOverlay = false;
@@ -233,8 +250,7 @@ function triggerResponse(messages, btnName = "")
     for (let m in messages) {
         let msg = messages[m];
 
-        switch (msg.target)
-        {
+        switch (msg.target) {
             case "MODAL":
                 needOverlay = true;
                 handleModalMsg(msg);
@@ -253,16 +269,14 @@ function triggerResponse(messages, btnName = "")
         }
     }
 
-    if (needOverlay)
-    {
+    if (needOverlay) {
         $("#btn-error-text").html(btnName);
         $("#error-overlay").removeClass("hidden");
         $("#error-overlay").find(':button').focus();
     }
 }
 
-function getMsgClass(type)
-{
+function getMsgClass(type) {
     let c;
 
     switch (type) {
@@ -285,19 +299,16 @@ function getMsgClass(type)
     return c;
 }
 
-function handleModalMsg(msg)
-{
+function handleModalMsg(msg) {
     let c = getMsgClass(msg.type);
     $("#error-holder").append(sprintf('<div class="message-container %s"><i class="material-icons">%s</i><div>%s</div></div>', c, c, msg.msg));
 }
 
-function handlePopupMsg(msg)
-{
+function handlePopupMsg(msg) {
     $("#popup-holder").append(sprintf('<div class="pop-up pop-up-fade-out"><div class="%s">%s</div></div>', getMsgClass(msg.type), msg.msg));
 }
 
-function handleHighlightMsg(msg)
-{
+function handleHighlightMsg(msg) {
 
 }
 
@@ -311,9 +322,8 @@ function handleHighlightMsg(msg)
  *
  * @return {undefined}
  */
-function clientsideError(msg, btn = "dismiss")
-{
-    triggerResponse(msg, btn);
+function clientsideError(msg, btn = "dismiss") {
+    triggerResponse({ "msg": msg, "target": "POP_UP" }, btn);
 }
 
 /**
@@ -321,8 +331,7 @@ function clientsideError(msg, btn = "dismiss")
  *
  * @returns {undefined}
  */
-function dismissErrors()
-{
+function dismissErrors() {
     $("#error-overlay").addClass("hidden");
     $("#error-holder").html("");
 }
@@ -330,8 +339,7 @@ function dismissErrors()
 // === > modal =====================================================================================
 let openModals = 0;
 
-function getModal(url)
-{
+function getModal(url) {
     showGlobalLoader();
 
     GET(url);
@@ -341,8 +349,7 @@ function getModal(url)
 /**
  * Function to submit directly from a modal if no other function is specified
  */
-function submitFromModal()
-{
+function submitFromModal() {
     showGlobalLoader();
 
     let modal = $(sprintf("#modal-overlay-%d", openModals));
@@ -354,8 +361,7 @@ function submitFromModal()
 
 
 
-function submitLeftBtnPress()
-{
+function submitLeftBtnPress() {
     let modal = $(sprintf("#modal-overlay-%d", openModals));
     let arr = {
         btn_left: true,
@@ -365,8 +371,7 @@ function submitLeftBtnPress()
     POST(modal.attr("data-request-url"), arr);
 }
 
-function submitMiddleBtnPress()
-{
+function submitMiddleBtnPress() {
     let modal = $(sprintf("#modal-overlay-%d", openModals));
     let arr = {
         btn_middle: true,
@@ -376,8 +381,7 @@ function submitMiddleBtnPress()
     POST(modal.attr("data-request-url"), arr);
 }
 
-function submitRightBtnPress()
-{
+function submitRightBtnPress() {
     let modal = $(sprintf("#modal-overlay-%d", openModals));
     let arr = {
         btn_right: true,
@@ -387,8 +391,7 @@ function submitRightBtnPress()
     POST(modal.attr("data-request-url"), arr);
 }
 
-function submitAbort()
-{
+function submitAbort() {
     let modal = $(sprintf("#modal-overlay-%d", openModals));
     let arr = {
         aborted: true,
@@ -405,8 +408,7 @@ function submitAbort()
  *
  * @returns {undefined}
  */
-function openModal(modal)
-{
+function openModal(modal) {
     openModals++;
 
     // -> data attributes
@@ -438,14 +440,12 @@ function openModal(modal)
     hideGlobalLoader();
 }
 
-function modalShowBtn()
-{
+function modalShowBtn() {
     $(sprintf("#modal-overlay-%d", openModals)).attr("data-close-on-overlay", "0");
     $(sprintf("#modal-buttons-%d", openModals)).removeClass("hidden");
 }
 
-function radioClick(event)
-{
+function radioClick(event) {
     event.stopPropagation();
     $(event.currentTarget).find(".slider").click();
 }
@@ -456,8 +456,7 @@ function radioClick(event)
  * @returns {undefined}
  */
 function closeModal() {
-    if ($(sprintf("#modal-overlay-%d", openModals)).attr("data-lock-set") === "1")
-    {
+    if ($(sprintf("#modal-overlay-%d", openModals)).attr("data-lock-set") === "1") {
         $(sprintf("#modal-overlay-%d", openModals)).attr("data-lock-set", "0");
         releaseLock();
     }
@@ -467,13 +466,10 @@ function closeModal() {
 }
 // === < modal =====================================================================================
 // === > site ======================================================================================
-function fillContent(content)
-{
+function fillContent(content) {
     let elementId = sprintf("#%s", content.elementId);
-    if ($(content).length)
-    {
-        if (content.replace)
-        {
+    if ($(content).length) {
+        if (content.replace) {
             $(elementId).html("");
         }
 
@@ -481,15 +477,13 @@ function fillContent(content)
     }
 }
 
-function replaceContent(obj)
-{
+function replaceContent(obj) {
     let contentIdentifier = obj.context;
 
     $(sprintf("#%s", contentIdentifier)).replaceWith(write(obj.element));
 }
 
-function removeContent(obj)
-{
+function removeContent(obj) {
     let contentIdentifier = obj.context;
 
     $(sprintf("#%s", contentIdentifier)).remove();
@@ -502,50 +496,88 @@ function removeContent(obj)
  *
  * @returns {object} containing the extracted values and the standard message for the jserver
  */
-function extractValuesToSubmit(target)
-{
+async function extractValuesToSubmit(target) {
+    showGlobalLoader("extract form fields");
     let arg = {};
 
-    $(sprintf('[data-submit-id="%s"]', target)).each(function ()
-    {
+    for (const elem of $(sprintf('[data-submit-id="%s"]', target))) {
         let arr = new Array();
 
-        if ($(this).attr("data-submit-as") === "")
-        {
+        if ($(elem).attr("data-submit-as") === "") {
             // no submit id set so ignore input
         } else {
-            switch ($(this).attr("data-value-type")) {
+            switch ($(elem).attr("data-value-type")) {
                 case "INPUT":
                 case "SELECT":
                 case "TEXTAREA":
                 case "TEXTFIELD":
                 case "DATE":
                 case "PASSWORD":
-                    arg[$(this).attr("data-submit-as")] = $(this).val();
+                    arg[$(elem).attr("data-submit-as")] = $(elem).val();
                     break;
                 case "DIV":
-                    arg[$(this).attr("data-submit-as")] = $(this).html();
+                    arg[$(elem).attr("data-submit-as")] = $(elem).html();
                     break;
                 case "CHECKBOX":
-                    $(this).find('input[type="checkbox"]:checked').each(function () {
-                        arr.push($(this).val());
+                    $(elem).find('input[type="checkbox"]:checked').each(function () {
+                        arr.push($(elem).val());
                     });
-                    arg[$(this).attr("data-submit-as")] = arr;
+                    arg[$(elem).attr("data-submit-as")] = arr;
                     break;
                 case "SWITCH":
-                    arg[$(this).attr("data-submit-as")] = $(this).is(':checked');
+                    arg[$(elem).attr("data-submit-as")] = $(elem).is(':checked');
                     break;
                 case "RADIO":
-                    arg[$(this).attr("data-submit-as")] = $(this).find('input[type="radio"]:checked').val();
+                    arg[$(elem).attr("data-submit-as")] = $(elem).find('input[type="radio"]:checked').val();
+                    break;
+                case "FILE":
+                    console.log("IN");
+                    arg[$(elem).attr("data-submit-as")] = await extractFiles($(elem)[0].files);
+                    console.log("OUT");
                     break;
 
                 default:
-                    clientsideError("ERR_READ_FAIL", sprintf("a field value couldn't be fetched (field: %s)", $(this).attr("data-submit-as")));
+                    clientsideError("ERR_READ_FAIL", sprintf("a field value couldn't be fetched (field: %s)", $(elem).attr("data-submit-as")));
             }
         }
-    });
+    }
 
     console.log(arg);
     return arg;
+}
+
+async function extractFiles(files) {
+    const fileArray = [];
+    const promises = [];
+
+    if (files.length > 0) {
+        for (const file of files) {
+            const fileData = await read_file(file);
+            fileArray.push(fileData);
+        }
+    }
+
+    return fileArray;
+}
+
+function read_file(file) {
+    return new Promise((resolve, reject) => {
+        var fr = new FileReader();
+        fr.fileName = file.name;
+        fr.fileType = file.type;
+        fr.onload = (event) => {
+            resolve({
+                fileName: event.target.fileName,
+                fileType: event.target.fileType,
+                fileContent: event.target.result
+            });
+        };
+        fr.onerror = (error) => {
+            console.log("error reading file");
+            reject(error);
+        }
+
+        fr.readAsDataURL(file);
+    });
 }
 // === < site ======================================================================================

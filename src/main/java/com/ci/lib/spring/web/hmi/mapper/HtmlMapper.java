@@ -24,7 +24,6 @@ public final class HtmlMapper
     private static final String TAG_INPUT               = "input";
     private static final String TAG_SELECT              = "select";
     private static final String TAG_OPTION              = "option";
-    private static final String TAG_FORM                = "form";
 
     private static final String ATT_ID                  = "id";
     private static final String ATT_NAME                = "name";
@@ -56,12 +55,27 @@ public final class HtmlMapper
     private static final String DATA_ATT_VALUE_TYPE     = "value-type";
     private static final String DATA_ATT_MAX_CHARACTERS = "max-characters";
 
+    /**
+     * Map a {@link Container} to its HTML represantation
+     * 
+     * @param container to map
+     * 
+     * @return resulting HTML String
+     */
     public static String map(Container container)
     {
         HtmlMapper mapper = new HtmlMapper();
+
         return mapper.render(container);
     }
 
+    /**
+     * Map a list of {@link Container}s to a single HTML String
+     * 
+     * @param containers to map
+     * 
+     * @return resulting HTML String, containing all mappings one after the other
+     */
     public static String map(List<Container> containers)
     {
         HtmlMapper   mapper = new HtmlMapper();
@@ -72,14 +86,34 @@ public final class HtmlMapper
         return sc.getString();
     }
 
+    /**
+     * A temporary result for not yet implemented objects<br>
+     * TODO: remove
+     * 
+     * @param name of the element
+     * 
+     * @return
+     */
     private String elementNotYetImplemented(String name)
     {
         String s = name + " element not supported yet.";
         return StringAdapter.withPrefixAndSuffix("<div>", s, "</div>");
     }
 
+    /**
+     * Render a {@link Container} as HTML component
+     * 
+     * @param container to render
+     * 
+     * @return the resulting HTML String or
+     */
     private String render(Container container)
     {
+        if (container == null)
+        {
+            return "";
+        }
+
         return switch (container.getType())
         {
             case AUDIO -> render((AudioContainer) container);
@@ -88,6 +122,7 @@ public final class HtmlMapper
             case BUTTON_ICON -> render((ButtonIconContainer) container);
             case COLUMN -> render((ColumnContainer) container);
             case CONTENT -> render((ContentContainer) container);
+            case HEADING -> render((HeadingContainer) container);
             case HIDDEN -> render((HiddenContainer) container);
             case IMAGE -> render((ImageContainer) container);
             case FORM -> render((FormContainer) container);
@@ -134,6 +169,44 @@ public final class HtmlMapper
                 .classes(contentContainer.getClasses())
                 .dataAttribues(contentContainer.getDataAttributes())
                 .content(content)
+                .build();
+
+        return elementMapper.html();
+    }
+
+    private String render(HeadingContainer headingContainer)
+    {
+        Integer size;
+        switch (headingContainer.getSize())
+        {
+            case 1:
+                size = 1;
+                break;
+            case 2:
+                size = 1;
+                break;
+            case 3:
+                size = 1;
+                break;
+            case 4:
+                size = 1;
+                break;
+            case 5:
+                size = 1;
+                break;
+
+            default:
+                size = 1;
+        }
+
+        HtmlElementMapper elementMapper = HtmlElementMapper
+                .builder()
+                .tag("h" + size)
+                .attribute(new Attribute(ATT_ID, headingContainer.getUid()))
+                .attribute(new Attribute(ATT_ON_CLICK, headingContainer.getOnClick()))
+                .classes(headingContainer.getClasses())
+                .dataAttribues(headingContainer.getDataAttributes())
+                .content(headingContainer.getText())
                 .build();
 
         return elementMapper.html();
@@ -274,6 +347,7 @@ public final class HtmlMapper
 
     private String render(SplittedContainer splittedContainer)
     {
+
         String            head          = render(splittedContainer.getHead());
         String            tail          = render(splittedContainer.getTail());
 
@@ -435,8 +509,34 @@ public final class HtmlMapper
 
     private String render(File file, String formId)
     {
-        // TODO: implement
-        return elementNotYetImplemented("file");
+        String            label         = HtmlElementMapper
+                .builder()
+                .tag(TAG_LABEL)
+                .attribute(new Attribute(ATT_FOR, file.getUid()))
+                .clazz(CLASS_FORM_LABEL)
+                .content(file.getName())
+                .build()
+                .html();
+
+        String            input         = HtmlElementMapper
+                .builder()
+                .isSingleTag(true)
+                .tag(TAG_INPUT)
+                .attribute(new Attribute(ATT_ID, file.getUid()))
+                .attribute(new Attribute(ATT_TYPE, file.getType().name().toLowerCase()))
+                .attribute(new Attribute("multiple", file.getMultiple().toString()))
+                .attribute(new Attribute("accept", StringAdapter.withSeparatorFrom(file.getAccepts(), ",")))
+                .clazz(CLASS_FORM_CONTROL)
+                .dataAttribue(DATA_ATT_SUBMIT_ID, formId)
+                .dataAttribue(DATA_ATT_SUBMIT_AS, file.getSubmitAs())
+                .dataAttribue(DATA_ATT_VALUE_TYPE, file.getType().name())
+                .dataAttribues(file.getDataAttributes())
+                .build()
+                .html();
+
+        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(StringAdapter.from(label, input)).build();
+
+        return elementMapper.html();
     }
 
     private String render(Hidden hidden, String formId)

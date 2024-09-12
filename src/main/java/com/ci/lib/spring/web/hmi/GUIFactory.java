@@ -18,6 +18,13 @@ import lombok.Data;
 public class GUIFactory
 {
 
+    /**
+     * Read in a static template and transform into a {@link Container}
+     * 
+     * @param path to read in
+     * 
+     * @return the parsed {@code Container}
+     */
     public Container fromComponentJson(String path)
     {
         JsonTreeMapper mapper = new JsonTreeMapper();
@@ -35,6 +42,14 @@ public class GUIFactory
         }
     }
 
+    /**
+     * Read in a dynamic template and transform into a {@link Container}
+     * 
+     * @param path to read in
+     * @param valueMap dynamic {@code valueMap}
+     * 
+     * @return the parsed {@code Container}
+     */
     public Container fromComponentJson(String path, ValueMap valueMap)
     {
         JsonTreeMapper mapper = new JsonTreeMapper();

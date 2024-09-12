@@ -1,7 +1,10 @@
 package com.ci.lib.spring.web.hmi.input;
 
+import java.util.List;
+
 import lombok.Getter;
-import lombok.NonNull;
+import lombok.Singular;
+import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -13,13 +16,16 @@ import lombok.experimental.SuperBuilder;
 public class File extends SubmittableInput
 {
 
-    @NonNull
-    private String value;
+    @Default
+    private Boolean      multiple = false;
+
+    @Singular
+    private List<String> accepts;
 
     @Override
     protected InputType inferType()
     {
-        return InputType.DATE;
+        return InputType.FILE;
     }
 
 }

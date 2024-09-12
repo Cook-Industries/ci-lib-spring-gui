@@ -1,6 +1,7 @@
 /**
- * /* Copyright(c) 2024 sebastian koch/CI. All rights reserved. mailto:
- * koch.sebastian@cook-industries.de
+ * 
+ * Copyright(c) 2024 sebastian koch/CI. All rights reserved.<br>
+ * mailto: koch.sebastian@cook-industries.de
  */
 package com.ci.lib.spring.web.util;
 

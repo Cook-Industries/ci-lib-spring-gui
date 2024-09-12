@@ -20,52 +20,57 @@ import com.ci.lib.spring.web.util.StringConcat;
 public class HtmlSite
 {
 
-    private ArrayList<HtmlHeadValue> headers;
-    private ArrayList<CSSLink>       css;
-    private ArrayList<CSSEntity>     cssInline;
-    private ArrayList<JsLink>        scripts;
-
-    private ArrayList<Container>     content;
+    private final ArrayList<HtmlHeadValue> headers;
+    private final ArrayList<CSSLink>       css;
+    private final ArrayList<CSSEntity>     cssInline;
+    private final ArrayList<JsLink>        scripts;
+    private final ArrayList<JsImport>      imports;
+    private final ArrayList<Container>     content;
 
     HtmlSite(ArrayList<HtmlHeadValue> headers, ArrayList<CSSLink> css, ArrayList<CSSEntity> cssInline, ArrayList<JsLink> scripts,
-            ArrayList<Container> content)
+            ArrayList<JsImport> imports, ArrayList<Container> content)
     {
         this.headers = headers;
         this.css = css;
         this.cssInline = cssInline;
         this.scripts = scripts;
+        this.imports = imports;
         this.content = content;
     }
 
     public String getHtmlCode()
     {
-        StringConcat s = new StringConcat();
+        StringConcat sc = new StringConcat();
 
-        s.appendnl("<!DOCTYPE html>");
-        s.appendnl("<html>");
-        s.appendnl("<head>");
+        sc.appendnl("<!DOCTYPE html>");
+        sc.appendnl("<html>");
+        sc.appendnl("<head>");
 
-        headers.forEach(h -> s.append(h.getHtmlCode()));
+        sc.appendnl("<base href=\"/\">");
 
-        css.forEach(h -> s.append(h.getHtmlCode()));
+        headers.forEach(h -> sc.append(h.getHtmlCode()));
 
-        s.appendnl("<style>");
+        css.forEach(h -> sc.append(h.getHtmlCode()));
 
-        cssInline.forEach(h -> s.append(h.getHtmlRep()));
+        sc.appendnl("<style>");
 
-        s.appendnl("</style>");
+        cssInline.forEach(h -> sc.append(h.getHtmlRep()));
 
-        scripts.forEach(h -> s.append(h.getHtmlCode()));
+        sc.appendnl("</style>");
 
-        s.appendnl("</head>");
+        sc.appendnl(JsImportMap.builder().entries(imports).build().getHtmlRep());
 
-        s.appendnl("<body>");
+        scripts.forEach(h -> sc.append(h.getHtmlRep()));
 
-        content.forEach(c -> s.append(HtmlMapper.map(c)));
+        sc.appendnl("</head>");
 
-        s.appendnl("</body>");
-        s.appendnl("</html>");
+        sc.appendnl("<body>");
 
-        return s.getString();
+        content.forEach(c -> sc.append(HtmlMapper.map(c)));
+
+        sc.appendnl("</body>");
+        sc.appendnl("</html>");
+
+        return sc.getString();
     }
 }

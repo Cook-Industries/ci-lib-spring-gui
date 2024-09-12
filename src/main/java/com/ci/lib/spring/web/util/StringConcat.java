@@ -38,9 +38,13 @@ public class StringConcat
         return this;
     }
 
-    public StringConcat appendnl(String str)
+    public StringConcat appendnl(String... str)
     {
-        stb.append(str);
+        for (String s : str)
+        {
+            stb.append(s);
+        }
+
         stb.append("\n");
 
         return this;

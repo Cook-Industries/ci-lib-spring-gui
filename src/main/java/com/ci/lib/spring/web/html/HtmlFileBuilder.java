@@ -21,8 +21,8 @@ public class HtmlFileBuilder
     private final ArrayList<HtmlHeadValue> headers;
     private final ArrayList<CSSLink>       css;
     private final ArrayList<CSSEntity>     cssInline;
+    private final ArrayList<JsImport>      importEntries;
     private final ArrayList<JsLink>        scripts;
-
     private final ArrayList<Container>     content;
 
     public static HtmlFileBuilder site()
@@ -35,6 +35,7 @@ public class HtmlFileBuilder
         headers = new ArrayList<>();
         css = new ArrayList<>();
         cssInline = new ArrayList<>();
+        importEntries = new ArrayList<>();
         scripts = new ArrayList<>();
         content = new ArrayList<>();
     }
@@ -59,9 +60,15 @@ public class HtmlFileBuilder
         return this;
     }
 
-    public HtmlFileBuilder script(String href)
+    public HtmlFileBuilder importMap(JsImport jsImport)
     {
-        scripts.add(new JsLink(href));
+        importEntries.add(jsImport);
+        return this;
+    }
+
+    public HtmlFileBuilder script(JsLink jsLink)
+    {
+        scripts.add(jsLink);
 
         return this;
     }
@@ -75,6 +82,6 @@ public class HtmlFileBuilder
 
     public HtmlSite build()
     {
-        return new HtmlSite(headers, css, cssInline, scripts, content);
+        return new HtmlSite(headers, css, cssInline, scripts, importEntries, content);
     }
 }
