@@ -1,8 +1,8 @@
 /**
- * Copyright(c) 2021 sebastian koch/CI. All rights reserved. mailto:
- * koch.sebastian@cook-industries.de
+ * Copyright(c) 2024 sebastian koch/CI. All rights reserved.<br>
+ * mailto: koch.sebastian@cook-industries.de
  *
- * Created on : 10.11.2021 Author : sebastian koch <koch.sebastian@cook-industries.de>
+ * @author : sebastian koch <koch.sebastian@cook-industries.de>
  */
 package com.ci.lib.spring.web.hmi.container;
 
