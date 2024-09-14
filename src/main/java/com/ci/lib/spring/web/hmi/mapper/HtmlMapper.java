@@ -8,6 +8,7 @@ package com.ci.lib.spring.web.hmi.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.ci.lib.spring.web.hmi.container.*;
@@ -55,6 +56,7 @@ public final class HtmlMapper
     private static final String CLASS_FORM_CHECK        = "form-check";
     private static final String CLASS_FORM_CHECK_INPUT  = "form-check-input";
     private static final String CLASS_FORM_CHECK_LABEL  = "form-check-label";
+    private static final String CLASS_FORM_SELECT       = "form-select";
 
     private static final String DATA_ATT_SUBMIT_ID      = "submit-id";
     private static final String DATA_ATT_SUBMIT_AS      = "submit-as";
@@ -405,6 +407,7 @@ public final class HtmlMapper
             case FILE -> render((File) input, formId);
             case HIDDEN -> render((Hidden) input, formId);
             case LINK -> render((Link) input, formId);
+            case LIST -> render((ListSelection) input, formId);
             case NUMBER -> render((Number) input, formId);
             case PASSWORD -> render((Password) input, formId);
             case RADIO -> render((Radio) input, formId);
@@ -573,6 +576,110 @@ public final class HtmlMapper
         return elementNotYetImplemented("link input");
     }
 
+    private String render(ListSelection list, String formId)
+    {
+        ArrayList<String> options = new ArrayList<>();
+
+        for (InputValue selection : list.getValues())
+        {
+            String option = HtmlElementMapper
+                    .builder()
+                    .tag(TAG_OPTION)
+                    .attribute(new Attribute(ATT_VALUE, selection.getValue()))
+                    .attribute(new Attribute(ATT_SELECTED, selection.getChecked()))
+                    .content(selection.getText())
+                    .build()
+                    .html();
+
+            options.add(option);
+        }
+
+        ArrayList<String> selections = new ArrayList<>();
+
+        for (InputValue selection : list.getSelected())
+        {
+            UUID   uuid   = UUID.randomUUID();
+
+            String option = HtmlElementMapper
+                    .builder()
+                    .tag(TAG_DIV)
+                    .attribute(new Attribute(ATT_ID, uuid.toString()))
+                    .dataAttribue(ATT_VALUE, selection.getValue())
+                    .content(render(ContentContainer
+                            .builder()
+                            .clazz("form-list-selection-item")
+                            .content(TextContainer.builder().text(selection.getText()).build())
+                            .content(ButtonContainer
+                                    .builder()
+                                    .button(Button
+                                            .builder()
+                                            .text("X")
+                                            .onClick(String.format("removeListSelectionItem('%s')", uuid))
+                                            .build())
+                                    .build())
+                            .build()))
+                    .build()
+                    .html();
+
+            selections.add(option);
+        }
+
+        String            label           = HtmlElementMapper
+                .builder()
+                .tag(TAG_LABEL)
+                .attribute(new Attribute(ATT_FOR, list.getUid()))
+                .clazz(CLASS_FORM_LABEL)
+                .clazz(CLASS_FORM_SELECT)
+                .content(list.getName())
+                .build()
+                .html();
+
+        UUID              selectId        = UUID.randomUUID();
+
+        String            input           = HtmlElementMapper
+                .builder()
+                .tag(TAG_SELECT)
+                .attribute(new Attribute(ATT_ID, selectId.toString()))
+                .clazz("form-list-selection")
+                .dataAttribue("multiple", list.getMultiple().toString())
+                .content(StringAdapter.from(options))
+                .build()
+                .html();
+
+        String            selectHolder    = HtmlElementMapper
+                .builder()
+                .tag(TAG_DIV)
+                .clazz("form-list-selection-select-holder")
+                .content(input)
+                .content(render(ButtonContainer
+                        .builder()
+                        .button(Button.builder().text("+").onClick(String.format("addListSelectionItem('%s', '%s')", selectId, list.getUid())).build())
+                        .build()))
+                .build()
+                .html();
+
+        String            selectionHolder = HtmlElementMapper
+                .builder()
+                .tag(TAG_DIV)
+                .attribute(new Attribute(ATT_ID, list.getUid()))
+                .attribute(new Attribute(ATT_ON_INPUT, list.getOnInput()))
+                .dataAttribues(list.getDataAttributes())
+                .dataAttribue(DATA_ATT_SUBMIT_ID, formId)
+                .dataAttribue(DATA_ATT_SUBMIT_AS, list.getSubmitAs())
+                .dataAttribue(DATA_ATT_VALUE_TYPE, list.getType().name())
+                .dataAttribues(list.getDataAttributes())
+                .content(StringAdapter.from(selections))
+                .build()
+                .html();
+
+        String            outerBody       =
+                HtmlElementMapper.builder().tag(TAG_DIV).content(selectHolder).content(selectionHolder).build().html();
+
+        HtmlElementMapper elementMapper   = HtmlElementMapper.builder().tag(TAG_DIV).content(label).content(outerBody).build();
+
+        return elementMapper.html();
+    }
+
     private String render(Number number, String formId)
     {
         String            label         = HtmlElementMapper
@@ -735,7 +842,7 @@ public final class HtmlMapper
                 .tag(TAG_SELECT)
                 .attribute(new Attribute(ATT_ID, select.getUid()))
                 .attribute(new Attribute(ATT_ON_INPUT, select.getOnInput()))
-                .clazz("form-select")
+                .clazz(CLASS_FORM_SELECT)
                 .dataAttribue(DATA_ATT_SUBMIT_ID, formId)
                 .dataAttribue(DATA_ATT_SUBMIT_AS, select.getSubmitAs())
                 .dataAttribue(DATA_ATT_VALUE_TYPE, select.getType().name())

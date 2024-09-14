@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
+import lombok.Builder.Default;
 
 /**
  *
@@ -27,7 +28,8 @@ public class InputValue
     @NonNull
     private final String       value;
     @NonNull
-    private Boolean            checked;
+    @Default
+    private Boolean            checked = false;
 
     @Singular("clazz")
     private final List<String> classes;

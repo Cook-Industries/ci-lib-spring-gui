@@ -42,9 +42,9 @@ public class GUIFactory
 
             return JsonMapper.map(root);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
-            throw new JsonMapperException(String.format("error while parsing [%s] : [%s]", path, e.getMessage()));
+            throw new JsonMapperException(String.format("error building gui component [%s] : [%s]", path, e.getMessage()));
         }
     }
 
@@ -67,9 +67,9 @@ public class GUIFactory
 
             return JsonMapper.map(root, valueMap);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
-            throw new JsonMapperException(String.format("error while parsing [%s] : [%s]", path, e.getMessage()));
+            throw new JsonMapperException(String.format("error building gui component [%s] : [%s]", path, e.getMessage()));
         }
     }
 }

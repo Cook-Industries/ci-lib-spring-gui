@@ -1,4 +1,4 @@
-export { showGlobalLoader, hideGlobalLoader, getModal, GET, POST, sendFromForm, registerFunction };
+export { showGlobalLoader, hideGlobalLoader, getModal, GET, POST, sendFromForm, submitFromModal, registerFunction, closeModal, dismissErrors};
 
 /**
  * Copyright(c) 2024 sebastian koch/CI. All rights reserved.<br>
@@ -26,6 +26,9 @@ $(document).ready(function () {
     });
 
     window.dismissErrors = () => { dismissErrors(); };
+    window.closeModal = () => { closeModal()};
+    window.removeListSelectionItem = (uuid) => { removeListSelectionItem(uuid); };
+    window.addListSelectionItem = (selectUuid, holderUuid) =>  { addListSelectionItem(selectUuid, holderUuid)};
 
     hideGlobalLoader();
 });
@@ -264,7 +267,7 @@ function triggerResponse(messages, btnName = "") {
                 break;
 
             default:
-                console.log("unrecognized message type");
+                console.log(sprintf("unrecognized message type [%s]", msg.target));
         }
     }
 
@@ -580,3 +583,25 @@ function read_file(file) {
     });
 }
 // === < site ======================================================================================
+// === > form ======================================================================================
+function addListSelectionItem(inputUuid, holderUuid) {
+    const itemName = $(sprintf('#%s option:selected', inputUuid)).text();
+    const itemValue = $(sprintf('#%s', inputUuid)).val();
+    const isMultiple = $(sprintf('#%s', inputUuid)).data("multiple");
+    const newUuid = generateUUID();
+
+    if(isMultiple || $(sprintf('#%s', holderUuid)).find(sprintf('[data-value="%s"]', itemValue)).length === 0) {
+        $(sprintf('#%s', holderUuid)).append(sprintf('<div id="%s" data-value="%s"><div class="form-list-selection-item"><p>%s</p><button onclick="removeListSelectionItem(\'%s\')" class="btn btn-primary">X</button></div></div>', newUuid, itemValue, itemName, newUuid));
+    }
+}
+
+function removeListSelectionItem(uuid) {
+    $(sprintf('#%s', uuid)).remove();
+}
+// === < form ======================================================================================
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}

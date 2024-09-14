@@ -19,38 +19,36 @@ import com.ci.lib.spring.web.hmi.mapper.exception.JsonMapperException;
 import com.ci.lib.spring.web.hmi.mapper.exception.JsonParsingException;
 
 import lombok.Data;
+import lombok.val;
 
 @Data
 public class JsonMapper
 {
 
-    private static final String                    CONTENT                             = "content";
-    private static final String                    SRC                                 = "src";
-    private static final String                    SUFFIX                              = "suffix";
-    private static final String                    PREFIX                              = "prefix";
-    private static final String                    MAX_CHARS                           = "maxChars";
-    private static final String                    TARGET                              = "target";
-    private static final String                    HREF                                = "href";
-    private static final String                    MAX                                 = "max";
-    private static final String                    MIN                                 = "min";
-    private static final String                    CHECKED                             = "checked";
-    private static final String                    IMAGE                               = "image";
-    private static final String                    ON_CLICK                            = "onClick";
-    private static final String                    BTN_CLASS                           = "btnClass";
-    private static final String                    TEXT                                = "text";
-    private static final String                    PARAMETER_S_IS_EXPECTED_BUT_NOT_SET = "parameter '%s' is expected but not set";
-    private static final String                    DEFAULT_DATE                        = "0000-00-00";
-    private static final String                    PLACEHOLDER                         = "placeholder";
-    private static final String                    DEFAULT_VAL                         = "";
-    private static final String                    NAME                                = "name";
-    private static final String                    VALUE                               = "value";
-    private static final String                    VALUES                              = "values";
-    private static final String                    SUBMIT_AS                           = "submitAs";
-    private static final String                    ON_INPUT                            = "onInput";
-    private static final String                    IDENTIFIER_INDICATOR                = "..";
-
-    private static final Function<String, Boolean> BOOLEAN                             = (s) -> Boolean.valueOf(s);
-    private static final Function<String, Integer> INTEGER                             = (s) -> Integer.valueOf(s);
+    private static final String          CONTENT                             = "content";
+    private static final String          SRC                                 = "src";
+    private static final String          SUFFIX                              = "suffix";
+    private static final String          PREFIX                              = "prefix";
+    private static final String          MAX_CHARS                           = "maxChars";
+    private static final String          TARGET                              = "target";
+    private static final String          HREF                                = "href";
+    private static final String          MAX                                 = "max";
+    private static final String          MIN                                 = "min";
+    private static final String          CHECKED                             = "checked";
+    private static final String          IMAGE                               = "image";
+    private static final String          ON_CLICK                            = "onClick";
+    private static final String          BTN_CLASS                           = "btnClass";
+    private static final String          TEXT                                = "text";
+    private static final String          PARAMETER_S_IS_EXPECTED_BUT_NOT_SET = "parameter '%s' is expected but not set";
+    private static final String          DEFAULT_DATE                        = "0000-00-00";
+    private static final String          PLACEHOLDER                         = "placeholder";
+    private static final String          DEFAULT_VAL                         = "";
+    private static final String          NAME                                = "name";
+    private static final String          VALUE                               = "value";
+    private static final String          VALUES                              = "values";
+    private static final String          SUBMIT_AS                           = "submitAs";
+    private static final String          ON_INPUT                            = "onInput";
+    private static final String          IDENTIFIER_INDICATOR                = "..";
 
     //@formatter:off
     private static final ContainerType[]                     CONTAINER_CHILDREN                  =
@@ -74,11 +72,11 @@ public class JsonMapper
             };
     //@formatter:on
 
-    private static final ContainerType[]           LINK_CHILDREN                       = {ContainerType.TEXT};
-    private final TreeHandling                     handling;
-    private final ValueMap                         objectMap;
+    private static final ContainerType[] LINK_CHILDREN                       = {ContainerType.TEXT};
+    private final TreeHandling           handling;
+    private final ValueMap               objectMap;
 
-    private Integer                                count                               = 0;
+    private Integer                      count                               = 0;
 
     /**
      * Map a {@link JsonTreeRoot} to a {@link Container} in a {@link TreeHandling#STATIC} context
@@ -285,7 +283,7 @@ public class JsonMapper
     private InputValue transformInputValue(PseudoElement element, Integer depth)
     {
         String  text    = getParameterValue(element, TEXT);
-        Boolean checked = Boolean.valueOf(getParameterValue(element, CHECKED));
+        Boolean checked = Boolean.valueOf(getParameterValue(element, CHECKED, "false"));
 
         return InputValue
                 .builder()
@@ -316,8 +314,8 @@ public class JsonMapper
                 .classes(element.getClasses())
                 .dataAttributes(element.getAttributes())
                 .src(extractFromValueMap(element, src, depth, String.class, src))
-                .controls(extractFromValueMap(element, controls, depth, Boolean.class, BOOLEAN.apply(controls)))
-                .autoplay(extractFromValueMap(element, autoplay, depth, Boolean.class, BOOLEAN.apply(autoplay)))
+                .controls(extractFromValueMap(element, controls, depth, Boolean.class, false))
+                .autoplay(extractFromValueMap(element, autoplay, depth, Boolean.class, false))
                 .build();
     }
 
@@ -683,6 +681,7 @@ public class JsonMapper
                 case FILE -> transformFileInput(element, depth);
                 case HIDDEN -> transformHiddenInput(element, depth);
                 case LINK -> transformLinkInput(element, depth);
+                case LIST -> transformListInput(element, depth);
                 case NUMBER -> transformNumberInput(element, depth);
                 case PASSWORD -> transformPasswordInput(element, depth);
                 case RADIO -> transformRadioInput(element, depth);
@@ -697,7 +696,7 @@ public class JsonMapper
         }
         catch (final Exception ex)
         {
-            // TODO:
+            // TODO: write better exception
             throw new JsonParsingException("", depth, this.count, "error parsing element", ex);
         }
     }
@@ -775,7 +774,7 @@ public class JsonMapper
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .checked(extractFromValueMap(element, checked, depth, Boolean.class, BOOLEAN.apply(checked)))
+                .checked(extractFromValueMap(element, checked, depth, Boolean.class, false))
                 .build();
     }
 
@@ -807,11 +806,11 @@ public class JsonMapper
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .valueF(extractFromValueMap(element, valueF, depth, Integer.class, INTEGER.apply(valueF)))
-                .valueB(extractFromValueMap(element, valueB, depth, Integer.class, INTEGER.apply(valueB)))
+                .valueF(extractFromValueMap(element, valueF, depth, Integer.class, 0))
+                .valueB(extractFromValueMap(element, valueB, depth, Integer.class, 0))
                 .symbol(extractFromValueMap(element, symbol, depth, String.class, symbol))
-                .min(extractFromValueMap(element, min, depth, Integer.class, INTEGER.apply(min)))
-                .max(extractFromValueMap(element, max, depth, Integer.class, INTEGER.apply(max)))
+                .min(extractFromValueMap(element, min, depth, Integer.class, Integer.MIN_VALUE))
+                .max(extractFromValueMap(element, max, depth, Integer.class, Integer.MAX_VALUE))
                 .placeholder(extractFromValueMap(element, placeholder, depth, String.class, placeholder))
                 .build();
     }
@@ -925,6 +924,43 @@ public class JsonMapper
     }
 
     /**
+     * Transform a {@link PseudoElement} to an {@link Link} input
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     *
+     * @return the transformed object
+     */
+    private ListSelection transformListInput(PseudoElement element, Integer depth)
+    {
+        final String         name           = getParameterValue(element, NAME);
+        final String         submitAs       = getParameterValue(element, SUBMIT_AS);
+        final String         onInput        = getParameterValue(element, ON_INPUT, DEFAULT_VAL);
+        final String         selectedValues = getParameterValue(element, "selectionList");
+        final String         multiple = getParameterValue(element, "multiple", "false");
+
+        final InputValueList inputValues    = new InputValueList();
+
+        for (final PseudoElement pe : element.getChildren())
+        {
+            inputValues.add(transformInputValue(pe, depth));
+        }
+
+        return ListSelection
+                .builder()
+                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
+                .classes(element.getClasses())
+                .dataAttributes(element.getAttributes())
+                .name(extractFromValueMap(element, name, depth, String.class, name))
+                .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
+                .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
+                .values(inputValues)
+                .multiple(extractFromValueMap(element, multiple, depth, Boolean.class, Boolean.valueOf(multiple)))
+                .selected(extractFromValueMap(element, selectedValues, depth, InputValueList.class, new InputValueList()))
+                .build();
+    }
+
+    /**
      * Transform a {@link PseudoElement} to an {@link Number} input
      *
      * @param element to transfrom
@@ -952,9 +988,9 @@ public class JsonMapper
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .value(extractFromValueMap(element, value, depth, Integer.class, INTEGER.apply(value)))
-                .min(extractFromValueMap(element, min, depth, Integer.class, INTEGER.apply(min)))
-                .max(extractFromValueMap(element, max, depth, Integer.class, INTEGER.apply(max)))
+                .value(extractFromValueMap(element, value, depth, Integer.class, 0))
+                .min(extractFromValueMap(element, min, depth, Integer.class, Integer.MIN_VALUE))
+                .max(extractFromValueMap(element, max, depth, Integer.class, Integer.MAX_VALUE))
                 .placeholder(extractFromValueMap(element, placeholder, depth, String.class, placeholder))
                 .prefix(extractFromValueMap(element, prefix, depth, String.class, prefix))
                 .suffix(extractFromValueMap(element, suffix, depth, String.class, suffix))
@@ -1074,9 +1110,9 @@ public class JsonMapper
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .value(extractFromValueMap(element, value, depth, Integer.class, INTEGER.apply(value)))
-                .min(extractFromValueMap(element, min, depth, Integer.class, INTEGER.apply(min)))
-                .max(extractFromValueMap(element, max, depth, Integer.class, INTEGER.apply(max)))
+                .value(extractFromValueMap(element, value, depth, Integer.class, 0))
+                .min(extractFromValueMap(element, min, depth, Integer.class, Integer.MIN_VALUE))
+                .max(extractFromValueMap(element, max, depth, Integer.class, Integer.MAX_VALUE))
                 .build();
     }
 
@@ -1103,7 +1139,7 @@ public class JsonMapper
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .checked(extractFromValueMap(element, checked, depth, Boolean.class, BOOLEAN.apply(checked)))
+                .checked(extractFromValueMap(element, checked, depth, Boolean.class, false))
                 .build();
     }
 
@@ -1132,7 +1168,7 @@ public class JsonMapper
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
                 .value(extractFromValueMap(element, value, depth, String.class, value))
-                .maxCharacters(extractFromValueMap(element, maxChars, depth, Integer.class, INTEGER.apply(maxChars)))
+                .maxCharacters(extractFromValueMap(element, maxChars, depth, Integer.class, 32000))
                 .build();
     }
 
@@ -1182,7 +1218,7 @@ public class JsonMapper
                 .placeholder(extractFromValueMap(element, placeholder, depth, String.class, placeholder))
                 .prefix(extractFromValueMap(element, prefix, depth, String.class, prefix))
                 .suffix(extractFromValueMap(element, suffix, depth, String.class, suffix))
-                .maxCharacters(extractFromValueMap(element, maxChars, depth, Integer.class, INTEGER.apply(maxChars)))
+                .maxCharacters(extractFromValueMap(element, maxChars, depth, Integer.class, 150))
                 .build();
     }
 }

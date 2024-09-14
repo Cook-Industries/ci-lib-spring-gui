@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import com.ci.lib.spring.web.hmi.UiElement;
 import com.ci.lib.spring.web.hmi.container.Container;
+import com.ci.lib.spring.web.hmi.container.HeadingContainer;
 import com.ci.lib.spring.web.hmi.mapper.HtmlMapper;
 
 import io.micrometer.common.lang.NonNull;

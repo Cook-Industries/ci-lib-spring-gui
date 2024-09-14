@@ -44,9 +44,8 @@ final class HtmlElementMapper
     @Default
     private Boolean             isSingleTag = false;
 
-    @NonNull
-    @Default
-    private String              content     = "";
+    @Singular
+    private List<String>        contents;
 
     public String html()
     {
@@ -60,7 +59,7 @@ final class HtmlElementMapper
                 .append(!classes.isEmpty(), SPACE)
                 .append(getDataAttributes())
                 .append(GT)
-                .append(!isSingleTag, content)
+                .append(!isSingleTag, StringAdapter.from(contents))
                 .append(!isSingleTag, StringAdapter.withPrefixAndSuffix(LTS, tag, GT));
 
         return sc.getString();

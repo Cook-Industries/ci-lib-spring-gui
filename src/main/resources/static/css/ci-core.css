@@ -207,6 +207,10 @@ html {
     color: white;
 }
 
+.error-overlay button {
+    margin-top: 1rem;
+}
+
 /* === < notifications ========================================================================== */
 /* === > loader  ================================================================================ */
 #global-loader-overlay {
@@ -267,13 +271,33 @@ html {
     overflow-y: auto;
 }
 
+.modal-inlay button {
+    margin-top: 1rem;
+}
+
 /* === < modal ================================================================================== */
 /* === > form =================================================================================== */
 .form-label {
     margin-top: 1rem;
 }
 
-.btn {
-    margin-top: 1rem;
+.form-list-selection-select-holder {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.form-list-selection-select-holder:first-child {
+    width: 75%;
+}
+
+.form-list-selection-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.form-list-selection-item:first-child {
+    width: 75%;
 }
 /* === < form =================================================================================== */
