@@ -503,7 +503,7 @@ async function extractValuesToSubmit(target) {
     let arg = {};
 
     for (const elem of $(sprintf('[data-submit-id="%s"]', target))) {
-        let arr = new Array();
+        
 
         if ($(elem).attr("data-submit-as") === "") {
             // no submit id set so ignore input
@@ -521,10 +521,11 @@ async function extractValuesToSubmit(target) {
                     arg[$(elem).attr("data-submit-as")] = $(elem).html();
                     break;
                 case "CHECKBOX":
+                    let checkArr = [];
                     $(elem).find('input[type="checkbox"]:checked').each(function () {
-                        arr.push($(elem).val());
+                        checkArr.push($(elem).val());
                     });
-                    arg[$(elem).attr("data-submit-as")] = arr;
+                    arg[$(elem).attr("data-submit-as")] = checkArr;
                     break;
                 case "SWITCH":
                     arg[$(elem).attr("data-submit-as")] = $(elem).is(':checked');
@@ -533,9 +534,15 @@ async function extractValuesToSubmit(target) {
                     arg[$(elem).attr("data-submit-as")] = $(elem).find('input[type="radio"]:checked').val();
                     break;
                 case "FILE":
-                    console.log("IN");
                     arg[$(elem).attr("data-submit-as")] = await extractFiles($(elem)[0].files);
                     console.log("OUT");
+                    break;
+                case "LIST":
+                    let listArr = [];
+                    $(elem).find(".form-list-selection-item").each(function () {
+                        listArr.push($(this).attr("data-value"));
+                    });
+                    arg[$(elem).attr("data-submit-as")] = listArr;
                     break;
 
                 default:
@@ -591,7 +598,7 @@ function addListSelectionItem(inputUuid, holderUuid) {
     const newUuid = generateUUID();
 
     if(isMultiple || $(sprintf('#%s', holderUuid)).find(sprintf('[data-value="%s"]', itemValue)).length === 0) {
-        $(sprintf('#%s', holderUuid)).append(sprintf('<div id="%s" data-value="%s"><div class="form-list-selection-item"><p>%s</p><button onclick="removeListSelectionItem(\'%s\')" class="btn btn-primary">X</button></div></div>', newUuid, itemValue, itemName, newUuid));
+        $(sprintf('#%s', holderUuid)).append(sprintf('<div id="%s"><div class="form-list-selection-item" data-value="%s"><p>%s</p><button onclick="removeListSelectionItem(\'%s\')" class="btn btn-primary">X</button></div></div>', newUuid, itemValue, itemName, newUuid));
     }
 }
 

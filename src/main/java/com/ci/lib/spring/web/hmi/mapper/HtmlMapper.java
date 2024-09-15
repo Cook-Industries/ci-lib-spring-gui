@@ -175,7 +175,7 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_ID, contentContainer.getUid()))
                 .attribute(new Attribute(ATT_ON_CLICK, contentContainer.getOnClick()))
                 .classes(contentContainer.getClasses())
-                .dataAttribues(contentContainer.getDataAttributes())
+                .dataAttributes(contentContainer.getDataAttributes())
                 .content(content)
                 .build();
 
@@ -213,7 +213,7 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_ID, headingContainer.getUid()))
                 .attribute(new Attribute(ATT_ON_CLICK, headingContainer.getOnClick()))
                 .classes(headingContainer.getClasses())
-                .dataAttribues(headingContainer.getDataAttributes())
+                .dataAttributes(headingContainer.getDataAttributes())
                 .content(headingContainer.getText())
                 .build();
 
@@ -231,7 +231,7 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_ON_CLICK, rowedContentContainer.getOnClick()))
                 .clazz("container")
                 .classes(rowedContentContainer.getClasses())
-                .dataAttribues(rowedContentContainer.getDataAttributes())
+                .dataAttributes(rowedContentContainer.getDataAttributes())
                 .content(content)
                 .build();
 
@@ -249,7 +249,7 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_ON_CLICK, rowContainer.getOnClick()))
                 .clazz("row")
                 .classes(rowContainer.getClasses())
-                .dataAttribues(rowContainer.getDataAttributes())
+                .dataAttributes(rowContainer.getDataAttributes())
                 .content(content)
                 .build();
 
@@ -265,7 +265,7 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_ON_CLICK, columnContainer.getOnClick()))
                 .clazz("col")
                 .classes(columnContainer.getClasses())
-                .dataAttribues(columnContainer.getDataAttributes())
+                .dataAttributes(columnContainer.getDataAttributes())
                 .content(render(columnContainer.getContent()))
                 .build();
 
@@ -283,7 +283,7 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_ID, formContainer.getUid()))
                 .attribute(new Attribute(ATT_ON_CLICK, formContainer.getOnClick()))
                 .classes(formContainer.getClasses())
-                .dataAttribues(formContainer.getDataAttributes())
+                .dataAttributes(formContainer.getDataAttributes())
                 .content(content)
                 .build();
 
@@ -299,7 +299,7 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_ON_CLICK, hiddenContainer.getOnClick()))
                 .clazz(CLASS_HIDDEN)
                 .classes(hiddenContainer.getClasses())
-                .dataAttribues(hiddenContainer.getDataAttributes())
+                .dataAttributes(hiddenContainer.getDataAttributes())
                 .content(render(hiddenContainer.getChild()))
                 .build();
 
@@ -315,7 +315,7 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_ON_CLICK, imageContainer.getOnClick()))
                 .attribute(new Attribute(ATT_SRC, imageContainer.getSrc()))
                 .classes(imageContainer.getClasses())
-                .dataAttribues(imageContainer.getDataAttributes())
+                .dataAttributes(imageContainer.getDataAttributes())
                 .build();
 
         return elementMapper.html();
@@ -331,7 +331,7 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_HREF, linkContainer.getHref()))
                 .attribute(new Attribute(ATT_TARGET, linkContainer.getTarget()))
                 .classes(linkContainer.getClasses())
-                .dataAttribues(linkContainer.getDataAttributes())
+                .dataAttributes(linkContainer.getDataAttributes())
                 .content(render(linkContainer.getContent()))
                 .build();
 
@@ -346,7 +346,7 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_ID, spanContainer.getUid()))
                 .attribute(new Attribute(ATT_ON_CLICK, spanContainer.getOnClick()))
                 .classes(spanContainer.getClasses())
-                .dataAttribues(spanContainer.getDataAttributes())
+                .dataAttributes(spanContainer.getDataAttributes())
                 .content(spanContainer.getText())
                 .build();
 
@@ -367,7 +367,7 @@ public final class HtmlMapper
                 .clazz("d-flex")
                 .clazz("justify-content-between")
                 .classes(splittedContainer.getClasses())
-                .dataAttribues(splittedContainer.getDataAttributes())
+                .dataAttributes(splittedContainer.getDataAttributes())
                 .content(StringAdapter.from(head, tail))
                 .build();
 
@@ -388,7 +388,7 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_ID, textContainer.getUid()))
                 .attribute(new Attribute(ATT_ON_CLICK, textContainer.getOnClick()))
                 .classes(textContainer.getClasses())
-                .dataAttribues(textContainer.getDataAttributes())
+                .dataAttributes(textContainer.getDataAttributes())
                 .content(textContainer.getText())
                 .build();
 
@@ -431,7 +431,7 @@ public final class HtmlMapper
                 .clazz("btn")
                 .clazz(button.getBtnClass().getClassName())
                 .classes(button.getClasses())
-                .dataAttribues(button.getDataAttributes())
+                .dataAttributes(button.getDataAttributes())
                 .content(button.getText())
                 .build();
 
@@ -456,10 +456,10 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_ON_INPUT, checkbox.getOnInput()))
                 .attribute(new Attribute(ATT_CHECKED, checkbox.getChecked()))
                 .clazz(CLASS_FORM_CHECK_INPUT)
-                .dataAttribue(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribue(DATA_ATT_SUBMIT_AS, checkbox.getSubmitAs())
-                .dataAttribue(DATA_ATT_VALUE_TYPE, checkbox.getType().name())
-                .dataAttribues(checkbox.getDataAttributes())
+                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+                .dataAttribute(DATA_ATT_SUBMIT_AS, checkbox.getSubmitAs())
+                .dataAttribute(DATA_ATT_VALUE_TYPE, checkbox.getType().name())
+                .dataAttributes(checkbox.getDataAttributes())
                 .build()
                 .html();
 
@@ -504,10 +504,10 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_TYPE, date.getType().name().toLowerCase()))
                 .attribute(new Attribute(ATT_VALUE, date.getValue()))
                 .clazz(CLASS_FORM_CONTROL)
-                .dataAttribue(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribue(DATA_ATT_SUBMIT_AS, date.getSubmitAs())
-                .dataAttribue(DATA_ATT_VALUE_TYPE, date.getType().name())
-                .dataAttribues(date.getDataAttributes())
+                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+                .dataAttribute(DATA_ATT_SUBMIT_AS, date.getSubmitAs())
+                .dataAttribute(DATA_ATT_VALUE_TYPE, date.getType().name())
+                .dataAttributes(date.getDataAttributes())
                 .build()
                 .html();
 
@@ -536,10 +536,10 @@ public final class HtmlMapper
                 .attribute(new Attribute("multiple", file.getMultiple().toString()))
                 .attribute(new Attribute("accept", StringAdapter.withSeparatorFrom(file.getAccepts(), ",")))
                 .clazz(CLASS_FORM_CONTROL)
-                .dataAttribue(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribue(DATA_ATT_SUBMIT_AS, file.getSubmitAs())
-                .dataAttribue(DATA_ATT_VALUE_TYPE, file.getType().name())
-                .dataAttribues(file.getDataAttributes())
+                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+                .dataAttribute(DATA_ATT_SUBMIT_AS, file.getSubmitAs())
+                .dataAttribute(DATA_ATT_VALUE_TYPE, file.getType().name())
+                .dataAttributes(file.getDataAttributes())
                 .build()
                 .html();
 
@@ -558,10 +558,10 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_TYPE, "text"))
                 .attribute(new Attribute(ATT_VALUE, hidden.getValue()))
                 .clazz(CLASS_HIDDEN)
-                .dataAttribue(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribue(DATA_ATT_SUBMIT_AS, hidden.getSubmitAs())
-                .dataAttribue(DATA_ATT_VALUE_TYPE, hidden.getType().name())
-                .dataAttribues(hidden.getDataAttributes())
+                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+                .dataAttribute(DATA_ATT_SUBMIT_AS, hidden.getSubmitAs())
+                .dataAttribute(DATA_ATT_VALUE_TYPE, hidden.getType().name())
+                .dataAttributes(hidden.getDataAttributes())
                 .build()
                 .html();
 
@@ -604,10 +604,10 @@ public final class HtmlMapper
                     .builder()
                     .tag(TAG_DIV)
                     .attribute(new Attribute(ATT_ID, uuid.toString()))
-                    .dataAttribue(ATT_VALUE, selection.getValue())
                     .content(render(ContentContainer
                             .builder()
                             .clazz("form-list-selection-item")
+                            .dataAttribute(ATT_VALUE, selection.getValue())
                             .content(TextContainer.builder().text(selection.getText()).build())
                             .content(ButtonContainer
                                     .builder()
@@ -641,7 +641,7 @@ public final class HtmlMapper
                 .tag(TAG_SELECT)
                 .attribute(new Attribute(ATT_ID, selectId.toString()))
                 .clazz("form-list-selection")
-                .dataAttribue("multiple", list.getMultiple().toString())
+                .dataAttribute("multiple", list.getMultiple().toString())
                 .content(StringAdapter.from(options))
                 .build()
                 .html();
@@ -653,7 +653,11 @@ public final class HtmlMapper
                 .content(input)
                 .content(render(ButtonContainer
                         .builder()
-                        .button(Button.builder().text("+").onClick(String.format("addListSelectionItem('%s', '%s')", selectId, list.getUid())).build())
+                        .button(Button
+                                .builder()
+                                .text("+")
+                                .onClick(String.format("addListSelectionItem('%s', '%s')", selectId, list.getUid()))
+                                .build())
                         .build()))
                 .build()
                 .html();
@@ -663,11 +667,11 @@ public final class HtmlMapper
                 .tag(TAG_DIV)
                 .attribute(new Attribute(ATT_ID, list.getUid()))
                 .attribute(new Attribute(ATT_ON_INPUT, list.getOnInput()))
-                .dataAttribues(list.getDataAttributes())
-                .dataAttribue(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribue(DATA_ATT_SUBMIT_AS, list.getSubmitAs())
-                .dataAttribue(DATA_ATT_VALUE_TYPE, list.getType().name())
-                .dataAttribues(list.getDataAttributes())
+                .dataAttributes(list.getDataAttributes())
+                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+                .dataAttribute(DATA_ATT_SUBMIT_AS, list.getSubmitAs())
+                .dataAttribute(DATA_ATT_VALUE_TYPE, list.getType().name())
+                .dataAttributes(list.getDataAttributes())
                 .content(StringAdapter.from(selections))
                 .build()
                 .html();
@@ -700,10 +704,10 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_VALUE, number.getValue().toString()))
                 .attribute(new Attribute(ATT_PLACEHOLDER, number.getPlaceholder()))
                 .clazz(CLASS_FORM_CONTROL)
-                .dataAttribue(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribue(DATA_ATT_SUBMIT_AS, number.getSubmitAs())
-                .dataAttribue(DATA_ATT_VALUE_TYPE, number.getType().name())
-                .dataAttribues(number.getDataAttributes())
+                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+                .dataAttribute(DATA_ATT_SUBMIT_AS, number.getSubmitAs())
+                .dataAttribute(DATA_ATT_VALUE_TYPE, number.getType().name())
+                .dataAttributes(number.getDataAttributes())
                 .build()
                 .html();
 
@@ -732,10 +736,10 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_VALUE, ""))
                 .attribute(new Attribute(ATT_PLACEHOLDER, password.getPlaceholder()))
                 .clazz(CLASS_FORM_CONTROL)
-                .dataAttribue(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribue(DATA_ATT_SUBMIT_AS, password.getSubmitAs())
-                .dataAttribue(DATA_ATT_VALUE_TYPE, password.getType().name())
-                .dataAttribues(password.getDataAttributes())
+                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+                .dataAttribute(DATA_ATT_SUBMIT_AS, password.getSubmitAs())
+                .dataAttribute(DATA_ATT_VALUE_TYPE, password.getType().name())
+                .dataAttributes(password.getDataAttributes())
                 .build()
                 .html();
 
@@ -801,9 +805,9 @@ public final class HtmlMapper
                 .builder()
                 .tag(TAG_DIV)
                 .clazz(CLASS_FORM_CHECK)
-                .dataAttribue(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribue(DATA_ATT_SUBMIT_AS, radio.getSubmitAs())
-                .dataAttribue(DATA_ATT_VALUE_TYPE, radio.getType().name())
+                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+                .dataAttribute(DATA_ATT_SUBMIT_AS, radio.getSubmitAs())
+                .dataAttribute(DATA_ATT_VALUE_TYPE, radio.getType().name())
                 .content(StringAdapter.from(outerLabel, StringAdapter.from(buttons)))
                 .build();
 
@@ -843,10 +847,10 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_ID, select.getUid()))
                 .attribute(new Attribute(ATT_ON_INPUT, select.getOnInput()))
                 .clazz(CLASS_FORM_SELECT)
-                .dataAttribue(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribue(DATA_ATT_SUBMIT_AS, select.getSubmitAs())
-                .dataAttribue(DATA_ATT_VALUE_TYPE, select.getType().name())
-                .dataAttribues(select.getDataAttributes())
+                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+                .dataAttribute(DATA_ATT_SUBMIT_AS, select.getSubmitAs())
+                .dataAttribute(DATA_ATT_VALUE_TYPE, select.getType().name())
+                .dataAttributes(select.getDataAttributes())
                 .content(StringAdapter.from(selections))
                 .build()
                 .html();
@@ -878,10 +882,10 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_MIN, slider.getMin().toString()))
                 .attribute(new Attribute(ATT_MAX, slider.getMax().toString()))
                 .clazz("form-range")
-                .dataAttribue(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribue(DATA_ATT_SUBMIT_AS, slider.getSubmitAs())
-                .dataAttribue(DATA_ATT_VALUE_TYPE, slider.getType().name())
-                .dataAttribues(slider.getDataAttributes())
+                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+                .dataAttribute(DATA_ATT_SUBMIT_AS, slider.getSubmitAs())
+                .dataAttribute(DATA_ATT_VALUE_TYPE, slider.getType().name())
+                .dataAttributes(slider.getDataAttributes())
                 .build()
                 .html();
 
@@ -902,10 +906,10 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_ON_INPUT, switch1.getOnInput()))
                 .attribute(new Attribute(ATT_CHECKED, switch1.getChecked()))
                 .clazz(CLASS_FORM_CHECK_INPUT)
-                .dataAttribue(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribue(DATA_ATT_SUBMIT_AS, switch1.getSubmitAs())
-                .dataAttribue(DATA_ATT_VALUE_TYPE, switch1.getType().name())
-                .dataAttribues(switch1.getDataAttributes())
+                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+                .dataAttribute(DATA_ATT_SUBMIT_AS, switch1.getSubmitAs())
+                .dataAttribute(DATA_ATT_VALUE_TYPE, switch1.getType().name())
+                .dataAttributes(switch1.getDataAttributes())
                 .build()
                 .html();
 
@@ -950,7 +954,7 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_ID, textbox.getUid()))
                 .clazz("text-preserve-newline")
                 .classes(textbox.getClasses())
-                .dataAttribues(textbox.getDataAttributes())
+                .dataAttributes(textbox.getDataAttributes())
                 .content(textbox.getValue())
                 .build();
 
@@ -979,11 +983,11 @@ public final class HtmlMapper
                 .attribute(new Attribute(ATT_PLACEHOLDER, textfield.getPlaceholder()))
                 .attribute(new Attribute(ATT_ON_KEY_DOWN, textfield.getOnKeydown()))
                 .clazz(CLASS_FORM_CONTROL)
-                .dataAttribue(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribue(DATA_ATT_SUBMIT_AS, textfield.getSubmitAs())
-                .dataAttribue(DATA_ATT_VALUE_TYPE, textfield.getType().name())
-                .dataAttribue(DATA_ATT_MAX_CHARACTERS, textfield.getMaxCharacters().toString())
-                .dataAttribues(textfield.getDataAttributes())
+                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+                .dataAttribute(DATA_ATT_SUBMIT_AS, textfield.getSubmitAs())
+                .dataAttribute(DATA_ATT_VALUE_TYPE, textfield.getType().name())
+                .dataAttribute(DATA_ATT_MAX_CHARACTERS, textfield.getMaxCharacters().toString())
+                .dataAttributes(textfield.getDataAttributes())
                 .build()
                 .html();
 

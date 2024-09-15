@@ -39,7 +39,7 @@ final class HtmlElementMapper
     private Set<String>         classes;
 
     @Singular
-    private Map<String, String> dataAttribues;
+    private Map<String, String> dataAttributes;
 
     @Default
     private Boolean             isSingleTag = false;
@@ -72,7 +72,7 @@ final class HtmlElementMapper
 
     private String getDataAttributes()
     {
-        return dataAttribues
+        return dataAttributes
                 .entrySet()
                 .stream()
                 .map(e -> StringAdapter.withPrefixAndSuffix("data-", e.getKey(), "=\"") + StringAdapter.withSuffix(e.getValue(), QTM))
