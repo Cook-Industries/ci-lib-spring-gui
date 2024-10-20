@@ -6,7 +6,7 @@
  */
 package com.ci.lib.spring.web.hmi.container;
 
-import com.ci.lib.spring.web.hmi.ErrorMarker;
+import com.ci.lib.spring.web.hmi.input.Marker;
 
 import io.micrometer.common.lang.NonNull;
 import lombok.Getter;
@@ -21,17 +21,17 @@ public class Tab
 {
 
     @NonNull
-    private final String        uid;
+    private final String   uid;
     @NonNull
-    private final String        text;
+    private final String   text;
     @Singular
-    private final ErrorMarker[] errors;
+    private final Marker[] errors;
 
-    public Tab(String uid, String text, ErrorMarker... errors)
+    public Tab(String uid, String text, Marker... errors)
     {
         this.uid = uid;
         this.text = text;
-        this.errors = errors == null ? new ErrorMarker[] {} : errors;
+        this.errors = errors == null ? new Marker[] {} : errors;
     }
 
 }

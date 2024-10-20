@@ -4,7 +4,7 @@
  *
  * @author : sebastian koch <koch.sebastian@cook-industries.de>
  */
-package com.ci.lib.spring.web.response;
+package com.ci.lib.spring.web.hmi;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

@@ -6,6 +6,7 @@
  */
 package com.ci.lib.spring.web.hmi.mapper;
 
+import com.ci.lib.spring.web.html.HtmlExportable;
 import com.ci.lib.spring.web.util.StringAdapter;
 
 import lombok.AccessLevel;
@@ -18,7 +19,7 @@ import lombok.Setter;
 @Data
 @RequiredArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class Attribute
+public class Attribute implements HtmlExportable
 {
 
     private final String name;
@@ -31,13 +32,17 @@ public class Attribute
 
     /**
      * Create a valueless html attribute. E.g. 'checked';
+     *
+     * @param name of this {@code Attribute}
+     * @param show wether this arrtibute is active or not
      */
     public Attribute(String name, Boolean show)
     {
         this(name, "", show, true);
     }
 
-    public String html()
+    @Override
+    public String getHtmlRep()
     {
         String result = valueless ? name : StringAdapter.from(name, "=\"", value, "\"");
 

@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import com.ci.lib.spring.web.hmi.container.*;
 import com.ci.lib.spring.web.hmi.input.*;
 import com.ci.lib.spring.web.hmi.input.Number;
+import com.ci.lib.spring.web.response.message.MessageType;
 import com.ci.lib.spring.web.util.StringAdapter;
 import com.ci.lib.spring.web.util.StringConcat;
 
@@ -51,12 +52,14 @@ public final class HtmlMapper
 
     private static final String CLASS_FORM_LABEL        = "form-label";
     private static final String CLASS_FORM_CONTROL      = "form-control";
-    private static final String CLASS_HIDDEN            = "d-none";
+    private static final String CLASS_HIDDEN            = "hidden";
     private static final String CLASS_USER_SELECT_NONE  = "user-select-none";
     private static final String CLASS_FORM_CHECK        = "form-check";
     private static final String CLASS_FORM_CHECK_INPUT  = "form-check-input";
     private static final String CLASS_FORM_CHECK_LABEL  = "form-check-label";
     private static final String CLASS_FORM_SELECT       = "form-select";
+    private static final String CLASS_ERROR_HIGHLIGHT   = "error-highlight";
+    private static final String CLASS_TEXT_COLOR_RED    = "text-color-red";
 
     private static final String DATA_ATT_SUBMIT_ID      = "submit-id";
     private static final String DATA_ATT_SUBMIT_AS      = "submit-as";
@@ -991,8 +994,33 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(StringAdapter.from(label, input)).build();
+        String            content       =
+                StringAdapter.from(label, resolveMarker(formId, textfield.getUid(), textfield.getMarker()), input);
+        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(content).build();
 
         return elementMapper.html();
+    }
+
+    private String resolveMarker(String formId, String uid, List<Marker> marker)
+    {
+        List<String> results = new ArrayList<>();
+
+        for (Marker m : marker)
+        {
+            results
+                    .add(HtmlElementMapper
+                            .builder()
+                            .tag(TAG_DIV)
+                            .attribute(new Attribute(ATT_ID,
+                                    String.format("error-marker-%s-%s-%s", formId, uid, MessageType.valueOf(m.getType().toUpperCase()))))
+                            .clazz(CLASS_HIDDEN)
+                            .clazz(CLASS_ERROR_HIGHLIGHT)
+                            .clazz(CLASS_TEXT_COLOR_RED)
+                            .content(m.getText())
+                            .build()
+                            .html());
+        }
+
+        return StringAdapter.from(results);
     }
 }

@@ -4,9 +4,9 @@
  *
  * @author : sebastian koch <koch.sebastian@cook-industries.de>
  */
-package com.ci.lib.spring.web.response;
+package com.ci.lib.spring.web.hmi.mapper;
 
-public enum MessageType {
+public enum MapperInternalElementType {
 
-    SUCCESS, ERROR, WARNING, NOTICE;
+    COMPONENT;
 }

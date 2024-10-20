@@ -1,4 +1,16 @@
-export { showGlobalLoader, hideGlobalLoader, getModal, GET, POST, sendFromForm, submitFromModal, registerFunction, closeModal, dismissErrors};
+export { 
+    showGlobalLoader, 
+    hideGlobalLoader, 
+    getModal, 
+    GET, 
+    POST, 
+    POSTFormData, 
+    sendFromForm, 
+    submitFromModal, 
+    registerFunction, 
+    closeModal, 
+    dismissErrors
+};
 
 /**
  * Copyright(c) 2024 sebastian koch/CI. All rights reserved.<br>
@@ -10,7 +22,10 @@ export { showGlobalLoader, hideGlobalLoader, getModal, GET, POST, sendFromForm, 
 const version = "";
 const customFunctionMap = new Map();
 
-$(document).ready(function () {
+const CLASS_HIDDEN = "hidden";
+
+$(document).ready(function ()
+{
     console.log("ci-lib-dev-build");
 
     /**
@@ -36,12 +51,12 @@ $(document).ready(function () {
 // === > global functions ==========================================================================
 /**
  * 
- * @param {*} endpointUrl 
- * @param {*} dataToSend 
+ * @param {String} endpointUrl
  * 
  * @returns a Promise
  */
-function GET(endpointUrl, dataToSend = {}) {
+function GET(endpointUrl)
+{
     return new Promise((resolve, reject) => {
         fetch(endpointUrl,
             {
@@ -68,11 +83,13 @@ function GET(endpointUrl, dataToSend = {}) {
 
 /**
  * 
- * @param {*} endpointUrl 
+ * @param {String} endpointUrl 
  * @param {*} dataToSend 
+ * 
  * @returns a Promise
  */
-function POST(endpointUrl, dataToSend = {}) {
+function POST(endpointUrl, dataToSend = {})
+{
     if (endpointUrl === undefined || endpointUrl === "") {
         throw new Error("POST URL cannot be undefined/empty");
     }
@@ -106,16 +123,57 @@ function POST(endpointUrl, dataToSend = {}) {
 
 /**
  * 
- * @param {*} id of form to grab values from
- * @param {*} url to call on backend
+ * @param {String} endpointUrl 
+ * @param {FormData} formData 
+ * 
+ * @returns a Promise
  */
-async function sendFromForm(id, url) {
-    showGlobalLoader("send form data");
-    const data = await extractValuesToSubmit(id);
-    POST(url, data);
+function POSTFormData(endpointUrl, formData = {})
+{
+    if (endpointUrl === undefined || endpointUrl === "") {
+        throw new Error("POST URL cannot be undefined/empty");
+    }
+    console.log(formData);
+
+    return new Promise((resolve, reject) => {
+        fetch(endpointUrl, {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(json => {
+                handleResponse(json);
+                return json;
+            })
+            .then(responseData => {
+                resolve(responseData);
+            })
+            .catch(error => {
+                reject(error);
+            });
+    });
 }
 
-function handleResponse(response) {
+/**
+ * 
+ * @param {String} id of form to grab values from
+ * @param {String} url to call on backend
+ */
+function sendFromForm(id, url)
+{
+    showGlobalLoader("collect data");
+    const formData = extractValuesToSubmit(id);
+    changeGlobalLoaderText("send data");
+    POSTFormData(url, formData);
+}
+
+function handleResponse(response)
+{
     triggerResponse(response.messages);
 
     switch (response.action) {
@@ -177,7 +235,8 @@ function handleResponse(response) {
     call(response.calls);
 }
 
-function tryCustomFunction(response) {
+function tryCustomFunction(response)
+{
     const key = response.action;
 
     if (customFunctionMap.has(key)) {
@@ -190,11 +249,13 @@ function tryCustomFunction(response) {
     }
 }
 
-function registerFunction(key, func) {
+function registerFunction(key, func)
+{
     customFunctionMap.set(key, func);
 }
 
-function call(calls) {
+function call(calls)
+{
     for (let func in calls) {
         let call = calls[func];
         let fn = window[call.functionName];
@@ -212,14 +273,16 @@ function call(calls) {
  * Shows the global loader overlay
  *
  * @param {type} text - text to be shown in loader if neccessary
+ * 
  * @returns {undefined}
  */
-function showGlobalLoader(text = "") {
+function showGlobalLoader(text = "")
+{
     if (text !== undefined) {
         $("#global-loader-text").html(text);
     }
 
-    $("#global-loader-overlay").removeClass("hidden");
+    $("#global-loader-overlay").removeClass(CLASS_HIDDEN);
 }
 
 /**
@@ -227,12 +290,14 @@ function showGlobalLoader(text = "") {
  *
  * @returns {undefined}
  */
-function hideGlobalLoader() {
+function hideGlobalLoader()
+{
     $("#global-loader-text").html("loading...");
-    $("#global-loader-overlay").addClass("hidden");
+    $("#global-loader-overlay").addClass(CLASS_HIDDEN);
 }
 
-function changeGlobalLoaderText(text) {
+function changeGlobalLoaderText(text)
+{
     $("#global-loader-text").html(text);
 }
 // === < global loader =============================================================================
@@ -240,14 +305,16 @@ function changeGlobalLoaderText(text) {
 /**
  * @param {type} messages
  * @param {type} btnName - label for the "ok" btn
+ * 
  * @returns {undefined}
  */
-function triggerResponse(messages, btnName = "") {
+function triggerResponse(messages, btnName = "")
+{
     hideGlobalLoader();
 
     let needOverlay = false;
 
-    $(".error-icon").addClass("hidden");
+    $(".error-marker").addClass(CLASS_HIDDEN);
 
     for (let m in messages) {
         let msg = messages[m];
@@ -262,8 +329,8 @@ function triggerResponse(messages, btnName = "") {
                 handlePopupMsg(msg);
                 break;
 
-            case "HIGHLIGHT":
-                handleHighlightMsg(msg);
+            case "MARKER":
+                handleMarkerMsg(msg);
                 break;
 
             default:
@@ -273,12 +340,13 @@ function triggerResponse(messages, btnName = "") {
 
     if (needOverlay) {
         $("#btn-error-text").html(btnName);
-        $("#error-overlay").removeClass("hidden");
+        $("#error-overlay").removeClass(CLASS_HIDDEN);
         $("#error-overlay").find(':button').focus();
     }
 }
 
-function getMsgClass(type) {
+function getMsgClass(type)
+{
     let c;
 
     switch (type) {
@@ -301,30 +369,33 @@ function getMsgClass(type) {
     return c;
 }
 
-function handleModalMsg(msg) {
+function handleModalMsg(msg)
+{
     let c = getMsgClass(msg.type);
     $("#error-holder").append(sprintf('<div class="message-container %s"><i class="material-icons">%s</i><div>%s</div></div>', c, c, msg.msg));
 }
 
-function handlePopupMsg(msg) {
+function handlePopupMsg(msg)
+{
     $("#popup-holder").append(sprintf('<div class="pop-up pop-up-fade-out"><div class="%s">%s</div></div>', getMsgClass(msg.type), msg.msg));
 }
 
-function handleHighlightMsg(msg) {
+function handleMarkerMsg(msg)
+{
+    console.log(msg, sprintf("#error-marker-%s-%s-%s", msg.formId, msg.fieldId, msg.type));
 
+    $(sprintf("#error-marker-%s-%s-%s", msg.formId, msg.fieldId, msg.type)).removeClass(CLASS_HIDDEN);
 }
 
 /**
  *
- * @param {String} type - type of error
  * @param {String} msg  - message to be shown -> musst be set
- * @param {String} func - function name (without '()') to be called on button click
- *                          -> can be set, default 'dismissErrors'
  * @param {String} btn  - text on button -> can be set, default: 'dismiss'
  *
  * @return {undefined}
  */
-function clientsideError(msg, btn = "dismiss") {
+function clientsideError(msg, btn = "dismiss")
+{
     triggerResponse({ "msg": msg, "target": "POP_UP" }, btn);
 }
 
@@ -333,37 +404,39 @@ function clientsideError(msg, btn = "dismiss") {
  *
  * @returns {undefined}
  */
-function dismissErrors() {
-    $("#error-overlay").addClass("hidden");
+function dismissErrors()
+{
+    $("#error-overlay").addClass(CLASS_HIDDEN);
     $("#error-holder").html("");
 }
 // === < notifications =============================================================================
 // === > modal =====================================================================================
 let openModals = 0;
 
-function getModal(url) {
-    showGlobalLoader();
+function getModal(url)
+{
+    showGlobalLoader("load modal");
 
     GET(url);
 }
 
-
 /**
  * Function to submit directly from a modal if no other function is specified
  */
-function submitFromModal() {
-    showGlobalLoader();
+function submitFromModal()
+{
+    showGlobalLoader("collect data");
 
     let modal = $(sprintf("#modal-overlay-%d", openModals));
-    let data = extractValuesToSubmit(modal.attr("data-extraction-id"));
+    let formData = extractValuesToSubmit(modal.attr("data-extraction-id"));
     let url = modal.attr("data-server-target");
 
-    POST(url, data);
+    changeGlobalLoaderText("send data");
+    POSTFormData(url, formData);
 }
 
-
-
-function submitLeftBtnPress() {
+function submitLeftBtnPress()
+{
     let modal = $(sprintf("#modal-overlay-%d", openModals));
     let arr = {
         btn_left: true,
@@ -373,7 +446,8 @@ function submitLeftBtnPress() {
     POST(modal.attr("data-request-url"), arr);
 }
 
-function submitMiddleBtnPress() {
+function submitMiddleBtnPress()
+{
     let modal = $(sprintf("#modal-overlay-%d", openModals));
     let arr = {
         btn_middle: true,
@@ -383,7 +457,8 @@ function submitMiddleBtnPress() {
     POST(modal.attr("data-request-url"), arr);
 }
 
-function submitRightBtnPress() {
+function submitRightBtnPress()
+{
     let modal = $(sprintf("#modal-overlay-%d", openModals));
     let arr = {
         btn_right: true,
@@ -393,7 +468,8 @@ function submitRightBtnPress() {
     POST(modal.attr("data-request-url"), arr);
 }
 
-function submitAbort() {
+function submitAbort()
+{
     let modal = $(sprintf("#modal-overlay-%d", openModals));
     let arr = {
         aborted: true,
@@ -410,7 +486,8 @@ function submitAbort() {
  *
  * @returns {undefined}
  */
-function openModal(modal) {
+function openModal(modal)
+{
     openModals++;
 
     // -> data attributes
@@ -430,24 +507,26 @@ function openModal(modal) {
     $(sprintf("#modal-overlay-%d", openModals)).css("z-index", openModals + 100);
 
     if (modal.hideBtn === true) {
-        $(sprintf("#modal-buttons-%d", openModals)).addClass("hidden");
+        $(sprintf("#modal-buttons-%d", openModals)).addClass(CLASS_HIDDEN);
     }
     // <-
     $(sprintf("#modal-input-%d", openModals)).append(modal.contentHtml);
 
-    $(sprintf("#modal-container")).removeClass("hidden")
-    $(sprintf("#modal-overlay-%d", openModals)).removeClass("hidden");
+    $(sprintf("#modal-container")).removeClass(CLASS_HIDDEN)
+    $(sprintf("#modal-overlay-%d", openModals)).removeClass(CLASS_HIDDEN);
     $(sprintf("#modal-inlay-%d :input", openModals)).first().focus();
 
     hideGlobalLoader();
 }
 
-function modalShowBtn() {
+function modalShowBtn()
+{
     $(sprintf("#modal-overlay-%d", openModals)).attr("data-close-on-overlay", "0");
-    $(sprintf("#modal-buttons-%d", openModals)).removeClass("hidden");
+    $(sprintf("#modal-buttons-%d", openModals)).removeClass(CLASS_HIDDEN);
 }
 
-function radioClick(event) {
+function radioClick(event)
+{
     event.stopPropagation();
     $(event.currentTarget).find(".slider").click();
 }
@@ -457,7 +536,8 @@ function radioClick(event) {
  *
  * @returns {undefined}
  */
-function closeModal() {
+function closeModal()
+{
     if ($(sprintf("#modal-overlay-%d", openModals)).attr("data-lock-set") === "1") {
         $(sprintf("#modal-overlay-%d", openModals)).attr("data-lock-set", "0");
         releaseLock();
@@ -468,7 +548,8 @@ function closeModal() {
 }
 // === < modal =====================================================================================
 // === > site ======================================================================================
-function fillContent(content) {
+function fillContent(content)
+{
     let elementId = sprintf("#%s", content.elementId);
     if ($(content).length) {
         if (content.replace) {
@@ -479,13 +560,15 @@ function fillContent(content) {
     }
 }
 
-function replaceContent(obj) {
+function replaceContent(obj)
+{
     let contentIdentifier = obj.context;
 
     $(sprintf("#%s", contentIdentifier)).replaceWith(write(obj.element));
 }
 
-function removeContent(obj) {
+function removeContent(obj)
+{
     let contentIdentifier = obj.context;
 
     $(sprintf("#%s", contentIdentifier)).remove();
@@ -494,20 +577,25 @@ function removeContent(obj) {
 /**
  * Extracts values from fields specified by an identifier as an object to be send back to the jserver
  *
- * @param {string} target   - id of the context to be extracted from
+ * @param {string} target - id of the context to be extracted from
  *
- * @returns {object} containing the extracted values and the standard message for the jserver
+ * @returns {FormData} containing the extracted values
  */
-async function extractValuesToSubmit(target) {
+function extractValuesToSubmit(target)
+{
     showGlobalLoader("extract form fields");
-    let arg = {};
+    const  formData = new FormData();
+
+    formData.append("__form_id", target);
 
     for (const elem of $(sprintf('[data-submit-id="%s"]', target))) {
-        
-
         if ($(elem).attr("data-submit-as") === "") {
             // no submit id set so ignore input
         } else {
+            changeGlobalLoaderText("extract: " + target);
+
+            const id = $(elem).attr("data-submit-as");
+
             switch ($(elem).attr("data-value-type")) {
                 case "INPUT":
                 case "SELECT":
@@ -515,34 +603,47 @@ async function extractValuesToSubmit(target) {
                 case "TEXTFIELD":
                 case "DATE":
                 case "PASSWORD":
-                    arg[$(elem).attr("data-submit-as")] = $(elem).val();
+                case "NUMBER":
+                    formData.append(id, $(elem).val());
                     break;
+
+                case "CURRENCY":
+                    break;
+
                 case "DIV":
-                    arg[$(elem).attr("data-submit-as")] = $(elem).html();
+                    formData.append(id, $(elem).html());
                     break;
+
                 case "CHECKBOX":
                     let checkArr = [];
                     $(elem).find('input[type="checkbox"]:checked').each(function () {
                         checkArr.push($(elem).val());
                     });
-                    arg[$(elem).attr("data-submit-as")] = checkArr;
+                    val = checkArr;
+                    formData.append(id, checkArr);
                     break;
-                case "SWITCH":
-                    arg[$(elem).attr("data-submit-as")] = $(elem).is(':checked');
+
+                case "SWITCH":                    
+                    formData.append(id, $(elem).is(':checked'));
                     break;
+
                 case "RADIO":
-                    arg[$(elem).attr("data-submit-as")] = $(elem).find('input[type="radio"]:checked').val();
+                    formData.append(id, $(elem).find('input[type="radio"]:checked').val());
                     break;
+
                 case "FILE":
-                    arg[$(elem).attr("data-submit-as")] = await extractFiles($(elem)[0].files);
-                    console.log("OUT");
+                    const files = $(elem)[0].files;                    
+                    for (var x = 0; x < files.length; x++) {
+                        formData.append(id, files[x]);
+                    }
                     break;
+
                 case "LIST":
                     let listArr = [];
                     $(elem).find(".form-list-selection-item").each(function () {
                         listArr.push($(this).attr("data-value"));
                     });
-                    arg[$(elem).attr("data-submit-as")] = listArr;
+                    formData.append(id, listArr);
                     break;
 
                 default:
@@ -551,11 +652,12 @@ async function extractValuesToSubmit(target) {
         }
     }
 
-    console.log(arg);
-    return arg;
+    console.log(formData);
+    return formData;
 }
 
-async function extractFiles(files) {
+async function extractFiles(files)
+{
     const fileArray = [];
     const promises = [];
 
@@ -569,7 +671,8 @@ async function extractFiles(files) {
     return fileArray;
 }
 
-function read_file(file) {
+function read_file(file)
+{
     return new Promise((resolve, reject) => {
         var fr = new FileReader();
         fr.fileName = file.name;
@@ -578,7 +681,7 @@ function read_file(file) {
             resolve({
                 fileName: event.target.fileName,
                 fileType: event.target.fileType,
-                fileContent: event.target.result
+                fileContent: event.target.result.replace('data:', '').replace(/^.+,/, '')
             });
         };
         fr.onerror = (error) => {
@@ -591,7 +694,8 @@ function read_file(file) {
 }
 // === < site ======================================================================================
 // === > form ======================================================================================
-function addListSelectionItem(inputUuid, holderUuid) {
+function addListSelectionItem(inputUuid, holderUuid)
+{
     const itemName = $(sprintf('#%s option:selected', inputUuid)).text();
     const itemValue = $(sprintf('#%s', inputUuid)).val();
     const isMultiple = $(sprintf('#%s', inputUuid)).data("multiple");
@@ -602,7 +706,8 @@ function addListSelectionItem(inputUuid, holderUuid) {
     }
 }
 
-function removeListSelectionItem(uuid) {
+function removeListSelectionItem(uuid)
+{
     $(sprintf('#%s', uuid)).remove();
 }
 // === < form ======================================================================================

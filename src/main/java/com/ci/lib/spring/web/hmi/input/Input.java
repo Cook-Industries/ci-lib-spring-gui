@@ -8,7 +8,6 @@ package com.ci.lib.spring.web.hmi.input;
 
 import java.util.List;
 
-import com.ci.lib.spring.web.hmi.ErrorMarker;
 import com.ci.lib.spring.web.hmi.UiElement;
 
 import lombok.Getter;
@@ -28,12 +27,12 @@ public abstract class Input extends UiElement
 
     @NonNull
     @Default
-    private String                  onInput = "";
-    @Singular
-    private final List<ErrorMarker> errors;
+    private String             onInput = "";
+    @Singular("marker")
+    private final List<Marker> marker;
 
     @NonNull
-    private final InputType         type    = inferType();
+    private final InputType    type    = inferType();
 
     protected abstract InputType inferType();
 }

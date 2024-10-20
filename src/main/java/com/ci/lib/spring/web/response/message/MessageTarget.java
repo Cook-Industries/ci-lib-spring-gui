@@ -4,9 +4,9 @@
  *
  * @author : sebastian koch <koch.sebastian@cook-industries.de>
  */
-package com.ci.lib.spring.web.response;
+package com.ci.lib.spring.web.response.message;
 
 public enum MessageTarget {
 
-    MODAL, HIGHLIGHT, POP_UP;
+    MODAL, MARKER, POP_UP;
 }

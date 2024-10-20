@@ -4,9 +4,9 @@
  *
  * @author : sebastian koch <koch.sebastian@cook-industries.de>
  */
-package com.ci.lib.spring.web.hmi;
+package com.ci.lib.spring.web.response.message;
 
-public enum ErrorHighlightType {
+public enum MessageType {
 
-    EMPTY, ERROROUS,
+    SUCCESS, ERROR, WARNING, NOTICE;
 }

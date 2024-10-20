@@ -67,7 +67,7 @@ final class HtmlElementMapper
 
     private String getAttributes()
     {
-        return attributes.stream().map(e -> e.html()).collect(Collectors.joining(SPACE));
+        return attributes.stream().map(e -> e.getHtmlRep()).collect(Collectors.joining(SPACE));
     }
 
     private String getDataAttributes()

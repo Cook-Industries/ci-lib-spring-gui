@@ -6,33 +6,59 @@
  */
 package com.ci.lib.spring.web.hmi.mapper;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.ci.lib.spring.web.hmi.input.InputValue;
+import com.ci.lib.spring.web.hmi.input.InputValueList;
 import com.ci.lib.spring.web.hmi.mapper.exception.ValueMapKeyAlreadyInUse;
 import com.ci.lib.spring.web.hmi.mapper.exception.ValueMapSealedException;
 
 import lombok.Data;
 
 /**
- * Key/Value map to use for {@link TreeHandling#DYNAMIC}
+ * Key/Value map to use for {@link TreeHandling#DYNAMIC}.<br>
+ * Uses an underlying {@link ConcurrentHashMap} to ensure thread-safety.
  */
 @Data
 public class ValueMap
 {
 
-    private final Map<String, Object> map    = new HashMap<>();
+    private final Map<String, Object> map    = new ConcurrentHashMap<>();
+    private final Integer             presedence;
+
     private Boolean                   sealed = false;
+
+    /**
+     * Create a new {@code ValueMap} with presedence '0'
+     */
+    public ValueMap()
+    {
+        this(0);
+    }
+
+    /**
+     * Create a new {@code ValueMap}
+     * 
+     * @param presedence in which concurrent maps are resolved. Higher is better.
+     */
+    public ValueMap(Integer presedence)
+    {
+        this.presedence = presedence;
+    }
 
     /**
      * Add multiple {@link ValueMapExportable} objects to this map
      * 
      * @param objects
+     * 
+     * @throws ValueMapSealedException if this map is already sealed
+     * @throws ValueMapKeyAlreadyInUse if a implicit {@code key} is already in use
      */
     public void extractObjects(ValueMapExportable... objects)
     {
+        checkSeal();
+
         for (ValueMapExportable vme : objects)
         {
             vme.exportTo(this);
@@ -55,12 +81,13 @@ public class ValueMap
      * 
      * @return {@code this}
      * 
+     * @throws ValueMapSealedException if this map is already sealed
      * @throws ValueMapKeyAlreadyInUse if {@code key} is already in use
      */
     public ValueMap add(String key, String value) throws ValueMapKeyAlreadyInUse
     {
         checkSeal();
-        checkKey(key, String.class);
+        checkKey(key);
         map.put(key, value);
 
         return this;
@@ -74,12 +101,13 @@ public class ValueMap
      * 
      * @return {@code this}
      * 
+     * @throws ValueMapSealedException if this map is already sealed
      * @throws IllegalArgumentException if {@code key} is already in use
      */
     public ValueMap add(String key, Boolean value) throws ValueMapKeyAlreadyInUse
     {
         checkSeal();
-        checkKey(key, Boolean.class);
+        checkKey(key);
         map.put(key, value);
 
         return this;
@@ -93,12 +121,13 @@ public class ValueMap
      * 
      * @return {@code this}
      * 
+     * @throws ValueMapSealedException if this map is already sealed
      * @throws ValueMapKeyAlreadyInUse if {@code key} is already in use
      */
     public ValueMap add(String key, Integer value) throws ValueMapKeyAlreadyInUse
     {
         checkSeal();
-        checkKey(key, Integer.class);
+        checkKey(key);
         map.put(key, value);
 
         return this;
@@ -112,12 +141,13 @@ public class ValueMap
      * 
      * @return {@code this}
      * 
+     * @throws ValueMapSealedException if this map is already sealed
      * @throws ValueMapKeyAlreadyInUse if {@code key} is already in use
      */
-    public ValueMap add(String key, List<InputValue> value) throws ValueMapKeyAlreadyInUse
+    public ValueMap add(String key, InputValueList value) throws ValueMapKeyAlreadyInUse
     {
         checkSeal();
-        checkKey(key, InputValue.class);
+        checkKey(key);
         map.put(key, value);
 
         return this;
@@ -128,7 +158,7 @@ public class ValueMap
      * 
      * @param key to lookup
      * 
-     * @return the value associated with {@code key}, or {@code null}
+     * @return the value associated with {@code key}, or {@code null} if no key is set
      */
     public Object get(String key)
     {
@@ -155,11 +185,11 @@ public class ValueMap
      * 
      * @throws ValueMapKeyAlreadyInUse if key is already used
      */
-    private void checkKey(String key, Class<?> objectClass) throws ValueMapKeyAlreadyInUse
+    private void checkKey(String key) throws ValueMapKeyAlreadyInUse
     {
         if (map.containsKey(key))
         {
-            throw new ValueMapKeyAlreadyInUse(key, objectClass);
+            throw new ValueMapKeyAlreadyInUse(key, map.get(key).getClass());
         }
     }
 

@@ -6,8 +6,8 @@
  */
 package com.ci.lib.spring.web.util;
 
+import com.ci.lib.spring.web.hmi.ValuePair;
 import com.ci.lib.spring.web.response.Action;
-import com.ci.lib.spring.web.response.ValuePair;
 
 /**
  *

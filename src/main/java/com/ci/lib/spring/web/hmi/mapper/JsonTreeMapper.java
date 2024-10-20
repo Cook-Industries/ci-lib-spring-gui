@@ -19,6 +19,15 @@ public final class JsonTreeMapper
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * Map a {@link JsonTreeRoot} from a {@code path} as a {@link InputStream} from a resource
+     * 
+     * @param path to the resource
+     * 
+     * @return the mapped resource
+     * 
+     * @throws IOException TODO: change Exception to RuntimeEx
+     */
     public JsonTreeRoot map(String path) throws IOException
     {
         InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(path);

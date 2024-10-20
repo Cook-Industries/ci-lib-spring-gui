@@ -8,9 +8,10 @@ package com.ci.lib.spring.web.hmi.mapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.Optional;
 
 import com.ci.lib.spring.web.hmi.container.*;
 import com.ci.lib.spring.web.hmi.input.*;
@@ -19,7 +20,6 @@ import com.ci.lib.spring.web.hmi.mapper.exception.JsonMapperException;
 import com.ci.lib.spring.web.hmi.mapper.exception.JsonParsingException;
 
 import lombok.Data;
-import lombok.val;
 
 @Data
 public class JsonMapper
@@ -48,13 +48,12 @@ public class JsonMapper
     private static final String          VALUES                              = "values";
     private static final String          SUBMIT_AS                           = "submitAs";
     private static final String          ON_INPUT                            = "onInput";
-    private static final String          IDENTIFIER_INDICATOR                = "..";
+    private static final String          IDENTIFIER_INDICATOR                = "$$";
 
     //@formatter:off
     private static final ContainerType[]                     CONTAINER_CHILDREN                  =
             {
                 ContainerType.AUDIO,
-                ContainerType.AUDIO, 
                 ContainerType.BUTTON, 
                 ContainerType.BUTTON_BAR, 
                 ContainerType.BUTTON_ICON,
@@ -73,8 +72,9 @@ public class JsonMapper
     //@formatter:on
 
     private static final ContainerType[] LINK_CHILDREN                       = {ContainerType.TEXT};
+
     private final TreeHandling           handling;
-    private final ValueMap               objectMap;
+    private final ValueMap[]             valueMaps;
 
     private Integer                      count                               = 0;
 
@@ -93,25 +93,27 @@ public class JsonMapper
     }
 
     /**
-     * Map a {@link JsonTreeRoot} to a {@link Container} in a {@link TreeHandling#DYNAMIC} context
+     * Map a {@link JsonTreeRoot} to a {@link Container} in a {@link TreeHandling#DYNAMIC} context.<br>
+     * Note, that any {@link ValueMap} used here will be {@link ValueMap#seal()}ed before it is used!
      *
      * @param root to map
-     * @param valueMap object map to link to dynamic fill-in content
+     * @param valueMap value maps to link to dynamic fill-in content. These will be sealed before usage!
      *
      * @return the mapped {@code Container}
      *
      * @throws JsonMapperException if mapping is set to dynamic but no {@code valueMap} is provided
      */
-    public static Container map(JsonTreeRoot root, ValueMap valueMap)
+    public static Container map(JsonTreeRoot root, final ValueMap... valueMap)
     {
         final TreeHandling handling = TreeHandling.valueOf(root.getHandling().toUpperCase());
 
-        if (handling == TreeHandling.DYNAMIC && valueMap == null)
+        if (handling == TreeHandling.DYNAMIC && (valueMap == null || valueMap.length == 0))
         {
-            throw new JsonMapperException("Mapping is set to [dynamic] fill-in but [valueMap] is null");
+            throw new JsonMapperException("Mapping is set to [dynamic] fill-in but [valueMap] is null/empty");
         }
 
-        valueMap.seal();
+        Arrays.sort(valueMap, Comparator.comparing(ValueMap::getPresedence).reversed());
+        Arrays.stream(valueMap).forEach(vm -> vm.seal());
 
         final JsonMapper mapper = new JsonMapper(handling, valueMap);
 
@@ -145,8 +147,34 @@ public class JsonMapper
     {
         this.count++;
 
+        MapperInternalElementType internalType = null;
+
         try
         {
+            try
+            {
+                internalType = MapperInternalElementType.valueOf(element.getType().toUpperCase());
+            }
+            catch (Exception ex)
+            {
+                // do nothing
+            }
+
+            try
+            {
+                if (internalType != null)
+                {
+                    switch (internalType)
+                    {
+                        case COMPONENT:
+                            return transformInternalComponent(element, depth);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new JsonParsingException(element.getUid(), depth, this.count, "error parsing imported element", ex);
+            }
             final ContainerType type = ContainerType.valueOf(element.getType().toUpperCase());
 
             if (!Arrays.asList(allowedTypes).contains(type))
@@ -217,7 +245,7 @@ public class JsonMapper
     }
 
     /**
-     * Extract a value from {@link JsonMapper#objectMap}
+     * Extract a value from {@link JsonMapper#valueMaps}
      *
      * @param <I> expected type of value
      * @param paramName name of parameter
@@ -229,12 +257,23 @@ public class JsonMapper
      */
     private <I> I extractFromObjectMap(String objName, Class<I> expectedType) throws JsonMapperException
     {
-        final Object o = this.objectMap.get(objName);
+        Optional<Object> opt;
 
-        if (o == null)
+        try
+        {
+            opt = Arrays.stream(valueMaps).map(m -> m.get(objName)).findFirst();
+        }
+        catch (NullPointerException ex)
         {
             return null;
         }
+
+        if (opt.isEmpty())
+        {
+            return null;
+        }
+
+        Object o = opt.get();
 
         if (expectedType.isInstance(o))
         {
@@ -243,7 +282,7 @@ public class JsonMapper
         else
         {
             throw new JsonMapperException(String
-                    .format("object [%s] could not be set extracted due to expected class is [%s] but got [%s]", objName, expectedType,
+                    .format("object [%s] could not be extracted due to expected class is [%s] but got [%s]", objName, expectedType,
                             o.getClass()));
         }
     }
@@ -270,6 +309,32 @@ public class JsonMapper
         }
 
         return value;
+    }
+
+    /**
+     * Transform a {@link PseudoElement} as a external component
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     *
+     * @return the transformed object
+     */
+    private Container transformInternalComponent(PseudoElement element, Integer depth)
+    {
+        String         path   = getParameterValue(element, "path");
+        JsonTreeMapper mapper = new JsonTreeMapper();
+
+        JsonTreeRoot   root;
+        try
+        {
+            root = mapper.map(path);
+
+            return JsonMapper.map(root, valueMaps);
+        }
+        catch (Exception e)
+        {
+            throw new JsonMapperException(String.format("error building gui component [%s] : [%s]", path, e.getMessage()));
+        }
     }
 
     /**
@@ -771,6 +836,7 @@ public class JsonMapper
                 .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
                 .classes(element.getClasses())
                 .dataAttributes(element.getAttributes())
+                .marker(element.getMarker())
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
@@ -803,6 +869,7 @@ public class JsonMapper
                 .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
                 .classes(element.getClasses())
                 .dataAttributes(element.getAttributes())
+                .marker(element.getMarker())
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
@@ -835,6 +902,7 @@ public class JsonMapper
                 .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
                 .classes(element.getClasses())
                 .dataAttributes(element.getAttributes())
+                .marker(element.getMarker())
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
@@ -863,6 +931,7 @@ public class JsonMapper
                 .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
                 .classes(element.getClasses())
                 .dataAttributes(element.getAttributes())
+                .marker(element.getMarker())
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
@@ -889,6 +958,7 @@ public class JsonMapper
                 .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
                 .classes(element.getClasses())
                 .dataAttributes(element.getAttributes())
+                .marker(element.getMarker())
                 .name(DEFAULT_VAL)
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(DEFAULT_VAL)
@@ -916,6 +986,7 @@ public class JsonMapper
                 .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
                 .classes(element.getClasses())
                 .dataAttributes(element.getAttributes())
+                .marker(element.getMarker())
                 .text(extractFromValueMap(element, text, depth, String.class, text))
                 .href(extractFromValueMap(element, href, depth, String.class, href))
                 .target(extractFromValueMap(element, target, depth, String.class, target))
@@ -937,7 +1008,7 @@ public class JsonMapper
         final String         submitAs       = getParameterValue(element, SUBMIT_AS);
         final String         onInput        = getParameterValue(element, ON_INPUT, DEFAULT_VAL);
         final String         selectedValues = getParameterValue(element, "selectionList");
-        final String         multiple = getParameterValue(element, "multiple", "false");
+        final String         multiple       = getParameterValue(element, "multiple", "false");
 
         final InputValueList inputValues    = new InputValueList();
 
@@ -951,6 +1022,7 @@ public class JsonMapper
                 .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
                 .classes(element.getClasses())
                 .dataAttributes(element.getAttributes())
+                .marker(element.getMarker())
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
@@ -985,6 +1057,7 @@ public class JsonMapper
                 .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
                 .classes(element.getClasses())
                 .dataAttributes(element.getAttributes())
+                .marker(element.getMarker())
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
@@ -1017,6 +1090,7 @@ public class JsonMapper
                 .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
                 .classes(element.getClasses())
                 .dataAttributes(element.getAttributes())
+                .marker(element.getMarker())
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
@@ -1044,6 +1118,7 @@ public class JsonMapper
                 .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
                 .classes(element.getClasses())
                 .dataAttributes(element.getAttributes())
+                .marker(element.getMarker())
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
@@ -1078,6 +1153,7 @@ public class JsonMapper
                 .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
                 .classes(element.getClasses())
                 .dataAttributes(element.getAttributes())
+                .marker(element.getMarker())
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
@@ -1107,6 +1183,7 @@ public class JsonMapper
                 .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
                 .classes(element.getClasses())
                 .dataAttributes(element.getAttributes())
+                .marker(element.getMarker())
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
@@ -1136,6 +1213,7 @@ public class JsonMapper
                 .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
                 .classes(element.getClasses())
                 .dataAttributes(element.getAttributes())
+                .marker(element.getMarker())
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
@@ -1164,6 +1242,7 @@ public class JsonMapper
                 .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
                 .classes(element.getClasses())
                 .dataAttributes(element.getAttributes())
+                .marker(element.getMarker())
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
@@ -1211,6 +1290,7 @@ public class JsonMapper
                 .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
                 .classes(element.getClasses())
                 .dataAttributes(element.getAttributes())
+                .marker(element.getMarker())
                 .name(extractFromValueMap(element, name, depth, String.class, name))
                 .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
                 .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))

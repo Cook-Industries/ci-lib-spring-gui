@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ci.lib.spring.web.hmi.input.Marker;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,6 +32,8 @@ public class PseudoElement
     private Map<String, String> attributes = new HashMap<>();
 
     private Map<String, String> parameters = new HashMap<>();
+
+    private List<Marker>        marker     = new ArrayList<>();
 
     private List<PseudoElement> children   = new ArrayList<>();
 

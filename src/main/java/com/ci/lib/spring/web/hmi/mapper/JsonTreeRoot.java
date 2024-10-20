@@ -22,6 +22,9 @@ public class JsonTreeRoot
     private String        name;
     private PseudoElement root;
 
+    /**
+     * Validate this {@ JsonTreeRoot} to verify all necessary fields are existant
+     */
     public void validate()
     {
         if (handling == null || handling.isBlank())

@@ -6,8 +6,6 @@
  */
 package com.ci.lib.spring.web.hmi;
 
-import java.io.IOException;
-
 import org.springframework.stereotype.Component;
 
 import com.ci.lib.spring.web.hmi.container.Container;

@@ -15,6 +15,7 @@ import com.ci.lib.spring.web.hmi.mapper.HtmlMapper;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -26,15 +27,32 @@ import lombok.experimental.SuperBuilder;
 public class ContentResponse extends Response
 {
 
-    public static final String LOADABLE = "loadable-content";
+    public static final String LOADABLE  = "loadable-content";
 
+    /**
+     * Element id to place content in
+     */
     @NonNull
-    private final String       elementId;
+    @Default
+    private final String       elementId = LOADABLE;
+
+    /**
+     * {@link Container} to be sent
+     */
     @NonNull
     @Getter(value = AccessLevel.NONE)
     private final Container    content;
+    /**
+     * {@link Call}s to perform
+     */
     private final List<Call>   callbacks;
-    private final Boolean      replace;
+
+    /**
+     * Whether or not this content should be replace the old content or be appended to it
+     */
+    @NonNull
+    @Default
+    private final Boolean      replace   = false;
 
     @Override
     protected Action inferType()

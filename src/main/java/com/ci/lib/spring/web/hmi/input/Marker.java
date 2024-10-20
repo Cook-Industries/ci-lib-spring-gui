@@ -4,7 +4,7 @@
  *
  * @author : sebastian koch <koch.sebastian@cook-industries.de>
  */
-package com.ci.lib.spring.web.hmi;
+package com.ci.lib.spring.web.hmi.input;
 
 import lombok.Data;
 
@@ -13,9 +13,10 @@ import lombok.Data;
  * @author sebastian koch <koch.sebastian@cook-industries.de>
  */
 @Data
-public class ErrorMarker
+public class Marker
 {
 
-    private final String id;
+    private String type;
+    private String text;
 
 }
