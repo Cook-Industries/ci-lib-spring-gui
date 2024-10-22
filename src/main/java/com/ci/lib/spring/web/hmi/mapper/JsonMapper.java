@@ -746,7 +746,7 @@ public class JsonMapper
                 case FILE -> transformFileInput(element, depth);
                 case HIDDEN -> transformHiddenInput(element, depth);
                 case LINK -> transformLinkInput(element, depth);
-                case LIST -> transformListInput(element, depth);
+                case LIST -> transformListSelectionInput(element, depth);
                 case NUMBER -> transformNumberInput(element, depth);
                 case PASSWORD -> transformPasswordInput(element, depth);
                 case RADIO -> transformRadioInput(element, depth);
@@ -1002,7 +1002,7 @@ public class JsonMapper
      *
      * @return the transformed object
      */
-    private ListSelection transformListInput(PseudoElement element, Integer depth)
+    private ListSelection transformListSelectionInput(PseudoElement element, Integer depth)
     {
         final String         name           = getParameterValue(element, NAME);
         final String         submitAs       = getParameterValue(element, SUBMIT_AS);

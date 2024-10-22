@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.ci</groupId>
 	<artifactId>lib.spring.web</artifactId>
-	<version>0.0.1-SNAPSHOT</version>	
+	<version>0.0.2-SNAPSHOT</version>	
     <packaging>jar</packaging>
 	<name>lib.spring.web</name>
 	<description>CI-lib for web usage in Spring</description>
@@ -110,5 +110,29 @@
 		</plugins>
 	</build>
 
+	<repositories>
+		<repository>
+		  <id>RiPanel.internal</id>
+		  <url>https://tfs01.de.flg.int/Test-Team-Collection-FUE/RiCS/_packaging/RiPanel.internal/maven/v1</url>
+		  <releases>
+		    <enabled>true</enabled>
+		  </releases>
+		  <snapshots>
+		    <enabled>true</enabled>
+		  </snapshots>
+		</repository>
+	</repositories>
+	<distributionManagement>
+	  <repository>
+		  <id>RiPanel.internal</id>
+		  <url>https://tfs01.de.flg.int/Test-Team-Collection-FUE/RiCS/_packaging/RiPanel.internal/maven/v1</url>
+		  <releases>
+		    <enabled>true</enabled>
+		  </releases>
+		  <snapshots>
+		    <enabled>true</enabled>
+		  </snapshots>
+		</repository>
+	</distributionManagement>
 
 </project>

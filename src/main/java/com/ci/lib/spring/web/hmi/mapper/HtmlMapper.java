@@ -632,7 +632,6 @@ public final class HtmlMapper
                 .tag(TAG_LABEL)
                 .attribute(new Attribute(ATT_FOR, list.getUid()))
                 .clazz(CLASS_FORM_LABEL)
-                .clazz(CLASS_FORM_SELECT)
                 .content(list.getName())
                 .build()
                 .html();
