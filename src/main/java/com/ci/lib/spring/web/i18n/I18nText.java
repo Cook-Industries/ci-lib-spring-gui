@@ -6,12 +6,19 @@
  */
 package com.ci.lib.spring.web.i18n;
 
+import lombok.Data;
+
 /**
  *
  * @author <a href="mailto:koch.sebastian@cook-industries.de">sebastian koch</a>
  */
-public interface I18nText
+@Data
+public class I18nText
 {
 
-    public Integer getID();
+    private String key;
+    private String language;
+    private String country;
+    private String text;
+
 }

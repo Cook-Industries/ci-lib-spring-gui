@@ -546,7 +546,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(StringAdapter.from(label, input)).build();
+        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(StringAdapter.from(label, resolveMarker(formId, file.getUid(), file.getMarker()), input)).build();
 
         return elementMapper.html();
     }
@@ -713,7 +713,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(StringAdapter.from(label, input)).build();
+        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(StringAdapter.from(label, resolveMarker(formId, number.getUid(), number.getMarker()), input)).build();
 
         return elementMapper.html();
     }
@@ -745,7 +745,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(StringAdapter.from(label, input)).build();
+        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(StringAdapter.from(label, resolveMarker(formId, password.getUid(), password.getMarker()), input)).build();
 
         return elementMapper.html();
     }
@@ -1014,6 +1014,7 @@ public final class HtmlMapper
                                     String.format("error-marker-%s-%s-%s", formId, uid, MessageType.valueOf(m.getType().toUpperCase()))))
                             .clazz(CLASS_HIDDEN)
                             .clazz(CLASS_ERROR_HIGHLIGHT)
+                            .clazz("error-marker")
                             .clazz(CLASS_TEXT_COLOR_RED)
                             .content(m.getText())
                             .build()

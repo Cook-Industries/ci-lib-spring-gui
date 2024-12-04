@@ -1,0 +1,133 @@
+package com.ci.lib.spring.web.i18n;
+
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+public final class TranslationMap
+{
+
+    private Map<Locale, Map<String, String>> translations = new ConcurrentHashMap<>();
+    private Boolean                          sealed       = false;
+
+    public void seal()
+    {
+        this.sealed = true;
+    }
+
+    private void checkSealed()
+    {
+        if (sealed)
+        {
+            // TODO: better exception
+            throw new IllegalArgumentException("TranslationMap is sealed and can not be modified.");
+        }
+    }
+
+    /**
+     * Add a translation {@code text} based on a {@code locale} and {@code key}
+     * 
+     * @param locale to associate
+     * @param key to associate
+     * @param text to associate
+     * 
+     * @throws IllegalArgumentException if {@code locale} is null
+     * @throws IllegalArgumentException if {@code key} is null or empty
+     * @throws IllegalArgumentException if {@code text} is null or empty
+     */
+    public void addTranslation(Locale locale, String key, String text)
+    {
+        checkSealed();
+
+        if (locale == null)
+        {
+            throw new IllegalArgumentException("translation local cannot be null");
+        }
+
+        Map<String, String> map = translations.get(locale);
+
+        if (map == null)
+        {
+            map = new ConcurrentHashMap<>();
+            translations.put(locale, map);
+        }
+
+        if (key == null || key.isBlank())
+        {
+            throw new IllegalArgumentException("translation key can not be null/empty");
+        }
+
+        if (text == null || text.isBlank())
+        {
+            throw new IllegalArgumentException("translation text can not be null/empty");
+        }
+
+        map.put(key, text);
+    }
+
+    /**
+     * Add a whole map of translations. If {@code translationMap} is null, a empty map will be
+     * associated
+     * 
+     * @param locale to associate with
+     * @param translationMap to add
+     * 
+     * @throws IllegalArgumentException if {@code locale} is null
+     */
+    public void addTranslations(Locale locale, Map<String, String> translationMap)
+    {
+        checkSealed();
+
+        if (locale == null)
+        {
+            throw new IllegalArgumentException("translation local can not be null");
+        }
+
+        Map<String, String> map = translations.get(locale);
+
+        if (map == null)
+        {
+            map = new ConcurrentHashMap<>();
+            translations.put(locale, map);
+        }
+
+        if (translationMap != null)
+        {
+            map.putAll(translationMap);
+        }
+    }
+
+    /**
+     * Get a translation from a {@code locale} and a {@code key}
+     * 
+     * @param locale to fetch
+     * @param key to fetch
+     * 
+     * @return either the associated text, or "{@code key} not set." if no associate exists
+     * 
+     * @throws IllegalArgumentException if {@code locale} is null
+     * @throws IllegalArgumentException if {@code key} is null or empty
+     */
+    public String getText(Locale locale, String key)
+    {
+        if (locale == null)
+        {
+            throw new IllegalArgumentException("translation locale can not be null");
+        }
+
+        if (key == null || key.isBlank())
+        {
+            throw new IllegalArgumentException("translation key can not be null/empty");
+        }
+
+        Map<String, String> map  = translations.get(locale);
+        String              text = String.format("I18N [%s] not set.", key);
+
+        if (map != null && map.get(key) != null)
+        {
+            text = map.get(key);
+        }
+
+        return text;
+    }
+}

@@ -7,6 +7,7 @@
 package com.ci.lib.spring.web.response.message;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
@@ -14,6 +15,7 @@ import lombok.experimental.SuperBuilder;
 public final class ModalMessage extends ResponseMessage
 {
 
+    @NonNull
     private final String msg;
 
     @Override

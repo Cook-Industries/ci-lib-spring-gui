@@ -1,14 +1,14 @@
-export { 
-    showGlobalLoader, 
-    hideGlobalLoader, 
-    getModal, 
-    GET, 
-    POST, 
-    POSTFormData, 
-    sendFromForm, 
-    submitFromModal, 
-    registerFunction, 
-    closeModal, 
+export {
+    showGlobalLoader,
+    hideGlobalLoader,
+    getModal,
+    GET,
+    POST,
+    POSTFormData,
+    sendFromForm,
+    submitFromModal,
+    registerFunction,
+    closeModal,
     dismissErrors
 };
 
@@ -24,8 +24,7 @@ const customFunctionMap = new Map();
 
 const CLASS_HIDDEN = "hidden";
 
-$(document).ready(function ()
-{
+$(document).ready(function () {
     console.log("ci-lib-dev-build");
 
     /**
@@ -41,9 +40,9 @@ $(document).ready(function ()
     });
 
     window.dismissErrors = () => { dismissErrors(); };
-    window.closeModal = () => { closeModal()};
+    window.closeModal = () => { closeModal() };
     window.removeListSelectionItem = (uuid) => { removeListSelectionItem(uuid); };
-    window.addListSelectionItem = (selectUuid, holderUuid) =>  { addListSelectionItem(selectUuid, holderUuid)};
+    window.addListSelectionItem = (selectUuid, holderUuid) => { addListSelectionItem(selectUuid, holderUuid) };
 
     hideGlobalLoader();
 });
@@ -55,8 +54,7 @@ $(document).ready(function ()
  * 
  * @returns a Promise
  */
-function GET(endpointUrl)
-{
+function GET(endpointUrl) {
     return new Promise((resolve, reject) => {
         fetch(endpointUrl,
             {
@@ -88,8 +86,7 @@ function GET(endpointUrl)
  * 
  * @returns a Promise
  */
-function POST(endpointUrl, dataToSend = {})
-{
+function POST(endpointUrl, dataToSend = {}) {
     if (endpointUrl === undefined || endpointUrl === "") {
         throw new Error("POST URL cannot be undefined/empty");
     }
@@ -128,8 +125,7 @@ function POST(endpointUrl, dataToSend = {})
  * 
  * @returns a Promise
  */
-function POSTFormData(endpointUrl, formData = {})
-{
+function POSTFormData(endpointUrl, formData = {}) {
     if (endpointUrl === undefined || endpointUrl === "") {
         throw new Error("POST URL cannot be undefined/empty");
     }
@@ -167,6 +163,7 @@ function POSTFormData(endpointUrl, formData = {})
 function sendFromForm(id, url)
 {
     showGlobalLoader("collect data");
+    resetMarker();
     const formData = extractValuesToSubmit(id);
     changeGlobalLoaderText("send data");
     POSTFormData(url, formData);
@@ -235,8 +232,7 @@ function handleResponse(response)
     call(response.calls);
 }
 
-function tryCustomFunction(response)
-{
+function tryCustomFunction(response) {
     const key = response.action;
 
     if (customFunctionMap.has(key)) {
@@ -249,13 +245,11 @@ function tryCustomFunction(response)
     }
 }
 
-function registerFunction(key, func)
-{
+function registerFunction(key, func) {
     customFunctionMap.set(key, func);
 }
 
-function call(calls)
-{
+function call(calls) {
     for (let func in calls) {
         let call = calls[func];
         let fn = window[call.functionName];
@@ -276,8 +270,7 @@ function call(calls)
  * 
  * @returns {undefined}
  */
-function showGlobalLoader(text = "")
-{
+function showGlobalLoader(text = "") {
     if (text !== undefined) {
         $("#global-loader-text").html(text);
     }
@@ -290,14 +283,12 @@ function showGlobalLoader(text = "")
  *
  * @returns {undefined}
  */
-function hideGlobalLoader()
-{
+function hideGlobalLoader() {
     $("#global-loader-text").html("loading...");
     $("#global-loader-overlay").addClass(CLASS_HIDDEN);
 }
 
-function changeGlobalLoaderText(text)
-{
+function changeGlobalLoaderText(text) {
     $("#global-loader-text").html(text);
 }
 // === < global loader =============================================================================
@@ -308,8 +299,7 @@ function changeGlobalLoaderText(text)
  * 
  * @returns {undefined}
  */
-function triggerResponse(messages, btnName = "")
-{
+function triggerResponse(messages, btnName = "") {
     hideGlobalLoader();
 
     let needOverlay = false;
@@ -345,8 +335,7 @@ function triggerResponse(messages, btnName = "")
     }
 }
 
-function getMsgClass(type)
-{
+function getMsgClass(type) {
     let c;
 
     switch (type) {
@@ -382,9 +371,12 @@ function handlePopupMsg(msg)
 
 function handleMarkerMsg(msg)
 {
-    console.log(msg, sprintf("#error-marker-%s-%s-%s", msg.formId, msg.fieldId, msg.type));
-
     $(sprintf("#error-marker-%s-%s-%s", msg.formId, msg.fieldId, msg.type)).removeClass(CLASS_HIDDEN);
+}
+
+function resetMarker()
+{
+    $(".error-marker").addClass(CLASS_HIDDEN);
 }
 
 /**
@@ -394,8 +386,7 @@ function handleMarkerMsg(msg)
  *
  * @return {undefined}
  */
-function clientsideError(msg, btn = "dismiss")
-{
+function clientsideError(msg, btn = "dismiss") {
     triggerResponse({ "msg": msg, "target": "POP_UP" }, btn);
 }
 
@@ -404,8 +395,7 @@ function clientsideError(msg, btn = "dismiss")
  *
  * @returns {undefined}
  */
-function dismissErrors()
-{
+function dismissErrors() {
     $("#error-overlay").addClass(CLASS_HIDDEN);
     $("#error-holder").html("");
 }
@@ -413,8 +403,7 @@ function dismissErrors()
 // === > modal =====================================================================================
 let openModals = 0;
 
-function getModal(url)
-{
+function getModal(url) {
     showGlobalLoader("load modal");
 
     GET(url);
@@ -423,20 +412,19 @@ function getModal(url)
 /**
  * Function to submit directly from a modal if no other function is specified
  */
-function submitFromModal()
-{
+function submitFromModal() {
     showGlobalLoader("collect data");
 
     let modal = $(sprintf("#modal-overlay-%d", openModals));
     let formData = extractValuesToSubmit(modal.attr("data-extraction-id"));
     let url = modal.attr("data-server-target");
 
+    resetMarker();
     changeGlobalLoaderText("send data");
     POSTFormData(url, formData);
 }
 
-function submitLeftBtnPress()
-{
+function submitLeftBtnPress() {
     let modal = $(sprintf("#modal-overlay-%d", openModals));
     let arr = {
         btn_left: true,
@@ -446,8 +434,7 @@ function submitLeftBtnPress()
     POST(modal.attr("data-request-url"), arr);
 }
 
-function submitMiddleBtnPress()
-{
+function submitMiddleBtnPress() {
     let modal = $(sprintf("#modal-overlay-%d", openModals));
     let arr = {
         btn_middle: true,
@@ -457,8 +444,7 @@ function submitMiddleBtnPress()
     POST(modal.attr("data-request-url"), arr);
 }
 
-function submitRightBtnPress()
-{
+function submitRightBtnPress() {
     let modal = $(sprintf("#modal-overlay-%d", openModals));
     let arr = {
         btn_right: true,
@@ -468,8 +454,7 @@ function submitRightBtnPress()
     POST(modal.attr("data-request-url"), arr);
 }
 
-function submitAbort()
-{
+function submitAbort() {
     let modal = $(sprintf("#modal-overlay-%d", openModals));
     let arr = {
         aborted: true,
@@ -486,8 +471,7 @@ function submitAbort()
  *
  * @returns {undefined}
  */
-function openModal(modal)
-{
+function openModal(modal) {
     openModals++;
 
     // -> data attributes
@@ -519,14 +503,12 @@ function openModal(modal)
     hideGlobalLoader();
 }
 
-function modalShowBtn()
-{
+function modalShowBtn() {
     $(sprintf("#modal-overlay-%d", openModals)).attr("data-close-on-overlay", "0");
     $(sprintf("#modal-buttons-%d", openModals)).removeClass(CLASS_HIDDEN);
 }
 
-function radioClick(event)
-{
+function radioClick(event) {
     event.stopPropagation();
     $(event.currentTarget).find(".slider").click();
 }
@@ -536,8 +518,7 @@ function radioClick(event)
  *
  * @returns {undefined}
  */
-function closeModal()
-{
+function closeModal() {
     if ($(sprintf("#modal-overlay-%d", openModals)).attr("data-lock-set") === "1") {
         $(sprintf("#modal-overlay-%d", openModals)).attr("data-lock-set", "0");
         releaseLock();
@@ -548,8 +529,7 @@ function closeModal()
 }
 // === < modal =====================================================================================
 // === > site ======================================================================================
-function fillContent(content)
-{
+function fillContent(content) {
     let elementId = sprintf("#%s", content.elementId);
     if ($(content).length) {
         if (content.replace) {
@@ -560,15 +540,13 @@ function fillContent(content)
     }
 }
 
-function replaceContent(obj)
-{
+function replaceContent(obj) {
     let contentIdentifier = obj.context;
 
     $(sprintf("#%s", contentIdentifier)).replaceWith(write(obj.element));
 }
 
-function removeContent(obj)
-{
+function removeContent(obj) {
     let contentIdentifier = obj.context;
 
     $(sprintf("#%s", contentIdentifier)).remove();
@@ -581,10 +559,9 @@ function removeContent(obj)
  *
  * @returns {FormData} containing the extracted values
  */
-function extractValuesToSubmit(target)
-{
+function extractValuesToSubmit(target) {
     showGlobalLoader("extract form fields");
-    const  formData = new FormData();
+    const formData = new FormData();
 
     formData.append("__form_id", target);
 
@@ -604,6 +581,7 @@ function extractValuesToSubmit(target)
                 case "DATE":
                 case "PASSWORD":
                 case "NUMBER":
+                case "HIDDEN":
                     formData.append(id, $(elem).val());
                     break;
 
@@ -619,11 +597,10 @@ function extractValuesToSubmit(target)
                     $(elem).find('input[type="checkbox"]:checked').each(function () {
                         checkArr.push($(elem).val());
                     });
-                    val = checkArr;
                     formData.append(id, checkArr);
                     break;
 
-                case "SWITCH":                    
+                case "SWITCH":
                     formData.append(id, $(elem).is(':checked'));
                     break;
 
@@ -632,7 +609,7 @@ function extractValuesToSubmit(target)
                     break;
 
                 case "FILE":
-                    const files = $(elem)[0].files;                    
+                    const files = $(elem)[0].files;
                     for (var x = 0; x < files.length; x++) {
                         formData.append(id, files[x]);
                     }
@@ -694,25 +671,29 @@ function read_file(file)
 }
 // === < site ======================================================================================
 // === > form ======================================================================================
-function addListSelectionItem(inputUuid, holderUuid)
-{
+function addListSelectionItem(inputUuid, holderUuid) {
     const itemName = $(sprintf('#%s option:selected', inputUuid)).text();
     const itemValue = $(sprintf('#%s', inputUuid)).val();
     const isMultiple = $(sprintf('#%s', inputUuid)).data("multiple");
     const newUuid = generateUUID();
 
-    if(isMultiple || $(sprintf('#%s', holderUuid)).find(sprintf('[data-value="%s"]', itemValue)).length === 0) {
+    if (itemName === undefined || itemName === "")
+    {
+        return;
+    }
+
+    if (isMultiple || $(sprintf('#%s', holderUuid)).find(sprintf('[data-value="%s"]', itemValue)).length === 0)
+    {
         $(sprintf('#%s', holderUuid)).append(sprintf('<div id="%s"><div class="form-list-selection-item" data-value="%s"><p>%s</p><button onclick="removeListSelectionItem(\'%s\')" class="btn btn-primary">X</button></div></div>', newUuid, itemValue, itemName, newUuid));
     }
 }
 
-function removeListSelectionItem(uuid)
-{
+function removeListSelectionItem(uuid) {
     $(sprintf('#%s', uuid)).remove();
 }
 // === < form ======================================================================================
 function generateUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });

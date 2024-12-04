@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.ci</groupId>
 	<artifactId>lib.spring.web</artifactId>
-	<version>0.0.2-SNAPSHOT</version>	
+	<version>0.0.3-SNAPSHOT</version>	
     <packaging>jar</packaging>
 	<name>lib.spring.web</name>
 	<description>CI-lib for web usage in Spring</description>

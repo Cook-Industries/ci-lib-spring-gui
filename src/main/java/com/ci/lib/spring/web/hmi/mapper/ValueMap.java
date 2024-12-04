@@ -48,24 +48,6 @@ public class ValueMap
     }
 
     /**
-     * Add multiple {@link ValueMapExportable} objects to this map
-     * 
-     * @param objects
-     * 
-     * @throws ValueMapSealedException if this map is already sealed
-     * @throws ValueMapKeyAlreadyInUse if a implicit {@code key} is already in use
-     */
-    public void extractObjects(ValueMapExportable... objects)
-    {
-        checkSeal();
-
-        for (ValueMapExportable vme : objects)
-        {
-            vme.exportTo(this);
-        }
-    }
-
-    /**
      * Seal this map so it cannot be changed anymore
      */
     public void seal()

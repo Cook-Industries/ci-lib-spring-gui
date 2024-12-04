@@ -6,6 +6,8 @@
  */
 package com.ci.lib.spring.web.hmi;
 
+import java.util.Locale;
+
 import org.springframework.stereotype.Component;
 
 import com.ci.lib.spring.web.hmi.container.Container;
@@ -14,6 +16,7 @@ import com.ci.lib.spring.web.hmi.mapper.JsonTreeMapper;
 import com.ci.lib.spring.web.hmi.mapper.JsonTreeRoot;
 import com.ci.lib.spring.web.hmi.mapper.ValueMap;
 import com.ci.lib.spring.web.hmi.mapper.exception.JsonMapperException;
+import com.ci.lib.spring.web.i18n.TranslationProvider;
 
 import lombok.Data;
 
@@ -21,6 +24,13 @@ import lombok.Data;
 @Data
 public class GUIFactory
 {
+
+    private final TranslationProvider translationProvider;
+
+    public GUIFactory(TranslationProvider translationProvider)
+    {
+        this.translationProvider = translationProvider;
+    }
 
     /**
      * Read in a static template and transform into a {@link Container}
@@ -54,7 +64,7 @@ public class GUIFactory
      * 
      * @return the parsed {@code Container}
      */
-    public Container fromComponentJson(String path, ValueMap valueMap)
+    public Container fromComponentJson(String path, Locale locale, ValueMap... valueMap)
     {
         JsonTreeMapper mapper = new JsonTreeMapper();
 
@@ -63,7 +73,7 @@ public class GUIFactory
         {
             root = mapper.map(path);
 
-            return JsonMapper.map(root, valueMap);
+            return JsonMapper.map(root, locale, translationProvider.getTranslationMap(), valueMap);
         }
         catch (Exception e)
         {
