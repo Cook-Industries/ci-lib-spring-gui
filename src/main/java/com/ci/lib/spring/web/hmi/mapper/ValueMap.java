@@ -9,25 +9,21 @@ package com.ci.lib.spring.web.hmi.mapper;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.ci.lib.spring.web.hmi.input.InputValue;
-import com.ci.lib.spring.web.hmi.input.InputValueList;
+import com.ci.lib.spring.web.hmi.input.util.InputValue;
+import com.ci.lib.spring.web.hmi.input.util.InputValueList;
 import com.ci.lib.spring.web.hmi.mapper.exception.ValueMapKeyAlreadyInUse;
 import com.ci.lib.spring.web.hmi.mapper.exception.ValueMapSealedException;
-
-import lombok.Data;
+import com.ci.lib.spring.web.util.Sealable;
 
 /**
  * Key/Value map to use for {@link TreeHandling#DYNAMIC}.<br>
  * Uses an underlying {@link ConcurrentHashMap} to ensure thread-safety.
  */
-@Data
-public class ValueMap
+public class ValueMap extends Sealable
 {
 
-    private final Map<String, Object> map    = new ConcurrentHashMap<>();
+    private final Map<String, Object> map = new ConcurrentHashMap<>();
     private final Integer             presedence;
-
-    private Boolean                   sealed = false;
 
     /**
      * Create a new {@code ValueMap} with presedence '0'
@@ -44,15 +40,19 @@ public class ValueMap
      */
     public ValueMap(Integer presedence)
     {
+        super(ValueMap.class);
+
         this.presedence = presedence;
     }
 
     /**
-     * Seal this map so it cannot be changed anymore
+     * Get the presedence for this map
+     * 
+     * @return the presedence of this map
      */
-    public void seal()
+    public Integer getPresedence()
     {
-        this.sealed = true;
+        return presedence;
     }
 
     /**
@@ -70,6 +70,7 @@ public class ValueMap
     {
         checkSeal();
         checkKey(key);
+
         map.put(key, value);
 
         return this;
@@ -90,6 +91,7 @@ public class ValueMap
     {
         checkSeal();
         checkKey(key);
+
         map.put(key, value);
 
         return this;
@@ -110,6 +112,7 @@ public class ValueMap
     {
         checkSeal();
         checkKey(key);
+
         map.put(key, value);
 
         return this;
@@ -130,6 +133,7 @@ public class ValueMap
     {
         checkSeal();
         checkKey(key);
+
         map.put(key, value);
 
         return this;
@@ -145,19 +149,6 @@ public class ValueMap
     public Object get(String key)
     {
         return map.get(key);
-    }
-
-    /**
-     * Check whether this map is sealed
-     * 
-     * @throws ValueMapSealedException if this map is sealed
-     */
-    private void checkSeal() throws ValueMapSealedException
-    {
-        if (sealed.booleanValue())
-        {
-            throw new ValueMapSealedException();
-        }
     }
 
     /**

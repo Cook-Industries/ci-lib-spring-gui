@@ -12,6 +12,7 @@ import io.micrometer.common.lang.NonNull;
 import lombok.Getter;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  *
@@ -19,7 +20,8 @@ import lombok.experimental.SuperBuilder;
  */
 @SuperBuilder
 @Getter
-public class RowContainer extends Container
+@Jacksonized
+public final class RowContainer extends Container
 {
 
     @NonNull

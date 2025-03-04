@@ -8,9 +8,12 @@ package com.ci.lib.spring.web.hmi.input;
 
 import java.util.List;
 
+import com.ci.lib.spring.web.hmi.input.util.InputValue;
+
 import lombok.Getter;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  *
@@ -18,7 +21,8 @@ import lombok.experimental.SuperBuilder;
  */
 @SuperBuilder
 @Getter
-public class Select extends SubmittableInput
+@Jacksonized
+public final class Select extends SubmittableInput
 {
 
     @Singular

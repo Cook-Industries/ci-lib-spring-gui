@@ -11,6 +11,7 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  *
@@ -18,7 +19,8 @@ import lombok.experimental.SuperBuilder;
  */
 @SuperBuilder
 @Getter
-public class ContentContainer extends Container
+@Jacksonized
+public final class ContentContainer extends Container
 {
 
     @Singular

@@ -11,9 +11,11 @@ import com.ci.lib.spring.web.hmi.modal.Modal;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 @SuperBuilder
 @Getter
+@Jacksonized
 public class ModalResponse extends Response
 {
 

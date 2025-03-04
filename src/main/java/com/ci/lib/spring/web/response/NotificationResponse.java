@@ -8,9 +8,11 @@ package com.ci.lib.spring.web.response;
 
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 @SuperBuilder
 @Getter
+@Jacksonized
 public class NotificationResponse extends Response
 {
 

@@ -11,6 +11,7 @@ import lombok.NonNull;
 
 import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * {@link Textfield} represents a text input field.<br>
@@ -22,7 +23,8 @@ import lombok.experimental.SuperBuilder;
  */
 @SuperBuilder
 @Getter
-public class Textfield extends SubmittableInput
+@Jacksonized
+public final class Textfield extends SubmittableInput
 {
 
     @NonNull
@@ -32,9 +34,9 @@ public class Textfield extends SubmittableInput
     @Default
     private String  placeholder   = "";
     @Default
-    private String  prefix       = "";
+    private String  prefix        = "";
     @Default
-    private String  suffix     = "";
+    private String  suffix        = "";
     @Default
     private Integer maxCharacters = Integer.MAX_VALUE;
     @Default

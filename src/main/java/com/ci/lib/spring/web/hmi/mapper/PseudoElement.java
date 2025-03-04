@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ci.lib.spring.web.hmi.input.Marker;
+import com.ci.lib.spring.web.hmi.input.util.Marker;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

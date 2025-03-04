@@ -6,7 +6,7 @@
  */
 package com.ci.lib.spring.web.hmi.container;
 
-import com.ci.lib.spring.web.hmi.input.Marker;
+import com.ci.lib.spring.web.hmi.input.util.Marker;
 
 import io.micrometer.common.lang.NonNull;
 import lombok.Getter;
@@ -17,7 +17,7 @@ import lombok.Singular;
  * @author <a href="mailto:koch.sebastian@cook-industries.de">sebastian koch</a>
  */
 @Getter
-public class Tab
+public final class Tab
 {
 
     @NonNull

@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  *
@@ -24,6 +25,7 @@ import lombok.experimental.SuperBuilder;
  */
 @SuperBuilder
 @Getter
+@Jacksonized
 public class ContentResponse extends Response
 {
 

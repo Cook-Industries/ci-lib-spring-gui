@@ -8,6 +8,7 @@ package com.ci.lib.spring.web.hmi.container;
 
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  *
@@ -15,7 +16,8 @@ import lombok.experimental.SuperBuilder;
  */
 @SuperBuilder
 @Getter
-public class TextContainer extends Container
+@Jacksonized
+public final class TextContainer extends Container
 {
 
     private final String text;

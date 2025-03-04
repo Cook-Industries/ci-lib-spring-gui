@@ -12,6 +12,7 @@ import com.ci.lib.spring.web.hmi.container.TableRow;
 
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  *
@@ -19,7 +20,8 @@ import lombok.experimental.SuperBuilder;
  */
 @SuperBuilder
 @Getter
-public class Table extends Input
+@Jacksonized
+public final class Table extends Input
 {
 
     private final Boolean        editable;

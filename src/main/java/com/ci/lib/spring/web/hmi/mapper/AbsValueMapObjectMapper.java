@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import com.ci.lib.spring.web.hmi.input.InputValue;
-import com.ci.lib.spring.web.hmi.input.InputValueList;
+import com.ci.lib.spring.web.hmi.input.util.InputValue;
+import com.ci.lib.spring.web.hmi.input.util.InputValueList;
 import com.ci.lib.spring.web.i18n.TranslationProvider;
 
 public abstract class AbsValueMapObjectMapper<T>

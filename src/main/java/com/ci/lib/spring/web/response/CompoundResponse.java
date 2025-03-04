@@ -11,9 +11,11 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 @SuperBuilder
 @Getter
+@Jacksonized
 public class CompoundResponse extends Response
 {
 

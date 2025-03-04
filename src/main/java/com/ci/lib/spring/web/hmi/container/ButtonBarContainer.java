@@ -13,10 +13,12 @@ import com.ci.lib.spring.web.hmi.input.Button;
 import lombok.Getter;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 @SuperBuilder
 @Getter
-public class ButtonBarContainer extends Container
+@Jacksonized
+public final class ButtonBarContainer extends Container
 {
 
     @Singular

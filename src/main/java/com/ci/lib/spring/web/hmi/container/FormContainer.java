@@ -12,6 +12,7 @@ import com.ci.lib.spring.web.hmi.input.Input;
 import lombok.Getter;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  *
@@ -19,7 +20,8 @@ import lombok.experimental.SuperBuilder;
  */
 @SuperBuilder
 @Getter
-public class FormContainer extends Container
+@Jacksonized
+public final class FormContainer extends Container
 {
 
     @Singular

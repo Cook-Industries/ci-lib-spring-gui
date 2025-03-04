@@ -4,7 +4,7 @@
  *
  * @author : sebastian koch <koch.sebastian@cook-industries.de>
  */
-package com.ci.lib.spring.web.hmi.input;
+package com.ci.lib.spring.web.hmi.input.util;
 
 import java.util.ArrayList;
 

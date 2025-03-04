@@ -9,6 +9,7 @@ package com.ci.lib.spring.web.hmi.container;
 import io.micrometer.common.lang.NonNull;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  *
@@ -16,7 +17,8 @@ import lombok.experimental.SuperBuilder;
  */
 @SuperBuilder
 @Getter
-public class AudioContainer extends Container
+@Jacksonized
+public final class AudioContainer extends Container
 {
 
     @NonNull

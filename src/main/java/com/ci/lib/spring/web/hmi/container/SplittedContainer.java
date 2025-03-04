@@ -11,6 +11,7 @@ import java.util.List;
 import io.micrometer.common.lang.NonNull;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  *
@@ -18,7 +19,8 @@ import lombok.experimental.SuperBuilder;
  */
 @SuperBuilder
 @Getter
-public class SplittedContainer extends Container
+@Jacksonized
+public final class SplittedContainer extends Container
 {
 
     @NonNull

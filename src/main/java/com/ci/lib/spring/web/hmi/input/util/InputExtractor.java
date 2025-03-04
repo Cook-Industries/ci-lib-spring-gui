@@ -1,4 +1,4 @@
-package com.ci.lib.spring.web.hmi.input;
+package com.ci.lib.spring.web.hmi.input.util;
 
 import java.sql.Date;
 import java.text.DateFormat;
@@ -15,60 +15,113 @@ import java.util.regex.Pattern;
 
 import org.springframework.util.MultiValueMap;
 
+import com.ci.lib.spring.web.hmi.input.util.exception.KeyInvalidException;
 import com.ci.lib.spring.web.response.message.HighlightMessage;
 import com.ci.lib.spring.web.response.message.MessageType;
 import com.ci.lib.spring.web.response.message.ModalMessage;
 import com.ci.lib.spring.web.response.message.ResponseMessage;
 
+/**
+ * Utility to extract information from Forms to use them in the application
+ */
 public final class InputExtractor
 {
 
-    private static final DateFormat             format   = new SimpleDateFormat("yyyy-mm-dd");
+    private static final DateFormat             format       = new SimpleDateFormat("yyyy-mm-dd");
 
     private final String                        formId;
     private final MultiValueMap<String, String> inputs;
-    private final List<ResponseMessage>         messages = new ArrayList<>();
+    private final List<ResponseMessage>         messages     = new ArrayList<>();
+    private Boolean                             modalMessage = false;
 
+    /**
+     * Create a extractor for this
+     * 
+     * @param inputs to use
+     */
     public InputExtractor(MultiValueMap<String, String> inputs)
     {
         this.inputs = inputs;
         formId = inputs.getFirst("__form_id");
-    }
 
-    private void checkKey(String key)
-    {
-        if (key == null)
+        if (formId == null || formId.isBlank())
         {
-            // TODO: better exception
-            throw new IllegalArgumentException("key cannot be null");
+            throw new IllegalArgumentException("key [__form_id] cannot be null/empty");
         }
     }
 
+    /**
+     * Set this extractor messages to be {@link ModalMessage} instead of {@link HighlightMessage}
+     */
+    public void useModalMessages()
+    {
+        this.modalMessage = true;
+    }
+
+    /**
+     * Check whether {@code key} is valid
+     * 
+     * @param key to check
+     * 
+     * @throws KeyInvalidException if the key is null or {@link String#isBlank()}
+     */
+    private void check(String key)
+    {
+        if (key == null || key.isBlank())
+        {
+            throw new KeyInvalidException("key cannot be null/empty");
+        }
+    }
+
+    /**
+     * Get a value for a {@code key}. If the {@code key} is not associated with a value, a
+     * {@link ResponseMessage} will be added to the internal {@code message} list.
+     * 
+     * @param key
+     * 
+     * @return the value as {@code String} of {@code key} if it is associated with a value, or
+     *         {@code null} if the key is not set
+     * 
+     * @throws KeyInvalidException if {@code key} is null/empty
+     */
     private String getValue(String key)
     {
-        checkKey(key);
+        check(key);
 
         @SuppressWarnings("null")
         String value = inputs.getFirst(key);
 
         if (value == null)
         {
-            messages
-                    .add(ModalMessage
-                            .builder()
-                            .msg(String.format("key value [%s] is null but expected", key))
-                            .type(MessageType.ERROR)
-                            .build());
+            String msg = String.format("key value [%s] is null but expected", key);
+            addMessage(key, msg, MessageType.ERROR);
         }
 
         return value;
     }
 
+    /**
+     * Extract a {@link String}
+     * 
+     * @param key to extract
+     * @param consumer to feed
+     * 
+     * @throws KeyInvalidException if {@code key} is null/empty
+     */
     public void asString(String key, Consumer<String> consumer)
     {
         asString(key, null, consumer);
     }
 
+    /**
+     * Extract a {@link Integer} that conforms to a regex pattern
+     * 
+     * @param key to extract
+     * @param pattern to apply
+     * @param consumer to feed
+     * 
+     * @throws KeyInvalidException if {@code key} is null/empty
+     */
     public void asString(String key, String pattern, Consumer<String> consumer)
     {
         try
@@ -84,7 +137,8 @@ public final class InputExtractor
 
                     if (!mat.matches())
                     {
-                        messages.add(HighlightMessage.builder().formId(formId).fieldId(key).type(MessageType.ERROR).build());
+                        String msg = String.format("key [%s] value [%s] does not match pattern [%s]", key, value, pat);
+                        addMessage(key, msg, MessageType.ERROR);
 
                         return;
                     }
@@ -99,11 +153,29 @@ public final class InputExtractor
         }
     }
 
+    /**
+     * Extract a {@link Integer} in a lower and upper bound range
+     * 
+     * @param key to extract
+     * @param consumer to feed
+     * 
+     * @throws KeyInvalidException if {@code key} is null/empty
+     */
     public void asInteger(String key, Consumer<Integer> consumer)
     {
         asInteger(key, null, null, consumer);
     }
 
+    /**
+     * Extract a {@link Integer} in a lower and upper bound range
+     * 
+     * @param key to extract
+     * @param lowerBound of valid value (inclusive)
+     * @param upperBound of valid value (inclusive)
+     * @param consumer to feed
+     * 
+     * @throws KeyInvalidException if {@code key} is null/empty
+     */
     public void asInteger(String key, Integer lowerBound, Integer upperBound, Consumer<Integer> consumer)
     {
         String value = null;
@@ -127,12 +199,8 @@ public final class InputExtractor
         }
         catch (NumberFormatException ex)
         {
-            messages
-                    .add(ModalMessage
-                            .builder()
-                            .msg(String.format("key [%s] value [%s] cannot be parsed", key, value))
-                            .type(MessageType.ERROR)
-                            .build());
+            String msg = String.format("key [%s] value [%s] cannot be parsed", key, value);
+            addMessage(key, msg, MessageType.ERROR);
         }
         catch (Exception ex)
         {
@@ -141,13 +209,11 @@ public final class InputExtractor
     }
 
     /**
-     * Extract a String in the format yyyy-mm-dd to a {@link Date} object.
+     * Extract a {@link Date} in the format yyyy-mm-dd
      * 
      * @param key
      * 
-     * @return
-     * 
-     * @throws ParseException
+     * @throws KeyInvalidException if {@code key} is null/empty
      */
     public void asSqlDate(String key, Consumer<Date> consumer)
     {
@@ -158,7 +224,6 @@ public final class InputExtractor
             value = getValue(key);
             if (value != null)
             {
-
                 java.util.Date date    = format.parse(value);
 
                 Date           sqlDate = new java.sql.Date(date.getTime());
@@ -168,12 +233,8 @@ public final class InputExtractor
         }
         catch (ParseException ex)
         {
-            messages
-                    .add(ModalMessage
-                            .builder()
-                            .msg(String.format("key [%s] value [%s] is not in format yyyy-mm-dd", key, value))
-                            .type(MessageType.ERROR)
-                            .build());
+            String msg = String.format("key [%s] value [%s] is not in format yyyy-mm-dd", key, value);
+            addMessage(key, msg, MessageType.ERROR);
         }
         catch (Exception ex)
         {
@@ -181,6 +242,16 @@ public final class InputExtractor
         }
     }
 
+    /**
+     * Extract a {@link Enum}
+     * 
+     * @param <E> enum class
+     * @param key to extract
+     * @param source of enums
+     * @param consumer to feed
+     * 
+     * @throws KeyInvalidException if {@code key} is null/empty
+     */
     public <E extends Enum<E>> void asEnum(String key, Class<E> source, Consumer<E> consumer)
     {
         try
@@ -196,12 +267,8 @@ public final class InputExtractor
         }
         catch (NoSuchElementException ex)
         {
-            messages
-                    .add(ModalMessage
-                            .builder()
-                            .msg(String.format("key [%s] is not part of enum [%s]", key, source.getSimpleName()))
-                            .type(MessageType.ERROR)
-                            .build());
+            String msg = String.format("key [%s] is not part of enum [%s]", key, source.getSimpleName());
+            addMessage(key, msg, MessageType.ERROR);
         }
         catch (Exception ex)
         {
@@ -211,19 +278,36 @@ public final class InputExtractor
 
     private void addUnexpectedErrorMessage(String key, String errorMsg)
     {
-        messages
-                .add(ModalMessage
-                        .builder()
-                        .msg(String.format("key [%s] unexpected error [%s]", key, errorMsg))
-                        .type(MessageType.ERROR)
-                        .build());
+        addMessage(key, String.format("key [%s] unexpected error [%s]", key, errorMsg), MessageType.ERROR);
     }
 
+    private void addMessage(String key, String msg, MessageType type)
+    {
+        if (modalMessage)
+        {
+            messages.add(ModalMessage.builder().msg(msg).type(type).build());
+        }
+        else
+        {
+            messages.add(HighlightMessage.builder().formId(formId).fieldId(key).type(type).build());
+        }
+    }
+
+    /**
+     * Check whether this extractor has raised any messages
+     * 
+     * @return true, if there are messages raise, false otherwise
+     */
     public Boolean hasMessages()
     {
         return !messages.isEmpty();
     }
 
+    /**
+     * Get e list of any messages raised by the transformations
+     * 
+     * @return list of messages
+     */
     public List<ResponseMessage> getMessages()
     {
         return Collections.unmodifiableList(messages);

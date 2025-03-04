@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.Singular;
 import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  *
@@ -19,7 +20,8 @@ import lombok.experimental.SuperBuilder;
  */
 @SuperBuilder
 @Getter
-public class File extends SubmittableInput
+@Jacksonized
+public final class File extends SubmittableInput
 {
 
     @Default

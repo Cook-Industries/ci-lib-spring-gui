@@ -18,18 +18,27 @@ import lombok.NoArgsConstructor;
 public class JsonTreeRoot
 {
 
-    private String        handling;
-    private String        name;
-    private PseudoElement root;
+    private static final String JSON_FILE = "json-file";
+
+    private String              handling;
+    private PseudoElement       root;
 
     /**
-     * Validate this {@ JsonTreeRoot} to verify all necessary fields are existant
+     * Validates the state of the tree object to ensure it can be successfully parsed.<br>
+     * 
+     * This method checks that:<br>
+     * - The handling property is not null or empty, and its value is either static or dynamic.<br>
+     * - The root property is not null.<br>
+     * 
+     * If any validation fails, a {@code JsonParsingException} is thrown with relevant error details.
+     *
+     * @throws {@code JsonParsingException} if the tree object's state is invalid
      */
     public void validate()
     {
         if (handling == null || handling.isBlank())
         {
-            throw new JsonParsingException(null, 0, 0, "tree.handling cannot be null/empty");
+            throw new JsonParsingException(JSON_FILE, 0, 0, "tree.handling cannot be null/empty");
         }
 
         try
@@ -38,17 +47,12 @@ public class JsonTreeRoot
         }
         catch (Exception ex)
         {
-            throw new JsonParsingException(null, 0, 0, "tree.handling is not static/dynamic");
-        }
-
-        if (name == null || name.isBlank())
-        {
-            throw new JsonParsingException(null, 0, 0, "tree.name cannot be null/empty");
+            throw new JsonParsingException(JSON_FILE, 0, 0, "tree.handling is not static/dynamic");
         }
 
         if (root == null)
         {
-            throw new JsonParsingException(null, 0, 0, "tree.root cannot be null");
+            throw new JsonParsingException(JSON_FILE, 0, 0, "tree.root cannot be null");
         }
     }
 }

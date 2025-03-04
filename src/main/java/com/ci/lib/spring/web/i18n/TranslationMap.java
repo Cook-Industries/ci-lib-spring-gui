@@ -4,24 +4,19 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class TranslationMap
+import com.ci.lib.spring.web.util.Sealable;
+
+/**
+ * Aggrigation for translations
+ */
+public final class TranslationMap extends Sealable
 {
 
     private Map<Locale, Map<String, String>> translations = new ConcurrentHashMap<>();
-    private Boolean                          sealed       = false;
 
-    public void seal()
+    public TranslationMap()
     {
-        this.sealed = true;
-    }
-
-    private void checkSealed()
-    {
-        if (sealed)
-        {
-            // TODO: better exception
-            throw new IllegalArgumentException("TranslationMap is sealed and can not be modified.");
-        }
+        super(TranslationMap.class);
     }
 
     /**
@@ -37,7 +32,7 @@ public final class TranslationMap
      */
     public void addTranslation(Locale locale, String key, String text)
     {
-        checkSealed();
+        checkSeal();
 
         if (locale == null)
         {
@@ -76,7 +71,7 @@ public final class TranslationMap
      */
     public void addTranslations(Locale locale, Map<String, String> translationMap)
     {
-        checkSealed();
+        checkSeal();
 
         if (locale == null)
         {

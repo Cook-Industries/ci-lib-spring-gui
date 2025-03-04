@@ -15,7 +15,7 @@ import lombok.Getter;
  * @author sebastian koch <koch.sebastian@cook-industries.de>
  */
 @Getter
-public class TableRow
+public final class TableRow
 {
 
     private final ArrayList<Object> fields;

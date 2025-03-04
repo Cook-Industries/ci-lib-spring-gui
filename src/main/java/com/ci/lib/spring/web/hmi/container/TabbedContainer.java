@@ -13,6 +13,7 @@ import lombok.Singular;
 import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  *
@@ -20,7 +21,8 @@ import lombok.experimental.SuperBuilder;
  */
 @SuperBuilder
 @Getter
-public class TabbedContainer extends Container
+@Jacksonized
+public final class TabbedContainer extends Container
 {
 
     @Singular

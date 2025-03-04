@@ -9,6 +9,7 @@ package com.ci.lib.spring.web.hmi.input;
 import lombok.Getter;
 import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  *
@@ -16,7 +17,8 @@ import lombok.experimental.SuperBuilder;
  */
 @SuperBuilder
 @Getter
-public class Checkbox extends SubmittableInput
+@Jacksonized
+public final class Checkbox extends SubmittableInput
 {
 
     @Default
