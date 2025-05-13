@@ -1,0 +1,171 @@
+/**
+ * Copyright(c) 2024 sebastian koch/CI. All rights reserved.<br>
+ * mailto: koch.sebastian@cook-industries.de
+ *
+ * @author : sebastian koch <koch.sebastian@cook-industries.de>
+ */
+package de.cook_industries.lib.spring.gui.hmi.mapper;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import de.cook_industries.lib.spring.gui.hmi.input.util.InputValue;
+import de.cook_industries.lib.spring.gui.hmi.input.util.InputValueList;
+import de.cook_industries.lib.spring.gui.hmi.mapper.exception.ValueMapKeyAlreadyInUseException;
+import de.cook_industries.lib.spring.gui.hmi.mapper.exception.ValueMapSealedException;
+import de.cook_industries.lib.spring.gui.util.Sealable;
+
+/**
+ * Key/Value map to use with {@link TreeHandling#DYNAMIC}.
+ * 
+ * <p>
+ * Uses an underlying {@link ConcurrentHashMap} to ensure thread-safety.
+ */
+public class ValueMap extends Sealable
+{
+
+    private final Map<String, Object> map = new ConcurrentHashMap<>();
+    private final Integer             presedence;
+
+    /**
+     * Create a new {@code ValueMap} with presedence '0'
+     */
+    public ValueMap()
+    {
+        this(0);
+    }
+
+    /**
+     * Create a new {@code ValueMap}
+     * 
+     * @param presedence in which order maps are resolved. Higher is better.
+     */
+    public ValueMap(Integer presedence)
+    {
+        super(ValueMap.class);
+
+        this.presedence = presedence;
+    }
+
+    /**
+     * Get the presedence for this map
+     * 
+     * @return the presedence of this map
+     */
+    public Integer getPresedence()
+    {
+        return presedence;
+    }
+
+    /**
+     * Add a {@link String} value to this map
+     * 
+     * @param key to link
+     * @param value to link
+     * 
+     * @return {@code this}
+     * 
+     * @throws ValueMapSealedException if this map is already sealed
+     * @throws ValueMapKeyAlreadyInUseException if {@code key} is already in use
+     */
+    public ValueMap add(String key, String value) throws ValueMapKeyAlreadyInUseException
+    {
+        checkSeal();
+        checkKey(key);
+
+        map.put(key, value);
+
+        return this;
+    }
+
+    /**
+     * Add a {@link Boolean} value to this map
+     * 
+     * @param key to link
+     * @param value to link
+     * 
+     * @return {@code this}
+     * 
+     * @throws ValueMapSealedException if this map is already sealed
+     * @throws IllegalArgumentException if {@code key} is already in use
+     */
+    public ValueMap add(String key, Boolean value) throws ValueMapKeyAlreadyInUseException
+    {
+        checkSeal();
+        checkKey(key);
+
+        map.put(key, value);
+
+        return this;
+    }
+
+    /**
+     * Add a {@link Integer} value to this map
+     * 
+     * @param key to link
+     * @param value to link
+     * 
+     * @return {@code this}
+     * 
+     * @throws ValueMapSealedException if this map is already sealed
+     * @throws ValueMapKeyAlreadyInUseException if {@code key} is already in use
+     */
+    public ValueMap add(String key, Integer value) throws ValueMapKeyAlreadyInUseException
+    {
+        checkSeal();
+        checkKey(key);
+
+        map.put(key, value);
+
+        return this;
+    }
+
+    /**
+     * Add a list of {@link InputValue}s value to this map
+     * 
+     * @param key to link
+     * @param value to link
+     * 
+     * @return {@code this}
+     * 
+     * @throws ValueMapSealedException if this map is already sealed
+     * @throws ValueMapKeyAlreadyInUseException if {@code key} is already in use
+     */
+    public ValueMap add(String key, InputValueList value) throws ValueMapKeyAlreadyInUseException
+    {
+        checkSeal();
+        checkKey(key);
+
+        map.put(key, value);
+
+        return this;
+    }
+
+    /**
+     * Retrieve a value associated to {@code key}
+     * 
+     * @param key to lookup
+     * 
+     * @return the value associated with {@code key}, or {@code null} if no key is set
+     */
+    public Object get(String key)
+    {
+        return map.get(key);
+    }
+
+    /**
+     * Check whether {@code key} is already in use
+     * 
+     * @param key to check
+     * 
+     * @throws ValueMapKeyAlreadyInUseException if key is already used
+     */
+    private void checkKey(String key) throws ValueMapKeyAlreadyInUseException
+    {
+        if (map.containsKey(key))
+        {
+            throw new ValueMapKeyAlreadyInUseException(key, map.get(key).getClass());
+        }
+    }
+
+}
