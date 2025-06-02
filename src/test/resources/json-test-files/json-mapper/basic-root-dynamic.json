@@ -1,0 +1,21 @@
+{
+    "handling": "dynamic",
+    "root": {
+        "uid": "uid",
+        "type": "TEXT",
+        "classes":
+        [
+            "$$class$class1",
+            "class2"
+        ],
+        "attributes":
+        {
+            "key1": "value1",
+            "key2": "value2"	
+        },
+        "parameters":
+        {
+            "text": "string : any"
+        }
+    }
+}

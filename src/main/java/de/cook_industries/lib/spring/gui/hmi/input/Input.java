@@ -29,6 +29,7 @@ public abstract class Input extends UiElement
     @NonNull
     @Default
     private String             onInput = "";
+    
     @Singular("marker")
     private final List<Marker> marker;
 

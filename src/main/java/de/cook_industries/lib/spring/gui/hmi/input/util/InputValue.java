@@ -25,8 +25,10 @@ public class InputValue
 
     @NonNull
     private final String       text;
+
     @NonNull
     private final String       value;
+    
     @NonNull
     @Default
     private Boolean            checked = false;

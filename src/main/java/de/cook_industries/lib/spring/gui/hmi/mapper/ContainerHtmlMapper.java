@@ -26,7 +26,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public final class HtmlMapper
+public final class ContainerHtmlMapper
 {
 
     private static final String TAG_DIV                 = "div";
@@ -72,12 +72,11 @@ public final class HtmlMapper
      * Map a {@link Container} to its HTML represantation
      * 
      * @param container to map
-     * 
      * @return resulting HTML String
      */
     public static String map(Container container)
     {
-        HtmlMapper mapper = new HtmlMapper();
+        ContainerHtmlMapper mapper = new ContainerHtmlMapper();
 
         return mapper.render(container);
     }
@@ -86,13 +85,12 @@ public final class HtmlMapper
      * Map a list of {@link Container}s to a single HTML String
      * 
      * @param containers to map
-     * 
      * @return resulting HTML String, containing all mappings one after the other
      */
     public static String map(List<Container> containers)
     {
-        HtmlMapper   mapper = new HtmlMapper();
-        StringConcat sc     = new StringConcat();
+        ContainerHtmlMapper mapper = new ContainerHtmlMapper();
+        StringConcat        sc     = new StringConcat();
 
         containers.stream().forEach(c -> sc.append(mapper.render(c)));
 
@@ -104,12 +102,12 @@ public final class HtmlMapper
      * TODO: remove
      * 
      * @param name of the element
-     * 
      * @return
      */
     private String elementNotYetImplemented(String name)
     {
         String s = name + " element not supported yet.";
+
         return StringAdapter.withPrefixAndSuffix("<div>", s, "</div>");
     }
 
@@ -117,7 +115,6 @@ public final class HtmlMapper
      * Render a {@link Container} as HTML component
      * 
      * @param container to render
-     * 
      * @return the resulting HTML String or
      */
     private String render(Container container)
@@ -135,14 +132,12 @@ public final class HtmlMapper
             case BUTTON_ICON -> render((ButtonIconContainer) container);
             case COLUMN -> render((ColumnContainer) container);
             case CONTENT -> render((ContentContainer) container);
-            case HEADING -> render((HeadingContainer) container);
             case HIDDEN -> render((HiddenContainer) container);
             case IMAGE -> render((ImageContainer) container);
             case FORM -> render((FormContainer) container);
             case LINK -> render((LinkContainer) container);
             case ROW -> render((RowContainer) container);
             case ROWED_CONTENT -> render((RowedContentContainer) container);
-            case SPAN -> render((SpanContainer) container);
             case SPLITTED -> render((SplittedContainer) container);
             case TAB -> render((TabbedContainer) container);
             case TEXT -> render((TextContainer) container);
@@ -172,9 +167,9 @@ public final class HtmlMapper
 
     private String render(ContentContainer contentContainer)
     {
-        String            content       = contentContainer.getContents().stream().map(this::render).collect(Collectors.joining());
+        String      content       = contentContainer.getContents().stream().map(this::render).collect(Collectors.joining());
 
-        HtmlElementMapper elementMapper = HtmlElementMapper
+        HtmlElement elementMapper = HtmlElement
                 .builder()
                 .tag(TAG_DIV)
                 .attribute(new Attribute(ATT_ID, contentContainer.getUid()))
@@ -187,49 +182,11 @@ public final class HtmlMapper
         return elementMapper.html();
     }
 
-    private String render(HeadingContainer headingContainer)
-    {
-        Integer size;
-        switch (headingContainer.getSize())
-        {
-            case 1:
-                size = 1;
-                break;
-            case 2:
-                size = 1;
-                break;
-            case 3:
-                size = 1;
-                break;
-            case 4:
-                size = 1;
-                break;
-            case 5:
-                size = 1;
-                break;
-
-            default:
-                size = 1;
-        }
-
-        HtmlElementMapper elementMapper = HtmlElementMapper
-                .builder()
-                .tag("h" + size)
-                .attribute(new Attribute(ATT_ID, headingContainer.getUid()))
-                .attribute(new Attribute(ATT_ON_CLICK, headingContainer.getOnClick()))
-                .classes(headingContainer.getClasses())
-                .dataAttributes(headingContainer.getDataAttributes())
-                .content(headingContainer.getText())
-                .build();
-
-        return elementMapper.html();
-    }
-
     private String render(RowedContentContainer rowedContentContainer)
     {
-        String            content       = rowedContentContainer.getRows().stream().map(this::render).collect(Collectors.joining());
+        String      content       = rowedContentContainer.getRows().stream().map(this::render).collect(Collectors.joining());
 
-        HtmlElementMapper elementMapper = HtmlElementMapper
+        HtmlElement elementMapper = HtmlElement
                 .builder()
                 .tag(TAG_DIV)
                 .attribute(new Attribute(ATT_ID, rowedContentContainer.getUid()))
@@ -245,9 +202,9 @@ public final class HtmlMapper
 
     private String render(RowContainer rowContainer)
     {
-        String            content       = rowContainer.getColumns().stream().map(this::render).collect(Collectors.joining());
+        String      content       = rowContainer.getColumns().stream().map(this::render).collect(Collectors.joining());
 
-        HtmlElementMapper elementMapper = HtmlElementMapper
+        HtmlElement elementMapper = HtmlElement
                 .builder()
                 .tag(TAG_DIV)
                 .attribute(new Attribute(ATT_ID, rowContainer.getUid()))
@@ -263,7 +220,7 @@ public final class HtmlMapper
 
     private String render(ColumnContainer columnContainer)
     {
-        HtmlElementMapper elementMapper = HtmlElementMapper
+        HtmlElement elementMapper = HtmlElement
                 .builder()
                 .tag(TAG_DIV)
                 .attribute(new Attribute(ATT_ID, columnContainer.getUid()))
@@ -279,10 +236,10 @@ public final class HtmlMapper
 
     private String render(FormContainer formContainer)
     {
-        String            content       =
+        String      content       =
                 formContainer.getInputs().stream().map(i -> render(i, formContainer.getUid())).collect(Collectors.joining());
 
-        HtmlElementMapper elementMapper = HtmlElementMapper
+        HtmlElement elementMapper = HtmlElement
                 .builder()
                 .tag(TAG_DIV)
                 .attribute(new Attribute(ATT_ID, formContainer.getUid()))
@@ -297,7 +254,7 @@ public final class HtmlMapper
 
     private String render(HiddenContainer hiddenContainer)
     {
-        HtmlElementMapper elementMapper = HtmlElementMapper
+        HtmlElement elementMapper = HtmlElement
                 .builder()
                 .tag(TAG_DIV)
                 .attribute(new Attribute(ATT_ID, hiddenContainer.getUid()))
@@ -313,7 +270,7 @@ public final class HtmlMapper
 
     private String render(ImageContainer imageContainer)
     {
-        HtmlElementMapper elementMapper = HtmlElementMapper
+        HtmlElement elementMapper = HtmlElement
                 .builder()
                 .tag("img")
                 .attribute(new Attribute(ATT_ID, imageContainer.getUid()))
@@ -328,7 +285,7 @@ public final class HtmlMapper
 
     private String render(LinkContainer linkContainer)
     {
-        HtmlElementMapper elementMapper = HtmlElementMapper
+        HtmlElement elementMapper = HtmlElement
                 .builder()
                 .tag("a")
                 .attribute(new Attribute(ATT_ID, linkContainer.getUid()))
@@ -343,28 +300,13 @@ public final class HtmlMapper
         return elementMapper.html();
     }
 
-    private String render(SpanContainer spanContainer)
-    {
-        HtmlElementMapper elementMapper = HtmlElementMapper
-                .builder()
-                .tag("span")
-                .attribute(new Attribute(ATT_ID, spanContainer.getUid()))
-                .attribute(new Attribute(ATT_ON_CLICK, spanContainer.getOnClick()))
-                .classes(spanContainer.getClasses())
-                .dataAttributes(spanContainer.getDataAttributes())
-                .content(spanContainer.getText())
-                .build();
-
-        return elementMapper.html();
-    }
-
     private String render(SplittedContainer splittedContainer)
     {
 
-        String            head          = render(splittedContainer.getHead());
-        String            tail          = render(splittedContainer.getTail());
+        String      head          = render(splittedContainer.getHead());
+        String      tail          = render(splittedContainer.getTail());
 
-        HtmlElementMapper elementMapper = HtmlElementMapper
+        HtmlElement elementMapper = HtmlElement
                 .builder()
                 .tag(TAG_DIV)
                 .attribute(new Attribute(ATT_ID, splittedContainer.getUid()))
@@ -387,7 +329,7 @@ public final class HtmlMapper
 
     private String render(TextContainer textContainer)
     {
-        HtmlElementMapper elementMapper = HtmlElementMapper
+        HtmlElement elementMapper = HtmlElement
                 .builder()
                 .tag("p")
                 .attribute(new Attribute(ATT_ID, textContainer.getUid()))
@@ -428,7 +370,7 @@ public final class HtmlMapper
 
     private String render(Button button)
     {
-        HtmlElementMapper elementMapper = HtmlElementMapper
+        HtmlElement elementMapper = HtmlElement
                 .builder()
                 .tag("button")
                 .attribute(new Attribute(ATT_ID, button.getUid()))
@@ -451,7 +393,7 @@ public final class HtmlMapper
 
     private String render(Checkbox checkbox, String formId)
     {
-        String            input         = HtmlElementMapper
+        String      input         = HtmlElement
                 .builder()
                 .isSingleTag(true)
                 .tag(TAG_INPUT)
@@ -468,7 +410,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String            label         = HtmlElementMapper
+        String      label         = HtmlElement
                 .builder()
                 .tag(TAG_LABEL)
                 .attribute(new Attribute(ATT_FOR, checkbox.getUid()))
@@ -478,8 +420,8 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        HtmlElementMapper elementMapper =
-                HtmlElementMapper.builder().tag(TAG_DIV).clazz(CLASS_FORM_CHECK).content(StringAdapter.from(input, label)).build();
+        HtmlElement elementMapper =
+                HtmlElement.builder().tag(TAG_DIV).clazz(CLASS_FORM_CHECK).content(StringAdapter.from(input, label)).build();
 
         return elementMapper.html();
     }
@@ -492,7 +434,7 @@ public final class HtmlMapper
 
     private String render(Date date, String formId)
     {
-        String            label         = HtmlElementMapper
+        String      label         = HtmlElement
                 .builder()
                 .tag(TAG_LABEL)
                 .attribute(new Attribute(ATT_FOR, date.getUid()))
@@ -501,7 +443,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String            input         = HtmlElementMapper
+        String      input         = HtmlElement
                 .builder()
                 .isSingleTag(true)
                 .tag(TAG_INPUT)
@@ -516,14 +458,14 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(StringAdapter.from(label, input)).build();
+        HtmlElement elementMapper = HtmlElement.builder().tag(TAG_DIV).content(StringAdapter.from(label, input)).build();
 
         return elementMapper.html();
     }
 
     private String render(File file, String formId)
     {
-        String            label         = HtmlElementMapper
+        String      label         = HtmlElement
                 .builder()
                 .tag(TAG_LABEL)
                 .attribute(new Attribute(ATT_FOR, file.getUid()))
@@ -532,7 +474,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String            input         = HtmlElementMapper
+        String      input         = HtmlElement
                 .builder()
                 .isSingleTag(true)
                 .tag(TAG_INPUT)
@@ -548,14 +490,18 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(StringAdapter.from(label, resolveMarker(formId, file.getUid(), file.getMarker()), input)).build();
+        HtmlElement elementMapper = HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .content(StringAdapter.from(label, resolveMarker(formId, file.getUid(), file.getMarker()), input))
+                .build();
 
         return elementMapper.html();
     }
 
     private String render(Hidden hidden, String formId)
     {
-        String            input         = HtmlElementMapper
+        String      input         = HtmlElement
                 .builder()
                 .isSingleTag(true)
                 .tag(TAG_INPUT)
@@ -570,7 +516,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(input).build();
+        HtmlElement elementMapper = HtmlElement.builder().tag(TAG_DIV).content(input).build();
 
         return elementMapper.html();
     }
@@ -587,7 +533,7 @@ public final class HtmlMapper
 
         for (InputValue selection : list.getValues())
         {
-            String option = HtmlElementMapper
+            String option = HtmlElement
                     .builder()
                     .tag(TAG_OPTION)
                     .attribute(new Attribute(ATT_VALUE, selection.getValue()))
@@ -605,7 +551,7 @@ public final class HtmlMapper
         {
             UUID   uuid   = UUID.randomUUID();
 
-            String option = HtmlElementMapper
+            String option = HtmlElement
                     .builder()
                     .tag(TAG_DIV)
                     .attribute(new Attribute(ATT_ID, uuid.toString()))
@@ -629,7 +575,7 @@ public final class HtmlMapper
             selections.add(option);
         }
 
-        String            label           = HtmlElementMapper
+        String      label           = HtmlElement
                 .builder()
                 .tag(TAG_LABEL)
                 .attribute(new Attribute(ATT_FOR, list.getUid()))
@@ -638,9 +584,9 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        UUID              selectId        = UUID.randomUUID();
+        UUID        selectId        = UUID.randomUUID();
 
-        String            input           = HtmlElementMapper
+        String      input           = HtmlElement
                 .builder()
                 .tag(TAG_SELECT)
                 .attribute(new Attribute(ATT_ID, selectId.toString()))
@@ -650,7 +596,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String            selectHolder    = HtmlElementMapper
+        String      selectHolder    = HtmlElement
                 .builder()
                 .tag(TAG_DIV)
                 .clazz("form-list-selection-select-holder")
@@ -666,7 +612,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String            selectionHolder = HtmlElementMapper
+        String      selectionHolder = HtmlElement
                 .builder()
                 .tag(TAG_DIV)
                 .attribute(new Attribute(ATT_ID, list.getUid()))
@@ -680,17 +626,16 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String            outerBody       =
-                HtmlElementMapper.builder().tag(TAG_DIV).content(selectHolder).content(selectionHolder).build().html();
+        String      outerBody       = HtmlElement.builder().tag(TAG_DIV).content(selectHolder).content(selectionHolder).build().html();
 
-        HtmlElementMapper elementMapper   = HtmlElementMapper.builder().tag(TAG_DIV).content(label).content(outerBody).build();
+        HtmlElement elementMapper   = HtmlElement.builder().tag(TAG_DIV).content(label).content(outerBody).build();
 
         return elementMapper.html();
     }
 
     private String render(Number number, String formId)
     {
-        String            label         = HtmlElementMapper
+        String      label         = HtmlElement
                 .builder()
                 .tag(TAG_LABEL)
                 .attribute(new Attribute(ATT_FOR, number.getUid()))
@@ -699,7 +644,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String            input         = HtmlElementMapper
+        String      input         = HtmlElement
                 .builder()
                 .isSingleTag(true)
                 .tag(TAG_INPUT)
@@ -715,14 +660,18 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(StringAdapter.from(label, resolveMarker(formId, number.getUid(), number.getMarker()), input)).build();
+        HtmlElement elementMapper = HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .content(StringAdapter.from(label, resolveMarker(formId, number.getUid(), number.getMarker()), input))
+                .build();
 
         return elementMapper.html();
     }
 
     private String render(Password password, String formId)
     {
-        String            label         = HtmlElementMapper
+        String      label         = HtmlElement
                 .builder()
                 .tag(TAG_LABEL)
                 .attribute(new Attribute(ATT_FOR, password.getUid()))
@@ -731,7 +680,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String            input         = HtmlElementMapper
+        String      input         = HtmlElement
                 .builder()
                 .isSingleTag(true)
                 .tag(TAG_INPUT)
@@ -747,7 +696,11 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(StringAdapter.from(label, resolveMarker(formId, password.getUid(), password.getMarker()), input)).build();
+        HtmlElement elementMapper = HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .content(StringAdapter.from(label, resolveMarker(formId, password.getUid(), password.getMarker()), input))
+                .build();
 
         return elementMapper.html();
     }
@@ -764,7 +717,7 @@ public final class HtmlMapper
         {
             radioID = radio.getUid() + "-" + i;
 
-            String            input    = HtmlElementMapper
+            String      input    = HtmlElement
                     .builder()
                     .isSingleTag(true)
                     .tag(TAG_INPUT)
@@ -778,7 +731,7 @@ public final class HtmlMapper
                     .build()
                     .html();
 
-            String            btnLabel = HtmlElementMapper
+            String      btnLabel = HtmlElement
                     .builder()
                     .tag(TAG_LABEL)
                     .attribute(new Attribute(ATT_FOR, radioID))
@@ -788,7 +741,7 @@ public final class HtmlMapper
                     .build()
                     .html();
 
-            HtmlElementMapper innerDiv = HtmlElementMapper
+            HtmlElement innerDiv = HtmlElement
                     .builder()
                     .tag(TAG_DIV)
                     .attribute(new Attribute(ATT_ID, radio.getUid()))
@@ -802,10 +755,9 @@ public final class HtmlMapper
             buttons.add(innerDiv.html());
         }
 
-        String            outerLabel =
-                HtmlElementMapper.builder().tag(TAG_LABEL).clazz(CLASS_USER_SELECT_NONE).content(radio.getName()).build().html();
+        String      outerLabel = HtmlElement.builder().tag(TAG_LABEL).clazz(CLASS_USER_SELECT_NONE).content(radio.getName()).build().html();
 
-        HtmlElementMapper outerDiv   = HtmlElementMapper
+        HtmlElement outerDiv   = HtmlElement
                 .builder()
                 .tag(TAG_DIV)
                 .clazz(CLASS_FORM_CHECK)
@@ -824,7 +776,7 @@ public final class HtmlMapper
 
         for (InputValue selection : select.getValues())
         {
-            String option = HtmlElementMapper
+            String option = HtmlElement
                     .builder()
                     .tag(TAG_OPTION)
                     .attribute(new Attribute(ATT_VALUE, selection.getValue()))
@@ -836,7 +788,7 @@ public final class HtmlMapper
             selections.add(option);
         }
 
-        String            label         = HtmlElementMapper
+        String      label         = HtmlElement
                 .builder()
                 .tag(TAG_LABEL)
                 .attribute(new Attribute(ATT_FOR, select.getUid()))
@@ -845,7 +797,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String            input         = HtmlElementMapper
+        String      input         = HtmlElement
                 .builder()
                 .tag(TAG_SELECT)
                 .attribute(new Attribute(ATT_ID, select.getUid()))
@@ -859,14 +811,14 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(StringAdapter.from(label, input)).build();
+        HtmlElement elementMapper = HtmlElement.builder().tag(TAG_DIV).content(StringAdapter.from(label, input)).build();
 
         return elementMapper.html();
     }
 
     private String render(Slider slider, String formId)
     {
-        String            label         = HtmlElementMapper
+        String      label         = HtmlElement
                 .builder()
                 .tag(TAG_LABEL)
                 .attribute(new Attribute(ATT_FOR, slider.getUid()))
@@ -875,7 +827,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String            input         = HtmlElementMapper
+        String      input         = HtmlElement
                 .builder()
                 .isSingleTag(true)
                 .tag(TAG_INPUT)
@@ -893,14 +845,14 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(StringAdapter.from(label, input)).build();
+        HtmlElement elementMapper = HtmlElement.builder().tag(TAG_DIV).content(StringAdapter.from(label, input)).build();
 
         return elementMapper.html();
     }
 
     private String render(Switch switch1, String formId)
     {
-        String            input         = HtmlElementMapper
+        String      input         = HtmlElement
                 .builder()
                 .isSingleTag(true)
                 .tag(TAG_INPUT)
@@ -917,7 +869,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String            label         = HtmlElementMapper
+        String      label         = HtmlElement
                 .builder()
                 .tag(TAG_LABEL)
                 .attribute(new Attribute(ATT_FOR, switch1.getUid()))
@@ -927,7 +879,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        HtmlElementMapper elementMapper = HtmlElementMapper
+        HtmlElement elementMapper = HtmlElement
                 .builder()
                 .tag(TAG_DIV)
                 .clazz(CLASS_FORM_CHECK)
@@ -952,7 +904,7 @@ public final class HtmlMapper
 
     private String render(Textbox textbox)
     {
-        HtmlElementMapper elementMapper = HtmlElementMapper
+        HtmlElement elementMapper = HtmlElement
                 .builder()
                 .tag(TAG_DIV)
                 .attribute(new Attribute(ATT_ID, textbox.getUid()))
@@ -967,7 +919,7 @@ public final class HtmlMapper
 
     private String render(Textfield textfield, String formId)
     {
-        String            label         = HtmlElementMapper
+        String      label         = HtmlElement
                 .builder()
                 .tag(TAG_LABEL)
                 .attribute(new Attribute(ATT_FOR, textfield.getUid()))
@@ -976,7 +928,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String            input         = HtmlElementMapper
+        String      input         = HtmlElement
                 .builder()
                 .isSingleTag(true)
                 .tag(TAG_INPUT)
@@ -995,9 +947,8 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String            content       =
-                StringAdapter.from(label, resolveMarker(formId, textfield.getUid(), textfield.getMarker()), input);
-        HtmlElementMapper elementMapper = HtmlElementMapper.builder().tag(TAG_DIV).content(content).build();
+        String      content       = StringAdapter.from(label, resolveMarker(formId, textfield.getUid(), textfield.getMarker()), input);
+        HtmlElement elementMapper = HtmlElement.builder().tag(TAG_DIV).content(content).build();
 
         return elementMapper.html();
     }
@@ -1009,7 +960,7 @@ public final class HtmlMapper
         for (Marker m : marker)
         {
             results
-                    .add(HtmlElementMapper
+                    .add(HtmlElement
                             .builder()
                             .tag(TAG_DIV)
                             .attribute(new Attribute(ATT_ID,

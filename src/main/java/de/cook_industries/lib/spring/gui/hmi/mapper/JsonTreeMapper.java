@@ -6,6 +6,7 @@
  */
 package de.cook_industries.lib.spring.gui.hmi.mapper;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
@@ -14,6 +15,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.cook_industries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
 import lombok.Data;
 
+/**
+ * Mapper for JSON files to {@link JsonTreeRoot}.
+ */
 @Data
 public final class JsonTreeMapper
 {
@@ -21,31 +25,38 @@ public final class JsonTreeMapper
     private final ObjectMapper mapper = new ObjectMapper();
 
     /**
-     * Map a {@link JsonTreeRoot} from a {@code path} as a {@link InputStream} from a resource.
+     * Map a {@link JsonTreeRoot} from a {@code path}
      * 
-     * <p>
-     * {@code Path} either can be a jar resource path starting with a '/' or an absolute file path.
-     * 
-     * @param path to the resource
-     * 
+     * @param path a jar resource path
      * @return the mapped resource
-     * 
      * @throws JsonMapperException if anything goes wrong
      */
     public JsonTreeRoot map(String path)
     {
-        InputStream inputStream;
-
         try
         {
-            if (path.startsWith("/"))
-            {
-                inputStream = this.getClass().getClassLoader().getResourceAsStream(path);
-            }
-            else
-            {
-                inputStream = new FileInputStream(path);
-            }
+            InputStream inputStream = JsonTreeRoot.class.getClassLoader().getResourceAsStream(path);
+
+            return mapper.readValue(inputStream, JsonTreeRoot.class);
+        }
+        catch (Exception e)
+        {
+            throw new JsonMapperException(e);
+        }
+    }
+
+    /**
+     * Map a {@link JsonTreeRoot} from a {@link File}
+     * 
+     * @param file a file resource
+     * @return the mapped resource
+     * @throws JsonMapperException if anything goes wrong
+     */
+    public JsonTreeRoot map(File file)
+    {
+        try
+        {
+            InputStream inputStream = new FileInputStream(file);
 
             return mapper.readValue(inputStream, JsonTreeRoot.class);
         }

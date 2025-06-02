@@ -10,13 +10,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+import de.cook_industries.lib.spring.gui.html.HtmlExportable;
 import de.cook_industries.lib.spring.gui.util.StringConcat;
 
-/**
- *
- * @author <a href="mailto:koch.sebastian@cook-industries.de">sebastian koch</a>
- */
-public final class ValuePair
+public final class ValuePair implements HtmlExportable
 {
 
     private final String name;
@@ -53,19 +50,21 @@ public final class ValuePair
             }
             else
             {
-                sc.append("");
                 sc.append(URLEncoder.encode(value.toString(), StandardCharsets.UTF_8.toString()));
-                sc.append("");
             }
 
             return sc.getString();
         }
         catch (UnsupportedEncodingException ex)
         {
+            // TODO: really? fix this exception...
             throw new RuntimeException("kaputt");
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public final String getHtmlRep()
     {
         StringConcat sc = new StringConcat();

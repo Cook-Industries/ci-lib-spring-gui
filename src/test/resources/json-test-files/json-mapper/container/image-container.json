@@ -1,0 +1,17 @@
+{
+    "handling": "static",
+    "root": {
+        "uid": "uid",
+        "type": "IMAGE",
+        "classes": [
+            "class1"
+        ],
+        "attributes": {
+            "key1": "value1"
+        },
+        "parameters": {
+            "src": "path/to/resource"
+        },
+        "children": []
+    }
+}

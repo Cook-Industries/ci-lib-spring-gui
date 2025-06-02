@@ -11,7 +11,7 @@ import java.util.UUID;
 
 import de.cook_industries.lib.spring.gui.hmi.UiElement;
 import de.cook_industries.lib.spring.gui.hmi.container.Container;
-import de.cook_industries.lib.spring.gui.hmi.mapper.HtmlMapper;
+import de.cook_industries.lib.spring.gui.hmi.mapper.ContainerHtmlMapper;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -44,6 +44,6 @@ public final class Modal extends UiElement
 
     public String getContentHtml()
     {
-        return HtmlMapper.map(containers);
+        return ContainerHtmlMapper.map(containers);
     }
 }

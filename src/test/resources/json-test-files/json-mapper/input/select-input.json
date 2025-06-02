@@ -1,0 +1,53 @@
+{
+    "handling": "static",
+    "root": {
+        "uid": "uid",
+        "type": "FORM",
+        "classes": [],
+        "attributes": {},
+        "parameters": {},
+        "children": [
+            {
+                "uid": "uid",
+                "type": "SELECT",
+                "classes": [],
+                "attributes": {},
+                "parameters": {
+                    "name": "name",
+                    "submitAs": "select1"
+                },
+                "children": [
+                    {
+                        "type": "INPUT_VALUE",
+                        "classes": [],
+                        "parameters": {
+                            "text": "radio 1",
+                            "value": "1"
+                        }
+                    }
+                ]
+            },
+            {
+                "uid": "uid",
+                "type": "SELECT",
+                "classes": [],
+                "attributes": {},
+                "parameters": {
+                    "name": "name",
+                    "submitAs": "select2",
+                    "values": "list"
+                },
+                "children": [
+                    {
+                        "type": "INPUT_VALUE",
+                        "classes": [],
+                        "parameters": {
+                            "text": "radio 1",
+                            "value": "1"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

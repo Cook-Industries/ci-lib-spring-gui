@@ -19,15 +19,14 @@ public abstract class AbsValueMapObjectMapper<T>
     }
 
     /**
-     * Export the values of an {@code obj} to a new {@link ValueMap}
+     * Export the values of an {@code obj} to a new {@link ValueMap} in {@link Locale#ENGLISH}
      * 
      * @param obj object to export
-     * 
      * @return a new {@code ValueMap} filled with the extracted fields from this
      */
     public final ValueMap export(final T obj)
     {
-        return exportInternal(obj, new ValueMap(), new Locale("none"));
+        return exportInternal(obj, new ValueMap(), Locale.ENGLISH);
     }
 
     /**
@@ -37,7 +36,6 @@ public abstract class AbsValueMapObjectMapper<T>
      * @param valueMap to fill
      * @param locale local language to use for fields
      * @param translation to use
-     * 
      * @return a {@code ValueMap} filled with the extracted fields from this
      */
     public final ValueMap export(final T obj, ValueMap valueMap, Locale locale)
@@ -48,18 +46,16 @@ public abstract class AbsValueMapObjectMapper<T>
     protected abstract ValueMap exportInternal(final T obj, ValueMap valueMap, Locale locale);
 
     /**
-     * Extract {@link Enum}s to a {@link InputValueList} with the inclusion of the {@code selection} and
-     * a automatic translation.<br>
-     * If the enums cannot be translated, the text will be 'I18N [enum] not set.'
+     * Extract {@link Enum}s to a {@link InputValueList} with the inclusion of the {@code selection} and a automatic translation.
+     * <p>
+     * If the enums can not be translated, the text will be 'I18N [var] not set.' with 'var' taken from {@link Enum#name()}.
      * 
      * @param <E> enum to use as value parameters
      * @param selection the selected value. can be null
      * @param enumClass enum to use as values
      * @param locale language information to use
      * @param translations {@code TranslationMap} to fetch translated text from
-     * 
-     * @return {@code InputValueList} containing the selection list with either the selected value or
-     *         the first list value checked
+     * @return {@code InputValueList} containing the selection list with either the selected value or the first list value checked
      */
     protected <E extends Enum<E>> InputValueList mapSelectionValue(E selection, Class<E> enumClass, Locale locale)
     {
@@ -70,12 +66,10 @@ public abstract class AbsValueMapObjectMapper<T>
      * Extract {@link Enum}s to a {@link InputValueList} with the inclusion of the {@code selection}
      * 
      * @param selection the selected value. can be null
-     * @param values list of values to use *
+     * @param values list of values to use
      * @param locale language information to use
      * @param translations {@code TranslationMap} to fetch translated text from
-     * 
-     * @return {@code InputValueList} containing the selection list with either the selected value or
-     *         the first list value checked
+     * @return {@code InputValueList} containing the selection list with either the selected value or the first list value checked
      */
     protected InputValueList mapSelectionValue(String selection, List<String> values, Locale locale)
     {

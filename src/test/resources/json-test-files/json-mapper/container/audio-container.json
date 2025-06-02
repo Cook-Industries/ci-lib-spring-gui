@@ -1,0 +1,18 @@
+{
+    "handling": "static",
+    "root": {
+        "uid": "uid",
+        "type": "AUDIO",
+        "classes": [
+            "class1"
+        ],
+        "attributes": {
+            "key1": "value1"
+        },
+        "parameters": {
+            "src": "path/to/resource",
+            "controls": "false",
+            "autoplay": "true"
+        }
+    }
+}

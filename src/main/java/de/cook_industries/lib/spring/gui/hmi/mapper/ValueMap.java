@@ -12,14 +12,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import de.cook_industries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cook_industries.lib.spring.gui.hmi.input.util.InputValueList;
 import de.cook_industries.lib.spring.gui.hmi.mapper.exception.ValueMapKeyAlreadyInUseException;
-import de.cook_industries.lib.spring.gui.hmi.mapper.exception.ValueMapSealedException;
 import de.cook_industries.lib.spring.gui.util.Sealable;
+import de.cook_industries.lib.spring.gui.util.exception.ObjectSealedException;
 
 /**
  * Key/Value map to use with {@link TreeHandling#DYNAMIC}.
- * 
+ * <p>
+ * This extends {@link Sealable} and will throw an {@link ObjectSealedException} if this object is sealed and a modification is tried.
  * <p>
  * Uses an underlying {@link ConcurrentHashMap} to ensure thread-safety.
+ * 
+ * @see Sealable
  */
 public class ValueMap extends Sealable
 {
@@ -62,13 +65,11 @@ public class ValueMap extends Sealable
      * 
      * @param key to link
      * @param value to link
-     * 
      * @return {@code this}
-     * 
-     * @throws ValueMapSealedException if this map is already sealed
+     * @throws ObjectSealedException if this map is already sealed
      * @throws ValueMapKeyAlreadyInUseException if {@code key} is already in use
      */
-    public ValueMap add(String key, String value) throws ValueMapKeyAlreadyInUseException
+    public ValueMap add(String key, String value)
     {
         checkSeal();
         checkKey(key);
@@ -83,13 +84,11 @@ public class ValueMap extends Sealable
      * 
      * @param key to link
      * @param value to link
-     * 
      * @return {@code this}
-     * 
-     * @throws ValueMapSealedException if this map is already sealed
+     * @throws ObjectSealedException if this map is already sealed
      * @throws IllegalArgumentException if {@code key} is already in use
      */
-    public ValueMap add(String key, Boolean value) throws ValueMapKeyAlreadyInUseException
+    public ValueMap add(String key, Boolean value)
     {
         checkSeal();
         checkKey(key);
@@ -104,13 +103,11 @@ public class ValueMap extends Sealable
      * 
      * @param key to link
      * @param value to link
-     * 
      * @return {@code this}
-     * 
-     * @throws ValueMapSealedException if this map is already sealed
+     * @throws ObjectSealedException if this map is already sealed
      * @throws ValueMapKeyAlreadyInUseException if {@code key} is already in use
      */
-    public ValueMap add(String key, Integer value) throws ValueMapKeyAlreadyInUseException
+    public ValueMap add(String key, Integer value)
     {
         checkSeal();
         checkKey(key);
@@ -125,13 +122,11 @@ public class ValueMap extends Sealable
      * 
      * @param key to link
      * @param value to link
-     * 
      * @return {@code this}
-     * 
-     * @throws ValueMapSealedException if this map is already sealed
+     * @throws ObjectSealedException if this map is already sealed
      * @throws ValueMapKeyAlreadyInUseException if {@code key} is already in use
      */
-    public ValueMap add(String key, InputValueList value) throws ValueMapKeyAlreadyInUseException
+    public ValueMap add(String key, InputValueList value)
     {
         checkSeal();
         checkKey(key);
@@ -145,7 +140,6 @@ public class ValueMap extends Sealable
      * Retrieve a value associated to {@code key}
      * 
      * @param key to lookup
-     * 
      * @return the value associated with {@code key}, or {@code null} if no key is set
      */
     public Object get(String key)
@@ -157,10 +151,9 @@ public class ValueMap extends Sealable
      * Check whether {@code key} is already in use
      * 
      * @param key to check
-     * 
      * @throws ValueMapKeyAlreadyInUseException if key is already used
      */
-    private void checkKey(String key) throws ValueMapKeyAlreadyInUseException
+    private void checkKey(String key)
     {
         if (map.containsKey(key))
         {

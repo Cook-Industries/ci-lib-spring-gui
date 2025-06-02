@@ -24,15 +24,17 @@ public class JsonTreeRoot
     private PseudoElement       root;
 
     /**
-     * Validates the state of the tree object to ensure it can be successfully parsed.<br>
-     * 
-     * This method checks that:<br>
-     * - The handling property is not null or empty, and its value is either static or dynamic.<br>
-     * - The root property is not null.<br>
-     * 
+     * Validates the state of this {@code JsonTreeRoot} object to ensure it can be successfully parsed.
+     * <p>
+     * This method checks that:
+     * <ul>
+     * <li>The handling property is not null or empty, and its value is either 'static' or 'dynamic'.</li>
+     * <li>The root property is not null.</li>
+     * </ul>
+     * <p>
      * If any validation fails, a {@code JsonParsingException} is thrown with relevant error details.
      *
-     * @throws {@code JsonParsingException} if the tree object's state is invalid
+     * @throws JsonParsingException if the this object state is invalid with a corresponding error message
      */
     public void validate()
     {

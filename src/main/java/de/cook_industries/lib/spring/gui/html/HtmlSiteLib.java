@@ -8,7 +8,7 @@ package de.cook_industries.lib.spring.gui.html;
 
 import de.cook_industries.lib.spring.gui.hmi.container.ButtonContainer;
 import de.cook_industries.lib.spring.gui.hmi.container.ContentContainer;
-import de.cook_industries.lib.spring.gui.hmi.container.SpanContainer;
+import de.cook_industries.lib.spring.gui.hmi.container.TextContainer;
 import de.cook_industries.lib.spring.gui.hmi.input.Button;
 
 public class HtmlSiteLib
@@ -52,7 +52,7 @@ public class HtmlSiteLib
                                 .clazz("justify-items-center")
                                 .clazz("align-items-center")
                                 .content(ContentContainer.builder().clazz("spinner-border").clazz("text-primary").build())
-                                .content(SpanContainer.builder().uid("global-loader-text").clazz("sr-only").text("loading...").build())
+                                .content(TextContainer.builder().uid("global-loader-text").clazz("sr-only").text("loading...").build())
                                 .build())
                         .build())
                 .content(ContentContainer

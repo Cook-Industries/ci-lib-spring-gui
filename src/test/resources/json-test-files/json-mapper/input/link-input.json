@@ -1,0 +1,22 @@
+{
+    "handling": "static",
+    "root": {
+        "uid": "uid",
+        "type": "FORM",
+        "classes": [],
+        "attributes": {},
+        "parameters": {},
+        "children": [
+            {
+                "uid": "uid",
+                "type": "LINK",
+                "classes": [],
+                "attributes": {},
+                "parameters": {
+                    "text": "link",
+                    "href": "link/to/somewhere"
+                }
+            }
+        ]
+    }
+}

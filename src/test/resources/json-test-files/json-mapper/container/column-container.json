@@ -1,0 +1,15 @@
+{
+    "handling": "static",
+    "root": {
+        "uid": "uid",
+        "type": "COLUMN",
+        "classes": [
+            "class1"
+        ],
+        "attributes": {
+            "key1": "value1"
+        },
+        "parameters": {},
+        "children": []
+    }
+}

@@ -20,6 +20,7 @@ import de.cook_industries.lib.spring.gui.hmi.input.*;
 import de.cook_industries.lib.spring.gui.hmi.input.Number;
 import de.cook_industries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cook_industries.lib.spring.gui.hmi.input.util.InputValueList;
+import de.cook_industries.lib.spring.gui.hmi.input.util.Marker;
 import de.cook_industries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
 import de.cook_industries.lib.spring.gui.hmi.mapper.exception.JsonParsingException;
 import de.cook_industries.lib.spring.gui.i18n.TranslationMap;
@@ -35,7 +36,6 @@ import lombok.Setter;
 public class JsonMapper
 {
 
-    private static final String          CONTENT                             = "content";
     private static final String          SRC                                 = "src";
     private static final String          SUFFIX                              = "suffix";
     private static final String          PREFIX                              = "prefix";
@@ -55,7 +55,6 @@ public class JsonMapper
     private static final String          DEFAULT_VAL                         = "";
     private static final String          NAME                                = "name";
     private static final String          VALUE                               = "value";
-    private static final String          VALUES                              = "values";
     private static final String          SUBMIT_AS                           = "submitAs";
     private static final String          ON_INPUT                            = "onInput";
     private static final String          INDICATOR_VALUE_PLACEHOLDER         = "$$value$";
@@ -71,12 +70,10 @@ public class JsonMapper
                 ContainerType.BUTTON_ICON,
                 ContainerType.CONTENT,
                 ContainerType.FORM,
-                ContainerType.HEADING,
                 ContainerType.HIDDEN,
                 ContainerType.IMAGE,
                 ContainerType.LINK,
                 ContainerType.ROWED_CONTENT,
-                ContainerType.SPAN,
                 ContainerType.SPLITTED,
                 ContainerType.TAB,
                 ContainerType.TEXT
@@ -95,46 +92,40 @@ public class JsonMapper
     private Integer                      count                               = 0;
 
     /**
-     * Validate a {@link JsonTreeRoot} and map it to a {@link Container} in a
-     * {@link TreeHandling#STATIC} context.
-     * 
+     * Validate a {@link JsonTreeRoot} and map it to a {@link Container} in a {@link TreeHandling#STATIC} context.
      * <p>
-     * Uses {@link Locale#ENGLISH} as a language, an empty {@link TranslationMap} and no
-     * {@link ValueMap}s.
+     * Uses {@link Locale#ENGLISH} as a language, an empty {@link TranslationMap} and no {@link ValueMap}s.
      *
      * @param root to map
-     *
      * @return the mapped {@code Container}
      */
     public static Container map(JsonTreeRoot root)
     {
         root.validate();
 
-        final JsonMapper mapper =
-                new JsonMapper(TreeHandling.valueOf(root.getHandling().toUpperCase()), Locale.ENGLISH, new TranslationMap(), null);
+        final JsonMapper mapper = new JsonMapper(TreeHandling.valueOf(root.getHandling().toUpperCase()), Locale.ENGLISH,
+                new TranslationMap(), new ValueMap[0]);
 
         return mapper.transform(root);
     }
 
     /**
-     * Map a {@link JsonTreeRoot} to a {@link Container} in a {@link TreeHandling#DYNAMIC} context.<br>
-     * Note, that any {@link ValueMap} used here will call {@link ValueMap#seal()} before it is used!
+     * Map a {@link JsonTreeRoot} to a {@link Container} in a {@link TreeHandling#DYNAMIC} context.
+     * <p>
+     * Note, that any {@link ValueMap} provided for this will call {@link ValueMap#seal()} before it is used!
      *
      * @param root to map
      * @param locale the language to use from {@code translationMap}
      * @param translationMap the map to fetch tranlation values
-     * @param valueMaps {@code ValueMap}s to link to dynamic fill-in content. These will be sealed
-     *        before usage!
-     * 
+     * @param valueMaps {@code ValueMap}s to link to dynamic fill-in content. These will be sealed before usage!
      * @return the mapped {@code Container}
-     *
      * @throws JsonMapperException if mapping is set to dynamic but no {@code valueMap} is provided
      */
     public static Container map(JsonTreeRoot root, Locale locale, TranslationMap translationMap, final ValueMap... valueMaps)
     {
         final TreeHandling handling = TreeHandling.valueOf(root.getHandling().toUpperCase());
 
-        if (handling == TreeHandling.DYNAMIC && (valueMaps == null || valueMaps.length == 0))
+        if (handling == TreeHandling.DYNAMIC && valueMaps.length == 0)
         {
             throw new JsonMapperException("Mapping is set to [dynamic] fill-in no [valueMap] are given");
         }
@@ -147,39 +138,31 @@ public class JsonMapper
         return mapper.transform(root);
     }
 
+    /*
+     * --- > utility functions -------------------------------------------------------------------------------------------------------------
+     */
+
     private Container throwNotSupported(PseudoElement element, Integer depth)
     {
         throw new JsonParsingException(element.getUid(), depth, this.count,
                 String.format("container type [%s] is not supported", element.getType()));
     }
 
-    private <I> I extractFromValueMap(PseudoElement element, String key, Integer depth, Class<I> expectedType) throws JsonMapperException
-    {
-        return extractFromValueMap(element, key, depth, expectedType, null);
-    }
-
     /**
      * Extracts a value from the value map based on the provided pseudo element, key, and expected type.
-     *
      * <p>
-     * If dynamic handling mode is enabled, it checks for indicator placeholders in the key to determine
-     * which mapping to use. If no value is found and a default value is provided, it returns the
-     * default value instead of throwing an exception.
+     * If dynamic handling mode is enabled, it checks for indicator placeholders in the key to determine which mapping to use. If no value
+     * is found and a default value is provided, it returns the default value instead of throwing an exception.
      *
      * @param <I> the expected result type
-     * @param element The pseudo element associated with the extracted value.
-     * @param key The key used to look up the value in the value map.
-     * @param depth The current depth level of parsing.
-     * @param expectedType The expected type of the extracted value.
-     * @param defaultValue The default value to return if no value is found.
-     * 
-     * @return The extracted value, or null if an exception was thrown during parsing.
-     * 
-     * @throws JsonMapperException If there is an error while extracting the value.
+     * @param key the key used to look up the value in the value map.
+     * @param depth the current depth level of parsing.
+     * @param expectedType the expected type of the extracted value.
+     * @param defaultValue the default value to return if no value is found.
+     * @return the extracted value if found, or {@code defaultValue} if not found, or null if not found and no {@code defaultValue} is set
+     * @throws JsonMapperException if there is an error while extracting the value.
      */
-    @SuppressWarnings("unchecked")
-    private <I> I extractFromValueMap(PseudoElement element, String key, Integer depth, Class<I> expectedType, I defaultValue)
-            throws JsonMapperException
+    private <I> I extractFromValueMaps(String key, Class<I> expectedType, I defaultValue) throws JsonMapperException
     {
         I value = null;
 
@@ -187,22 +170,19 @@ public class JsonMapper
         {
             if (key.startsWith(INDICATOR_VALUE_PLACEHOLDER))
             {
-                value = extractFromObjectMap(key.substring(INDICATOR_VALUE_PLACEHOLDER.length()), expectedType);
+                String keyName = key.substring(INDICATOR_VALUE_PLACEHOLDER.length());
+                value = extractFromValueMaps(keyName, expectedType);
             }
             else if (key.startsWith(INDICATOR_TEXT_PLACEHOLDER) && expectedType.equals(String.class))
             {
-                value = (I) extractFromTranslationMap(key.substring(INDICATOR_TEXT_PLACEHOLDER.length()));
+                String keyName = key.substring(INDICATOR_TEXT_PLACEHOLDER.length());
+                value = expectedType.cast(extractFromTranslationMap(keyName));
             }
         }
 
         if (value == null && defaultValue != null)
         {
             value = defaultValue;
-        }
-
-        if (value == null)
-        {
-            throw new JsonParsingException(element.getUid(), depth, this.count, String.format(PARAMETER_S_IS_EXPECTED_BUT_NOT_SET, key));
         }
 
         return value;
@@ -214,12 +194,10 @@ public class JsonMapper
      * @param <I> expected type of value
      * @param paramName name of parameter
      * @param expectedType class of value
-     *
      * @return the value associated with {@code paramName}
-     *
-     * @throws JsonMapperException when value is not of type {@code expectedType}
+     * @throws JsonMapperException if value is not of type {@code expectedType}
      */
-    private <I> I extractFromObjectMap(String objName, Class<I> expectedType) throws JsonMapperException
+    private <I> I extractFromValueMaps(String objName, Class<I> expectedType) throws JsonMapperException
     {
         Optional<Object> opt;
 
@@ -251,66 +229,119 @@ public class JsonMapper
         }
     }
 
-    private String getParameterValue(PseudoElement element, String key)
-    {
-        String value = element.getParameters().get(key);
-
-        if (value == null)
-        {
-            throw new JsonParsingException(element.getUid(), 0, this.count, String.format(PARAMETER_S_IS_EXPECTED_BUT_NOT_SET, key));
-        }
-
-        return value;
-    }
-
-    private String getParameterValue(PseudoElement element, String key, String fallback)
-    {
-        String value = element.getParameters().get(key);
-
-        if (value == null)
-        {
-            return fallback;
-        }
-
-        return value;
-    }
-
     private String extractFromTranslationMap(String key)
     {
         return translationMap.getText(locale, key);
     }
 
+    private <T> T getParameterValue(PseudoElement element, Integer depth, String key, Class<T> expectedType)
+    {
+        return getParameterValue(element, depth, key, expectedType, null);
+    }
+
     /**
-     * Transform a {@link PseudoElement} as a external component
+     * Extract a paramater from the {@code element}.
+     * <p>
+     * Replaces the content of the result with a value fetched from {@link #valueMaps} or {@link #translationMap} if the {@code key} starts
+     * with '$$'
+     * 
+     * @param <T> the expected result type
+     * @param element the element to extract from
+     * @param depth the current depth in the tree
+     * @param key the key to lookup
+     * @param expectedType the expected result type
+     * @param fallback to use if no result is found, can be {@code null}
+     * @return the found parameter
+     * @throws JsonParsingException if parameter is expected but not found and no {@code fallback} is provided
+     */
+    private <T> T getParameterValue(PseudoElement element, Integer depth, String key, Class<T> expectedType, T fallback)
+    {
+        String rawValue = element.getParameters().get(key);
+        T      value    = null;
+
+        if (rawValue == null || rawValue.isBlank())
+        {
+            if (fallback == null)
+            {
+                throw new JsonParsingException(element.getUid(), 0, this.count, String.format(PARAMETER_S_IS_EXPECTED_BUT_NOT_SET, key));
+            }
+
+            return fallback;
+        }
+
+        if (rawValue.startsWith("$$"))
+        {
+            value = extractFromValueMaps(rawValue, expectedType, fallback);
+        }
+        else
+        {
+            value = transformRawValue(element.getUid(), depth, rawValue, expectedType);
+        }
+
+        return value;
+    }
+
+    /**
+     * Transform the raw value of a parameter
+     * <p>
+     * 'true' gets cast to a boolean value
+     * 
+     * @param <T> the expected result type
+     * @param uid of the element to transform for error logging
+     * @param depth of the tree
+     * @param value the value to transform
+     * @param expectedType the expected result type
+     * @return the transformed {@code vale}
+     * @throws JsonParsingException if the value could not be transformed
+     */
+    private <T> T transformRawValue(String uid, Integer depth, String value, Class<T> expectedType)
+    {
+        if (expectedType.equals(Boolean.class))
+        {
+            Boolean b = Boolean.valueOf(value);
+
+            return expectedType.cast(b);
+        }
+
+        if (expectedType.equals(Integer.class))
+        {
+            Integer i = Integer.valueOf(value);
+
+            return expectedType.cast(i);
+        }
+
+        if (expectedType.equals(String.class))
+        {
+            return expectedType.cast(value);
+        }
+
+        throw new JsonParsingException(uid, depth, 0,
+                String.format("could not transform [%s] to the expected type [%s]", value, expectedType));
+    }
+
+    /**
+     * Transform a {@link PseudoElement} as a internal component
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private Container transformInternalComponent(PseudoElement element, Integer depth)
     {
-        String         path   = getParameterValue(element, "path");
+        String         path   = getParameterValue(element, depth, "path", String.class);
         JsonTreeMapper mapper = new JsonTreeMapper();
 
-        JsonTreeRoot   root;
-        try
-        {
-            root = mapper.map(path);
+        JsonTreeRoot   root   = mapper.map(path);
 
-            return JsonMapper.map(root, locale, translationMap, valueMaps);
-        }
-        catch (Exception e)
-        {
-            throw new JsonMapperException(String.format("error building gui component [%s] : [%s]", path, e.getMessage()));
-        }
+        return JsonMapper.map(root, locale, translationMap, valueMaps);
     }
 
     /**
-     * Replace a css class variable with a {@code String} from the object map
+     * Traverse the css classes and replace {@code $$class$} parameters from {@link #valueMaps}.
+     * <p>
+     * Not founde {@code class}es will be ignored and will not be raised.
      * 
-     * @param classes {@code List} of all classes {@code String}s to extract
-     * 
+     * @param classes {@code List} of all classes {@code String}s to traverse
      * @return a {@code List} of {@code String}s containing the non-altered and the replaced classes
      */
     private List<String> replaceClasses(List<String> classes)
@@ -319,7 +350,7 @@ public class JsonMapper
             if (c.startsWith(INDICATOR_CLASS_PLACEHOLDER))
             {
                 String key  = c.replace(INDICATOR_CLASS_PLACEHOLDER, "");
-                String text = extractFromObjectMap(key, String.class);
+                String text = extractFromValueMaps(key, String.class);
 
                 if (text == null)
                 {
@@ -333,33 +364,47 @@ public class JsonMapper
         }).dropWhile(String::isBlank).collect(Collectors.toList());
     }
 
+    private InputValueList extractInputValues(PseudoElement element, Integer depth, Boolean throwWhenEmpty)
+    {
+        InputValueList values = new InputValueList();
+
+        for (PseudoElement pe : element.getChildren())
+        {
+            if (pe.getType().toUpperCase().equals("INPUT_VALUE"))
+            {
+                values.add(transformInputValue(pe, depth + 1));
+            }
+        }
+
+        if (throwWhenEmpty && values.isEmpty())
+        {
+            throw new JsonParsingException(element.getUid(), depth, 0, "InputValue list can not be emtpy");
+        }
+
+        return values;
+    }
+
     /**
      * Transform a {@link PseudoElement} to an {@link InputValue}
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private InputValue transformInputValue(PseudoElement element, Integer depth)
     {
-        String  text    = getParameterValue(element, TEXT);
-        Boolean checked = Boolean.valueOf(getParameterValue(element, CHECKED, "false"));
+        List<String> classes = replaceClasses(element.getClasses());
+        String       text    = getParameterValue(element, depth, TEXT, String.class);
+        String       value   = getParameterValue(element, depth, VALUE, String.class);
+        Boolean      checked = getParameterValue(element, depth, CHECKED, Boolean.class, Boolean.FALSE);
 
-        return InputValue
-                .builder()
-                .text(extractFromValueMap(element, text, depth, String.class, text))
-                .value(getParameterValue(element, VALUE))
-                .checked(checked)
-                .classes(replaceClasses(element.getClasses()))
-                .build();
+        return InputValue.builder().text(text).value(value).checked(checked).classes(classes).build();
     }
 
     /**
      * Internal JSON transform
      *
      * @param root
-     *
      * @return the transformed {@code Container}
      */
     private Container transform(JsonTreeRoot root) throws JsonMapperException
@@ -367,15 +412,17 @@ public class JsonMapper
         return transform(root.getRoot(), 0, ContainerType.values());
     }
 
+    /*
+     * --- < utility functions -------------------------------------------------------------------------------------------------------------
+     */
+
     /**
      * Entry function to transform elements from JSON to {@link Container} objects
      *
      * @param element to transform
      * @param depth inside the element tree
      * @param allowedTypes allowed types of transformations
-     *
      * @return the transformed container
-     *
      * @throws JsonParsingException on any failure, refer to exception text
      */
     private Container transform(PseudoElement element, Integer depth, ContainerType... allowedTypes) throws JsonParsingException
@@ -410,12 +457,13 @@ public class JsonMapper
             {
                 throw new JsonParsingException(element.getUid(), depth, this.count, "error parsing imported element", ex);
             }
+
             final ContainerType type = ContainerType.valueOf(element.getType().toUpperCase());
 
             if (!Arrays.asList(allowedTypes).contains(type))
             {
                 throw new JsonParsingException(element.getUid(), depth, this.count,
-                        String.format("container type [%s] is not allowed", element.getType()));
+                        String.format("container type [%s] is not allowed here", element.getType()));
             }
 
             return switch (type)
@@ -427,13 +475,11 @@ public class JsonMapper
                 case COLUMN -> transformColumnContainer(element, depth);
                 case CONTENT -> transformContentContainer(element, depth);
                 case FORM -> transformFormContainer(element, depth);
-                case HEADING -> transformHeadingContainer(element, depth);
                 case HIDDEN -> transformHiddenContainer(element, depth);
                 case IMAGE -> transformImageContainer(element, depth);
                 case LINK -> transformLinkContainer(element, depth);
                 case ROW -> transformRowContainer(element, depth);
                 case ROWED_CONTENT -> transformRowedContentContainer(element, depth);
-                case SPAN -> transformSpanContainer(element, depth);
                 case SPLITTED -> transformSplittedContainer(element, depth);
                 case TAB -> transformTabbedContainer(element, depth);
                 case TEXT -> transformTextContainer(element, depth);
@@ -450,23 +496,25 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private AudioContainer transfromAudioContainer(PseudoElement element, Integer depth)
     {
-        final String src      = getParameterValue(element, SRC);
-        final String controls = getParameterValue(element, "controls");
-        final String autoplay = getParameterValue(element, "autoplay");
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        String              src        = getParameterValue(element, depth, SRC, String.class);
+        Boolean             controls   = getParameterValue(element, depth, "controls", Boolean.class, Boolean.FALSE);
+        Boolean             autoplay   = getParameterValue(element, depth, "autoplay", Boolean.class, Boolean.FALSE);
 
         return AudioContainer
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .src(extractFromValueMap(element, src, depth, String.class, src))
-                .controls(extractFromValueMap(element, controls, depth, Boolean.class, false))
-                .autoplay(extractFromValueMap(element, autoplay, depth, Boolean.class, false))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .src(src)
+                .controls(controls)
+                .autoplay(autoplay)
                 .build();
     }
 
@@ -475,18 +523,13 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private ButtonContainer transfromButtonContainer(PseudoElement element, Integer depth)
     {
-        return ButtonContainer
-                .builder()
-                .uid("")
-                .classes(List.of())
-                .dataAttributes(Map.of())
-                .button(transformButtonInput(element, depth))
-                .build();
+        Button button = transformButtonInput(element, depth);
+
+        return ButtonContainer.builder().uid(DEFAULT_VAL).classes(List.of()).dataAttributes(Map.of()).button(button).build();
     }
 
     /**
@@ -494,7 +537,6 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private ButtonBarContainer transformButtonBarContainer(PseudoElement element, Integer depth)
@@ -507,7 +549,6 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private ButtonIconContainer transformButtonIconContainer(PseudoElement element, Integer depth)
@@ -520,18 +561,17 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private ColumnContainer transformColumnContainer(PseudoElement element, Integer depth)
     {
-        return ColumnContainer
-                .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .content(transform(element.getChildren().get(0), depth + 1, CONTAINER_CHILDREN))
-                .build();
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        Container           content    =
+                element.getChildren().isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, CONTAINER_CHILDREN);
+
+        return ColumnContainer.builder().uid(uid).classes(classes).dataAttributes(attributes).content(content).build();
     }
 
     /**
@@ -539,22 +579,18 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private ContentContainer transformContentContainer(PseudoElement element, Integer depth)
     {
-        final List<Container> contents = new ArrayList<>();
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        List<Container>     contents   = new ArrayList<>();
 
         element.getChildren().stream().forEach(c -> contents.add(transform(c, depth + 1, CONTAINER_CHILDREN)));
 
-        return ContentContainer
-                .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .contents(contents)
-                .build();
+        return ContentContainer.builder().uid(uid).classes(classes).dataAttributes(attributes).contents(contents).build();
     }
 
     /**
@@ -562,45 +598,19 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private FormContainer transformFormContainer(PseudoElement element, Integer depth)
     {
-        final List<Input> inputs = new ArrayList<>();
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+
+        List<Input>         inputs     = new ArrayList<>();
 
         element.getChildren().stream().forEach(c -> inputs.add(transformInput(c, depth + 1)));
 
-        return FormContainer
-                .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .inputs(inputs)
-                .build();
-    }
-
-    /**
-     * Transform a {@link PseudoElement} to an {@link HeadingContainer}
-     *
-     * @param element to transfrom
-     * @param depth of the recursive operation
-     *
-     * @return the transformed object
-     */
-    private HeadingContainer transformHeadingContainer(PseudoElement element, Integer depth)
-    {
-        final String text = getParameterValue(element, TEXT, DEFAULT_VAL);
-        final String size = getParameterValue(element, "size", "1");
-
-        return HeadingContainer
-                .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .text(extractFromValueMap(element, text, depth, String.class, text))
-                .size(Integer.parseInt(size))
-                .build();
+        return FormContainer.builder().uid(uid).classes(classes).dataAttributes(attributes).inputs(inputs).build();
     }
 
     /**
@@ -608,18 +618,17 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private HiddenContainer transformHiddenContainer(PseudoElement element, Integer depth)
     {
-        return HiddenContainer
-                .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .child(transform(element.getChildren().get(0), depth + 1, CONTAINER_CHILDREN))
-                .build();
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        Container           child      =
+                element.getChildren().isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, CONTAINER_CHILDREN);
+
+        return HiddenContainer.builder().uid(uid).classes(classes).dataAttributes(attributes).child(child).build();
     }
 
     /**
@@ -627,20 +636,16 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private ImageContainer transformImageContainer(PseudoElement element, Integer depth)
     {
-        final String src = getParameterValue(element, SRC);
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        String              src        = getParameterValue(element, depth, SRC, String.class);
 
-        return ImageContainer
-                .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .src(extractFromValueMap(element, src, depth, String.class, src))
-                .build();
+        return ImageContainer.builder().uid(uid).classes(classes).dataAttributes(attributes).src(src).build();
     }
 
     /**
@@ -648,22 +653,26 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private LinkContainer transformLinkContainer(PseudoElement element, Integer depth)
     {
-        final String href    = getParameterValue(element, HREF);
-        final String content = getParameterValue(element, CONTENT);
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        String              href       = getParameterValue(element, depth, HREF, String.class);
+        String              target     = getParameterValue(element, depth, TARGET, String.class, "_self");
+        Container           content    =
+                element.getChildren().isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, LINK_CHILDREN);
 
         return LinkContainer
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .href(extractFromValueMap(element, href, depth, String.class, href))
-                .target(extractFromValueMap(element, content, depth, String.class, content))
-                .content(transform(element.getChildren().get(0), depth + 1, LINK_CHILDREN))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .href(href)
+                .target(target)
+                .content(content)
                 .build();
     }
 
@@ -672,25 +681,21 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private RowContainer transformRowContainer(PseudoElement element, Integer depth)
     {
-        final List<ColumnContainer> columns = new ArrayList<>();
+        String                uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>          classes    = replaceClasses(element.getClasses());
+        Map<String, String>   attributes = element.getAttributes();
+        List<ColumnContainer> columns    = new ArrayList<>();
 
-        for (final PseudoElement pe : element.getChildren())
+        for (PseudoElement pe : element.getChildren())
         {
-            columns.add(transformColumnContainer(pe, depth));
+            columns.add((ColumnContainer) transform(pe, depth, ContainerType.COLUMN));
         }
 
-        return RowContainer
-                .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .columns(columns)
-                .build();
+        return RowContainer.builder().uid(uid).classes(classes).dataAttributes(attributes).columns(columns).build();
     }
 
     /**
@@ -698,46 +703,21 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private RowedContentContainer transformRowedContentContainer(PseudoElement element, Integer depth)
     {
-        final List<RowContainer> rows = new ArrayList<>();
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        List<RowContainer>  rows       = new ArrayList<>();
 
-        for (final PseudoElement pe : element.getChildren())
+        for (PseudoElement pe : element.getChildren())
         {
-            rows.add(transformRowContainer(pe, depth));
+            rows.add((RowContainer) transform(pe, depth, ContainerType.ROW));
         }
 
-        return RowedContentContainer
-                .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .rows(rows)
-                .build();
-    }
-
-    /**
-     * Transform a {@link PseudoElement} to an {@link SpanContainer}
-     *
-     * @param element to transfrom
-     * @param depth of the recursive operation
-     *
-     * @return the transformed object
-     */
-    private SpanContainer transformSpanContainer(PseudoElement element, Integer depth)
-    {
-        final String text = getParameterValue(element, TEXT);
-
-        return SpanContainer
-                .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .text(extractFromValueMap(element, text, depth, String.class, text))
-                .build();
+        return RowedContentContainer.builder().uid(uid).classes(classes).dataAttributes(attributes).rows(rows).build();
     }
 
     /**
@@ -745,18 +725,20 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private SplittedContainer transformSplittedContainer(PseudoElement element, Integer depth)
     {
-        Container             head   = null;
-        Container             tail   = null;
-        final List<Container> center = new ArrayList<>();
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        Container           head       = null;
+        Container           tail       = null;
+        List<Container>     center     = new ArrayList<>();
 
-        Integer               cnt    = 0;
+        Integer             cnt        = 0;
 
-        for (final PseudoElement pe : element.getChildren())
+        for (PseudoElement pe : element.getChildren())
         {
             if (cnt > 0 && cnt < element.getChildren().size() - 1)
             {
@@ -775,9 +757,9 @@ public class JsonMapper
 
         return SplittedContainer
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
                 .head(head)
                 .center(center)
                 .tail(tail)
@@ -789,7 +771,6 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private TabbedContainer transformTabbedContainer(PseudoElement element, Integer depth)
@@ -802,20 +783,16 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private TextContainer transformTextContainer(PseudoElement element, Integer depth)
     {
-        final String text = getParameterValue(element, TEXT, DEFAULT_VAL);
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        String              text       = getParameterValue(element, depth, TEXT, String.class);
 
-        return TextContainer
-                .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .text(extractFromValueMap(element, text, depth, String.class, text))
-                .build();
+        return TextContainer.builder().uid(uid).classes(classes).dataAttributes(attributes).text(text).build();
     }
 
     private Input transformInput(PseudoElement element, Integer depth)
@@ -857,24 +834,19 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private Button transformButtonInput(PseudoElement element, Integer depth)
     {
-        final String text     = getParameterValue(element, TEXT);
-        final String btnClass = getParameterValue(element, BTN_CLASS, "default");
-        final String onClick  = getParameterValue(element, ON_CLICK);
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        String              text       = getParameterValue(element, depth, TEXT, String.class);
+        ButtonClass         btnClass   =
+                ButtonClass.valueOf(getParameterValue(element, depth, BTN_CLASS, String.class, "DEFAULT").toUpperCase());
+        String              onClick    = getParameterValue(element, depth, ON_CLICK, String.class);
 
-        return Button
-                .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .text(extractFromValueMap(element, text, depth, String.class, text))
-                .btnClass(ButtonClass.valueOf(extractFromValueMap(element, btnClass, depth, String.class, btnClass).toUpperCase()))
-                .onClick(extractFromValueMap(element, onClick, depth, String.class, onClick))
-                .build();
+        return Button.builder().uid(uid).classes(classes).dataAttributes(attributes).text(text).btnClass(btnClass).onClick(onClick).build();
     }
 
     /**
@@ -882,23 +854,25 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private ButtonIcon transformButtonIconInput(PseudoElement element, Integer depth)
     {
-        final String image    = getParameterValue(element, IMAGE);
-        final String btnClass = getParameterValue(element, BTN_CLASS);
-        final String onClick  = getParameterValue(element, ON_CLICK);
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        String              image      = getParameterValue(element, depth, IMAGE, String.class);
+        ButtonClass         btnClass   = ButtonClass.valueOf(getParameterValue(element, depth, BTN_CLASS, String.class, "DEFAULT"));
+        String              onClick    = getParameterValue(element, depth, ON_CLICK, String.class);
 
         return ButtonIcon
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .image(extractFromValueMap(element, image, depth, String.class, image))
-                .btnClass(ButtonClass.valueOf(extractFromValueMap(element, btnClass, depth, String.class, btnClass).toUpperCase()))
-                .onClick(extractFromValueMap(element, onClick, depth, String.class, onClick))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .image(image)
+                .btnClass(btnClass)
+                .onClick(onClick)
                 .build();
     }
 
@@ -907,26 +881,29 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private Checkbox transformCheckboxInput(PseudoElement element, Integer depth)
     {
-        final String name     = getParameterValue(element, NAME);
-        final String submitAs = getParameterValue(element, SUBMIT_AS);
-        final String onInput  = getParameterValue(element, ON_INPUT, "");
-        final String checked  = getParameterValue(element, CHECKED, "false");
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        List<Marker>        marker     = element.getMarker();
+        String              name       = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, "");
+        Boolean             checked    = getParameterValue(element, depth, CHECKED, Boolean.class, Boolean.FALSE);
 
         return Checkbox
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .marker(element.getMarker())
-                .name(extractFromValueMap(element, name, depth, String.class, name))
-                .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
-                .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .checked(extractFromValueMap(element, checked, depth, Boolean.class, false))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .marker(marker)
+                .name(name)
+                .submitAs(submitAs)
+                .onInput(onInput)
+                .checked(checked)
                 .build();
     }
 
@@ -935,36 +912,39 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private Currency transformCurrencyInput(PseudoElement element, Integer depth)
     {
-        final String name        = getParameterValue(element, NAME);
-        final String submitAs    = getParameterValue(element, SUBMIT_AS);
-        final String onInput     = getParameterValue(element, ON_INPUT, "");
-        final String valueF      = getParameterValue(element, "valueF", "0");
-        final String valueB      = getParameterValue(element, "valueB", "0");
-        final String symbol      = getParameterValue(element, "symbol", "");
-        final String min         = getParameterValue(element, MIN, "" + Integer.MIN_VALUE);
-        final String max         = getParameterValue(element, MAX, "" + Integer.MAX_VALUE);
-        final String placeholder = getParameterValue(element, PLACEHOLDER, "");
+        String              uid         = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes     = replaceClasses(element.getClasses());
+        Map<String, String> attributes  = element.getAttributes();
+        List<Marker>        marker      = element.getMarker();
+        String              name        = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, "");
+        Integer             valueF      = getParameterValue(element, depth, "valueF", Integer.class, 0);
+        Integer             valueB      = getParameterValue(element, depth, "valueB", Integer.class, 0);
+        String              symbol      = getParameterValue(element, depth, "symbol", String.class, "");
+        Integer             min         = getParameterValue(element, depth, MIN, Integer.class, Integer.MIN_VALUE);
+        Integer             max         = getParameterValue(element, depth, MAX, Integer.class, Integer.MAX_VALUE);
+        String              placeholder = getParameterValue(element, depth, PLACEHOLDER, String.class, "");
 
         return Currency
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .marker(element.getMarker())
-                .name(extractFromValueMap(element, name, depth, String.class, name))
-                .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
-                .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .valueF(extractFromValueMap(element, valueF, depth, Integer.class, 0))
-                .valueB(extractFromValueMap(element, valueB, depth, Integer.class, 0))
-                .symbol(extractFromValueMap(element, symbol, depth, String.class, symbol))
-                .min(extractFromValueMap(element, min, depth, Integer.class, Integer.MIN_VALUE))
-                .max(extractFromValueMap(element, max, depth, Integer.class, Integer.MAX_VALUE))
-                .placeholder(extractFromValueMap(element, placeholder, depth, String.class, placeholder))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .marker(marker)
+                .name(name)
+                .submitAs(submitAs)
+                .onInput(onInput)
+                .valueF(valueF)
+                .valueB(valueB)
+                .symbol(symbol)
+                .min(min)
+                .max(max)
+                .placeholder(placeholder)
                 .build();
     }
 
@@ -973,26 +953,29 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private Date transformDateInput(PseudoElement element, Integer depth)
     {
-        final String name     = getParameterValue(element, NAME);
-        final String submitAs = getParameterValue(element, SUBMIT_AS);
-        final String onInput  = getParameterValue(element, ON_INPUT, DEFAULT_VAL);
-        final String value    = getParameterValue(element, VALUE, DEFAULT_DATE);
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        List<Marker>        marker     = element.getMarker();
+        String              name       = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              value      = getParameterValue(element, depth, VALUE, String.class, DEFAULT_DATE);
 
         return Date
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .marker(element.getMarker())
-                .name(extractFromValueMap(element, name, depth, String.class, name))
-                .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
-                .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .value(extractFromValueMap(element, value, depth, String.class, value))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .marker(marker)
+                .name(name)
+                .submitAs(submitAs)
+                .onInput(onInput)
+                .value(value)
                 .build();
     }
 
@@ -1001,28 +984,31 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private File transformFileInput(PseudoElement element, Integer depth)
     {
-        final String name     = getParameterValue(element, NAME);
-        final String submitAs = getParameterValue(element, SUBMIT_AS);
-        final String onInput  = getParameterValue(element, ON_INPUT, DEFAULT_VAL);
-        final String multiple = getParameterValue(element, "multiple", "false");
-        final String accept   = getParameterValue(element, "accept");
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        List<Marker>        marker     = element.getMarker();
+        String              name       = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        Boolean             multiple   = getParameterValue(element, depth, "multiple", Boolean.class, Boolean.FALSE);
+        String              accept     = getParameterValue(element, depth, "accept", String.class, "*");
 
         return File
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .marker(element.getMarker())
-                .name(extractFromValueMap(element, name, depth, String.class, name))
-                .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
-                .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .multiple(extractFromValueMap(element, multiple, depth, Boolean.class, Boolean.valueOf(multiple)))
-                .accept(extractFromValueMap(element, multiple, depth, String.class, accept))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .marker(marker)
+                .name(name)
+                .submitAs(submitAs)
+                .onInput(onInput)
+                .multiple(multiple)
+                .accept(accept)
                 .build();
     }
 
@@ -1031,24 +1017,27 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private Hidden transformHiddenInput(PseudoElement element, Integer depth)
     {
-        final String submitAs = getParameterValue(element, SUBMIT_AS);
-        final String value    = getParameterValue(element, VALUE, DEFAULT_VAL);
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        List<Marker>        marker     = element.getMarker();
+        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              value      = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
 
         return Hidden
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .marker(element.getMarker())
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .marker(marker)
                 .name(DEFAULT_VAL)
-                .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
+                .submitAs(submitAs)
                 .onInput(DEFAULT_VAL)
-                .value(extractFromValueMap(element, value, depth, String.class, value))
+                .value(value)
                 .build();
     }
 
@@ -1057,26 +1046,29 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private Link transformLinkInput(PseudoElement element, Integer depth)
     {
-        final String text    = getParameterValue(element, TEXT);
-        final String href    = getParameterValue(element, HREF);
-        final String target  = getParameterValue(element, TARGET);
-        final String onInput = getParameterValue(element, ON_INPUT, DEFAULT_VAL);
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        List<Marker>        marker     = element.getMarker();
+        String              text       = getParameterValue(element, depth, TEXT, String.class);
+        String              href       = getParameterValue(element, depth, HREF, String.class);
+        String              target     = getParameterValue(element, depth, TARGET, String.class, "_self");
+        String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
 
         return Link
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .marker(element.getMarker())
-                .text(extractFromValueMap(element, text, depth, String.class, text))
-                .href(extractFromValueMap(element, href, depth, String.class, href))
-                .target(extractFromValueMap(element, target, depth, String.class, target))
-                .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .marker(marker)
+                .text(text)
+                .href(href)
+                .target(target)
+                .onInput(onInput)
                 .build();
     }
 
@@ -1085,36 +1077,39 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private ListSelection transformListSelectionInput(PseudoElement element, Integer depth)
     {
-        final String         name           = getParameterValue(element, NAME);
-        final String         submitAs       = getParameterValue(element, SUBMIT_AS);
-        final String         onInput        = getParameterValue(element, ON_INPUT, DEFAULT_VAL);
-        final String         selectedValues = getParameterValue(element, "selectionList");
-        final String         multiple       = getParameterValue(element, "multiple", "false");
+        String              uid            = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes        = replaceClasses(element.getClasses());
+        Map<String, String> attributes     = element.getAttributes();
+        List<Marker>        marker         = element.getMarker();
+        String              name           = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs       = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput        = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        InputValueList      selectedValues =
+                getParameterValue(element, depth, "selectedValues", InputValueList.class, new InputValueList());
+        Boolean             multiple       = getParameterValue(element, depth, "multiple", Boolean.class, Boolean.FALSE);
+        InputValueList      inputValues    = extractInputValues(element, depth, multiple);
 
-        final InputValueList inputValues    = new InputValueList();
-
-        for (final PseudoElement pe : element.getChildren())
+        for (PseudoElement pe : element.getChildren())
         {
             inputValues.add(transformInputValue(pe, depth));
         }
 
         return ListSelection
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .marker(element.getMarker())
-                .name(extractFromValueMap(element, name, depth, String.class, name))
-                .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
-                .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .marker(marker)
+                .name(name)
+                .submitAs(submitAs)
+                .onInput(onInput)
                 .values(inputValues)
-                .multiple(extractFromValueMap(element, multiple, depth, Boolean.class, Boolean.valueOf(multiple)))
-                .selected(extractFromValueMap(element, selectedValues, depth, InputValueList.class, new InputValueList()))
+                .multiple(multiple)
+                .selected(selectedValues)
                 .build();
     }
 
@@ -1123,36 +1118,39 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private Number transformNumberInput(PseudoElement element, Integer depth)
     {
-        final String name        = getParameterValue(element, NAME);
-        final String submitAs    = getParameterValue(element, SUBMIT_AS);
-        final String onInput     = getParameterValue(element, ON_INPUT, DEFAULT_VAL);
-        final String value       = getParameterValue(element, VALUE, "0");
-        final String min         = getParameterValue(element, MIN, "" + Integer.MIN_VALUE);
-        final String max         = getParameterValue(element, MAX, "" + Integer.MAX_VALUE);
-        final String placeholder = getParameterValue(element, PLACEHOLDER, DEFAULT_VAL);
-        final String prefix      = getParameterValue(element, PREFIX, DEFAULT_VAL);
-        final String suffix      = getParameterValue(element, SUFFIX, DEFAULT_VAL);
+        String              uid         = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes     = replaceClasses(element.getClasses());
+        Map<String, String> attributes  = element.getAttributes();
+        List<Marker>        marker      = element.getMarker();
+        String              name        = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        Integer             value       = getParameterValue(element, depth, VALUE, Integer.class, 0);
+        Integer             min         = getParameterValue(element, depth, MIN, Integer.class, Integer.MIN_VALUE);
+        Integer             max         = getParameterValue(element, depth, MAX, Integer.class, Integer.MAX_VALUE);
+        String              placeholder = getParameterValue(element, depth, PLACEHOLDER, String.class, DEFAULT_VAL);
+        String              prefix      = getParameterValue(element, depth, PREFIX, String.class, DEFAULT_VAL);
+        String              suffix      = getParameterValue(element, depth, SUFFIX, String.class, DEFAULT_VAL);
 
         return Number
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .marker(element.getMarker())
-                .name(extractFromValueMap(element, name, depth, String.class, name))
-                .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
-                .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .value(extractFromValueMap(element, value, depth, Integer.class, 0))
-                .min(extractFromValueMap(element, min, depth, Integer.class, Integer.MIN_VALUE))
-                .max(extractFromValueMap(element, max, depth, Integer.class, Integer.MAX_VALUE))
-                .placeholder(extractFromValueMap(element, placeholder, depth, String.class, placeholder))
-                .prefix(extractFromValueMap(element, prefix, depth, String.class, prefix))
-                .suffix(extractFromValueMap(element, suffix, depth, String.class, suffix))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .marker(marker)
+                .name(name)
+                .submitAs(submitAs)
+                .onInput(onInput)
+                .value(value)
+                .min(min)
+                .max(max)
+                .placeholder(placeholder)
+                .prefix(prefix)
+                .suffix(suffix)
                 .build();
     }
 
@@ -1161,26 +1159,29 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private Password transformPasswordInput(PseudoElement element, Integer depth)
     {
-        final String name        = getParameterValue(element, NAME);
-        final String submitAs    = getParameterValue(element, SUBMIT_AS);
-        final String onInput     = getParameterValue(element, ON_INPUT, DEFAULT_VAL);
-        final String placeholder = getParameterValue(element, PLACEHOLDER, "***");
+        String              uid         = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes     = replaceClasses(element.getClasses());
+        Map<String, String> attributes  = element.getAttributes();
+        List<Marker>        marker      = element.getMarker();
+        String              name        = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              placeholder = getParameterValue(element, depth, PLACEHOLDER, String.class, "***");
 
         return Password
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .marker(element.getMarker())
-                .name(extractFromValueMap(element, name, depth, String.class, name))
-                .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
-                .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .placeholder(extractFromValueMap(element, placeholder, depth, String.class, placeholder))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .marker(marker)
+                .name(name)
+                .submitAs(submitAs)
+                .onInput(onInput)
+                .placeholder(placeholder)
                 .build();
     }
 
@@ -1189,26 +1190,29 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private Radio transformRadioInput(PseudoElement element, Integer depth)
     {
-        final String name     = getParameterValue(element, NAME);
-        final String submitAs = getParameterValue(element, SUBMIT_AS);
-        final String onInput  = getParameterValue(element, ON_INPUT, DEFAULT_VAL);
-        final String values   = getParameterValue(element, VALUES);
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        List<Marker>        marker     = element.getMarker();
+        String              name       = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        List<InputValue>    values     = extractInputValues(element, depth, true);
 
         return Radio
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .marker(element.getMarker())
-                .name(extractFromValueMap(element, name, depth, String.class, name))
-                .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
-                .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .values(extractFromValueMap(element, values, depth, InputValueList.class))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .marker(marker)
+                .name(name)
+                .submitAs(submitAs)
+                .onInput(onInput)
+                .values(values)
                 .build();
     }
 
@@ -1217,15 +1221,20 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private Select transformSelectInput(PseudoElement element, Integer depth)
     {
-        final String         name        = getParameterValue(element, NAME);
-        final String         submitAs    = getParameterValue(element, SUBMIT_AS);
-        final String         onInput     = getParameterValue(element, ON_INPUT, DEFAULT_VAL);
-        final String         values      = getParameterValue(element, VALUES, null);
+        String               uid         = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>         classes     = replaceClasses(element.getClasses());
+        Map<String, String>  attributes  = element.getAttributes();
+        List<Marker>         marker      = element.getMarker();
+        String               name        = getParameterValue(element, depth, NAME, String.class);
+        String               submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String               onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String               valueSrc    = getParameterValue(element, depth, "values", String.class, "");
+        InputValueList       values      = valueSrc.isBlank() ? extractInputValues(element, depth, false)
+                : extractFromValueMaps(valueSrc, InputValueList.class, new InputValueList());
 
         final InputValueList inputValues = new InputValueList();
 
@@ -1236,14 +1245,14 @@ public class JsonMapper
 
         return Select
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .marker(element.getMarker())
-                .name(extractFromValueMap(element, name, depth, String.class, name))
-                .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
-                .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .values(extractFromValueMap(element, values, depth, InputValueList.class, inputValues))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .marker(marker)
+                .name(name)
+                .submitAs(submitAs)
+                .onInput(onInput)
+                .values(values)
                 .build();
     }
 
@@ -1252,30 +1261,33 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private Slider transformSliderInput(PseudoElement element, Integer depth)
     {
-        final String name     = getParameterValue(element, NAME);
-        final String submitAs = getParameterValue(element, SUBMIT_AS);
-        final String onInput  = getParameterValue(element, ON_INPUT, DEFAULT_VAL);
-        final String value    = getParameterValue(element, VALUE, "0");
-        final String min      = getParameterValue(element, MIN, "" + Integer.MIN_VALUE);
-        final String max      = getParameterValue(element, MAX, "" + Integer.MAX_VALUE);
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        List<Marker>        marker     = element.getMarker();
+        String              name       = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        Integer             value      = getParameterValue(element, depth, VALUE, Integer.class, 0);
+        Integer             min        = getParameterValue(element, depth, MIN, Integer.class, Integer.MIN_VALUE);
+        Integer             max        = getParameterValue(element, depth, MAX, Integer.class, Integer.MAX_VALUE);
 
         return Slider
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .marker(element.getMarker())
-                .name(extractFromValueMap(element, name, depth, String.class, name))
-                .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
-                .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .value(extractFromValueMap(element, value, depth, Integer.class, 0))
-                .min(extractFromValueMap(element, min, depth, Integer.class, Integer.MIN_VALUE))
-                .max(extractFromValueMap(element, max, depth, Integer.class, Integer.MAX_VALUE))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .marker(marker)
+                .name(name)
+                .submitAs(submitAs)
+                .onInput(onInput)
+                .value(value)
+                .min(min)
+                .max(max)
                 .build();
     }
 
@@ -1284,26 +1296,29 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private Switch transformSwitchInput(PseudoElement element, Integer depth)
     {
-        final String name     = getParameterValue(element, NAME);
-        final String submitAs = getParameterValue(element, SUBMIT_AS);
-        final String onInput  = getParameterValue(element, ON_INPUT, DEFAULT_VAL);
-        final String checked  = getParameterValue(element, CHECKED, "false");
+        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        List<Marker>        marker     = element.getMarker();
+        String              name       = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        Boolean             checked    = getParameterValue(element, depth, CHECKED, Boolean.class, Boolean.FALSE);
 
         return Switch
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .marker(element.getMarker())
-                .name(extractFromValueMap(element, name, depth, String.class, name))
-                .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
-                .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .checked(extractFromValueMap(element, checked, depth, Boolean.class, false))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .marker(marker)
+                .name(name)
+                .submitAs(submitAs)
+                .onInput(onInput)
+                .checked(checked)
                 .build();
     }
 
@@ -1312,28 +1327,33 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private Textarea transformTextareaInput(PseudoElement element, Integer depth)
     {
-        final String name     = getParameterValue(element, NAME);
-        final String submitAs = getParameterValue(element, SUBMIT_AS);
-        final String onInput  = getParameterValue(element, ON_INPUT, DEFAULT_VAL);
-        final String value    = getParameterValue(element, VALUE, "0");
-        final String maxChars = getParameterValue(element, MAX_CHARS, "32000");
+        String              uid         = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes     = replaceClasses(element.getClasses());
+        Map<String, String> attributes  = element.getAttributes();
+        List<Marker>        marker      = element.getMarker();
+        String              name        = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              value       = getParameterValue(element, depth, VALUE, String.class, "");
+        Integer             maxChars    = getParameterValue(element, depth, MAX_CHARS, Integer.class, 32000);
+        String              placeholder = getParameterValue(element, depth, PLACEHOLDER, String.class, "");
 
         return Textarea
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .marker(element.getMarker())
-                .name(extractFromValueMap(element, name, depth, String.class, name))
-                .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
-                .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .value(extractFromValueMap(element, value, depth, String.class, value))
-                .maxCharacters(extractFromValueMap(element, maxChars, depth, Integer.class, 32000))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .marker(marker)
+                .name(name)
+                .submitAs(submitAs)
+                .onInput(onInput)
+                .value(value)
+                .maxCharacters(maxChars)
+                .placeholder(placeholder)
                 .build();
     }
 
@@ -1342,14 +1362,13 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private Textbox transformTextboxInput(PseudoElement element, Integer depth)
     {
-        final String value = getParameterValue(element, VALUE, DEFAULT_VAL);
+        final String value = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
 
-        return Textbox.builder().onInput(DEFAULT_VAL).value(extractFromValueMap(element, value, depth, String.class, value)).build();
+        return Textbox.builder().onInput(DEFAULT_VAL).value(value).build();
     }
 
     /**
@@ -1357,34 +1376,37 @@ public class JsonMapper
      *
      * @param element to transfrom
      * @param depth of the recursive operation
-     *
      * @return the transformed object
      */
     private Textfield transformTextfieldInput(PseudoElement element, Integer depth)
     {
-        final String name        = getParameterValue(element, NAME);
-        final String submitAs    = getParameterValue(element, SUBMIT_AS);
-        final String onInput     = getParameterValue(element, ON_INPUT, DEFAULT_VAL);
-        final String value       = getParameterValue(element, VALUE, DEFAULT_VAL);
-        final String placeholder = getParameterValue(element, PLACEHOLDER, DEFAULT_VAL);
-        final String prefix      = getParameterValue(element, PREFIX, DEFAULT_VAL);
-        final String suffix      = getParameterValue(element, SUFFIX, DEFAULT_VAL);
-        final String maxChars    = getParameterValue(element, MAX_CHARS, "150");
+        String              uid         = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        List<String>        classes     = replaceClasses(element.getClasses());
+        Map<String, String> attributes  = element.getAttributes();
+        List<Marker>        marker      = element.getMarker();
+        String              name        = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        final String        value       = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
+        final String        placeholder = getParameterValue(element, depth, PLACEHOLDER, String.class, DEFAULT_VAL);
+        final String        prefix      = getParameterValue(element, depth, PREFIX, String.class, DEFAULT_VAL);
+        final String        suffix      = getParameterValue(element, depth, SUFFIX, String.class, DEFAULT_VAL);
+        final Integer       maxChars    = getParameterValue(element, depth, MAX_CHARS, Integer.class, 150);
 
         return Textfield
                 .builder()
-                .uid(extractFromValueMap(element, element.getUid(), depth, String.class, element.getUid()))
-                .classes(replaceClasses(element.getClasses()))
-                .dataAttributes(element.getAttributes())
-                .marker(element.getMarker())
-                .name(extractFromValueMap(element, name, depth, String.class, name))
-                .submitAs(extractFromValueMap(element, submitAs, depth, String.class, submitAs))
-                .onInput(extractFromValueMap(element, onInput, depth, String.class, onInput))
-                .value(extractFromValueMap(element, value, depth, String.class, value))
-                .placeholder(extractFromValueMap(element, placeholder, depth, String.class, placeholder))
-                .prefix(extractFromValueMap(element, prefix, depth, String.class, prefix))
-                .suffix(extractFromValueMap(element, suffix, depth, String.class, suffix))
-                .maxCharacters(extractFromValueMap(element, maxChars, depth, Integer.class, 150))
+                .uid(uid)
+                .classes(classes)
+                .dataAttributes(attributes)
+                .marker(marker)
+                .name(name)
+                .submitAs(submitAs)
+                .onInput(onInput)
+                .value(value)
+                .placeholder(placeholder)
+                .prefix(prefix)
+                .suffix(suffix)
+                .maxCharacters(maxChars)
                 .build();
     }
 }

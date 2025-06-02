@@ -41,11 +41,12 @@ public class Attribute implements HtmlExportable
         this(name, "", show, true);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getHtmlRep()
     {
-        String result = valueless ? name : StringAdapter.from(name, "=\"", value, "\"");
-
-        return show ? result : "";
+        return valueless ? name : StringAdapter.from(name, "=\"", value, "\"");
     }
 }

@@ -1,0 +1,10 @@
+{
+    "handling": "dynamic",
+    "root": {
+        "uid": "uid",
+        "type": "TEXT",
+        "classes": [],
+        "attributes": {},
+        "parameters": {}
+    }
+}

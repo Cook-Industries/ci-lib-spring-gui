@@ -9,7 +9,7 @@ package de.cook_industries.lib.spring.gui.html;
 import java.util.ArrayList;
 
 import de.cook_industries.lib.spring.gui.hmi.container.Container;
-import de.cook_industries.lib.spring.gui.hmi.mapper.HtmlMapper;
+import de.cook_industries.lib.spring.gui.hmi.mapper.ContainerHtmlMapper;
 import de.cook_industries.lib.spring.gui.util.StringConcat;
 
 /**
@@ -65,7 +65,7 @@ public class HtmlSite
 
         sc.appendnl("<body>");
 
-        content.forEach(c -> sc.append(HtmlMapper.map(c)));
+        content.forEach(c -> sc.append(ContainerHtmlMapper.map(c)));
 
         sc.appendnl("</body>");
         sc.appendnl("</html>");

@@ -10,7 +10,7 @@ import java.util.List;
 
 import de.cook_industries.lib.spring.gui.function.Call;
 import de.cook_industries.lib.spring.gui.hmi.container.Container;
-import de.cook_industries.lib.spring.gui.hmi.mapper.HtmlMapper;
+import de.cook_industries.lib.spring.gui.hmi.mapper.ContainerHtmlMapper;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -64,7 +64,7 @@ public class ContentResponse extends Response
 
     public String getContentHtml()
     {
-        return HtmlMapper.map(content);
+        return ContainerHtmlMapper.map(content);
     }
 
 }

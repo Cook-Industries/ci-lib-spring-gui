@@ -17,6 +17,7 @@ public abstract class SubmittableInput extends Input
 
     @NonNull
     private String name;
+    
     @NonNull
     private String submitAs;
 }

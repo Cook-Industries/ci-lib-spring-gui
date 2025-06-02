@@ -24,8 +24,10 @@ public class UiElement
     @NonNull
     @Default
     private String              uid = UUID.randomUUID().toString();
+
     @Singular("clazz")
     private Set<String>         classes;
+    
     @Singular
     private Map<String, String> dataAttributes;
 

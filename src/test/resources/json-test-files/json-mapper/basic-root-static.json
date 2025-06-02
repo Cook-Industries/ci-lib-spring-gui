@@ -1,0 +1,10 @@
+{
+    "handling": "static",
+    "root": {
+        "uid": "uid",
+        "type": "TEXT",
+        "parameters": {
+            "text": "string : any"
+        }
+    }
+}

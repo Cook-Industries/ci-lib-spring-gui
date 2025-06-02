@@ -12,7 +12,6 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- *
  * @author sebastian koch <koch.sebastian@cook-industries.de>
  */
 @SuperBuilder
@@ -23,8 +22,10 @@ public final class Textarea extends SubmittableInput
 
     @NonNull
     private final String  value;
+
     @NonNull
     private final String  placeholder;
+
     @NonNull
     private final Integer maxCharacters;
 

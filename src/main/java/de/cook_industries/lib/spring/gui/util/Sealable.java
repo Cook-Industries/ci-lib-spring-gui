@@ -1,14 +1,20 @@
 package de.cook_industries.lib.spring.gui.util;
 
 import de.cook_industries.lib.spring.gui.util.exception.ObjectSealedException;
-
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
 public abstract class Sealable
 {
 
+    @Getter(value = AccessLevel.NONE)
     private final Class<?> extender;
+
+    @Setter(value = AccessLevel.NONE)
+    @Getter(value = AccessLevel.NONE)
     private Boolean        sealed = false;
 
     /**

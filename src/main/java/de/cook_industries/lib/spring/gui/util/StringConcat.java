@@ -7,10 +7,10 @@
 package de.cook_industries.lib.spring.gui.util;
 
 import java.util.Collection;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- *
  * @author <a href="mailto:koch.sebastian@cook-industries.de">sebastian koch</a>
  */
 public class StringConcat
@@ -35,6 +35,16 @@ public class StringConcat
         if (apply.booleanValue())
         {
             stb.append(str);
+        }
+
+        return this;
+    }
+
+    public StringConcat append(Boolean apply, Supplier<String> supplier)
+    {
+        if (apply.booleanValue())
+        {
+            stb.append(supplier.get());
         }
 
         return this;
@@ -74,9 +84,7 @@ public class StringConcat
     }
 
     /**
-     *
      * @param e
-     *
      * @return
      */
     @SuppressWarnings("rawtypes")
