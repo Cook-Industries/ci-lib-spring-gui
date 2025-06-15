@@ -9,14 +9,34 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>de.cook-industries</groupId>
-	<artifactId>lib.spring.gui</artifactId>
-	<version>0.0.3-SNAPSHOT</version>	
+	<artifactId>lib-spring-gui</artifactId>
+	<version>2.0.0</version>	
     <packaging>jar</packaging>
-	<name>lib.spring.gui</name>
-	<description>CI-lib for GUI creation in Spring</description>
+
+	<name>${project.groupId}:${project.artifactId}</name>
+	<description>Library for remote GUI creation in Spring</description>
+
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://www.opensource.org/licenses/mit-license.php</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Sebastian Koch</name>
+			<email>development@cook-industries.de</email>
+			<organization>Cook Industries</organization>
+			<organizationUrl>https://www.cook-industries.de</organizationUrl>
+		</developer>
+	</developers>
+
 	<properties>
 		<java.version>17</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -55,13 +75,11 @@
 			<version>5.3.2</version>
 			<scope>runtime</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
 			<version>2.2</version>            
 		</dependency>
-
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -81,7 +99,6 @@
 
 	<build>
 		<plugins>
-			<!-- Plugin to generate source JAR -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -95,16 +112,77 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<!-- Plugin to deploy artifacts -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.8.2</version>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			 <plugin>
+			<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
+				<version>0.7.0</version>
+				<extensions>true</extensions>
 				<configuration>
-					<!-- Configuration if needed -->
+					<publishingServerId>central</publishingServerId>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<id>custom-post-preprocessing</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+							<echo message="Replace license information" />
+							<exec executable="powershell" failonerror="true" outputproperty="exec.output">
+								<arg value="-ExecutionPolicy"/>
+								<arg value="Bypass"/>
+								<arg value="-Command"/>
+								<arg value="&amp; '${basedir}\replaceLicenseString.ps1'"/>
+							</exec>
+							<echo message="Exec output: ${exec.output}" />
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
+		<resources>
+			<resource>
+				<directory>${project.basedir}</directory>
+				<includes>
+					<include>LICENSE</include>
+				</includes>
+				<targetPath>.</targetPath>
+			</resource>
+		</resources>
 	</build>
 </project>

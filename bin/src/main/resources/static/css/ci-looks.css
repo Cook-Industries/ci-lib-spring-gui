@@ -1,13 +1,12 @@
 /**
- * Copyright(c) 2024 sebastian koch/CI. All rights reserved.<br>
- * mailto: koch.sebastian@cook-industries.de
+ * Copyright(c) 2025 sebastian koch/Cook Industries. All rights reserved.
  *
- * @author : sebastian koch <koch.sebastian@cook-industries.de>
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
- 
- /* === > ci ===================================================================================== */
+
+/* === > ci ===================================================================================== */
 .container-centered {
-    margin-left: 25%;
-    margin-right: 25%;
+  margin-left: 25%;
+  margin-right: 25%;
 }
 /* === < ci ===================================================================================== */
