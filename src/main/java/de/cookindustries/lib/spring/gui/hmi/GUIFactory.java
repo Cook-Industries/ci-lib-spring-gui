@@ -1,10 +1,9 @@
-﻿/**
+/**
  * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
- * 
+ * <p>
  * Licensed under the MIT License.
+ * <p>
  * See LICENSE file in the project root for full license information.
- * 
- * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 package de.cookindustries.lib.spring.gui.hmi;
 
@@ -18,15 +17,19 @@ import de.cookindustries.lib.spring.gui.hmi.mapper.JsonTreeMapper;
 import de.cookindustries.lib.spring.gui.hmi.mapper.JsonTreeRoot;
 import de.cookindustries.lib.spring.gui.hmi.mapper.ValueMap;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
-import de.cookindustries.lib.spring.gui.i18n.TranslationProvider;
+import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 
+/**
+ * @since 1.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
 @Component
 public class GUIFactory
 {
 
-    private final TranslationProvider translationProvider;
+    private final AbsTranslationProvider translationProvider;
 
-    public GUIFactory(TranslationProvider translationProvider)
+    public GUIFactory(AbsTranslationProvider translationProvider)
     {
         this.translationProvider = translationProvider;
     }
@@ -70,7 +73,7 @@ public class GUIFactory
         {
             root = mapper.map(path);
 
-            return JsonMapper.map(root, locale, translationProvider.getTranslationMap(), valueMap);
+            return JsonMapper.map(root, locale, translationProvider, valueMap);
         }
         catch (Exception e)
         {

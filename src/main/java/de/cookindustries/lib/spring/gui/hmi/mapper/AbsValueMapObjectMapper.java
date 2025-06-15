@@ -1,10 +1,9 @@
-﻿/**
+/**
  * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
- * 
+ * <p>
  * Licensed under the MIT License.
+ * <p>
  * See LICENSE file in the project root for full license information.
- * 
- * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper;
 
@@ -14,14 +13,18 @@ import java.util.Locale;
 
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
-import de.cookindustries.lib.spring.gui.i18n.TranslationProvider;
+import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 
+/**
+ * @since 1.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
 public abstract class AbsValueMapObjectMapper<T>
 {
 
-    private final TranslationProvider translationProvider;
+    private final AbsTranslationProvider translationProvider;
 
-    protected AbsValueMapObjectMapper(TranslationProvider translationProvider)
+    protected AbsValueMapObjectMapper(AbsTranslationProvider translationProvider)
     {
         this.translationProvider = translationProvider;
     }
@@ -84,7 +87,7 @@ public abstract class AbsValueMapObjectMapper<T>
 
         for (String value : values)
         {
-            text = translationProvider.getTranslationMap().getText(locale, value);
+            text = translationProvider.getText(locale, value);
             checked = selection != null && value.equals(selection);
 
             list.add(InputValue.builder().text(text).value(value).checked(checked).build());

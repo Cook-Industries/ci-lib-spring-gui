@@ -1,15 +1,17 @@
-﻿/**
+/**
  * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
- * 
+ * <p>
  * Licensed under the MIT License.
+ * <p>
  * See LICENSE file in the project root for full license information.
- * 
- * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper;
 
 /**
  * Defines operation modes for JSON mapping in {@link JsonMapper}
+ * 
+ * @since 1.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 public enum TreeHandling {
 

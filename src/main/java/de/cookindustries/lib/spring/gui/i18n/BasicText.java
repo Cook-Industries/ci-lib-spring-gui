@@ -1,36 +1,55 @@
-﻿/**
+/**
  * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
- * 
+ * <p>
  * Licensed under the MIT License.
+ * <p>
  * See LICENSE file in the project root for full license information.
- * 
- * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 package de.cookindustries.lib.spring.gui.i18n;
 
 /**
  * Basic text blocks to use as fallbacks
+ * 
+ * @since 1.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 public enum BasicText {
 
-    TEXT_NOT_SET(0, "TNS"), OK(1, "ok"), CANCEL(2, "cancel"), HELP(3, "help"), CLOSE(4, "close");
+    /** Default fallback for no text set */
+    TEXT_NOT_SET("TNS"),
 
-    private final Integer id;
-    private final String  fallback;
+    /** Text for 'ok' button */
+    OK("ok"),
 
-    BasicText(Integer id, String fallback)
+    /** Text for 'cancel' button */
+    CANCEL("cancel"),
+
+    /** Text for 'help' button */
+    HELP("help"),
+
+    /** Text for 'close' button */
+    CLOSE("close");
+
+    private final String text;
+
+    /**
+     * Basic constructor
+     * 
+     * @param id of this text block
+     * @param text to use as a fallback
+     */
+    BasicText(String text)
     {
-        this.id = id;
-        this.fallback = fallback;
+        this.text = text;
     }
 
-    public final Integer getID()
+    /**
+     * Get the fallback text assiciated with this enum
+     * 
+     * @return the fallback text
+     */
+    public final String getText()
     {
-        return id;
-    }
-
-    public final String getFallback()
-    {
-        return fallback;
+        return text;
     }
 }

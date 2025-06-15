@@ -1,10 +1,9 @@
-﻿/**
+/**
  * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
- * 
+ * <p>
  * Licensed under the MIT License.
+ * <p>
  * See LICENSE file in the project root for full license information.
- * 
- * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper;
 
@@ -23,7 +22,7 @@ import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonParsingException;
-import de.cookindustries.lib.spring.gui.i18n.TranslationMap;
+import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
 
 public class JsonMapperTest
 {
@@ -55,7 +54,7 @@ public class JsonMapperTest
         JsonTreeRoot root = getRoot("json-test-files/json-mapper/basic-root-static.json");
 
         // run
-        Container container = JsonMapper.map(root, Locale.ENGLISH, new TranslationMap());
+        Container container = JsonMapper.map(root, Locale.ENGLISH, new StaticTranslationProvider());
 
         // verify
         assertNotNull(container);
@@ -68,7 +67,7 @@ public class JsonMapperTest
         JsonTreeRoot root = getRoot("json-test-files/json-mapper/basic-root-dynamic.json");
 
         // run & verify
-        assertThrows(JsonMapperException.class, () -> JsonMapper.map(root, Locale.ENGLISH, new TranslationMap()));
+        assertThrows(JsonMapperException.class, () -> JsonMapper.map(root, Locale.ENGLISH, new StaticTranslationProvider()));
     }
 
     @Test
@@ -103,7 +102,7 @@ public class JsonMapperTest
         valueMap.add("class1", "testClass");
 
         // run
-        Container container = JsonMapper.map(root, Locale.ENGLISH, new TranslationMap(), valueMap);
+        Container container = JsonMapper.map(root, Locale.ENGLISH, new StaticTranslationProvider(), valueMap);
 
         // verify
         assertTrue(container.getClasses().contains("testClass"));
@@ -118,7 +117,7 @@ public class JsonMapperTest
         ValueMap     valueMap  = new ValueMap();
 
         // run
-        Container    container = JsonMapper.map(root, Locale.ENGLISH, new TranslationMap(), valueMap);
+        Container    container = JsonMapper.map(root, Locale.ENGLISH, new StaticTranslationProvider(), valueMap);
 
         // verify
         assertFalse(container.getClasses().contains("testClass"));
@@ -147,7 +146,7 @@ public class JsonMapperTest
         valueMap.add("param", "testText");
 
         // run
-        Container container = JsonMapper.map(root, Locale.ENGLISH, new TranslationMap(), valueMap);
+        Container container = JsonMapper.map(root, Locale.ENGLISH, new StaticTranslationProvider(), valueMap);
 
         // verify
         assertEquals("testText", ((TextContainer) container).getText());
@@ -161,7 +160,7 @@ public class JsonMapperTest
         ValueMap     valueMap = new ValueMap();
 
         // run & verify
-        assertThrows(JsonParsingException.class, () -> JsonMapper.map(root, Locale.ENGLISH, new TranslationMap(), valueMap));
+        assertThrows(JsonParsingException.class, () -> JsonMapper.map(root, Locale.ENGLISH, new StaticTranslationProvider(), valueMap));
     }
 
     @Test

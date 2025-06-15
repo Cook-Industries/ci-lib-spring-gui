@@ -1,10 +1,9 @@
-﻿/**
+/**
  * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
- * 
+ * <p>
  * Licensed under the MIT License.
+ * <p>
  * See LICENSE file in the project root for full license information.
- * 
- * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper;
 
@@ -25,7 +24,8 @@ import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
 import de.cookindustries.lib.spring.gui.hmi.input.util.Marker;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonParsingException;
-import de.cookindustries.lib.spring.gui.i18n.TranslationMap;
+import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
+import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
@@ -47,38 +47,43 @@ import lombok.Setter;
  * <li>$$class${@code name} - to replace styling classed</li>
  * </ul>
  * The {@code name} attribute is the key to lookup inside the respective source of values.
+ * 
+ * @since 1.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Data
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class JsonMapper
 {
 
-    private static final String          SRC                                 = "src";
-    private static final String          SUFFIX                              = "suffix";
-    private static final String          PREFIX                              = "prefix";
-    private static final String          MAX_CHARS                           = "maxChars";
-    private static final String          TARGET                              = "target";
-    private static final String          HREF                                = "href";
-    private static final String          MAX                                 = "max";
-    private static final String          MIN                                 = "min";
-    private static final String          CHECKED                             = "checked";
-    private static final String          IMAGE                               = "image";
-    private static final String          ON_CLICK                            = "onClick";
-    private static final String          BTN_CLASS                           = "btnClass";
-    private static final String          TEXT                                = "text";
-    private static final String          PARAMETER_S_IS_EXPECTED_BUT_NOT_SET = "parameter [%s] is expected but not set";
-    private static final String          DEFAULT_DATE                        = "0000-00-00";
-    private static final String          PLACEHOLDER                         = "placeholder";
-    private static final String          DEFAULT_VAL                         = "";
-    private static final String          NAME                                = "name";
-    private static final String          VALUE                               = "value";
-    private static final String          SUBMIT_AS                           = "submitAs";
-    private static final String          ON_INPUT                            = "onInput";
-    private static final String          INDICATOR_VALUE_PLACEHOLDER         = "$$value$";
-    private static final String          INDICATOR_TEXT_PLACEHOLDER          = "$$text$";
-    private static final String          INDICATOR_CLASS_PLACEHOLDER         = "$$class$";
+    private static final String                    SRC                                 = "src";
+    private static final String                    SUFFIX                              = "suffix";
+    private static final String                    PREFIX                              = "prefix";
+    private static final String                    MAX_CHARS                           = "maxChars";
+    private static final String                    TARGET                              = "target";
+    private static final String                    HREF                                = "href";
+    private static final String                    MAX                                 = "max";
+    private static final String                    MIN                                 = "min";
+    private static final String                    CHECKED                             = "checked";
+    private static final String                    IMAGE                               = "image";
+    private static final String                    ON_CLICK                            = "onClick";
+    private static final String                    BTN_CLASS                           = "btnClass";
+    private static final String                    TEXT                                = "text";
+    private static final String                    PARAMETER_S_IS_EXPECTED_BUT_NOT_SET = "parameter [%s] is expected but not set";
+    private static final String                    DEFAULT_DATE                        = "0000-00-00";
+    private static final String                    PLACEHOLDER                         = "placeholder";
+    private static final String                    DEFAULT_VAL                         = "";
+    private static final String                    NAME                                = "name";
+    private static final String                    VALUE                               = "value";
+    private static final String                    SUBMIT_AS                           = "submitAs";
+    private static final String                    ON_INPUT                            = "onInput";
+    private static final String                    INDICATOR_VALUE_PLACEHOLDER         = "$$value$";
+    private static final String                    INDICATOR_TEXT_PLACEHOLDER          = "$$text$";
+    private static final String                    INDICATOR_CLASS_PLACEHOLDER         = "$$class$";
 
-    private static final ContainerType[] CONTAINER_CHILDREN                  =
+    private static final StaticTranslationProvider NOOP_TRANSLATION_PROVIDER           = new StaticTranslationProvider();
+
+    private static final ContainerType[]           CONTAINER_CHILDREN                  =
         {
             ContainerType.AUDIO,
             ContainerType.BUTTON,
@@ -94,16 +99,16 @@ public class JsonMapper
             ContainerType.TEXT
         };
 
-    private static final ContainerType[] LINK_CHILDREN                       = {ContainerType.TEXT};
+    private static final ContainerType[]           LINK_CHILDREN                       = {ContainerType.TEXT};
 
-    private final TreeHandling           handling;
-    private final Locale                 locale;
-    private final TranslationMap         translationMap;
-    private final ValueMap[]             valueMaps;
+    private final TreeHandling                     handling;
+    private final Locale                           locale;
+    private final AbsTranslationProvider           translationProvider;
+    private final ValueMap[]                       valueMaps;
 
     @Getter(value = AccessLevel.NONE)
     @Setter(value = AccessLevel.NONE)
-    private Integer                      count                               = 0;
+    private Integer                                count                               = 0;
 
     /**
      * Validate a {@link JsonTreeRoot} and map it to a {@link Container} tree in a {@link TreeHandling#STATIC} context.
@@ -118,7 +123,7 @@ public class JsonMapper
         root.validate();
 
         final JsonMapper mapper = new JsonMapper(TreeHandling.valueOf(root.getHandling().toUpperCase()), Locale.ENGLISH,
-            new TranslationMap(), new ValueMap[0]);
+            NOOP_TRANSLATION_PROVIDER, new ValueMap[0]);
 
         return mapper.transform(root);
     }
@@ -135,7 +140,7 @@ public class JsonMapper
      * @return the mapped {@code Container}
      * @throws JsonMapperException if mapping is set to dynamic but no {@code valueMap} is provided
      */
-    public static Container map(JsonTreeRoot root, Locale locale, TranslationMap translationMap, final ValueMap... valueMaps)
+    public static Container map(JsonTreeRoot root, Locale locale, AbsTranslationProvider translationProvider, final ValueMap... valueMaps)
     {
         final TreeHandling handling = TreeHandling.valueOf(root.getHandling().toUpperCase());
 
@@ -149,7 +154,7 @@ public class JsonMapper
             .stream(valueMaps)
             .forEach(ValueMap::seal);
 
-        final JsonMapper mapper = new JsonMapper(handling, locale, translationMap, valueMaps);
+        final JsonMapper mapper = new JsonMapper(handling, locale, translationProvider, valueMaps);
 
         return mapper.transform(root);
     }
@@ -192,7 +197,7 @@ public class JsonMapper
             else if (key.startsWith(INDICATOR_TEXT_PLACEHOLDER) && expectedType.equals(String.class))
             {
                 String keyName = key.substring(INDICATOR_TEXT_PLACEHOLDER.length());
-                value = expectedType.cast(extractFromTranslationMap(keyName));
+                value = expectedType.cast(getTranslatedText(keyName));
             }
         }
 
@@ -248,9 +253,9 @@ public class JsonMapper
         }
     }
 
-    private String extractFromTranslationMap(String key)
+    private String getTranslatedText(String key)
     {
-        return translationMap.getText(locale, key);
+        return translationProvider.getText(locale, key);
     }
 
     private <T> T getParameterValue(PseudoElement element, Integer depth, String key, Class<T> expectedType)
@@ -352,7 +357,7 @@ public class JsonMapper
 
         JsonTreeRoot   root   = mapper.map(path);
 
-        return JsonMapper.map(root, locale, translationMap, valueMaps);
+        return JsonMapper.map(root, locale, translationProvider, valueMaps);
     }
 
     /**

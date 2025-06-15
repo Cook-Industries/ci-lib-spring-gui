@@ -1,10 +1,9 @@
-﻿/**
+/**
  * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
- * 
+ * <p>
  * Licensed under the MIT License.
+ * <p>
  * See LICENSE file in the project root for full license information.
- * 
- * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 package de.cookindustries.lib.spring.gui.hmi.input;
 
@@ -16,10 +15,10 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * {@link Textfield} represents a text input field.<br>
- * <br>
- * Required fields are: {@link Textfield#uid}, {@link Textfield#name}, {@link Textfield#submitAs}, {@link Textfield#value},
- * {@link Textfield#placeholder},
+ * {@link Textfield} represents a text input field.
+ * 
+ * @since 1.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @SuperBuilder
 @Getter

@@ -1,10 +1,9 @@
-﻿/**
+/**
  * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
- * 
+ * <p>
  * Licensed under the MIT License.
+ * <p>
  * See LICENSE file in the project root for full license information.
- * 
- * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 package de.cookindustries.lib.spring.gui.hmi.input.util;
 
@@ -31,6 +30,9 @@ import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
 
 /**
  * Utility to extract information from form data
+ * 
+ * @since 1.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 public final class InputExtractor
 {

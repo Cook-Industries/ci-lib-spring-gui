@@ -1,10 +1,9 @@
-﻿/**
+/**
  * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
- * 
+ * <p>
  * Licensed under the MIT License.
+ * <p>
  * See LICENSE file in the project root for full license information.
- * 
- * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 package de.cookindustries.lib.spring.gui.i18n;
 
@@ -15,28 +14,37 @@ import java.util.Locale;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class TranslationProvider
+/**
+ * Translation provider to load JSON files from resources
+ * 
+ * @since 1.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
+public final class ResourceTranslationProvider extends AbsTranslationProvider
 {
 
+    private final List<String> paths;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    private TranslationMap     translationMap;
-
-    public void initTranslationMapStatic(List<String> paths)
+    public ResourceTranslationProvider(List<String> paths)
     {
-        translationMap = new TranslationMap();
+        this.paths = paths;
+    }
 
+    @Override
+    protected void initMaps()
+    {
         for (String path : paths)
         {
             try
             {
                 TranslationMapping mapping = map(path);
 
-                Locale             locale  = new Locale(mapping.getLanguage(), mapping.getCountry());
+                Locale             locale  = Locale.of(mapping.getLanguage(), mapping.getCountry());
 
                 for (TranslationMappingText text : mapping.getElements())
                 {
-                    translationMap.addTranslation(locale, text.getKey(), text.getText());
+                    addTranslation(locale, text.getKey(), text.getText());
                 }
             }
             catch (Exception ex)
@@ -44,13 +52,6 @@ public class TranslationProvider
                 // TODO: write exception
             }
         }
-
-        translationMap.seal();
-    }
-
-    public TranslationMap getTranslationMap()
-    {
-        return translationMap;
     }
 
     private TranslationMapping map(String path) throws IOException

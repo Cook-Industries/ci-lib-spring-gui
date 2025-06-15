@@ -1,10 +1,9 @@
-﻿/**
+/**
  * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
- * 
+ * <p>
  * Licensed under the MIT License.
+ * <p>
  * See LICENSE file in the project root for full license information.
- * 
- * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 package de.cookindustries.lib.spring.gui.i18n;
 
@@ -12,20 +11,24 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.cookindustries.lib.spring.gui.util.Sealable;
-
 /**
- * Aggrigation for translations
+ * Base class for creation of source based translations.
+ * 
+ * @since 1.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-public final class TranslationMap extends Sealable
+public abstract class AbsTranslationProvider
 {
 
     private Map<Locale, Map<String, String>> translations = new ConcurrentHashMap<>();
 
-    public TranslationMap()
-    {
-        super(TranslationMap.class);
-    }
+    protected AbsTranslationProvider()
+    {}
+
+    /**
+     * Method to be implemented by concrete class to fill the {@code Translations}.
+     */
+    protected abstract void initMaps();
 
     /**
      * Add a translation {@code text} based on a {@code locale} and {@code key}
@@ -33,14 +36,10 @@ public final class TranslationMap extends Sealable
      * @param locale to associate with
      * @param key to associate to
      * @param text to use
-     * @throws IllegalArgumentException if {@code locale} is null
-     * @throws IllegalArgumentException if {@code key} is null or empty
-     * @throws IllegalArgumentException if {@code text} is null or empty
+     * @throws IllegalArgumentException if {@code locale} is null, or if {@code key} or {@code text} are null or empty
      */
-    public void addTranslation(Locale locale, String key, String text)
+    protected final void addTranslation(Locale locale, String key, String text)
     {
-        checkSeal();
-
         if (locale == null)
         {
             throw new IllegalArgumentException("translation locale cannot be null");
@@ -68,44 +67,14 @@ public final class TranslationMap extends Sealable
     }
 
     /**
-     * Add a whole map of translations. If {@code translationMap} is null, a empty map will be associated
+     * Get a translation from a {@link Locale} and a {@code key}
      * 
-     * @param locale to associate with
-     * @param translationMap to add
-     * @throws IllegalArgumentException if {@code locale} is null
-     */
-    public void addTranslations(Locale locale, Map<String, String> translationMap)
-    {
-        checkSeal();
-
-        if (locale == null)
-        {
-            throw new IllegalArgumentException("translation local can not be null");
-        }
-
-        Map<String, String> map = translations.get(locale);
-
-        if (map == null)
-        {
-            map = new ConcurrentHashMap<>();
-            translations.put(locale, map);
-        }
-
-        if (translationMap != null)
-        {
-            map.putAll(translationMap);
-        }
-    }
-
-    /**
-     * Get a translation from a {@code locale} and a {@code key}
-     * 
-     * @param locale to fetch
+     * @param locale to associate
      * @param key to fetch
-     * @return either the associated text, or "{@code key} not set." if no associate exists
+     * @return either the associated text, or "I18N [{@code key}] not set." if no associate exists
      * @throws IllegalArgumentException if {@code locale} is null, or if {@code key} is null or empty
      */
-    public String getText(Locale locale, String key)
+    public final String getText(Locale locale, String key)
     {
         if (locale == null)
         {
