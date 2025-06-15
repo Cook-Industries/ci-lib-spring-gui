@@ -43,7 +43,8 @@ import lombok.Setter;
  * These keywords are:
  * <ul>
  * <li>$$value${@code name} - to replace values in {@code inputs} and so on depending on type, with values from a {@link ValueMap}</li>
- * <li>$$text${@code name} - to replace text with a translation defined by a {@link Locale} and values from a {@link TranslationMap}</li>
+ * <li>$$text${@code name} - to replace text with a translation defined by a {@link Locale} and values from a
+ * {@link AbsTranslationProvider}</li>
  * <li>$$class${@code name} - to replace styling classed</li>
  * </ul>
  * The {@code name} attribute is the key to lookup inside the respective source of values.
@@ -113,7 +114,7 @@ public class JsonMapper
     /**
      * Validate a {@link JsonTreeRoot} and map it to a {@link Container} tree in a {@link TreeHandling#STATIC} context.
      * <p>
-     * Uses {@link Locale#ENGLISH} as a language, an empty {@link TranslationMap} and no {@link ValueMap}s.
+     * Uses {@link Locale#ENGLISH} as a language, an {@link StaticTranslationProvider} and no {@link ValueMap}s.
      *
      * @param root to map
      * @return the mapped {@code Container}
@@ -135,7 +136,7 @@ public class JsonMapper
      *
      * @param root to map
      * @param locale the language to use from {@code translationMap}
-     * @param translationMap the map to fetch tranlation values
+     * @param translationProvider to fetch tranlation values
      * @param valueMaps {@code ValueMap}s to link to dynamic fill-in content. These will be sealed before usage!
      * @return the mapped {@code Container}
      * @throws JsonMapperException if mapping is set to dynamic but no {@code valueMap} is provided
