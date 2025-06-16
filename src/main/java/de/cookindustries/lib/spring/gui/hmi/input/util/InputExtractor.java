@@ -8,9 +8,6 @@
 package de.cookindustries.lib.spring.gui.hmi.input.util;
 
 import java.sql.Date;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,15 +18,54 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 
-import de.cookindustries.lib.spring.gui.hmi.input.util.exception.InvalidInputKeyException;
+import de.cookindustries.lib.spring.gui.hmi.container.FormContainer;
+import de.cookindustries.lib.spring.gui.hmi.input.File;
 import de.cookindustries.lib.spring.gui.response.message.HighlightMessage;
+import de.cookindustries.lib.spring.gui.response.message.MessageTarget;
 import de.cookindustries.lib.spring.gui.response.message.MessageType;
 import de.cookindustries.lib.spring.gui.response.message.ModalMessage;
 import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
 
 /**
- * Utility to extract information from form data
+ * Utility to extract information from {@code Form} data into data objects.
+ * <p>
+ * A {@code InputExtractor} is supposed to run as a helper to streamline the validation and retrival-of-data process. It is intended to work
+ * with DTO objects either as POJOs with setters, or a builder.
+ * <p>
+ * A {@code InputExtractor} can olso validate a {@link MultipartFile} intended as a file upload from a {@link File}-input. This validation
+ * only checks whether there are any files uploaded and how many, but nothing about the state or value of the files, since this is up to the
+ * developer.
+ * <p>
+ * Example:
+ * 
+ * <pre>
+ * 
+ * public NotificationResponse handleFrom(MultiValueMap<String, String> formData, MultipartFile[] files)
+ * {
+ *     InputExtractor extractor = new InputExtractor(inputs, files);
+ *     TransformDtoBuilder dtoBuilder = TransformDto.builder();
+ * 
+ *     extractor.consumeString("mail", dtoBuilder::mail);
+ *     extractor.consumeString("name", dtoBuilder::name);
+ *     extractor.consumeEnum("resultType", ImageType.class, dtoBuilder::resultType);
+ *     extractor.checkFiles(false, true);
+ * 
+ *     if (extractor.hasMessages())
+ *     {
+ *         return NotificationResponse
+ *             .builder()
+ *             .messages(extractor.getMessages())
+ *             .build();
+ *     }
+ * 
+ *     TransformDto transformData = dtoBuilder.build();
+ * 
+ *     // do here with the data whatever you need...
+ *     // [...]
+ * }
+ * </pre>
  * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
@@ -37,24 +73,37 @@ import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
 public final class InputExtractor
 {
 
-    private static final DateFormat             DATE_FORMAT = new SimpleDateFormat("yyyy-mm-dd");
-
     private final String                        formId;
     private final MultiValueMap<String, String> inputs;
-    private final List<ResponseMessage>         messages    = new ArrayList<>();
+    private final MultipartFile[]               files;
+    private final List<ResponseMessage>         messages = new ArrayList<>();
     private final Boolean                       useModalMessages;
 
     /**
-     * Create a extractor for this
+     * Create a extractor for a {@link FormContainer} result
      * <p>
      * It is assumed that the {@code key} '__form_id' exists inside {@code inputs} and is non-null.
      * 
-     * @param inputs to use
-     * @throws IllegalArgumentException if key '__form_id' id {@code null} or empty
+     * @param inputs from the {@code Form}
+     * @throws IllegalArgumentException if {@code key} '__form_id' id {@code null} or empty
      */
     public InputExtractor(MultiValueMap<String, String> inputs)
     {
-        this(inputs, false);
+        this(inputs, null, false);
+    }
+
+    /**
+     * Create a extractor for a {@link FormContainer} result
+     * <p>
+     * It is assumed that the {@code key} '__form_id' exists inside {@code inputs} and is non-null.
+     * 
+     * @param inputs from the {@code Form}
+     * @param files from the {@code Form}
+     * @throws IllegalArgumentException if {@code key} '__form_id' id {@code null} or empty
+     */
+    public InputExtractor(MultiValueMap<String, String> inputs, MultipartFile[] files)
+    {
+        this(inputs, files, false);
     }
 
     /**
@@ -62,34 +111,23 @@ public final class InputExtractor
      * <p>
      * It is assumed that the {@code key} '__form_id' exists inside {@code inputs} and is non-null.
      * 
-     * @param inputs to use
-     * @throws IllegalArgumentException if key '__form_id' id {@code null} or empty
+     * @param inputs from the {@code Form}
+     * @param files from the {@code Form}
+     * @param useModalMessages true, if the reporting messages should be shown in a {@link MessageTarget#MODAL} instead of
+     *            {@link MessageTarget#MARKER}
+     * @throws IllegalArgumentException if {@code key} '__form_id' id {@code null} or empty
      */
-    public InputExtractor(MultiValueMap<String, String> inputs, Boolean useModalMessages)
+    public InputExtractor(MultiValueMap<String, String> inputs, MultipartFile[] files, Boolean useModalMessages)
     {
         this.inputs = inputs;
+        this.files = files;
         this.useModalMessages = useModalMessages;
 
-        formId = inputs.getFirst("__form_id");
+        formId = (String) inputs.getFirst("__form_id");
 
         if (formId == null || formId.isBlank())
         {
             throw new IllegalArgumentException("key [__form_id] cannot be null/empty");
-        }
-    }
-
-    /**
-     * Check whether {@code key} is valid
-     * 
-     * @param key to check
-     * @return {@code this} for chaining
-     * @throws InvalidInputKeyException if the key is {@code null} or empty
-     */
-    private void check(String key)
-    {
-        if (key == null || key.isBlank())
-        {
-            throw new InvalidInputKeyException("key cannot be null/empty");
         }
     }
 
@@ -102,7 +140,10 @@ public final class InputExtractor
      */
     private String getValue(String key)
     {
-        check(key);
+        if (key == null || key.isBlank())
+        {
+            throw new IllegalArgumentException("key cannot be null/empty");
+        }
 
         String value = inputs.getFirst(key);
 
@@ -119,8 +160,7 @@ public final class InputExtractor
     {
         if (value == null)
         {
-            String msg = String.format("value retrival to key [%s] is expected but returned null", key);
-            addMessage(key, msg, MessageType.ERROR);
+            throw new IllegalArgumentException(String.format("value retrival to key [%s] is expected but returned null", key));
         }
     }
 
@@ -154,30 +194,27 @@ public final class InputExtractor
      */
     public InputExtractor consumeString(String key, String pattern, Consumer<String> consumer)
     {
+        String value = getValue(key);
+
         try
         {
-            String value = getValue(key);
-
             checkValue(key, value);
 
-            if (value != null)
+            if (pattern != null)
             {
-                if (pattern != null)
+                Pattern pat = Pattern.compile(pattern);
+                Matcher mat = pat.matcher(value);
+
+                if (!mat.matches())
                 {
-                    Pattern pat = Pattern.compile(pattern);
-                    Matcher mat = pat.matcher(value);
+                    String msg = String.format("key [%s] value [%s] does not match pattern [%s]", key, value, pat);
+                    addMessage(key, msg, MessageType.ERROR);
 
-                    if (!mat.matches())
-                    {
-                        String msg = String.format("key [%s] value [%s] does not match pattern [%s]", key, value, pat);
-                        addMessage(key, msg, MessageType.ERROR);
-
-                        return this;
-                    }
+                    return this;
                 }
-
-                consumer.accept(value);
             }
+
+            consumer.accept(value);
         }
         catch (Exception ex)
         {
@@ -205,7 +242,7 @@ public final class InputExtractor
     }
 
     /**
-     * Extract a {@link Integer} conforming to {@code lower}(inclusive) &gt;= value &lt;= {@code upper}(inclusive) bound range
+     * Consume a {@link Integer} conforming to {@code lower}(inclusive) &gt;= value &lt;= {@code upper}(inclusive) bound range
      * <p>
      * The {@code consumer} will only be triggered if the value associated with {@code key} is non-null.
      * 
@@ -213,31 +250,31 @@ public final class InputExtractor
      * @param lowerBound of valid value (inclusive)
      * @param upperBound of valid value (inclusive)
      * @param consumer to feed
+     * @return {@code this} for chaining
      * @throws InvalidInputKeyException if {@code key} is null/empty
      */
     public InputExtractor consumeInteger(String key, Integer lowerBound, Integer upperBound, Consumer<Integer> consumer)
     {
-        String value = null;
+        String value = getValue(key);;
 
         try
         {
-            value = getValue(key);
-
             checkValue(key, value);
 
-            if (value != null && !value.isBlank())
-            {
-                Integer i = Integer.parseInt(value);
+            Integer i = Integer.parseInt(value);
 
-                if (lowerBound != null && upperBound != null && i >= lowerBound && i <= upperBound)
-                {
-                    consumer.accept(i);
-                }
-                else
-                {
-                    String msg = String.format("key [%s] with value [%s] is out of range of [%s]/[%s]", key, value, lowerBound, upperBound);
-                    addMessage(key, msg, MessageType.ERROR);
-                }
+            if (lowerBound == null && upperBound == null)
+            {
+                consumer.accept(i);
+            }
+            else if (lowerBound != null && i >= lowerBound && upperBound != null && i <= upperBound)
+            {
+                consumer.accept(i);
+            }
+            else
+            {
+                String msg = String.format("key [%s] with value [%s] is out of range of [%s]/[%s]", key, value, lowerBound, upperBound);
+                addMessage(key, msg, MessageType.ERROR);
             }
         }
         catch (NumberFormatException ex)
@@ -254,34 +291,58 @@ public final class InputExtractor
     }
 
     /**
+     * Consume a {@link Double}
+     * <p>
+     * The {@code consumer} will only be triggered if the value associated with {@code key} is non-null.
+     * 
+     * @param key to look-up
+     * @param consumer to feed
+     * @return {@code this} for chaining
+     * @throws InvalidInputKeyException if {@code key} is null/empty
+     */
+    public InputExtractor consumeDouble(String key, Consumer<Double> consumer)
+    {
+        String value = getValue(key);
+
+        try
+        {
+            checkValue(key, value);
+
+            Double d = Double.parseDouble(value);
+
+            consumer.accept(d);
+        }
+        catch (NumberFormatException ex)
+        {
+            String msg = String.format("key [%s] value [%s] cannot be parsed as [Double]", key, value);
+            addMessage(key, msg, MessageType.ERROR);
+        }
+        catch (Exception ex)
+        {
+            addUnexpectedErrorMessage(key, ex.getMessage());
+        }
+
+        return this;
+    }
+
+    /**
      * Extract a {@link Date} in the format yyyy-mm-dd
      * 
      * @param key to look-up
+     * @return {@code this} for chaining
      * @throws InvalidInputKeyException if {@code key} is null/empty
      */
     public InputExtractor consumeDate(String key, Consumer<Date> consumer)
     {
-        String value = null;
+        String value = getValue(key);
 
         try
         {
-            value = getValue(key);
-
             checkValue(key, value);
 
-            if (value != null)
-            {
-                java.util.Date date    = DATE_FORMAT.parse(value);
+            Date sqlDate = Date.valueOf(value);
 
-                Date           sqlDate = new java.sql.Date(date.getTime());
-
-                consumer.accept(sqlDate);
-            }
-        }
-        catch (ParseException ex)
-        {
-            String msg = String.format("key [%s] value [%s] cannot be parsed as [SqlDate] in format yyyy-mm-dd", key, value);
-            addMessage(key, msg, MessageType.ERROR);
+            consumer.accept(sqlDate);
         }
         catch (Exception ex)
         {
@@ -298,22 +359,20 @@ public final class InputExtractor
      * @param key to look-up
      * @param source of enums
      * @param consumer to feed
+     * @return {@code this} for chaining
      * @throws InvalidInputKeyException if {@code key} is null/empty
      */
     public <E extends Enum<E>> InputExtractor consumeEnum(String key, Class<E> source, Consumer<E> consumer)
     {
+        String value = getValue(key);
+
         try
         {
-            String value = getValue(key);
-
             checkValue(key, value);
 
-            if (value != null)
-            {
-                E e = Arrays.stream(source.getEnumConstants()).filter(t -> value.equals(t.name())).findFirst().get();
+            E e = Arrays.stream(source.getEnumConstants()).filter(t -> value.toUpperCase().equals(t.name())).findFirst().get();
 
-                consumer.accept(e);
-            }
+            consumer.accept(e);
         }
         catch (NoSuchElementException ex)
         {
@@ -323,6 +382,32 @@ public final class InputExtractor
         catch (Exception ex)
         {
             addUnexpectedErrorMessage(key, ex.getMessage());
+        }
+
+        return this;
+    }
+
+    /**
+     * Check if {@code files} contain something.
+     * <p>
+     * Tests, based on the parameters, if a error message should be raised or not regarding an empty {@code files} array.
+     * 
+     * @param nullable true, if null/empty is an allowed value
+     * @param multipleAllowed true, if more than one file can be uploaded
+     * @return {@code this} for chaining
+     */
+    public InputExtractor checkFiles(Boolean nullable, Boolean multipleAllowed)
+    {
+        if (files == null || files.length == 0)
+        {
+            if (!nullable)
+            {
+                addMessage(formId, "files are null/empty but expected", MessageType.ERROR);
+            }
+        }
+        else if (files.length > 1 && !multipleAllowed)
+        {
+            addMessage(formId, "more than one file uploaded yet only one expected", MessageType.ERROR);
         }
 
         return this;
