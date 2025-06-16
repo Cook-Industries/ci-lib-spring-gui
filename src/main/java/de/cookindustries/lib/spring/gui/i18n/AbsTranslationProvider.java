@@ -23,7 +23,9 @@ public abstract class AbsTranslationProvider
     private Map<Locale, Map<String, String>> translations = new ConcurrentHashMap<>();
 
     protected AbsTranslationProvider()
-    {}
+    {
+        initMaps();
+    }
 
     /**
      * Method to be implemented by concrete class to fill the {@code Translations}.

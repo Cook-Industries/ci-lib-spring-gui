@@ -26,7 +26,7 @@ public final class StaticTranslationProvider extends AbsTranslationProvider
 
         for (BasicText text : BasicText.values())
         {
-            addTranslation(eng, text.name(), text.getText());
+            addTranslation(eng, text.getText(), text.getText());
         }
     }
 }

@@ -40,7 +40,8 @@ public final class ResourceTranslationProvider extends AbsTranslationProvider
             {
                 TranslationMapping mapping = map(path);
 
-                Locale             locale  = Locale.of(mapping.getLanguage(), mapping.getCountry());
+                toString();
+                Locale locale = new Locale(mapping.getLanguage(), mapping.getCountry());
 
                 for (TranslationMappingText text : mapping.getElements())
                 {

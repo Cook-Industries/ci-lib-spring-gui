@@ -1103,12 +1103,7 @@ public class JsonMapper
         InputValueList      selectedValues =
             getParameterValue(element, depth, "selectedValues", InputValueList.class, new InputValueList());
         Boolean             multiple       = getParameterValue(element, depth, "multiple", Boolean.class, Boolean.FALSE);
-        InputValueList      inputValues    = extractInputValues(element, depth, multiple);
-
-        for (PseudoElement pe : element.getChildren())
-        {
-            inputValues.add(transformInputValue(pe, depth));
-        }
+        InputValueList      inputValues    = extractInputValues(element, depth, false);
 
         return ListSelection
             .builder()

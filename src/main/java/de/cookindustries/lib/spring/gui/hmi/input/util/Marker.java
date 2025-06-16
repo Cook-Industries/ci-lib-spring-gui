@@ -7,13 +7,17 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input.util;
 
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@Data
+@Builder
+@Getter
+@Jacksonized
 public class Marker
 {
 
