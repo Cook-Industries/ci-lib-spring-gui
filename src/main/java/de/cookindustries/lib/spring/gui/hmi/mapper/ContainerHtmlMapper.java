@@ -276,7 +276,6 @@ public final class ContainerHtmlMapper
 
     private String render(SplittedContainer splittedContainer)
     {
-
         String      head          = render(splittedContainer.getHead());
         String      tail          = render(splittedContainer.getTail());
 
@@ -443,7 +442,12 @@ public final class ContainerHtmlMapper
                 .build()
                 .html();
 
-        HtmlElement elementMapper = HtmlElement.builder().tag(TAG_DIV).content(StringAdapter.from(label, input)).build();
+        HtmlElement elementMapper =
+            HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .content(StringAdapter.from(label, input))
+                .build();
 
         return elementMapper.html();
     }
@@ -506,7 +510,11 @@ public final class ContainerHtmlMapper
                 .html();
 
         HtmlElement elementMapper =
-            HtmlElement.builder().tag(TAG_DIV).content(input).build();
+            HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .content(input)
+                .build();
 
         return elementMapper.html();
     }
@@ -689,8 +697,7 @@ public final class ContainerHtmlMapper
             HtmlElement
                 .builder()
                 .tag(TAG_DIV)
-                .content(StringAdapter.from(label, resolveMarker(formId, number.getUid(), number.getMarker()),
-                    input))
+                .content(StringAdapter.from(label, resolveMarker(formId, number.getUid(), number.getMarker()), input))
                 .build();
 
         return elementMapper.html();
@@ -729,8 +736,7 @@ public final class ContainerHtmlMapper
             HtmlElement
                 .builder()
                 .tag(TAG_DIV)
-                .content(StringAdapter.from(label, resolveMarker(formId, password.getUid(), password.getMarker()),
-                    input))
+                .content(StringAdapter.from(label, resolveMarker(formId, password.getUid(), password.getMarker()), input))
                 .build();
 
         return elementMapper.html();

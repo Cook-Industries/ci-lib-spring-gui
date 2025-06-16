@@ -68,7 +68,13 @@ public abstract class AbsValueMapObjectMapper<T>
      */
     protected <E extends Enum<E>> InputValueList mapSelectionValue(E selection, Class<E> enumClass, Locale locale)
     {
-        return mapSelectionValue(selection.name(), Arrays.stream(enumClass.getEnumConstants()).map(e -> e.name()).toList(), locale);
+        return mapSelectionValue(
+            selection.name(),
+            Arrays
+                .stream(enumClass.getEnumConstants())
+                .map(e -> e.name())
+                .toList(),
+            locale);
     }
 
     /**
@@ -90,7 +96,13 @@ public abstract class AbsValueMapObjectMapper<T>
             text = translationProvider.getText(locale, value);
             checked = selection != null && value.equals(selection);
 
-            list.add(InputValue.builder().text(text).value(value).checked(checked).build());
+            list.add(
+                InputValue
+                    .builder()
+                    .text(text)
+                    .value(value)
+                    .checked(checked)
+                    .build());
         }
 
         return list;
