@@ -10,11 +10,11 @@
 	</parent>
 	<groupId>de.cook-industries</groupId>
 	<artifactId>lib-spring-gui</artifactId>
-	<version>2.0.0</version>	
+	<version>1.0.0</version>	
     <packaging>jar</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
-	<description>Library for remote GUI creation in Spring</description>
+	<description>Library in Spring Boot context for remote GUI creation and GUI interaction.</description>
 
 	<licenses>
 		<license>
