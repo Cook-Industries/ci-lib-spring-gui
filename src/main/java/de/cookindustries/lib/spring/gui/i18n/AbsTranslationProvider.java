@@ -23,14 +23,12 @@ public abstract class AbsTranslationProvider
     private Map<Locale, Map<String, String>> translations = new ConcurrentHashMap<>();
 
     protected AbsTranslationProvider()
-    {
-        initMaps();
-    }
+    {}
 
     /**
      * Method to be implemented by concrete class to fill the {@code Translations}.
      */
-    protected abstract void initMaps();
+    public abstract AbsTranslationProvider initMaps();
 
     /**
      * Add a translation {@code text} based on a {@code locale} and {@code key}

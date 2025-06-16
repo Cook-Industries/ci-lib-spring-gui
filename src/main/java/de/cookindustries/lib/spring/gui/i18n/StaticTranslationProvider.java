@@ -20,7 +20,7 @@ public final class StaticTranslationProvider extends AbsTranslationProvider
 {
 
     @Override
-    protected void initMaps()
+    public final AbsTranslationProvider initMaps()
     {
         Locale eng = Locale.ENGLISH;
 
@@ -28,5 +28,7 @@ public final class StaticTranslationProvider extends AbsTranslationProvider
         {
             addTranslation(eng, text.getText(), text.getText());
         }
+
+        return this;
     }
 }

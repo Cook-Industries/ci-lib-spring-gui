@@ -32,7 +32,7 @@ public final class ResourceTranslationProvider extends AbsTranslationProvider
     }
 
     @Override
-    protected void initMaps()
+    public final AbsTranslationProvider initMaps()
     {
         for (String path : paths)
         {
@@ -53,6 +53,8 @@ public final class ResourceTranslationProvider extends AbsTranslationProvider
                 // TODO: write exception
             }
         }
+
+        return this;
     }
 
     private TranslationMapping map(String path) throws IOException
