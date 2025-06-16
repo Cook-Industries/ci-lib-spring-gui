@@ -25,15 +25,29 @@ import lombok.experimental.SuperBuilder;
 public abstract class Response
 {
 
+    /**
+     * the action associated with this response
+     */
     @NonNull
-    private final Action          action = inferType();
+    private final ResponseAction  action = inferType();
 
+    /**
+     * a list of {@link ResponseMessage}s to show in the GUI
+     */
     @Singular
     private List<ResponseMessage> messages;
 
+    /**
+     * a list of {@link Call}s to perform on the GUI
+     */
     @Singular
     private List<Call>            calls;
 
-    protected abstract Action inferType();
+    /**
+     * Infer the concrete type of action for the implementing class
+     * 
+     * @return the action this class represents
+     */
+    protected abstract ResponseAction inferType();
 
 }

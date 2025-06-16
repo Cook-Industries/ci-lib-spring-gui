@@ -58,9 +58,9 @@ public class ContentResponse extends Response
     private final Boolean      replace   = false;
 
     @Override
-    protected Action inferType()
+    protected ResponseAction inferType()
     {
-        return Action.CONTENT;
+        return ResponseAction.CONTENT;
     }
 
     public String getContentHtml()

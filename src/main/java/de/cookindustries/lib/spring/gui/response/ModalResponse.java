@@ -27,8 +27,8 @@ public class ModalResponse extends Response
     private Modal modal;
 
     @Override
-    protected Action inferType()
+    protected ResponseAction inferType()
     {
-        return Action.MODAL;
+        return ResponseAction.MODAL;
     }
 }

@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import de.cookindustries.lib.spring.gui.hmi.container.FormContainer;
 import de.cookindustries.lib.spring.gui.hmi.input.File;
+import de.cookindustries.lib.spring.gui.hmi.input.Input;
 import de.cookindustries.lib.spring.gui.response.message.HighlightMessage;
 import de.cookindustries.lib.spring.gui.response.message.MessageTarget;
 import de.cookindustries.lib.spring.gui.response.message.MessageType;
@@ -37,6 +38,9 @@ import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
  * A {@code InputExtractor} can olso validate a {@link MultipartFile} intended as a file upload from a {@link File}-input. This validation
  * only checks whether there are any files uploaded and how many, but nothing about the state or value of the files, since this is up to the
  * developer.
+ * <p>
+ * Output of validation is given in the form of {@link HighlightMessage}s bound to {@link Marker} definitions on the {@link Input}, or
+ * alternativly as {@link ModalMessage}s with more descriptive error messages.
  * <p>
  * Example:
  * 

@@ -7,11 +7,26 @@
  */
 package de.cookindustries.lib.spring.gui.response;
 
+import de.cookindustries.lib.spring.gui.hmi.input.Input;
+import de.cookindustries.lib.spring.gui.response.message.HighlightMessage;
+import de.cookindustries.lib.spring.gui.response.message.ModalMessage;
+import de.cookindustries.lib.spring.gui.response.message.PopupMessage;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
+ * A {@code notification} response to send information about API calls back to the GUI.
+ * <p>
+ * This object is an aggregator since the type of message and their behaviour is defined by the message to send.
+ * <p>
+ * Supported types:
+ * <ul>
+ * <li>{@link HighlightMessage} that links to a {@link Marker} on a {@link Input}</li>
+ * <li>{@link ModalMessage} that will trigger a permanent modal frame that needs active user interaction to close it</li>
+ * <li>{@link PopupMessage} that will show up in the designated pop-up region and will automatically disapear after a set time frame</li>
+ * </ul>
+ * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
@@ -22,9 +37,9 @@ public class NotificationResponse extends Response
 {
 
     @Override
-    protected Action inferType()
+    protected ResponseAction inferType()
     {
-        return Action.NOTIFICATION;
+        return ResponseAction.NOTIFICATION;
     }
 
 }

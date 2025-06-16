@@ -8,7 +8,7 @@
 package de.cookindustries.lib.spring.gui.util;
 
 import de.cookindustries.lib.spring.gui.hmi.ValuePair;
-import de.cookindustries.lib.spring.gui.response.Action;
+import de.cookindustries.lib.spring.gui.response.ResponseAction;
 
 /**
  * @since 1.0.0
@@ -22,7 +22,7 @@ public class StandardCommands
 
     }
 
-    public static String callStm(String requestUrl, Action action, ValuePair... valuePairs)
+    public static String callStm(String requestUrl, ResponseAction action, ValuePair... valuePairs)
     {
         StringConcat sc = new StringConcat();
 

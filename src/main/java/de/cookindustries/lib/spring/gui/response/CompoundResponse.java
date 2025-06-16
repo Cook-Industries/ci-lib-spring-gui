@@ -28,9 +28,9 @@ public class CompoundResponse extends Response
     private List<Response> responses;
 
     @Override
-    protected Action inferType()
+    protected ResponseAction inferType()
     {
-        return Action.COMPOUND;
+        return ResponseAction.COMPOUND;
     }
 
 }
