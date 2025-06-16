@@ -46,7 +46,7 @@ import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
  * 
  * <pre>
  * 
- * public NotificationResponse handleFrom(MultiValueMap<String, String> formData, MultipartFile[] files)
+ * public NotificationResponse handleFrom(MultiValueMap&lt;String, String&gt; formData, MultipartFile[] files)
  * {
  *     InputExtractor extractor = new InputExtractor(inputs, files);
  *     TransformDtoBuilder dtoBuilder = TransformDto.builder();
@@ -86,10 +86,10 @@ public final class InputExtractor
     /**
      * Create a extractor for a {@link FormContainer} result
      * <p>
-     * It is assumed that the {@code key} '__form_id' exists inside {@code inputs} and is non-null.
+     * It is assumed that the {@code key} {@code __form_id} exists inside {@code inputs} and is non-null.
      * 
      * @param inputs from the {@code Form}
-     * @throws IllegalArgumentException if {@code key} '__form_id' id {@code null} or empty
+     * @throws IllegalArgumentException if {@code key} {@code __form_id} id {@code null} or empty
      */
     public InputExtractor(MultiValueMap<String, String> inputs)
     {
@@ -99,11 +99,11 @@ public final class InputExtractor
     /**
      * Create a extractor for a {@link FormContainer} result
      * <p>
-     * It is assumed that the {@code key} '__form_id' exists inside {@code inputs} and is non-null.
+     * It is assumed that the {@code key} {@code __form_id} exists inside {@code inputs} and is non-null.
      * 
      * @param inputs from the {@code Form}
      * @param files from the {@code Form}
-     * @throws IllegalArgumentException if {@code key} '__form_id' id {@code null} or empty
+     * @throws IllegalArgumentException if {@code key} {@code __form_id} id {@code null} or empty
      */
     public InputExtractor(MultiValueMap<String, String> inputs, MultipartFile[] files)
     {
@@ -113,13 +113,13 @@ public final class InputExtractor
     /**
      * Create a extractor for this
      * <p>
-     * It is assumed that the {@code key} '__form_id' exists inside {@code inputs} and is non-null.
+     * It is assumed that the {@code key} {@code __form_id} exists inside {@code inputs} and is non-null.
      * 
      * @param inputs from the {@code Form}
      * @param files from the {@code Form}
      * @param useModalMessages true, if the reporting messages should be shown in a {@link MessageTarget#MODAL} instead of
      *            {@link MessageTarget#MARKER}
-     * @throws IllegalArgumentException if {@code key} '__form_id' id {@code null} or empty
+     * @throws IllegalArgumentException if {@code key} {@code __form_id} id {@code null} or empty
      */
     public InputExtractor(MultiValueMap<String, String> inputs, MultipartFile[] files, Boolean useModalMessages)
     {
@@ -140,7 +140,6 @@ public final class InputExtractor
      * 
      * @param key to look-up
      * @return the value as {@code String} associated with {@code key}
-     * @throws InvalidInputKeyException if {@code key} is {@code null} or emtpy
      */
     private String getValue(String key)
     {
@@ -176,7 +175,6 @@ public final class InputExtractor
      * @param key to look-up
      * @param consumer to feed
      * @return {@code this} for chaining
-     * @throws InvalidInputKeyException if {@code key} is null/empty
      */
     public InputExtractor consumeString(String key, Consumer<String> consumer)
     {
@@ -194,7 +192,6 @@ public final class InputExtractor
      * @param pattern to apply
      * @param consumer to feed
      * @return {@code this} for chaining
-     * @throws InvalidInputKeyException if {@code key} is null/empty
      */
     public InputExtractor consumeString(String key, String pattern, Consumer<String> consumer)
     {
@@ -236,7 +233,6 @@ public final class InputExtractor
      * @param key to look-up
      * @param consumer to feed
      * @return {@code this} for chaining
-     * @throws InvalidInputKeyException if {@code key} is null/empty
      */
     public InputExtractor consumeInteger(String key, Consumer<Integer> consumer)
     {
@@ -255,7 +251,6 @@ public final class InputExtractor
      * @param upperBound of valid value (inclusive)
      * @param consumer to feed
      * @return {@code this} for chaining
-     * @throws InvalidInputKeyException if {@code key} is null/empty
      */
     public InputExtractor consumeInteger(String key, Integer lowerBound, Integer upperBound, Consumer<Integer> consumer)
     {
@@ -302,7 +297,6 @@ public final class InputExtractor
      * @param key to look-up
      * @param consumer to feed
      * @return {@code this} for chaining
-     * @throws InvalidInputKeyException if {@code key} is null/empty
      */
     public InputExtractor consumeDouble(String key, Consumer<Double> consumer)
     {
@@ -334,7 +328,6 @@ public final class InputExtractor
      * 
      * @param key to look-up
      * @return {@code this} for chaining
-     * @throws InvalidInputKeyException if {@code key} is null/empty
      */
     public InputExtractor consumeDate(String key, Consumer<Date> consumer)
     {
@@ -364,7 +357,6 @@ public final class InputExtractor
      * @param source of enums
      * @param consumer to feed
      * @return {@code this} for chaining
-     * @throws InvalidInputKeyException if {@code key} is null/empty
      */
     public <E extends Enum<E>> InputExtractor consumeEnum(String key, Class<E> source, Consumer<E> consumer)
     {

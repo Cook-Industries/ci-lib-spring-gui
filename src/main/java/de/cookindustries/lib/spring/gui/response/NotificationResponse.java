@@ -8,6 +8,7 @@
 package de.cookindustries.lib.spring.gui.response;
 
 import de.cookindustries.lib.spring.gui.hmi.input.Input;
+import de.cookindustries.lib.spring.gui.hmi.input.util.Marker;
 import de.cookindustries.lib.spring.gui.response.message.HighlightMessage;
 import de.cookindustries.lib.spring.gui.response.message.ModalMessage;
 import de.cookindustries.lib.spring.gui.response.message.PopupMessage;
