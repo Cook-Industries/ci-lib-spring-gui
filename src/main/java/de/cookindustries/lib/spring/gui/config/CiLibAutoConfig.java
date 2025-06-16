@@ -7,21 +7,17 @@
  */
 package de.cookindustries.lib.spring.gui.config;
 
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * Configuration to ensure auto config in Spring context
+ * 
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Configuration
-public class BeanConfig
+@ComponentScan(basePackages = "de.cookindustries.lib.spring.gui")
+public class CiLibAutoConfig
 {
-
-    /**
-     * Default constructor
-     */
-    public BeanConfig()
-    {
-        // Default constructor
-    }
 
 }
