@@ -8,7 +8,7 @@
 package de.cookindustries.lib.spring.gui.hmi.mapper;
 
 /**
- * Defines the type of elements to parse the from nested calls
+ * Defines the type of elements to parse from nested calls
  * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>

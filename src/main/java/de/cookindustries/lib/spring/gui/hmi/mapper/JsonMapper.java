@@ -79,6 +79,8 @@ public class JsonMapper
     private static final String                    VALUE                       = "value";
     private static final String                    SUBMIT_AS                   = "submitAs";
     private static final String                    ON_INPUT                    = "onInput";
+
+    private static final String                    BASE_INDICATOR_START        = "$$";
     private static final String                    INDICATOR_VALUE_PLACEHOLDER = "$$value$";
     private static final String                    INDICATOR_TEXT_PLACEHOLDER  = "$$text$";
     private static final String                    INDICATOR_CLASS_PLACEHOLDER = "$$class$";
@@ -310,7 +312,7 @@ public class JsonMapper
             return fallback;
         }
 
-        if (rawValue.startsWith("$$"))
+        if (rawValue.startsWith(BASE_INDICATOR_START))
         {
             value = handlePossiblePlaceholder(rawValue, expectedType, fallback);
         }
@@ -405,6 +407,14 @@ public class JsonMapper
         }).dropWhile(String::isBlank).collect(Collectors.toList());
     }
 
+    /**
+     * Transform a list of children that are expected to be parsable as {@link InputValue} into a {@link InputValueList}.
+     * 
+     * @param element to fetch children from
+     * @param depth of the recursive operation
+     * @param throwWhenEmpty whether to throw an exception on an empty children-list
+     * @return a {@link InputValueList} of the transformed children
+     */
     private InputValueList handleInputValueChildren(PseudoElement element, Integer depth, Boolean throwWhenEmpty)
     {
         InputValueList values = new InputValueList();
@@ -459,19 +469,31 @@ public class JsonMapper
         return transform(root.getRoot(), 0, ContainerType.values());
     }
 
+    /**
+     * Transform {@link PseudoMarker} from a {@link PseudoElement} to internal {@link Marker}s.
+     * 
+     * @param ownerId uid of the parent
+     * @param marker list of markers to transform
+     * @return list containing all markers
+     */
     private List<Marker> transformMarker(String ownerId, List<PseudoMarker> marker)
     {
         List<Marker> list = new ArrayList<>();
 
         for (PseudoMarker pm : marker)
         {
+            MarkerCategory category = MarkerCategory.valueOf(pm.getCategory().toUpperCase());
+            MarkerType     type     = MarkerType.valueOf(pm.getType().toUpperCase());
+            String         text     =
+                pm.getText().startsWith(BASE_INDICATOR_START) ? handlePossiblePlaceholder(pm.getText(), String.class) : pm.getText();
+
             list.add(
                 Marker
                     .builder()
                     .ownerId(ownerId)
-                    .category(MarkerCategory.valueOf(pm.getCategory().toUpperCase()))
-                    .type(MarkerType.valueOf(pm.getType().toUpperCase()))
-                    .text(handlePossiblePlaceholder(pm.getText(), String.class))
+                    .category(category)
+                    .type(type)
+                    .text(text)
                     .build());
         }
 

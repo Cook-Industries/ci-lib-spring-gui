@@ -37,7 +37,7 @@ public abstract class Sealable
     }
 
     /**
-     * Check if this element is sealed
+     * Check if this object is sealed
      * 
      * @throws ObjectSealedException if this object is sealed
      */

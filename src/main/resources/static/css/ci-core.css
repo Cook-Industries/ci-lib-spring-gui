@@ -1,8 +1,11 @@
 /**
- * Copyright(c) 2025 sebastian koch/Cook Industries. All rights reserved.
-
- *
- * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
+ * <p>
+ * Licensed under the MIT License.
+ * <p>
+ * See LICENSE file in the project root for full license information.
+ * 
+ * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
 body,
@@ -122,11 +125,8 @@ html {
   opacity: 1;
   animation-name: fadeOutAnimation;
   animation-duration: 3s;
-  /* Duration of the fade effect */
   animation-delay: 3s;
-  /* Delay before the fade effect starts */
   animation-fill-mode: forwards;
-  /* Keeps the element in the final state of animation */
 }
 
 @keyframes fadeOutAnimation {
@@ -281,6 +281,10 @@ html {
 
 /* === < modal ================================================================================== */
 /* === > form =================================================================================== */
+.form-container button {
+  margin: 1rem;
+}
+
 .form-label {
   margin-top: 1rem;
 }
@@ -303,5 +307,5 @@ html {
 
 .form-list-selection-item:first-child {
   width: 75%;
-}
+} 
 /* === < form =================================================================================== */

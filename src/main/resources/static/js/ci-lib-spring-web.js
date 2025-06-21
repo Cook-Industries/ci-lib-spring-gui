@@ -13,10 +13,13 @@ export {
 };
 
 /**
- * Copyright(c) 2025 sebastian koch/Cook Industries. All rights reserved.
-
- *
- * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
+ * <p>
+ * Licensed under the MIT License.
+ * <p>
+ * See LICENSE file in the project root for full license information.
+ * 
+ * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
 const version = "";
@@ -651,9 +654,7 @@ function extractValuesToSubmit(target) {
           break;
 
         case "RADIO":
-          formData.append(
-            id,
-            $(elem).find('input[type="radio"]:checked').val()
+          formData.append(id, $(elem).find('input[type="radio"]:checked').val()
           );
           break;
 
@@ -686,7 +687,6 @@ function extractValuesToSubmit(target) {
     }
   }
 
-  console.log(formData);
   return formData;
 }
 

@@ -45,12 +45,10 @@ public final class GUIFactory
      */
     public Container fromComponentJson(String path)
     {
-        JsonTreeMapper mapper = new JsonTreeMapper();
-
-        JsonTreeRoot   root;
         try
         {
-            root = mapper.map(path);
+            JsonTreeMapper mapper = new JsonTreeMapper();
+            JsonTreeRoot   root   = mapper.map(path);
 
             return JsonMapper.map(root);
         }
@@ -69,12 +67,10 @@ public final class GUIFactory
      */
     public Container fromComponentJson(String path, Locale locale, ValueMap... valueMap)
     {
-        JsonTreeMapper mapper = new JsonTreeMapper();
-
-        JsonTreeRoot   root;
         try
         {
-            root = mapper.map(path);
+            JsonTreeMapper mapper = new JsonTreeMapper();
+            JsonTreeRoot   root   = mapper.map(path);
 
             return JsonMapper.map(root, locale, translationProvider, valueMap);
         }

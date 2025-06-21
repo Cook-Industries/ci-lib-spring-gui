@@ -214,6 +214,7 @@ public final class ContainerHtmlMapper
                 .tag(TAG_DIV)
                 .attribute(new Attribute(ATT_ID, formContainer.getUid()))
                 .attribute(new Attribute(ATT_ON_CLICK, formContainer.getOnClick()))
+                .clazz("form-container")
                 .classes(formContainer.getClasses())
                 .dataAttributes(formContainer.getDataAttributes())
                 .content(content)
@@ -570,9 +571,7 @@ public final class ContainerHtmlMapper
                                     .button(Button
                                         .builder()
                                         .text("X")
-                                        .onClick(String.format(
-                                            "removeListSelectionItem('%s')",
-                                            uuid))
+                                        .onClick(String.format("removeListSelectionItem('%s')", uuid))
                                         .build())
                                     .build())
                             .build()))
