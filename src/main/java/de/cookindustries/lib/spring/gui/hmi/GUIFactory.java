@@ -12,19 +12,22 @@ import java.util.Locale;
 import org.springframework.stereotype.Component;
 
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
+import de.cookindustries.lib.spring.gui.hmi.input.util.InputExtractor;
 import de.cookindustries.lib.spring.gui.hmi.mapper.JsonMapper;
 import de.cookindustries.lib.spring.gui.hmi.mapper.JsonTreeMapper;
 import de.cookindustries.lib.spring.gui.hmi.mapper.JsonTreeRoot;
 import de.cookindustries.lib.spring.gui.hmi.mapper.ValueMap;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
+import de.cookindustries.lib.spring.gui.response.NotificationResponse;
+import de.cookindustries.lib.spring.gui.response.Response;
 
 /**
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Component
-public class GUIFactory
+public final class GUIFactory
 {
 
     private final AbsTranslationProvider translationProvider;
@@ -35,7 +38,7 @@ public class GUIFactory
     }
 
     /**
-     * Read in a static template and transform into a {@link Container}
+     * Read a static template and transform into a {@link Container}
      * 
      * @param path to read in
      * @return the parsed {@code Container}
@@ -58,7 +61,7 @@ public class GUIFactory
     }
 
     /**
-     * Read in a dynamic template and transform into a {@link Container}
+     * Read a dynamic template and transform into a {@link Container}
      * 
      * @param path to read in
      * @param valueMap dynamic {@code valueMap}
@@ -79,5 +82,17 @@ public class GUIFactory
         {
             throw new JsonMapperException(String.format("error building gui component [%s] : [%s]", path, e.getMessage()));
         }
+    }
+
+    /**
+     * @param inputExtractor
+     * @return a {@link NotificationResponse} containing the marker raised by {@link InputExtractor}
+     */
+    public Response getActiveMarkerResponse(InputExtractor inputExtractor)
+    {
+        return NotificationResponse
+            .builder()
+            .messages(inputExtractor.getMessages())
+            .build();
     }
 }

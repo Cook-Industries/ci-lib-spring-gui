@@ -37,7 +37,7 @@ public final class AudioContainer extends Container
     private final Boolean controls;
 
     /**
-     * whether this audio should start playing outmatically
+     * whether this audio should start playing automatically
      */
     @NonNull
     private final Boolean autoplay;

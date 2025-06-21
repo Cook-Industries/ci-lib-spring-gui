@@ -15,7 +15,7 @@ package de.cookindustries.lib.spring.gui.hmi.mapper;
  */
 public enum TreeHandling {
 
-    /** Defines static transformation without incorporation of value replacement */
+    /** Defines static transformation <b>without</b> incorporation of value replacement */
     STATIC,
 
     /** Defines dynamic transformation with incorporation of value replacement */

@@ -21,7 +21,7 @@ class JsonTreeRootTest
     void test_validate_ok()
     {
         // setup
-        JsonTreeRoot root = new JsonTreeRoot("static", new PseudoElement());
+        JsonTreeRoot root = new JsonTreeRoot("static", PseudoElement.builder().type("CONTENT").build());
 
         // run & verify
         assertDoesNotThrow(() -> root.validate());

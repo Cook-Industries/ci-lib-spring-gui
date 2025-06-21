@@ -26,7 +26,7 @@ public final class ButtonIconContainer extends Container
 {
 
     /**
-     * the underlying iconized button
+     * the underlying iconized {@code button}
      */
     @NonNull
     private ButtonIcon button;

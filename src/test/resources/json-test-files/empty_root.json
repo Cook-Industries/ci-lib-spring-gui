@@ -1,4 +1,7 @@
 {
     "handling": "static",
-    "root": {}
+    "root": {
+        "uid": "uid",
+        "type": "CONTENT"
+    }
 }

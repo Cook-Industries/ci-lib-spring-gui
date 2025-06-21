@@ -10,7 +10,7 @@ package de.cookindustries.lib.spring.gui.hmi.input;
 import java.util.List;
 
 import de.cookindustries.lib.spring.gui.hmi.UiElement;
-import de.cookindustries.lib.spring.gui.hmi.input.util.Marker;
+import de.cookindustries.lib.spring.gui.hmi.input.marker.Marker;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
@@ -18,7 +18,6 @@ import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 
 /**
- * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */

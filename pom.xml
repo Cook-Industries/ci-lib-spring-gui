@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>de.cook-industries</groupId>
 	<artifactId>lib-spring-gui</artifactId>
-	<version>1.0.3</version>	
+	<version>1.1.0</version>	
     <packaging>jar</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -28,7 +28,7 @@
 			<name>Sebastian Koch</name>
 			<email>development@cook-industries.de</email>
 			<organization>Cook Industries</organization>
-			<organizationUrl>https://www.cook-industries.de</organizationUrl>
+			<organizationUrl>https://www.cook-industries.de/development</organizationUrl>
 		</developer>
 	</developers>
 

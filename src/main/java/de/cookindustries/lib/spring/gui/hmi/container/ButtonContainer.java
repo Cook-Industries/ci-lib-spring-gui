@@ -26,7 +26,7 @@ public final class ButtonContainer extends Container
 {
 
     /**
-     * the underlying button input
+     * the underlying {@code button}
      */
     @NonNull
     private Button button;

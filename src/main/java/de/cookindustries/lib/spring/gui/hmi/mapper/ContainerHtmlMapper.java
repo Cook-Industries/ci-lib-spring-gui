@@ -15,9 +15,8 @@ import java.util.stream.Collectors;
 import de.cookindustries.lib.spring.gui.hmi.container.*;
 import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
+import de.cookindustries.lib.spring.gui.hmi.input.marker.Marker;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
-import de.cookindustries.lib.spring.gui.hmi.input.util.Marker;
-import de.cookindustries.lib.spring.gui.response.message.MessageType;
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.Data;
@@ -485,7 +484,7 @@ public final class ContainerHtmlMapper
             HtmlElement
                 .builder()
                 .tag(TAG_DIV)
-                .content(StringAdapter.from(label, resolveMarker(formId, file.getUid(), file.getMarker()), input))
+                .content(StringAdapter.from(label, resolveMarker(formId, file.getSubmitAs(), file.getMarker()), input))
                 .build();
 
         return elementMapper.html();
@@ -697,7 +696,7 @@ public final class ContainerHtmlMapper
             HtmlElement
                 .builder()
                 .tag(TAG_DIV)
-                .content(StringAdapter.from(label, resolveMarker(formId, number.getUid(), number.getMarker()), input))
+                .content(StringAdapter.from(label, resolveMarker(formId, number.getSubmitAs(), number.getMarker()), input))
                 .build();
 
         return elementMapper.html();
@@ -736,7 +735,7 @@ public final class ContainerHtmlMapper
             HtmlElement
                 .builder()
                 .tag(TAG_DIV)
-                .content(StringAdapter.from(label, resolveMarker(formId, password.getUid(), password.getMarker()), input))
+                .content(StringAdapter.from(label, resolveMarker(formId, password.getSubmitAs(), password.getMarker()), input))
                 .build();
 
         return elementMapper.html();
@@ -1016,7 +1015,7 @@ public final class ContainerHtmlMapper
                 .build()
                 .html();
 
-        String      content       = StringAdapter.from(label, resolveMarker(formId, textfield.getUid(), textfield.getMarker()), input);
+        String      content       = StringAdapter.from(label, resolveMarker(formId, textfield.getSubmitAs(), textfield.getMarker()), input);
         HtmlElement elementMapper =
             HtmlElement
                 .builder()
@@ -1027,7 +1026,7 @@ public final class ContainerHtmlMapper
         return elementMapper.html();
     }
 
-    private String resolveMarker(String formId, String uid, List<Marker> marker)
+    private String resolveMarker(String formId, String submitAsId, List<Marker> marker)
     {
         List<String> results = new ArrayList<>();
 
@@ -1038,11 +1037,10 @@ public final class ContainerHtmlMapper
                     HtmlElement
                         .builder()
                         .tag(TAG_DIV)
-                        .attribute(new Attribute(ATT_ID,
-                            String
-                                .format("error-marker-%s-%s-%s", formId, uid,
-                                    MessageType.valueOf(m.getType()
-                                        .toUpperCase()))))
+                        .attribute(
+                            new Attribute(ATT_ID,
+                                String
+                                    .format("error-marker-%s-%s-%s-%s", formId, submitAsId, m.getCategory(), m.getType())))
                         .clazz(CLASS_HIDDEN)
                         .clazz(CLASS_ERROR_HIGHLIGHT)
                         .clazz("error-marker")

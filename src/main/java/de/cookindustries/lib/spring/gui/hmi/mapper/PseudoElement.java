@@ -7,18 +7,18 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
 import de.cookindustries.lib.spring.gui.hmi.container.ContainerType;
 import de.cookindustries.lib.spring.gui.hmi.input.InputType;
-import de.cookindustries.lib.spring.gui.hmi.input.util.Marker;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Singular;
+import lombok.Builder.Default;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * A {@code PseudoElemtent} describes a parsed element from a JSON file, that gets interpreted by a {@link JsonMapper} to transform the
@@ -27,45 +27,51 @@ import lombok.NoArgsConstructor;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
+@Getter
+@Jacksonized
 public class PseudoElement
 {
 
     /**
      * Unique id of this element
      */
-    private String              uid        = null;
+    @Default
+    private final String              uid = null;
 
     /**
      * Type of this element based on {@link ContainerType}, {@link InputType} or {@link InternalElementType}
      */
-    private String              type;
+    @NonNull
+    private final String              type;
 
     /**
      * Class modifiers to apply to this
      */
-    private List<String>        classes    = new ArrayList<>();
+    @Singular
+    private final List<String>        classes;
 
     /**
      * Attributes of this element
      */
-    private Map<String, String> attributes = new HashMap<>();
+    @Singular
+    private final Map<String, String> attributes;
 
     /**
      * Parameters of this element
      */
-    private Map<String, String> parameters = new HashMap<>();
+    private final Map<String, String> parameters;
 
     /**
      * Marker for interactive messaging
      */
-    private List<Marker>        marker     = new ArrayList<>();
+    @Singular("mark")
+    private final List<PseudoMarker>  marker;
 
     /**
      * Children of this element
      */
-    private List<PseudoElement> children   = new ArrayList<>();
+    @Singular
+    private final List<PseudoElement> children;
 
 }

@@ -7,7 +7,7 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.container;
 
-import de.cookindustries.lib.spring.gui.hmi.input.util.Marker;
+import de.cookindustries.lib.spring.gui.hmi.input.marker.Marker;
 import io.micrometer.common.lang.NonNull;
 import lombok.Getter;
 import lombok.Singular;

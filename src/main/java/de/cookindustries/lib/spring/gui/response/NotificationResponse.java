@@ -8,8 +8,8 @@
 package de.cookindustries.lib.spring.gui.response;
 
 import de.cookindustries.lib.spring.gui.hmi.input.Input;
-import de.cookindustries.lib.spring.gui.hmi.input.util.Marker;
-import de.cookindustries.lib.spring.gui.response.message.HighlightMessage;
+import de.cookindustries.lib.spring.gui.hmi.input.marker.Marker;
+import de.cookindustries.lib.spring.gui.response.message.ActivateMarkerMessage;
 import de.cookindustries.lib.spring.gui.response.message.ModalMessage;
 import de.cookindustries.lib.spring.gui.response.message.PopupMessage;
 import lombok.Getter;
@@ -23,7 +23,7 @@ import lombok.extern.jackson.Jacksonized;
  * <p>
  * Supported types:
  * <ul>
- * <li>{@link HighlightMessage} that links to a {@link Marker} on a {@link Input}</li>
+ * <li>{@link ActivateMarkerMessage} that links to a {@link Marker} on a {@link Input}</li>
  * <li>{@link ModalMessage} that will trigger a permanent modal frame that needs active user interaction to close it</li>
  * <li>{@link PopupMessage} that will show up in the designated pop-up region and will automatically disapear after a set time frame</li>
  * </ul>

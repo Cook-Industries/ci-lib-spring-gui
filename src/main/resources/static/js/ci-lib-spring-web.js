@@ -390,7 +390,7 @@ function handlePopupMsg(msg) {
 
 function handleMarkerMsg(msg) {
   $(
-    sprintf("#error-marker-%s-%s-%s", msg.formId, msg.fieldId, msg.type)
+    sprintf("#error-marker-%s-%s-%s-%s", msg.formId, msg.transferId, msg.markerCategory, msg.markerType)
   ).removeClass(CLASS_HIDDEN);
 }
 

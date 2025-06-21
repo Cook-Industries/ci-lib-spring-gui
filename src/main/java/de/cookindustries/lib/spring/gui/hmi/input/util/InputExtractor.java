@@ -23,8 +23,11 @@ import org.springframework.web.multipart.MultipartFile;
 import de.cookindustries.lib.spring.gui.hmi.container.FormContainer;
 import de.cookindustries.lib.spring.gui.hmi.input.File;
 import de.cookindustries.lib.spring.gui.hmi.input.Input;
-import de.cookindustries.lib.spring.gui.response.message.HighlightMessage;
-import de.cookindustries.lib.spring.gui.response.message.MessageTarget;
+import de.cookindustries.lib.spring.gui.hmi.input.marker.Marker;
+import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerCategory;
+import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
+import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
+import de.cookindustries.lib.spring.gui.response.message.ActivateMarkerMessage;
 import de.cookindustries.lib.spring.gui.response.message.MessageType;
 import de.cookindustries.lib.spring.gui.response.message.ModalMessage;
 import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
@@ -35,21 +38,21 @@ import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
  * A {@code InputExtractor} is supposed to run as a helper to streamline the validation and retrival-of-data process. It is intended to work
  * with DTO objects either as POJOs with setters, or a builder.
  * <p>
- * A {@code InputExtractor} can olso validate a {@link MultipartFile} intended as a file upload from a {@link File}-input. This validation
+ * A {@code InputExtractor} can olso validate a {@link MultipartFile} intended as a file upload from a {@link File} input. This validation
  * only checks whether there are any files uploaded and how many, but nothing about the state or value of the files, since this is up to the
  * developer.
  * <p>
- * Output of validation is given in the form of {@link HighlightMessage}s bound to {@link Marker} definitions on the {@link Input}, or
- * alternativly as {@link ModalMessage}s with more descriptive error messages.
+ * Output of validation is given in the form of {@link ActivateMarkerMessage}s bound to {@link Marker} definitions on the {@link Input}, or
+ * alternativly as {@link ModalMessage}s with more descriptive error messages for unexpected exceptions.
  * <p>
  * Example:
  * 
  * <pre>
  * 
- * public NotificationResponse handleFrom(MultiValueMap&lt;String, String&gt; formData, MultipartFile[] files)
+ * public Response handleFrom(MultiValueMap&lt;String, String&gt; formData, MultipartFile[] files)
  * {
  *     InputExtractor extractor = new InputExtractor(inputs, files);
- *     TransformDtoBuilder dtoBuilder = TransformDto.builder();
+ *     DtoBuilder dtoBuilder = Dto.builder();
  * 
  *     extractor.consumeString("mail", dtoBuilder::mail);
  *     extractor.consumeString("name", dtoBuilder::name);
@@ -58,13 +61,10 @@ import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
  * 
  *     if (extractor.hasMessages())
  *     {
- *         return NotificationResponse
- *             .builder()
- *             .messages(extractor.getMessages())
- *             .build();
+ *         return guiFactory.getActiveMarkerResponse(extractor);
  *     }
  * 
- *     TransformDto transformData = dtoBuilder.build();
+ *     Dto data = dtoBuilder.build();
  * 
  *     // do here with the data whatever you need...
  *     // [...]
@@ -77,55 +77,39 @@ import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
 public final class InputExtractor
 {
 
+    private static final String                 FILE_INPUT_SUBMIT_AS_ID = "files";
+
     private final String                        formId;
     private final MultiValueMap<String, String> inputs;
     private final MultipartFile[]               files;
-    private final List<ResponseMessage>         messages = new ArrayList<>();
-    private final Boolean                       useModalMessages;
+    private final List<ResponseMessage>         messages                = new ArrayList<>();
 
     /**
      * Create a extractor for a {@link FormContainer} result
      * <p>
-     * It is assumed that the {@code key} {@code __form_id} exists inside {@code inputs} and is non-null.
+     * It is assumed that the {@code key} <b>__form_id</b> exists inside {@code inputs} and is non-null.
      * 
      * @param inputs from the {@code Form}
-     * @throws IllegalArgumentException if {@code key} {@code __form_id} id {@code null} or empty
+     * @throws IllegalArgumentException if {@code key} <b>__form_id</b> {@code null} or empty
      */
     public InputExtractor(MultiValueMap<String, String> inputs)
     {
-        this(inputs, null, false);
+        this(inputs, null);
     }
 
     /**
      * Create a extractor for a {@link FormContainer} result
      * <p>
-     * It is assumed that the {@code key} {@code __form_id} exists inside {@code inputs} and is non-null.
+     * This object expects that the {@code key} <b>__form_id</b> exists inside {@code inputs} and is non-null.
      * 
      * @param inputs from the {@code Form}
      * @param files from the {@code Form}
-     * @throws IllegalArgumentException if {@code key} {@code __form_id} id {@code null} or empty
+     * @throws IllegalArgumentException if {@code key} <b>__form_id</b> {@code null} or empty
      */
     public InputExtractor(MultiValueMap<String, String> inputs, MultipartFile[] files)
     {
-        this(inputs, files, false);
-    }
-
-    /**
-     * Create a extractor for this
-     * <p>
-     * It is assumed that the {@code key} {@code __form_id} exists inside {@code inputs} and is non-null.
-     * 
-     * @param inputs from the {@code Form}
-     * @param files from the {@code Form}
-     * @param useModalMessages true, if the reporting messages should be shown in a {@link MessageTarget#MODAL} instead of
-     *            {@link MessageTarget#MARKER}
-     * @throws IllegalArgumentException if {@code key} {@code __form_id} id {@code null} or empty
-     */
-    public InputExtractor(MultiValueMap<String, String> inputs, MultipartFile[] files, Boolean useModalMessages)
-    {
         this.inputs = inputs;
         this.files = files;
-        this.useModalMessages = useModalMessages;
 
         formId = (String) inputs.getFirst("__form_id");
 
@@ -140,6 +124,8 @@ public final class InputExtractor
      * 
      * @param key to look-up
      * @return the value as {@code String} associated with {@code key}
+     * @throws IllegalArgumentException if {@code key} is {@code null} or empty
+     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     private String getValue(String key)
     {
@@ -150,56 +136,77 @@ public final class InputExtractor
 
         String value = inputs.getFirst(key);
 
+        if (value == null)
+        {
+            throw new ValueNotPresentException(key);
+        }
+
         return value;
     }
 
     /**
-     * Check if the {@code key} is associated with a value, if not add a {@link ResponseMessage} to the internal {@code message} list
-     * 
-     * @param key to associate
-     * @param value to check
-     */
-    private void checkValue(String key, String value)
-    {
-        if (value == null)
-        {
-            throw new IllegalArgumentException(String.format("value retrival to key [%s] is expected but returned null", key));
-        }
-    }
-
-    /**
-     * Consume a {@link String}
+     * Extract a submitted {@code value} and consume it as a {@link String}. The {@code value} can be empty but not {@code null}.
      * <p>
-     * The {@code consumer} will only be triggered if the value associated with {@code key} is non-null.
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
+     * designated type.
      * 
-     * @param key to look-up
-     * @param consumer to feed
+     * @param key to extract
+     * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public InputExtractor consumeString(String key, Consumer<String> consumer)
+    public InputExtractor extractAndConsumeAsString(String key, Consumer<String> consumer)
     {
-        consumeString(key, null, consumer);
+        extractAndConsumeAsString(key, null, consumer);
 
         return this;
     }
 
     /**
-     * Consume a {@link String} that conforms to a regex pattern
-     * <p>
-     * The {@code consumer} will only be triggered if the value associated with {@code key} is non-null and matches {@code pattern}.
+     * Extract a submitted {@code value} and consume it as a {@link String}. The {@code value} can <b>not</b> be empty or {@code null}.
      * 
-     * @param key to look-up
-     * @param pattern to apply
-     * @param consumer to feed
+     * @param key to extract
+     * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public InputExtractor consumeString(String key, String pattern, Consumer<String> consumer)
+    public InputExtractor extractAndConsumeAsNotEmptyString(String key, Consumer<String> consumer)
     {
-        String value = getValue(key);
-
         try
         {
-            checkValue(key, value);
+            String value = getValue(key);
+
+            if (value.isEmpty())
+            {
+                activateMarker(key, MarkerCategory.ERROR, MarkerType.EMPTY);
+
+                return this;
+            }
+
+            consumer.accept(value);
+        }
+        catch (Exception ex)
+        {
+            addUnexpectedErrorMessage(key, ex.getMessage());
+        }
+
+        return this;
+    }
+
+    /**
+     * Extract a submitted {@code value} and consume it as a {@link String}. The {@code value} <b>must</b> match the {@code pattern}.
+     * <p>
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
+     * designated type.
+     * 
+     * @param key to extract
+     * @param pattern to apply
+     * @param consumer to feed value to
+     * @return {@code this} for chaining
+     */
+    public InputExtractor extractAndConsumeAsString(String key, String pattern, Consumer<String> consumer)
+    {
+        try
+        {
+            String value = getValue(key);
 
             if (pattern != null)
             {
@@ -208,8 +215,7 @@ public final class InputExtractor
 
                 if (!mat.matches())
                 {
-                    String msg = String.format("key [%s] value [%s] does not match pattern [%s]", key, value, pat);
-                    addMessage(key, msg, MessageType.ERROR);
+                    activateMarker(key, MarkerCategory.ERROR, MarkerType.OUT_OF_RANGE);
 
                     return this;
                 }
@@ -226,41 +232,42 @@ public final class InputExtractor
     }
 
     /**
-     * Consume a {@link Integer}
+     * Extract a submitted {@code value} and consume it as a {@link Integer}.
      * <p>
-     * The {@code consumer} will only be triggered if the value associated with {@code key} is non-null.
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
+     * designated type.
      * 
-     * @param key to look-up
-     * @param consumer to feed
+     * @param key to extract
+     * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public InputExtractor consumeInteger(String key, Consumer<Integer> consumer)
+    public InputExtractor extractAndConsumeAsInteger(String key, Consumer<Integer> consumer)
     {
-        consumeInteger(key, null, null, consumer);
+        extractAndConsumeAsInteger(key, null, null, consumer);
 
         return this;
     }
 
     /**
-     * Consume a {@link Integer} conforming to {@code lower}(inclusive) &gt;= value &lt;= {@code upper}(inclusive) bound range
+     * Extract a submitted {@code value} and consume it as a {@link Integer}. The {@code value} <b>must</b> conform inside
+     * {@code lower}(inclusive) &lt;= {@code value} &lt;= {@code upper}(inclusive) range.
      * <p>
-     * The {@code consumer} will only be triggered if the value associated with {@code key} is non-null.
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
+     * designated type.
      * 
-     * @param key to look-up
-     * @param lowerBound of valid value (inclusive)
-     * @param upperBound of valid value (inclusive)
-     * @param consumer to feed
+     * @param key to extract
+     * @param lowerBound of valid {@code value} (inclusive)
+     * @param upperBound of valid {@code value} (inclusive)
+     * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public InputExtractor consumeInteger(String key, Integer lowerBound, Integer upperBound, Consumer<Integer> consumer)
+    public InputExtractor extractAndConsumeAsInteger(String key, Integer lowerBound, Integer upperBound, Consumer<Integer> consumer)
     {
-        String value = getValue(key);;
-
         try
         {
-            checkValue(key, value);
+            String  value = getValue(key);
 
-            Integer i = Integer.parseInt(value);
+            Integer i     = Integer.parseInt(value);
 
             if (lowerBound == null && upperBound == null)
             {
@@ -272,15 +279,9 @@ public final class InputExtractor
             }
             else
             {
-                String msg = String.format("key [%s] with value [%s] is out of range of [%s]/[%s]", key, value, lowerBound, upperBound);
-                addMessage(key, msg, MessageType.ERROR);
+                activateMarker(key, MarkerCategory.ERROR, MarkerType.OUT_OF_RANGE);
             }
         }
-        catch (NumberFormatException ex)
-        {
-            String msg = String.format("key [%s] value [%s] cannot be parsed as [Integer]", key, value);
-            addMessage(key, msg, MessageType.ERROR);
-        }
         catch (Exception ex)
         {
             addUnexpectedErrorMessage(key, ex.getMessage());
@@ -290,30 +291,53 @@ public final class InputExtractor
     }
 
     /**
-     * Consume a {@link Double}
+     * Extract a submitted {@code value} and consume it as a {@link Double}.
      * <p>
-     * The {@code consumer} will only be triggered if the value associated with {@code key} is non-null.
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
+     * designated type.
      * 
-     * @param key to look-up
-     * @param consumer to feed
+     * @param key to extract
+     * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public InputExtractor consumeDouble(String key, Consumer<Double> consumer)
+    public InputExtractor extractAndConsumeAsDouble(String key, Consumer<Double> consumer)
     {
-        String value = getValue(key);
+        return extractAndConsumeAsDouble(key, null, null, consumer);
+    }
 
+    /**
+     * Extract a submitted {@code value} and consume it as a {@link Double}. The {@code value} <b>must</b> conform inside
+     * {@code lower}(exclusive) &lt; {@code value} &lt; {@code upper}(exclusiv) range.
+     * <p>
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
+     * designated type.
+     * 
+     * @param key to extract
+     * @param lowerBound of valid {@code value} (inclusive)
+     * @param upperBound of valid {@code value} (inclusive)
+     * @param consumer to feed value to
+     * @return {@code this} for chaining
+     */
+    public InputExtractor extractAndConsumeAsDouble(String key, Double lowerBound, Double upperBound, Consumer<Double> consumer)
+    {
         try
         {
-            checkValue(key, value);
+            String value = getValue(key);
 
-            Double d = Double.parseDouble(value);
+            Double i     = Double.parseDouble(value);
 
-            consumer.accept(d);
-        }
-        catch (NumberFormatException ex)
-        {
-            String msg = String.format("key [%s] value [%s] cannot be parsed as [Double]", key, value);
-            addMessage(key, msg, MessageType.ERROR);
+            if (lowerBound == null && upperBound == null)
+            {
+                consumer.accept(i);
+            }
+            else if (lowerBound != null && i > lowerBound && upperBound != null && i < upperBound)
+            {
+                consumer.accept(i);
+            }
+            else
+            {
+                activateMarker(key, MarkerCategory.ERROR, MarkerType.OUT_OF_RANGE);
+            }
         }
         catch (Exception ex)
         {
@@ -324,20 +348,22 @@ public final class InputExtractor
     }
 
     /**
-     * Extract a {@link Date} in the format yyyy-mm-dd
+     * Extract a submitted {@code value} and consume it as a {@link Date}. The {@code value} <b>must</b> be in the format
+     * {@code yyyy-mm-dd}.
+     * <p>
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
+     * designated type.
      * 
-     * @param key to look-up
+     * @param key to extract
      * @return {@code this} for chaining
      */
-    public InputExtractor consumeDate(String key, Consumer<Date> consumer)
+    public InputExtractor extractAndConsumeAsDate(String key, Consumer<Date> consumer)
     {
-        String value = getValue(key);
-
         try
         {
-            checkValue(key, value);
+            String value   = getValue(key);
 
-            Date sqlDate = Date.valueOf(value);
+            Date   sqlDate = Date.valueOf(value);
 
             consumer.accept(sqlDate);
         }
@@ -350,30 +376,33 @@ public final class InputExtractor
     }
 
     /**
-     * Extract a {@link Enum}
+     * Extract a submitted {@code value} and consume it as a {@link Enum}.
+     * <p>
+     * This function assumes that the {@code enumClass} constants conform to the default of all-caps form of enum names.
+     * <p>
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
+     * designated type.
      * 
-     * @param <E> enum class
-     * @param key to look-up
-     * @param source of enums
-     * @param consumer to feed
+     * @param <E> enum class type
+     * @param key to extract
+     * @param enumClass source of {@code Enum} values
+     * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public <E extends Enum<E>> InputExtractor consumeEnum(String key, Class<E> source, Consumer<E> consumer)
+    public <E extends Enum<E>> InputExtractor extractAndConsumeAsEnum(String key, Class<E> enumClass, Consumer<E> consumer)
     {
-        String value = getValue(key);
 
         try
         {
-            checkValue(key, value);
+            String value = getValue(key);
 
-            E e = Arrays.stream(source.getEnumConstants()).filter(t -> value.toUpperCase().equals(t.name())).findFirst().get();
+            E      e     = Arrays.stream(enumClass.getEnumConstants()).filter(t -> value.toUpperCase().equals(t.name())).findFirst().get();
 
             consumer.accept(e);
         }
         catch (NoSuchElementException ex)
         {
-            String msg = String.format("key [%s] is not part of enum [%s]", key, source.getSimpleName());
-            addMessage(key, msg, MessageType.ERROR);
+            activateMarker(key, MarkerCategory.ERROR, MarkerType.OUT_OF_RANGE);
         }
         catch (Exception ex)
         {
@@ -386,9 +415,12 @@ public final class InputExtractor
     /**
      * Check if {@code files} contain something.
      * <p>
-     * Tests, based on the parameters, if a error message should be raised or not regarding an empty {@code files} array.
+     * This function assumes that the file transfer name - {@code submitAs} on the {@link File} input - is named {@code files} and will
+     * activate the marker only on this
+     * <p>
+     * This function only checks <b>if</b> files are present, but <b>nothing</b> about their state. This is up to the developer.
      * 
-     * @param nullable true, if null/empty is an allowed value
+     * @param nullable true, if {@code files} is allowed to be {@code null} or {@code empty}
      * @param multipleAllowed true, if more than one file can be uploaded
      * @return {@code this} for chaining
      */
@@ -398,12 +430,12 @@ public final class InputExtractor
         {
             if (!nullable)
             {
-                addMessage(formId, "files are null/empty but expected", MessageType.ERROR);
+                activateMarker(FILE_INPUT_SUBMIT_AS_ID, MarkerCategory.ERROR, MarkerType.EMPTY);
             }
         }
         else if (files.length > 1 && !multipleAllowed)
         {
-            addMessage(formId, "more than one file uploaded yet only one expected", MessageType.ERROR);
+            activateMarker(FILE_INPUT_SUBMIT_AS_ID, MarkerCategory.ERROR, MarkerType.TOO_LONG);
         }
 
         return this;
@@ -417,7 +449,9 @@ public final class InputExtractor
      */
     private void addUnexpectedErrorMessage(String key, String errorMsg)
     {
-        addMessage(key, String.format("key [%s] resulted in unexpected error [%s]", key, errorMsg), MessageType.ERROR);
+        String msg = String.format("key [%s] resulted in unexpected error [%s]", key, errorMsg);
+
+        messages.add(ModalMessage.builder().msg(msg).type(MessageType.ERROR).build());
     }
 
     /**
@@ -427,20 +461,20 @@ public final class InputExtractor
      * @param msg to add
      * @param type that was tried to consume
      */
-    private void addMessage(String key, String msg, MessageType type)
+    private void activateMarker(String key, MarkerCategory category, MarkerType type)
     {
-        if (useModalMessages)
-        {
-            messages.add(ModalMessage.builder().msg(msg).type(type).build());
-        }
-        else
-        {
-            messages.add(HighlightMessage.builder().formId(formId).fieldId(key).type(type).build());
-        }
+        messages.add(
+            ActivateMarkerMessage.builder()
+                .formId(formId)
+                .transferId(key)
+                .markerCategory(category)
+                .markerType(type)
+                .type(MessageType.ERROR)
+                .build());
     }
 
     /**
-     * Check whether this extractor has raised any messages
+     * Check whether this extractor has raised any markers or unexpected exceptions
      * 
      * @return true, if there are messages raise, false otherwise
      */
@@ -450,7 +484,7 @@ public final class InputExtractor
     }
 
     /**
-     * Get a unmodifiable list of {@link ResponseMessage}s raised by the consumations
+     * Get a unmodifiable list of {@link ResponseMessage}s raised by the extractions
      * 
      * @return list of messages
      */

@@ -19,9 +19,11 @@ import java.util.stream.Collectors;
 import de.cookindustries.lib.spring.gui.hmi.container.*;
 import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
+import de.cookindustries.lib.spring.gui.hmi.input.marker.Marker;
+import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerCategory;
+import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
-import de.cookindustries.lib.spring.gui.hmi.input.util.Marker;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonParsingException;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
@@ -57,34 +59,33 @@ import lombok.Setter;
 public class JsonMapper
 {
 
-    private static final String                    SRC                                 = "src";
-    private static final String                    SUFFIX                              = "suffix";
-    private static final String                    PREFIX                              = "prefix";
-    private static final String                    MAX_CHARS                           = "maxChars";
-    private static final String                    TARGET                              = "target";
-    private static final String                    HREF                                = "href";
-    private static final String                    MAX                                 = "max";
-    private static final String                    MIN                                 = "min";
-    private static final String                    CHECKED                             = "checked";
-    private static final String                    IMAGE                               = "image";
-    private static final String                    ON_CLICK                            = "onClick";
-    private static final String                    BTN_CLASS                           = "btnClass";
-    private static final String                    TEXT                                = "text";
-    private static final String                    PARAMETER_S_IS_EXPECTED_BUT_NOT_SET = "parameter [%s] is expected but not set";
-    private static final String                    DEFAULT_DATE                        = "0000-00-00";
-    private static final String                    PLACEHOLDER                         = "placeholder";
-    private static final String                    DEFAULT_VAL                         = "";
-    private static final String                    NAME                                = "name";
-    private static final String                    VALUE                               = "value";
-    private static final String                    SUBMIT_AS                           = "submitAs";
-    private static final String                    ON_INPUT                            = "onInput";
-    private static final String                    INDICATOR_VALUE_PLACEHOLDER         = "$$value$";
-    private static final String                    INDICATOR_TEXT_PLACEHOLDER          = "$$text$";
-    private static final String                    INDICATOR_CLASS_PLACEHOLDER         = "$$class$";
+    private static final String                    SRC                         = "src";
+    private static final String                    SUFFIX                      = "suffix";
+    private static final String                    PREFIX                      = "prefix";
+    private static final String                    MAX_CHARS                   = "maxChars";
+    private static final String                    TARGET                      = "target";
+    private static final String                    HREF                        = "href";
+    private static final String                    MAX                         = "max";
+    private static final String                    MIN                         = "min";
+    private static final String                    CHECKED                     = "checked";
+    private static final String                    IMAGE                       = "image";
+    private static final String                    ON_CLICK                    = "onClick";
+    private static final String                    BTN_CLASS                   = "btnClass";
+    private static final String                    TEXT                        = "text";
+    private static final String                    DEFAULT_DATE                = "0000-00-00";
+    private static final String                    PLACEHOLDER                 = "placeholder";
+    private static final String                    DEFAULT_VAL                 = "";
+    private static final String                    NAME                        = "name";
+    private static final String                    VALUE                       = "value";
+    private static final String                    SUBMIT_AS                   = "submitAs";
+    private static final String                    ON_INPUT                    = "onInput";
+    private static final String                    INDICATOR_VALUE_PLACEHOLDER = "$$value$";
+    private static final String                    INDICATOR_TEXT_PLACEHOLDER  = "$$text$";
+    private static final String                    INDICATOR_CLASS_PLACEHOLDER = "$$class$";
 
-    private static final StaticTranslationProvider NOOP_TRANSLATION_PROVIDER           = new StaticTranslationProvider();
+    private static final StaticTranslationProvider NOOP_TRANSLATION_PROVIDER   = new StaticTranslationProvider();
 
-    private static final ContainerType[]           CONTAINER_CHILDREN                  =
+    private static final ContainerType[]           CONTAINER_CHILDREN          =
         {
             ContainerType.AUDIO,
             ContainerType.BUTTON,
@@ -100,7 +101,7 @@ public class JsonMapper
             ContainerType.TEXT
         };
 
-    private static final ContainerType[]           LINK_CHILDREN                       = {ContainerType.TEXT};
+    private static final ContainerType[]           LINK_CHILDREN               = {ContainerType.TEXT};
 
     private final TreeHandling                     handling;
     private final Locale                           locale;
@@ -109,7 +110,7 @@ public class JsonMapper
 
     @Getter(value = AccessLevel.NONE)
     @Setter(value = AccessLevel.NONE)
-    private Integer                                count                               = 0;
+    private Integer                                count                       = 0;
 
     /**
      * Validate a {@link JsonTreeRoot} and map it to a {@link Container} tree in a {@link TreeHandling#STATIC} context.
@@ -132,7 +133,7 @@ public class JsonMapper
     /**
      * Map a {@link JsonTreeRoot} to a {@link Container} in a {@link TreeHandling#DYNAMIC} context.
      * <p>
-     * Note, that any {@link ValueMap} provided for this will call {@link ValueMap#seal()} before it is used!
+     * Note: any {@link ValueMap} provided for this will call {@link ValueMap#seal()} before it is used!
      *
      * @param root to map
      * @param locale the language to use from {@code translationMap}
@@ -171,20 +172,34 @@ public class JsonMapper
     }
 
     /**
-     * Extracts a value from {@code #valueMaps} based on the provided {@link PseudoElement}, {@code key}, and {@code expectedType}.
+     * Tries to handle a placeholder by fetching from {@code #valueMaps} based on {@code key} and {@code expectedType}.
      * <p>
      * If dynamic handling mode is enabled, it checks for indicator placeholders in the key to determine which mapping to use. If no value
-     * is found, the {@code defaultValue} is returned, or if {@code defaultValue} is {@code null} an exception is thrown.
+     * is found, the {@code null} is returned.
+     * 
+     * @param <I> the expected result type
+     * @param key the key used to look up the value in the value map.
+     * @param expectedType the expected type of the extracted value.
+     * @return the extracted value if found, or {@code null}
+     */
+    private <I> I handlePossiblePlaceholder(String key, Class<I> expectedType)
+    {
+        return handlePossiblePlaceholder(key, expectedType, null);
+    }
+
+    /**
+     * Tries to handle a placeholder by fetching from {@code valueMaps} based on {@code key} and {@code expectedType}.
+     * <p>
+     * If dynamic handling mode is enabled, it checks for indicator placeholders in the {@code key} to determine which mapping to use. If no
+     * value is found, the {@code defaultValue} is returned.
      *
      * @param <I> the expected result type
      * @param key the key used to look up the value in the value map.
-     * @param depth the current depth level of parsing.
      * @param expectedType the expected type of the extracted value.
      * @param defaultValue the default value to return if no value is found.
      * @return the extracted value if found, or {@code defaultValue} if not found
-     * @throws JsonMapperException if there is an error while extracting the value.
      */
-    private <I> I extractFromValueMaps(String key, Class<I> expectedType, I defaultValue) throws JsonMapperException
+    private <I> I handlePossiblePlaceholder(String key, Class<I> expectedType, I defaultValue)
     {
         I value = null;
 
@@ -195,10 +210,15 @@ public class JsonMapper
                 String keyName = key.substring(INDICATOR_VALUE_PLACEHOLDER.length());
                 value = extractFromValueMaps(keyName, expectedType);
             }
+            else if (key.startsWith(INDICATOR_CLASS_PLACEHOLDER))
+            {
+                String keyName = key.substring(INDICATOR_CLASS_PLACEHOLDER.length());
+                value = extractFromValueMaps(keyName, expectedType);
+            }
             else if (key.startsWith(INDICATOR_TEXT_PLACEHOLDER) && expectedType.equals(String.class))
             {
                 String keyName = key.substring(INDICATOR_TEXT_PLACEHOLDER.length());
-                value = expectedType.cast(getTranslatedText(keyName));
+                value = expectedType.cast(translationProvider.getText(locale, keyName));
             }
         }
 
@@ -254,11 +274,6 @@ public class JsonMapper
         }
     }
 
-    private String getTranslatedText(String key)
-    {
-        return translationProvider.getText(locale, key);
-    }
-
     private <T> T getParameterValue(PseudoElement element, Integer depth, String key, Class<T> expectedType)
     {
         return getParameterValue(element, depth, key, expectedType, null);
@@ -288,7 +303,8 @@ public class JsonMapper
         {
             if (fallback == null)
             {
-                throw new JsonParsingException(element.getUid(), 0, this.count, String.format(PARAMETER_S_IS_EXPECTED_BUT_NOT_SET, key));
+                throw new JsonParsingException(element.getUid(), 0, this.count,
+                    String.format("parameter [%s] is expected but not set", key));
             }
 
             return fallback;
@@ -296,7 +312,7 @@ public class JsonMapper
 
         if (rawValue.startsWith("$$"))
         {
-            value = extractFromValueMaps(rawValue, expectedType, fallback);
+            value = handlePossiblePlaceholder(rawValue, expectedType, fallback);
         }
         else
         {
@@ -389,7 +405,7 @@ public class JsonMapper
         }).dropWhile(String::isBlank).collect(Collectors.toList());
     }
 
-    private InputValueList extractInputValues(PseudoElement element, Integer depth, Boolean throwWhenEmpty)
+    private InputValueList handleInputValueChildren(PseudoElement element, Integer depth, Boolean throwWhenEmpty)
     {
         InputValueList values = new InputValueList();
 
@@ -441,6 +457,25 @@ public class JsonMapper
     private Container transform(JsonTreeRoot root) throws JsonMapperException
     {
         return transform(root.getRoot(), 0, ContainerType.values());
+    }
+
+    private List<Marker> transformMarker(String ownerId, List<PseudoMarker> marker)
+    {
+        List<Marker> list = new ArrayList<>();
+
+        for (PseudoMarker pm : marker)
+        {
+            list.add(
+                Marker
+                    .builder()
+                    .ownerId(ownerId)
+                    .category(MarkerCategory.valueOf(pm.getCategory().toUpperCase()))
+                    .type(MarkerType.valueOf(pm.getType().toUpperCase()))
+                    .text(handlePossiblePlaceholder(pm.getText(), String.class))
+                    .build());
+        }
+
+        return list;
     }
 
     /*
@@ -528,7 +563,7 @@ public class JsonMapper
      */
     private AudioContainer transfromAudioContainer(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
         String              src        = getParameterValue(element, depth, SRC, String.class);
@@ -593,7 +628,7 @@ public class JsonMapper
      */
     private ContentContainer transformContentContainer(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
         List<Container>     contents   = new ArrayList<>();
@@ -621,7 +656,7 @@ public class JsonMapper
      */
     private FormContainer transformFormContainer(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
         List<Input>         inputs     = new ArrayList<>();
@@ -649,7 +684,7 @@ public class JsonMapper
      */
     private HiddenContainer transformHiddenContainer(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
         Container           child      =
@@ -675,7 +710,7 @@ public class JsonMapper
      */
     private ImageContainer transformImageContainer(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
         String              src        = getParameterValue(element, depth, SRC, String.class);
@@ -698,7 +733,7 @@ public class JsonMapper
      */
     private LinkContainer transformLinkContainer(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
         String              href       = getParameterValue(element, depth, HREF, String.class);
@@ -728,7 +763,7 @@ public class JsonMapper
      */
     private SplittedContainer transformSplittedContainer(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
         Container           head       = null;
@@ -785,7 +820,7 @@ public class JsonMapper
      */
     private TextContainer transformTextContainer(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
         String              text       = getParameterValue(element, depth, TEXT, String.class);
@@ -842,7 +877,7 @@ public class JsonMapper
      */
     private Button transformButtonInput(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
         String              text       = getParameterValue(element, depth, TEXT, String.class);
@@ -870,7 +905,7 @@ public class JsonMapper
      */
     private ButtonIcon transformButtonIconInput(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
         String              image      = getParameterValue(element, depth, IMAGE, String.class);
@@ -897,10 +932,10 @@ public class JsonMapper
      */
     private Checkbox transformCheckboxInput(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
-        List<Marker>        marker     = element.getMarker();
+        List<Marker>        marker     = transformMarker(uid, element.getMarker());
         String              name       = getParameterValue(element, depth, NAME, String.class);
         String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, "");
@@ -928,10 +963,10 @@ public class JsonMapper
      */
     private Currency transformCurrencyInput(PseudoElement element, Integer depth)
     {
-        String              uid         = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid         = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes     = replaceClasses(element.getClasses());
         Map<String, String> attributes  = element.getAttributes();
-        List<Marker>        marker      = element.getMarker();
+        List<Marker>        marker      = transformMarker(uid, element.getMarker());
         String              name        = getParameterValue(element, depth, NAME, String.class);
         String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, "");
@@ -969,10 +1004,10 @@ public class JsonMapper
      */
     private Date transformDateInput(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
-        List<Marker>        marker     = element.getMarker();
+        List<Marker>        marker     = transformMarker(uid, element.getMarker());
         String              name       = getParameterValue(element, depth, NAME, String.class);
         String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
@@ -1000,10 +1035,10 @@ public class JsonMapper
      */
     private File transformFileInput(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
-        List<Marker>        marker     = element.getMarker();
+        List<Marker>        marker     = transformMarker(uid, element.getMarker());
         String              name       = getParameterValue(element, depth, NAME, String.class);
         String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
@@ -1033,10 +1068,10 @@ public class JsonMapper
      */
     private Hidden transformHiddenInput(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
-        List<Marker>        marker     = element.getMarker();
+        List<Marker>        marker     = transformMarker(uid, element.getMarker());
         String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              value      = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
 
@@ -1062,10 +1097,10 @@ public class JsonMapper
      */
     private Link transformLinkInput(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
-        List<Marker>        marker     = element.getMarker();
+        List<Marker>        marker     = transformMarker(uid, element.getMarker());
         String              text       = getParameterValue(element, depth, TEXT, String.class);
         String              href       = getParameterValue(element, depth, HREF, String.class);
         String              target     = getParameterValue(element, depth, TARGET, String.class, "_self");
@@ -1093,17 +1128,17 @@ public class JsonMapper
      */
     private ListSelection transformListSelectionInput(PseudoElement element, Integer depth)
     {
-        String              uid            = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid            = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes        = replaceClasses(element.getClasses());
         Map<String, String> attributes     = element.getAttributes();
-        List<Marker>        marker         = element.getMarker();
+        List<Marker>        marker         = transformMarker(uid, element.getMarker());
         String              name           = getParameterValue(element, depth, NAME, String.class);
         String              submitAs       = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput        = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
         InputValueList      selectedValues =
             getParameterValue(element, depth, "selectedValues", InputValueList.class, new InputValueList());
         Boolean             multiple       = getParameterValue(element, depth, "multiple", Boolean.class, Boolean.FALSE);
-        InputValueList      inputValues    = extractInputValues(element, depth, false);
+        InputValueList      inputValues    = handleInputValueChildren(element, depth, false);
 
         return ListSelection
             .builder()
@@ -1129,10 +1164,10 @@ public class JsonMapper
      */
     private Number transformNumberInput(PseudoElement element, Integer depth)
     {
-        String              uid         = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid         = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes     = replaceClasses(element.getClasses());
         Map<String, String> attributes  = element.getAttributes();
-        List<Marker>        marker      = element.getMarker();
+        List<Marker>        marker      = transformMarker(uid, element.getMarker());
         String              name        = getParameterValue(element, depth, NAME, String.class);
         String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
@@ -1170,10 +1205,10 @@ public class JsonMapper
      */
     private Password transformPasswordInput(PseudoElement element, Integer depth)
     {
-        String              uid         = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid         = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes     = replaceClasses(element.getClasses());
         Map<String, String> attributes  = element.getAttributes();
-        List<Marker>        marker      = element.getMarker();
+        List<Marker>        marker      = transformMarker(uid, element.getMarker());
         String              name        = getParameterValue(element, depth, NAME, String.class);
         String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
@@ -1201,14 +1236,14 @@ public class JsonMapper
      */
     private Radio transformRadioInput(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
-        List<Marker>        marker     = element.getMarker();
+        List<Marker>        marker     = transformMarker(uid, element.getMarker());
         String              name       = getParameterValue(element, depth, NAME, String.class);
         String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
-        List<InputValue>    values     = extractInputValues(element, depth, true);
+        List<InputValue>    values     = handleInputValueChildren(element, depth, true);
 
         return Radio
             .builder()
@@ -1232,16 +1267,16 @@ public class JsonMapper
      */
     private Select transformSelectInput(PseudoElement element, Integer depth)
     {
-        String               uid         = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String               uid         = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>         classes     = replaceClasses(element.getClasses());
         Map<String, String>  attributes  = element.getAttributes();
-        List<Marker>         marker      = element.getMarker();
+        List<Marker>         marker      = transformMarker(uid, element.getMarker());
         String               name        = getParameterValue(element, depth, NAME, String.class);
         String               submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String               onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
         String               valueSrc    = getParameterValue(element, depth, "values", String.class, "");
-        InputValueList       values      = valueSrc.isBlank() ? extractInputValues(element, depth, false)
-            : extractFromValueMaps(valueSrc, InputValueList.class, new InputValueList());
+        InputValueList       values      = valueSrc.isBlank() ? handleInputValueChildren(element, depth, false)
+            : handlePossiblePlaceholder(valueSrc, InputValueList.class, new InputValueList());
 
         final InputValueList inputValues = new InputValueList();
 
@@ -1272,10 +1307,10 @@ public class JsonMapper
      */
     private Slider transformSliderInput(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
-        List<Marker>        marker     = element.getMarker();
+        List<Marker>        marker     = transformMarker(uid, element.getMarker());
         String              name       = getParameterValue(element, depth, NAME, String.class);
         String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
@@ -1307,10 +1342,10 @@ public class JsonMapper
      */
     private Switch transformSwitchInput(PseudoElement element, Integer depth)
     {
-        String              uid        = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes    = replaceClasses(element.getClasses());
         Map<String, String> attributes = element.getAttributes();
-        List<Marker>        marker     = element.getMarker();
+        List<Marker>        marker     = transformMarker(uid, element.getMarker());
         String              name       = getParameterValue(element, depth, NAME, String.class);
         String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
@@ -1338,10 +1373,10 @@ public class JsonMapper
      */
     private Textarea transformTextareaInput(PseudoElement element, Integer depth)
     {
-        String              uid         = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid         = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes     = replaceClasses(element.getClasses());
         Map<String, String> attributes  = element.getAttributes();
-        List<Marker>        marker      = element.getMarker();
+        List<Marker>        marker      = transformMarker(uid, element.getMarker());
         String              name        = getParameterValue(element, depth, NAME, String.class);
         String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
@@ -1391,10 +1426,10 @@ public class JsonMapper
      */
     private Textfield transformTextfieldInput(PseudoElement element, Integer depth)
     {
-        String              uid         = extractFromValueMaps(element.getUid(), String.class, element.getUid());
+        String              uid         = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
         List<String>        classes     = replaceClasses(element.getClasses());
         Map<String, String> attributes  = element.getAttributes();
-        List<Marker>        marker      = element.getMarker();
+        List<Marker>        marker      = transformMarker(uid, element.getMarker());
         String              name        = getParameterValue(element, depth, NAME, String.class);
         String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
