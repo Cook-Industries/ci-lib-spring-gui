@@ -44,10 +44,10 @@ import lombok.Setter;
  * </ul>
  * These keywords are:
  * <ul>
- * <li>$$value${@code name} - to replace values in {@code inputs} and so on depending on type, with values from a {@link ValueMap}</li>
+ * <li>$$value${@code name} - to replace values in {@code inputs} and so on, depending on type, with values from a {@link ValueMap}</li>
  * <li>$$text${@code name} - to replace text with a translation defined by a {@link Locale} and values from a
  * {@link AbsTranslationProvider}</li>
- * <li>$$class${@code name} - to replace styling classed</li>
+ * <li>$$class${@code name} - to replace styling classes</li>
  * </ul>
  * The {@code name} attribute is the key to lookup inside the respective source of values.
  * 

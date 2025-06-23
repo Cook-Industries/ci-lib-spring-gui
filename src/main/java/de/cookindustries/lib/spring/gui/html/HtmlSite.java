@@ -7,38 +7,48 @@
  */
 package de.cookindustries.lib.spring.gui.html;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
 import de.cookindustries.lib.spring.gui.hmi.mapper.ContainerHtmlMapper;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Singular;
 
 /**
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-public class HtmlSite
+@Builder
+@Getter(value = AccessLevel.PACKAGE)
+public class HtmlSite implements HtmlExportable
 {
 
-    private final ArrayList<HtmlHeadValue> headers;
-    private final ArrayList<CSSLink>       css;
-    private final ArrayList<CSSEntity>     cssInline;
-    private final ArrayList<JsLink>        scripts;
-    private final ArrayList<JsImport>      imports;
-    private final ArrayList<Container>     content;
+    @NonNull
+    private final String              title;
 
-    HtmlSite(ArrayList<HtmlHeadValue> headers, ArrayList<CSSLink> css, ArrayList<CSSEntity> cssInline, ArrayList<JsLink> scripts,
-        ArrayList<JsImport> imports, ArrayList<Container> content)
-    {
-        this.headers = headers;
-        this.css = css;
-        this.cssInline = cssInline;
-        this.scripts = scripts;
-        this.imports = imports;
-        this.content = content;
-    }
+    @Singular
+    private final List<HtmlHeadValue> headers;
 
-    public String getHtmlCode()
+    @Singular
+    private final List<CSSLink>       cssLinks;
+
+    @Singular
+    private final List<CSSEntity>     cssEntities;
+
+    @Singular
+    private final List<JsLink>        jsScripts;
+
+    @Singular
+    private final List<JsImport>      jsImports;
+
+    @Singular
+    private final List<Container>     containers;
+
+    public String getHtmlRep()
     {
         StringConcat sc = new StringConcat();
 
@@ -48,25 +58,30 @@ public class HtmlSite
 
         sc.appendnl("<base href=\"/\">");
 
-        headers.forEach(h -> sc.append(h.getHtmlCode()));
+        headers.forEach(h -> sc.append(h.getHtmlRep()));
 
-        css.forEach(h -> sc.append(h.getHtmlCode()));
+        cssLinks.forEach(h -> sc.append(h.getHtmlRep()));
 
         sc.appendnl("<style>");
 
-        cssInline.forEach(h -> sc.append(h.getHtmlRep()));
+        cssEntities.forEach(h -> sc.append(h.getHtmlRep()));
 
         sc.appendnl("</style>");
 
-        sc.appendnl(JsImportMap.builder().entries(imports).build().getHtmlRep());
+        sc.appendnl(
+            JsImportMap
+                .builder()
+                .entries(jsImports)
+                .build()
+                .getHtmlRep());
 
-        scripts.forEach(h -> sc.append(h.getHtmlRep()));
+        jsScripts.forEach(h -> sc.append(h.getHtmlRep()));
 
         sc.appendnl("</head>");
 
         sc.appendnl("<body>");
 
-        content.forEach(c -> sc.append(ContainerHtmlMapper.map(c)));
+        containers.forEach(c -> sc.append(ContainerHtmlMapper.map(c)));
 
         sc.appendnl("</body>");
         sc.appendnl("</html>");

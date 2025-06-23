@@ -10,29 +10,28 @@ package de.cookindustries.lib.spring.gui.html;
 import java.util.List;
 
 import de.cookindustries.lib.spring.gui.util.StringConcat;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Singular;
 
 /**
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
+@Builder
+@Getter
 public class CSSEntity implements HtmlExportable
 {
 
+    @NonNull
     private final String             name;
+
+    @NonNull
     private final CSSEntityType      type;
+
+    @Singular
     private final List<CSSAttribute> attributes;
-
-    CSSEntity(String name, CSSEntityType type, List<CSSAttribute> attributes)
-    {
-        this.name = name;
-        this.type = type;
-        this.attributes = attributes;
-    }
-
-    public static CSSEntiyBuilder entity(String name, CSSEntityType type)
-    {
-        return new CSSEntiyBuilder(name, type);
-    }
 
     @Override
     public String getHtmlRep()

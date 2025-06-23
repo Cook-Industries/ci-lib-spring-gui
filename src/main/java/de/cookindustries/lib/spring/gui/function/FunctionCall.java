@@ -15,18 +15,17 @@ import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.Data;
 
 /**
- * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Data
-public abstract class Call
+public abstract class FunctionCall
 {
 
     private final String   functionName;
     private final Object[] parameters;
 
-    protected Call(String functionName, Integer paramCnt)
+    protected FunctionCall(String functionName, Integer paramCnt)
     {
         this.functionName = functionName;
         this.parameters = new Object[paramCnt];

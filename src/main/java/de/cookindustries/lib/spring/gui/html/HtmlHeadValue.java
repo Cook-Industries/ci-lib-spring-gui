@@ -7,21 +7,17 @@
  */
 package de.cookindustries.lib.spring.gui.html;
 
+import lombok.Data;
+
 /**
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-abstract class HtmlHeadValue
+@Data
+abstract class HtmlHeadValue implements HtmlExportable
 {
 
-    protected final Header type;
-    protected final String value;
+    private final Header type;
+    private final String value;
 
-    protected HtmlHeadValue(Header type, String value)
-    {
-        this.type = type;
-        this.value = value;
-    }
-
-    abstract String getHtmlCode();
 }

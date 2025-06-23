@@ -11,7 +11,7 @@ package de.cookindustries.lib.spring.gui.html;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-class CSSLink
+public class CSSLink implements HtmlExportable
 {
 
     private final String href;
@@ -21,7 +21,7 @@ class CSSLink
         this.href = href;
     }
 
-    String getHtmlCode()
+    public String getHtmlRep()
     {
         return String.format("<link href=\"%s\" rel=\"stylesheet\">", href);
     }

@@ -7,9 +7,16 @@
  */
 package de.cookindustries.lib.spring.gui.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import de.cookindustries.lib.spring.gui.hmi.GuiFactoryProperties;
+import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
+import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
+
 /**
+ * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Configuration
@@ -22,6 +29,22 @@ public class CiLibBeanConfig
     public CiLibBeanConfig()
     {
         // Default constructor
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(GuiFactoryProperties.class)
+    GuiFactoryProperties createGuiFactoryProperties()
+    {
+        return GuiFactoryProperties
+            .builder()
+            .build();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AbsTranslationProvider.class)
+    AbsTranslationProvider translationProvider()
+    {
+        return new StaticTranslationProvider();
     }
 
 }

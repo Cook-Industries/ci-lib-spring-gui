@@ -7,9 +7,6 @@
  */
 package de.cookindustries.lib.spring.gui.response;
 
-import java.util.List;
-
-import de.cookindustries.lib.spring.gui.function.Call;
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
 import de.cookindustries.lib.spring.gui.hmi.mapper.ContainerHtmlMapper;
 import lombok.AccessLevel;
@@ -44,11 +41,6 @@ public class ContentResponse extends Response
     @NonNull
     @Getter(value = AccessLevel.NONE)
     private final Container    content;
-
-    /**
-     * {@link Call}s to perform
-     */
-    private final List<Call>   callbacks;
 
     /**
      * Whether or not this content should be replace the old content or be appended to it

@@ -11,7 +11,7 @@ package de.cookindustries.lib.spring.gui.html;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-public class HeadTitle extends HtmlHeadValue
+class HeadTitle extends HtmlHeadValue
 {
 
     public HeadTitle(String value)
@@ -20,8 +20,8 @@ public class HeadTitle extends HtmlHeadValue
     }
 
     @Override
-    String getHtmlCode()
+    public String getHtmlRep()
     {
-        return String.format("<title>%s</title>", value);
+        return String.format("<title>%s</title>", getValue());
     }
 }

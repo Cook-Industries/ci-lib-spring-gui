@@ -11,13 +11,12 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public final class CloseModalCall extends Call
+public final class CloseModalCall extends FunctionCall
 {
 
     public CloseModalCall()
