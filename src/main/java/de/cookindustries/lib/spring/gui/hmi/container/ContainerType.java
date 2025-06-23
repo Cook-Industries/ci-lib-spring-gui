@@ -49,6 +49,9 @@ public enum ContainerType {
     BUTTON_ICON,
 
     /** Type for ButtonBar {@link Container} */
-    BUTTON_BAR;
+    BUTTON_BAR,
+
+    /** Type for Modal {@link Container} */
+    MODAL;
 
 }

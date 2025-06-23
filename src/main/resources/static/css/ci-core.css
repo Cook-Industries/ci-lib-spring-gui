@@ -60,6 +60,10 @@ html {
   display: none !important;
 }
 
+.overflow-auto {
+  overflow: auto;
+}
+
 /* === > notifications ========================================================================== */
 #error-overlay {
   display: flex;
@@ -277,6 +281,27 @@ html {
 
 .modal-inlay button {
   margin-top: 1rem;
+}
+
+.modal-buttons {
+  display: flex;
+  flex-direction: row-reverse;
+  width: 100%;
+}
+
+/* One button: align to the right (already handled by row-reverse + flex-start) */
+.modal-buttons:has(> :nth-child(1):nth-last-child(1)) {
+  justify-content: flex-start;
+}
+
+/* Two buttons: one left, one right */
+.modal-buttons:has(> :nth-child(2):nth-last-child(1)) {
+  justify-content: space-between;
+}
+
+/* Three buttons: space evenly */
+.modal-buttons:has(> :nth-child(3):nth-last-child(1)) {
+  justify-content: space-evenly;
 }
 
 /* === < modal ================================================================================== */

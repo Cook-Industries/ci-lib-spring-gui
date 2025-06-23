@@ -137,14 +137,15 @@ public final class ContainerHtmlMapper
         return switch (container.getType())
         {
             case AUDIO -> render((AudioContainer) container);
-            case BUTTON -> render((ButtonContainer) container);
+            case BUTTON -> render((Button) container);
             case BUTTON_BAR -> render((ButtonBarContainer) container);
-            case BUTTON_ICON -> render((ButtonIconContainer) container);
+            case BUTTON_ICON -> render((ButtonIcon) container);
             case CONTENT -> render((ContentContainer) container);
             case HIDDEN -> render((HiddenContainer) container);
             case IMAGE -> render((ImageContainer) container);
             case FORM -> render((FormContainer) container);
             case LINK -> render((LinkContainer) container);
+            case MODAL -> render((ModalContainer) container);
             case SPLITTED -> render((SplittedContainer) container);
             case TAB -> render((TabContainer) container);
             case TEXT -> render((TextContainer) container);
@@ -157,23 +158,50 @@ public final class ContainerHtmlMapper
         return elementNotYetImplemented("audio");
     }
 
-    private String render(ButtonContainer buttonContainer)
+    private String render(Button button)
     {
-        return render(buttonContainer.getButton());
+        return renderInternal(button);
     }
 
     private String render(ButtonBarContainer buttonBarContainer)
     {
-        return buttonBarContainer
-            .getButtons()
-            .stream()
-            .map(b -> render(b))
-            .collect(Collectors.joining(""));
+        return HtmlElement
+            .builder()
+            .tag(TAG_DIV)
+            .attribute(new Attribute(ATT_ID, buttonBarContainer.getUid()))
+            .classes(buttonBarContainer.getClasses())
+            .dataAttributes(buttonBarContainer.getDataAttributes())
+            .contents(
+                buttonBarContainer
+                    .getButtons()
+                    .stream()
+                    .map(b -> renderInternal(b))
+                    .toList())
+            .build()
+            .html();
     }
 
-    private String render(ButtonIconContainer buttonIconContainer)
+    private String render(ButtonIcon buttonIcon)
     {
-        return render(buttonIconContainer.getButton());
+        return elementNotYetImplemented("btn icon");
+    }
+
+    private String renderInternal(Button button)
+    {
+        HtmlElement elementMapper =
+            HtmlElement
+                .builder()
+                .tag("button")
+                .attribute(new Attribute(ATT_ID, button.getUid()))
+                .attribute(new Attribute(ATT_ON_CLICK, button.getOnClick()))
+                .clazz("btn")
+                .clazz(button.getBtnClass().getClassName())
+                .classes(button.getClasses())
+                .dataAttributes(button.getDataAttributes())
+                .content(button.getText())
+                .build();
+
+        return elementMapper.html();
     }
 
     private String render(ContentContainer contentContainer)
@@ -274,6 +302,81 @@ public final class ContainerHtmlMapper
         return elementMapper.html();
     }
 
+    private String render(ModalContainer modalContainer)
+    {
+        List<Button> buttons = new ArrayList<>();
+
+        // order of buttons is reveresed since they are right to left oriented in the modal
+
+        buttons.add(
+            Button
+                .builder()
+                .btnClass(modalContainer.getBtnClassRight())
+                .text(modalContainer.getBtnNameRight())
+                .onClick(modalContainer.getBtnFunctionRight().parse())
+                .build());
+
+        if (modalContainer.getBtnNameCenter() != null && !modalContainer.getBtnNameCenter().isEmpty())
+        {
+            buttons.add(
+                Button
+                    .builder()
+                    .btnClass(modalContainer.getBtnClassCenter())
+                    .text(modalContainer.getBtnNameCenter())
+                    .onClick(modalContainer.getBtnFunctionCenter().parse())
+                    .build());
+        }
+
+        if (modalContainer.getBtnNameLeft() != null && !modalContainer.getBtnNameLeft().isEmpty())
+        {
+            buttons.add(
+                Button
+                    .builder()
+                    .btnClass(modalContainer.getBtnClassLeft())
+                    .text(modalContainer.getBtnNameLeft())
+                    .onClick(modalContainer.getBtnFunctionLeft().parse())
+                    .build());
+        }
+
+        ButtonBarContainer buttonBar     =
+            ButtonBarContainer.builder()
+                .clazz("modal-buttons")
+                .buttons(buttons)
+                .build();
+
+        ContentContainer   modalInlay    =
+            ContentContainer
+                .builder()
+                .clazz("modal-inlay")
+                .content(
+                    TextContainer
+                        .builder()
+                        .clazz("modal-name-text-bold")
+                        .text(modalContainer.getName())
+                        .build())
+                .content(
+                    ContentContainer
+                        .builder()
+                        .clazz("flex-vertical")
+                        .clazz("overflow-auto")
+                        .contents(modalContainer.getContents())
+                        .build())
+                .content(buttonBar)
+                .build();
+
+        HtmlElement        elementMapper =
+            HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .attribute(new Attribute(ATT_ID, modalContainer.getUid()))
+                .classes(modalContainer.getClasses())
+                .dataAttributes(modalContainer.getDataAttributes())
+                .content(render(modalInlay))
+                .build();
+
+        return elementMapper.html();
+    }
+
     private String render(SplittedContainer splittedContainer)
     {
         String      head          = render(splittedContainer.getHead());
@@ -321,8 +424,6 @@ public final class ContainerHtmlMapper
     {
         return switch (input.getType())
         {
-            case BUTTON -> render((Button) input);
-            case BUTTON_ICON -> render((ButtonIcon) input);
             case CHECKBOX -> render((Checkbox) input, formId);
             case CURRENCY -> render((Currency) input, formId);
             case DATE -> render((Date) input, formId);
@@ -341,30 +442,6 @@ public final class ContainerHtmlMapper
             case TEXTBOX -> render((Textbox) input);
             case TEXTFIELD -> render((Textfield) input, formId);
         };
-    }
-
-    private String render(Button button)
-    {
-        HtmlElement elementMapper =
-            HtmlElement
-                .builder()
-                .tag("button")
-                .attribute(new Attribute(ATT_ID, button.getUid()))
-                .attribute(new Attribute(ATT_ON_CLICK, button.getOnClick()))
-                .clazz("btn")
-                .clazz(button.getBtnClass().getClassName())
-                .classes(button.getClasses())
-                .dataAttributes(button.getDataAttributes())
-                .content(button.getText())
-                .build();
-
-        return elementMapper.html();
-    }
-
-    private String render(ButtonIcon buttonIcon)
-    {
-        // TODO: implement
-        return elementNotYetImplemented("btn icon");
     }
 
     private String render(Checkbox checkbox, String formId)
@@ -555,26 +632,24 @@ public final class ContainerHtmlMapper
                     .builder()
                     .tag(TAG_DIV)
                     .attribute(new Attribute(ATT_ID, uuid.toString()))
-                    .content(render(
-                        ContentContainer
-                            .builder()
-                            .clazz("form-list-selection-item")
-                            .dataAttribute(ATT_VALUE, selection.getValue())
-                            .content(
-                                TextContainer
-                                    .builder()
-                                    .text(selection.getText())
-                                    .build())
-                            .content(
-                                ButtonContainer
-                                    .builder()
-                                    .button(Button
+                    .content(
+                        render(
+                            ContentContainer
+                                .builder()
+                                .clazz("form-list-selection-item")
+                                .dataAttribute(ATT_VALUE, selection.getValue())
+                                .content(
+                                    TextContainer
+                                        .builder()
+                                        .text(selection.getText())
+                                        .build())
+                                .content(
+                                    Button
                                         .builder()
                                         .text("X")
                                         .onClick(String.format("removeListSelectionItem('%s')", uuid))
                                         .build())
-                                    .build())
-                            .build()))
+                                .build()))
                     .build()
                     .html();
 
@@ -612,17 +687,10 @@ public final class ContainerHtmlMapper
                 .content(input)
                 .content(
                     render(
-                        ButtonContainer
+                        Button
                             .builder()
-                            .button(
-                                Button
-                                    .builder()
-                                    .text("+")
-                                    .onClick(String
-                                        .format("addListSelectionItem('%s', '%s')",
-                                            selectId,
-                                            list.getUid()))
-                                    .build())
+                            .text("+")
+                            .onClick(String.format("addListSelectionItem('%s', '%s')", selectId, list.getUid()))
                             .build()))
                 .build()
                 .html();

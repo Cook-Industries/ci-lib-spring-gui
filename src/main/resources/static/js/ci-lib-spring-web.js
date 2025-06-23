@@ -190,7 +190,7 @@ function handleResponse(response) {
       break;
 
     case "MODAL":
-      openModal(response.modal);
+      openModal(response.contentHtml);
       break;
 
     case "MODAL_CLOSE":
@@ -493,50 +493,12 @@ function submitAbort() {
  *
  * @returns {undefined}
  */
-function openModal(modal) {
+function openModal(modalHtml) {
   openModals++;
 
-  // -> data attributes
-  let data = "";
-  for (let att in modal.dataAttributes) {
-    let a = modal.dataAttributes[att];
-    data += sprintf(' data-%s="%s"', att, a);
-  }
-  // <-
+  $("#modal-container").append(sprintf('<div id="modal-overlay-%d" class="modal-overlay"></div>', openModals));
 
-  $("#modal-container").append(
-    sprintf(
-      '<div id="modal-overlay-%d" class="modal-overlay"%s><div id="modal-inlay-%d"class="modal-inlay"><div id="modal-name-%d" class="modal-name text-bold">Modal</div><div id="modal-input-%d" class="modal-input flex-vertical"></div><div id="modal-buttons-%d" class="modal-buttons flex-horizontal flex-center"></div></div></div>',
-      openModals,
-      data,
-      openModals,
-      openModals,
-      openModals,
-      openModals,
-      openModals
-    )
-  );
-
-  $(sprintf("#modal-name-%d", openModals)).html(modal.name);
-  $(sprintf("#modal-overlay-%d", openModals)).attr(
-    "data-extraction-id",
-    modal.identifier
-  );
-  $(sprintf("#modal-overlay-%d", openModals)).attr(
-    "data-server-target",
-    modal.requestUrl
-  );
-  $(sprintf("#modal-overlay-%d", openModals)).attr(
-    "data-close-on-overlay",
-    modal.closeOnOverlayClick
-  );
-  $(sprintf("#modal-overlay-%d", openModals)).css("z-index", openModals + 100);
-
-  if (modal.hideBtn === true) {
-    $(sprintf("#modal-buttons-%d", openModals)).addClass(CLASS_HIDDEN);
-  }
-  // <-
-  $(sprintf("#modal-input-%d", openModals)).append(modal.contentHtml);
+  $(sprintf("#modal-overlay-%d", openModals)).append(modalHtml);
 
   $(sprintf("#modal-container")).removeClass(CLASS_HIDDEN);
   $(sprintf("#modal-overlay-%d", openModals)).removeClass(CLASS_HIDDEN);
@@ -612,7 +574,7 @@ function extractValuesToSubmit(target) {
 
   formData.append("__form_id", target);
 
-  for (const elem of $(sprintf('[data-submit-id="%s"]', target))) {
+  for (const elem of $(`#${target} [data-submit-id="${target}"]`)) {
     if ($(elem).attr("data-submit-as") === "") {
       // no submit id set so ignore input
     } else {

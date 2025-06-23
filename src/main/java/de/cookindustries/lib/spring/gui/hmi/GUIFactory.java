@@ -13,11 +13,11 @@ import java.util.Locale;
 import org.springframework.stereotype.Component;
 
 import de.cookindustries.lib.spring.gui.function.FunctionCall;
-import de.cookindustries.lib.spring.gui.hmi.container.ButtonContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.Button;
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
 import de.cookindustries.lib.spring.gui.hmi.container.ContentContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.ModalContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.TextContainer;
-import de.cookindustries.lib.spring.gui.hmi.input.Button;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputExtractor;
 import de.cookindustries.lib.spring.gui.hmi.mapper.JsonMapper;
 import de.cookindustries.lib.spring.gui.hmi.mapper.JsonTreeMapper;
@@ -32,6 +32,7 @@ import de.cookindustries.lib.spring.gui.html.JsPlainLink;
 import de.cookindustries.lib.spring.gui.html.SiteImports;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 import de.cookindustries.lib.spring.gui.response.ContentResponse;
+import de.cookindustries.lib.spring.gui.response.ModalResponse;
 import de.cookindustries.lib.spring.gui.response.NotificationResponse;
 import de.cookindustries.lib.spring.gui.response.message.MessageType;
 import de.cookindustries.lib.spring.gui.response.message.PopupMessage;
@@ -253,14 +254,10 @@ public final class GUIFactory
                                 .uid("error-holder")
                                 .build())
                         .content(
-                            ButtonContainer
+                            Button
                                 .builder()
-                                .button(
-                                    Button
-                                        .builder()
-                                        .text("OK")
-                                        .onClick("dismissErrors()")
-                                        .build())
+                                .text("OK")
+                                .onClick("dismissErrors()")
                                 .build())
                         .build())
                 .build())
@@ -311,7 +308,23 @@ public final class GUIFactory
     }
 
     /**
-     * Create a {@link ContentResponse} from a static template to append or replace existing content on a receiver.
+     * Create a {@link ModalResponse} from a static template.
+     * 
+     * @param resourcePath to load template from
+     * @return a response with the processed content
+     */
+    public ModalResponse createStaticModalResponse(String resourcePath)
+    {
+        ModalContainer content = (ModalContainer) readStaticComponent(resourcePath);
+
+        return ModalResponse
+            .builder()
+            .modal(content)
+            .build();
+    }
+
+    /**
+     * Create a {@link ContentResponse} from a dynamic template to append or replace existing content on a receiver.
      * 
      * @param resourcePath to the dynamic component template
      * @param locale to fetch translations with
@@ -327,7 +340,7 @@ public final class GUIFactory
     }
 
     /**
-     * Create a {@link ContentResponse} from a static template to append or replace existing content on a receiver.
+     * Create a {@link ContentResponse} from a dynamic template to append or replace existing content on a receiver.
      * 
      * @param resourcePath to the dynamic component template
      * @param locale to fetch translations with
@@ -347,6 +360,24 @@ public final class GUIFactory
             .content(content)
             .calls(functionCalls)
             .replace(replace)
+            .build();
+    }
+
+    /**
+     * Create a {@link ModalResponse} from a dynamic template.
+     * 
+     * @param resourcePath to the dynamic component template
+     * @param locale to fetch translations with
+     * @param valueMaps to fetch dynamic values from
+     * @return a response with the processed content
+     */
+    public ModalResponse createDynamicModalResponse(String resourcePath, Locale locale, ValueMap... valueMaps)
+    {
+        ModalContainer content = (ModalContainer) readDynamicComponent(resourcePath, locale, valueMaps);
+
+        return ModalResponse
+            .builder()
+            .modal(content)
             .build();
     }
 

@@ -7,29 +7,31 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.container;
 
-import de.cookindustries.lib.spring.gui.hmi.input.Button;
-import io.micrometer.common.lang.NonNull;
+import de.cookindustries.lib.spring.gui.hmi.input.ButtonClass;
 import lombok.Getter;
+import lombok.NonNull;
+import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * A {@link Container} representing a textual {@code Button}
- * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @SuperBuilder
 @Getter
 @Jacksonized
-public final class ButtonContainer extends Container
+public final class Button extends Container
 {
 
-    /**
-     * the underlying {@code button}
-     */
     @NonNull
-    private Button button;
+    private String      text;
+
+    @NonNull
+    private String      onClick;
+
+    @Default
+    private ButtonClass btnClass = ButtonClass.DEFAULT;
 
     @Override
     protected ContainerType inferType()

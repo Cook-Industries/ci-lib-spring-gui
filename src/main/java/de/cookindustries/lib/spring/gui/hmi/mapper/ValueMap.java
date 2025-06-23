@@ -10,6 +10,7 @@ package de.cookindustries.lib.spring.gui.hmi.mapper;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.cookindustries.lib.spring.gui.function.FunctionCall;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.ValueMapKeyAlreadyInUseException;
@@ -124,17 +125,36 @@ public class ValueMap extends Sealable
      * Add a list of {@link InputValue}s value to this map
      * 
      * @param key to link
-     * @param value to link
+     * @param list to link
      * @return {@code this}
      * @throws ObjectSealedException if this map is already sealed
      * @throws ValueMapKeyAlreadyInUseException if {@code key} is already in use
      */
-    public ValueMap add(String key, InputValueList value)
+    public ValueMap add(String key, InputValueList list)
     {
         checkSeal();
         checkKey(key);
 
-        map.put(key, value);
+        map.put(key, list);
+
+        return this;
+    }
+
+    /**
+     * Add a {@link FunctionCall} value to this map
+     * 
+     * @param key to link
+     * @param call to link
+     * @return {@code this}
+     * @throws ObjectSealedException if this map is already sealed
+     * @throws ValueMapKeyAlreadyInUseException if {@code key} is already in use
+     */
+    public ValueMap add(String key, FunctionCall call)
+    {
+        checkSeal();
+        checkKey(key);
+
+        map.put(key, call);
 
         return this;
     }

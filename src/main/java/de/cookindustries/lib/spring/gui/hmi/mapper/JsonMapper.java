@@ -16,6 +16,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import de.cookindustries.lib.spring.gui.function.CloseModalCall;
+import de.cookindustries.lib.spring.gui.function.FunctionCall;
+import de.cookindustries.lib.spring.gui.function.VoidCall;
 import de.cookindustries.lib.spring.gui.hmi.container.*;
 import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
@@ -59,35 +62,36 @@ import lombok.Setter;
 public class JsonMapper
 {
 
-    private static final String                    SRC                         = "src";
-    private static final String                    SUFFIX                      = "suffix";
-    private static final String                    PREFIX                      = "prefix";
-    private static final String                    MAX_CHARS                   = "maxChars";
-    private static final String                    TARGET                      = "target";
-    private static final String                    HREF                        = "href";
-    private static final String                    MAX                         = "max";
-    private static final String                    MIN                         = "min";
-    private static final String                    CHECKED                     = "checked";
-    private static final String                    IMAGE                       = "image";
-    private static final String                    ON_CLICK                    = "onClick";
-    private static final String                    BTN_CLASS                   = "btnClass";
-    private static final String                    TEXT                        = "text";
-    private static final String                    DEFAULT_DATE                = "0000-00-00";
-    private static final String                    PLACEHOLDER                 = "placeholder";
-    private static final String                    DEFAULT_VAL                 = "";
-    private static final String                    NAME                        = "name";
-    private static final String                    VALUE                       = "value";
-    private static final String                    SUBMIT_AS                   = "submitAs";
-    private static final String                    ON_INPUT                    = "onInput";
+    private static final String                    SRC                            = "src";
+    private static final String                    SUFFIX                         = "suffix";
+    private static final String                    PREFIX                         = "prefix";
+    private static final String                    MAX_CHARS                      = "maxChars";
+    private static final String                    TARGET                         = "target";
+    private static final String                    HREF                           = "href";
+    private static final String                    MAX                            = "max";
+    private static final String                    MIN                            = "min";
+    private static final String                    CHECKED                        = "checked";
+    private static final String                    IMAGE                          = "image";
+    private static final String                    ON_CLICK                       = "onClick";
+    private static final String                    BTN_CLASS                      = "btnClass";
+    private static final String                    TEXT                           = "text";
+    private static final String                    DEFAULT_DATE                   = "0000-00-00";
+    private static final String                    PLACEHOLDER                    = "placeholder";
+    private static final String                    DEFAULT_VAL                    = "";
+    private static final String                    NAME                           = "name";
+    private static final String                    VALUE                          = "value";
+    private static final String                    SUBMIT_AS                      = "submitAs";
+    private static final String                    ON_INPUT                       = "onInput";
 
-    private static final String                    BASE_INDICATOR_START        = "$$";
-    private static final String                    INDICATOR_VALUE_PLACEHOLDER = "$$value$";
-    private static final String                    INDICATOR_TEXT_PLACEHOLDER  = "$$text$";
-    private static final String                    INDICATOR_CLASS_PLACEHOLDER = "$$class$";
+    private static final String                    BASE_INDICATOR_START           = "$$";
+    private static final String                    INDICATOR_VALUE_PLACEHOLDER    = "$$value$";
+    private static final String                    INDICATOR_TEXT_PLACEHOLDER     = "$$text$";
+    private static final String                    INDICATOR_CLASS_PLACEHOLDER    = "$$class$";
+    private static final String                    INDICATOR_FUNCTION_PLACEHOLDER = "$$function$";
 
-    private static final StaticTranslationProvider NOOP_TRANSLATION_PROVIDER   = new StaticTranslationProvider();
+    private static final StaticTranslationProvider NOOP_TRANSLATION_PROVIDER      = new StaticTranslationProvider();
 
-    private static final ContainerType[]           CONTAINER_CHILDREN          =
+    private static final ContainerType[]           CONTAINER_CHILDREN             =
         {
             ContainerType.AUDIO,
             ContainerType.BUTTON,
@@ -103,7 +107,18 @@ public class JsonMapper
             ContainerType.TEXT
         };
 
-    private static final ContainerType[]           LINK_CHILDREN               = {ContainerType.TEXT};
+    private static final ContainerType[]           LINK_CHILDREN                  = {ContainerType.TEXT};
+
+    private static final ContainerType[]           MODAL_CHILDREN                 =
+        {
+            ContainerType.CONTENT,
+            ContainerType.FORM,
+            ContainerType.HIDDEN,
+            ContainerType.IMAGE,
+            ContainerType.LINK,
+            ContainerType.SPLITTED,
+            ContainerType.TEXT
+        };
 
     private final TreeHandling                     handling;
     private final Locale                           locale;
@@ -112,7 +127,7 @@ public class JsonMapper
 
     @Getter(value = AccessLevel.NONE)
     @Setter(value = AccessLevel.NONE)
-    private Integer                                count                       = 0;
+    private Integer                                count                          = 0;
 
     /**
      * Validate a {@link JsonTreeRoot} and map it to a {@link Container} tree in a {@link TreeHandling#STATIC} context.
@@ -207,7 +222,12 @@ public class JsonMapper
 
         if (this.handling == TreeHandling.DYNAMIC && key != null)
         {
-            if (key.startsWith(INDICATOR_VALUE_PLACEHOLDER))
+            if (key.startsWith(INDICATOR_TEXT_PLACEHOLDER) && expectedType.equals(String.class))
+            {
+                String keyName = key.substring(INDICATOR_TEXT_PLACEHOLDER.length());
+                value = expectedType.cast(translationProvider.getText(locale, keyName));
+            }
+            else if (key.startsWith(INDICATOR_VALUE_PLACEHOLDER))
             {
                 String keyName = key.substring(INDICATOR_VALUE_PLACEHOLDER.length());
                 value = extractFromValueMaps(keyName, expectedType);
@@ -217,10 +237,10 @@ public class JsonMapper
                 String keyName = key.substring(INDICATOR_CLASS_PLACEHOLDER.length());
                 value = extractFromValueMaps(keyName, expectedType);
             }
-            else if (key.startsWith(INDICATOR_TEXT_PLACEHOLDER) && expectedType.equals(String.class))
+            else if (key.startsWith(INDICATOR_FUNCTION_PLACEHOLDER))
             {
-                String keyName = key.substring(INDICATOR_TEXT_PLACEHOLDER.length());
-                value = expectedType.cast(translationProvider.getText(locale, keyName));
+                String keyName = key.substring(INDICATOR_FUNCTION_PLACEHOLDER.length());
+                value = extractFromValueMaps(keyName, expectedType);
             }
         }
 
@@ -565,6 +585,7 @@ public class JsonMapper
                 case HIDDEN -> transformHiddenContainer(element, depth);
                 case IMAGE -> transformImageContainer(element, depth);
                 case LINK -> transformLinkContainer(element, depth);
+                case MODAL -> transformModal(element, depth);
                 case SPLITTED -> transformSplittedContainer(element, depth);
                 case TAB -> transformTabbedContainer(element, depth);
                 case TEXT -> transformTextContainer(element, depth);
@@ -610,11 +631,25 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private ButtonContainer transfromButtonContainer(PseudoElement element, Integer depth)
+    private Button transfromButtonContainer(PseudoElement element, Integer depth)
     {
-        Button button = transformButtonInput(element, depth);
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        String              text       = getParameterValue(element, depth, TEXT, String.class);
+        ButtonClass         btnClass   =
+            ButtonClass.valueOf(getParameterValue(element, depth, BTN_CLASS, String.class, "DEFAULT").toUpperCase());
+        String              onClick    = getParameterValue(element, depth, ON_CLICK, String.class);
 
-        return ButtonContainer.builder().uid(DEFAULT_VAL).classes(List.of()).dataAttributes(Map.of()).button(button).build();
+        return Button
+            .builder()
+            .uid(uid)
+            .classes(classes)
+            .dataAttributes(attributes)
+            .text(text)
+            .btnClass(btnClass)
+            .onClick(onClick)
+            .build();
     }
 
     /**
@@ -636,9 +671,24 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private ButtonIconContainer transformButtonIconContainer(PseudoElement element, Integer depth)
+    private ButtonIcon transformButtonIconContainer(PseudoElement element, Integer depth)
     {
-        return (ButtonIconContainer) throwNotSupported(element, depth);
+        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
+        List<String>        classes    = replaceClasses(element.getClasses());
+        Map<String, String> attributes = element.getAttributes();
+        String              image      = getParameterValue(element, depth, IMAGE, String.class);
+        ButtonClass         btnClass   = ButtonClass.valueOf(getParameterValue(element, depth, BTN_CLASS, String.class, "DEFAULT"));
+        String              onClick    = getParameterValue(element, depth, ON_CLICK, String.class);
+
+        return ButtonIcon
+            .builder()
+            .uid(uid)
+            .classes(classes)
+            .dataAttributes(attributes)
+            .image(image)
+            .btnClass(btnClass)
+            .onClick(onClick)
+            .build();
     }
 
     /**
@@ -777,6 +827,65 @@ public class JsonMapper
     }
 
     /**
+     * Transform a {@link PseudoElement} to an {@link Modal}
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private ModalContainer transformModal(PseudoElement element, Integer depth)
+    {
+        String              uid                 = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
+        List<String>        classes             = replaceClasses(element.getClasses());
+        Map<String, String> attributes          = element.getAttributes();
+        String              name                = getParameterValue(element, depth, NAME, String.class);
+        String              requestUrl          = getParameterValue(element, depth, "requestUrl", String.class);
+        Boolean             closeOnOverlayClick = getParameterValue(element, depth, NAME, Boolean.class);
+
+        String              btnNameLeft         = getParameterValue(element, depth, "btnNameLeft", String.class, "");
+        ButtonClass         btnClassLeft        = ButtonClass.valueOf(
+            getParameterValue(element, depth, "btnClassLeft", String.class, "DEFAULT").toUpperCase());
+        FunctionCall        btnFunctionLeft     = getParameterValue(element, depth, "btnFunctionLeft", FunctionCall.class, new VoidCall());
+
+        String              btnNameCenter       = getParameterValue(element, depth, "btnNameCenter", String.class, "");
+        ButtonClass         btnClassCenter      = ButtonClass.valueOf(
+            getParameterValue(element, depth, "btnClassCenter", String.class, "DEFAULT").toUpperCase());
+        FunctionCall        btnFunctionCenter   =
+            getParameterValue(element, depth, "btnFunctionCenter", FunctionCall.class, new VoidCall());
+
+        String              btnNameRight        = getParameterValue(element, depth, "btnNameRight", String.class);
+        ButtonClass         btnClassRight       = ButtonClass.valueOf(
+            getParameterValue(element, depth, "btnClassRight", String.class, "SUCCESS").toUpperCase());
+        FunctionCall        btnFunctionRight    =
+            getParameterValue(element, depth, "btnFunctionRight", FunctionCall.class, new CloseModalCall());
+
+        Container           content             =
+            element
+                .getChildren()
+                .isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, MODAL_CHILDREN);
+
+        return ModalContainer
+            .builder()
+            .uid(uid)
+            .classes(classes)
+            .dataAttributes(attributes)
+            .name(name)
+            .requestUrl(requestUrl)
+            .btnNameLeft(btnNameLeft)
+            .btnClassLeft(btnClassLeft)
+            .btnFunctionLeft(btnFunctionLeft)
+            .btnNameCenter(btnNameCenter)
+            .btnClassCenter(btnClassCenter)
+            .btnFunctionCenter(btnFunctionCenter)
+            .btnNameRight(btnNameRight)
+            .btnClassRight(btnClassRight)
+            .btnFunctionRight(btnFunctionRight)
+            .closeOnOverlayClick(closeOnOverlayClick)
+            .content(content)
+            .build();
+    }
+
+    /**
      * Transform a {@link PseudoElement} to an {@link SplittedContainer}
      *
      * @param element to transfrom
@@ -862,8 +971,6 @@ public class JsonMapper
         {
             return switch (InputType.valueOf(element.getType().toUpperCase()))
             {
-                case BUTTON -> transformButtonInput(element, depth);
-                case BUTTON_ICON -> transformButtonIconInput(element, depth);
                 case CHECKBOX -> transformCheckboxInput(element, depth);
                 case CURRENCY -> transformCurrencyInput(element, depth);
                 case DATE -> transformDateInput(element, depth);
@@ -888,61 +995,6 @@ public class JsonMapper
             // TODO: write better exception
             throw new JsonParsingException(element.getUid(), depth, this.count, "error parsing element", ex);
         }
-    }
-
-    /**
-     * Transform a {@link PseudoElement} to an {@link Button} input
-     *
-     * @param element to transfrom
-     * @param depth of the recursive operation
-     * @return the transformed object
-     */
-    private Button transformButtonInput(PseudoElement element, Integer depth)
-    {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
-        String              text       = getParameterValue(element, depth, TEXT, String.class);
-        ButtonClass         btnClass   =
-            ButtonClass.valueOf(getParameterValue(element, depth, BTN_CLASS, String.class, "DEFAULT").toUpperCase());
-        String              onClick    = getParameterValue(element, depth, ON_CLICK, String.class);
-
-        return Button
-            .builder()
-            .uid(uid)
-            .classes(classes)
-            .dataAttributes(attributes)
-            .text(text)
-            .btnClass(btnClass)
-            .onClick(onClick)
-            .build();
-    }
-
-    /**
-     * Transform a {@link PseudoElement} to an {@link ButtonIcon} input
-     *
-     * @param element to transfrom
-     * @param depth of the recursive operation
-     * @return the transformed object
-     */
-    private ButtonIcon transformButtonIconInput(PseudoElement element, Integer depth)
-    {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
-        String              image      = getParameterValue(element, depth, IMAGE, String.class);
-        ButtonClass         btnClass   = ButtonClass.valueOf(getParameterValue(element, depth, BTN_CLASS, String.class, "DEFAULT"));
-        String              onClick    = getParameterValue(element, depth, ON_CLICK, String.class);
-
-        return ButtonIcon
-            .builder()
-            .uid(uid)
-            .classes(classes)
-            .dataAttributes(attributes)
-            .image(image)
-            .btnClass(btnClass)
-            .onClick(onClick)
-            .build();
     }
 
     /**

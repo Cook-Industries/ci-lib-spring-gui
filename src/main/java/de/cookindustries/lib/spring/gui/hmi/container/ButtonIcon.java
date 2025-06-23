@@ -5,22 +5,22 @@
  * <p>
  * See LICENSE file in the project root for full license information.
  */
-package de.cookindustries.lib.spring.gui.hmi.input;
+package de.cookindustries.lib.spring.gui.hmi.container;
 
+import de.cookindustries.lib.spring.gui.hmi.input.ButtonClass;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @SuperBuilder
 @Getter
 @Jacksonized
-public final class ButtonIcon extends Input
+public final class ButtonIcon extends Container
 {
 
     @NonNull
@@ -31,9 +31,9 @@ public final class ButtonIcon extends Input
     private ButtonClass btnClass;
 
     @Override
-    protected InputType inferType()
+    protected ContainerType inferType()
     {
-        return InputType.BUTTON_ICON;
+        return ContainerType.BUTTON_ICON;
     }
 
 }

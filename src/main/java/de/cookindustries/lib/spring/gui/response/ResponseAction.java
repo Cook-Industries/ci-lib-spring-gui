@@ -8,7 +8,7 @@
 package de.cookindustries.lib.spring.gui.response;
 
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
-import de.cookindustries.lib.spring.gui.hmi.modal.Modal;
+import de.cookindustries.lib.spring.gui.hmi.container.ModalContainer;
 
 /**
  * A fixed set of {@code Action}s that can be performed by the GUI
@@ -21,10 +21,10 @@ public enum ResponseAction {
     /** show a notification */
     NOTIFICATION,
 
-    /** parse and show a {@link Modal} as the top-most */
+    /** parse and show a {@link ModalContainer} as the top-most */
     MODAL,
 
-    /** hide the top-most open {@link Modal} */
+    /** hide the top-most open {@link ModalContainer} */
     MODAL_HIDE,
 
     /** parse and either replace/append a {@link Container} */

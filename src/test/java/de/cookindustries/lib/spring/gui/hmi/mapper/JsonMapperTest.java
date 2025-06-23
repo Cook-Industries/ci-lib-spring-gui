@@ -185,7 +185,7 @@ public class JsonMapperTest
     }
 
     @Test
-    void test_map_ButtonContainer()
+    void test_map_Button()
     {
         // setup
         JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/button-container.json");
@@ -194,9 +194,9 @@ public class JsonMapperTest
         Container    container = JsonMapper.map(root);
 
         // verify
-        assertEquals(ButtonContainer.class, container.getClass());
+        assertEquals(Button.class, container.getClass());
 
-        Button button = ((ButtonContainer) container).getButton();
+        Button button = (Button) container;
         assertEquals("uid", button.getUid());
         assertEquals(1, button.getClasses().size());
         assertEquals(1, button.getDataAttributes().size());
@@ -360,25 +360,6 @@ public class JsonMapperTest
 
         TextContainer textContainer = (TextContainer) container;
         assertEquals("some text", textContainer.getText());
-    }
-
-    @Test
-    void test_map_ButtonInput()
-    {
-        // setup
-        JsonTreeRoot  root  = getRoot("json-test-files/json-mapper/input/button-input.json");
-
-        // run
-        FormContainer form  = (FormContainer) JsonMapper.map(root);
-
-        // verify
-        Input         input = form.getInputs().get(0);
-        assertEquals(Button.class, input.getClass());
-
-        Button button = (Button) input;
-        assertEquals("text", button.getText());
-        assertEquals(ButtonClass.SUCCESS, button.getBtnClass());
-        assertEquals("doShit()", button.getOnClick());
     }
 
     @Test

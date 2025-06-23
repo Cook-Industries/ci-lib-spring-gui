@@ -15,6 +15,8 @@ import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.Data;
 
 /**
+ * A generic function definition to send to the receiver
+ * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
@@ -25,33 +27,50 @@ public abstract class FunctionCall
     private final String   functionName;
     private final Object[] parameters;
 
-    protected FunctionCall(String functionName, Integer paramCnt)
+    /**
+     * Construct a new instance
+     */
+    protected FunctionCall()
     {
-        this.functionName = functionName;
-        this.parameters = new Object[paramCnt];
+        this.functionName = functionName();
+        this.parameters = new Object[numberOfParameters()];
     }
 
-    protected void setStringParam(Integer pos, Integer param)
+    /**
+     * Set the call name for this function
+     * 
+     * @return the call name of this function
+     */
+    protected abstract String functionName();
+
+    /**
+     * Set the number of expected parameters for consistency checking
+     * 
+     * @return the number of expected parameters
+     */
+    protected abstract Integer numberOfParameters();
+
+    protected final void setStringParam(Integer pos, Integer param)
     {
         setParameter(pos, param);
     }
 
-    protected void setIntegerParam(Integer pos, Integer param)
+    protected final void setIntegerParam(Integer pos, Integer param)
     {
         setParameter(pos, param);
     }
 
-    protected void setBooleanParam(Integer pos, Boolean param)
+    protected final void setBooleanParam(Integer pos, Boolean param)
     {
         setParameter(pos, param);
     }
 
-    protected void setDoubleParam(Integer pos, Double param)
+    protected final void setDoubleParam(Integer pos, Double param)
     {
         setParameter(pos, param);
     }
 
-    private void setParameter(Integer pos, Object param)
+    private final void setParameter(Integer pos, Object param)
     {
         if (pos < 0 || pos >= parameters.length)
         {
@@ -61,6 +80,11 @@ public abstract class FunctionCall
         parameters[pos] = param;
     }
 
+    /**
+     * Parse this function to JS style
+     * 
+     * @return a JS callable String
+     */
     public final String parse()
     {
         StringConcat sc     = new StringConcat();
