@@ -26,6 +26,7 @@ public abstract class FunctionCall
 
     private final String   functionName;
     private final Object[] parameters;
+    private Integer        paramsSet;
 
     /**
      * Construct a new instance
@@ -34,6 +35,7 @@ public abstract class FunctionCall
     {
         this.functionName = functionName();
         this.parameters = new Object[numberOfParameters()];
+        this.paramsSet = 0;
     }
 
     /**
@@ -50,31 +52,39 @@ public abstract class FunctionCall
      */
     protected abstract Integer numberOfParameters();
 
-    protected final void setStringParam(Integer pos, Integer param)
+    protected final FunctionCall setStringParam(String param)
     {
-        setParameter(pos, param);
+        setParameter(paramsSet++, param);
+
+        return this;
     }
 
-    protected final void setIntegerParam(Integer pos, Integer param)
+    protected final FunctionCall setIntegerParam(Integer param)
     {
-        setParameter(pos, param);
+        setParameter(paramsSet++, param);
+
+        return this;
     }
 
-    protected final void setBooleanParam(Integer pos, Boolean param)
+    protected final FunctionCall setBooleanParam(Boolean param)
     {
-        setParameter(pos, param);
+        setParameter(paramsSet++, param);
+
+        return this;
     }
 
-    protected final void setDoubleParam(Integer pos, Double param)
+    protected final FunctionCall setDoubleParam(Double param)
     {
-        setParameter(pos, param);
+        setParameter(paramsSet++, param);
+
+        return this;
     }
 
     private final void setParameter(Integer pos, Object param)
     {
-        if (pos < 0 || pos >= parameters.length)
+        if (paramsSet >= parameters.length)
         {
-            throw new IndexOutOfBoundsException("not enough prameters expected");
+            throw new IndexOutOfBoundsException("all params are already set");
         }
 
         parameters[pos] = param;
@@ -107,7 +117,7 @@ public abstract class FunctionCall
                     break;
 
                 default:
-                    throw new IllegalArgumentException("no recognised class type as call parameter" + className);
+                    throw new IllegalArgumentException("not recognised class type as call parameter " + className);
             }
         }
 
