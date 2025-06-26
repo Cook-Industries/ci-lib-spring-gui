@@ -7,11 +7,19 @@
  */
 package de.cookindustries.lib.spring.gui.html;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 /**
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-public interface JsLink extends HtmlExportable
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter(value = AccessLevel.PROTECTED)
+public abstract class AbsJsLink implements HtmlExportable
 {
+
+    private final String href;
 
 }

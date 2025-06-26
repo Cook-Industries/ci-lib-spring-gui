@@ -40,7 +40,7 @@ public class HtmlSite implements HtmlExportable
     private final List<CSSEntity>     cssEntities;
 
     @Singular
-    private final List<JsLink>        jsScripts;
+    private final List<AbsJsLink>     jsScripts;
 
     @Singular
     private final List<JsImport>      jsImports;

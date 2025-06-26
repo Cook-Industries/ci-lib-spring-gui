@@ -11,19 +11,17 @@ package de.cookindustries.lib.spring.gui.html;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-public class JsPlainLink implements JsLink
+public class JsPlainLink extends AbsJsLink
 {
-
-    private final String href;
 
     public JsPlainLink(String href)
     {
-        this.href = href;
+        super(href);
     }
 
     @Override
     public String getHtmlRep()
     {
-        return String.format("<script src=\"%s\"></script>", href);
+        return String.format("<script src=\"%s\"></script>", getHref());
     }
 }
