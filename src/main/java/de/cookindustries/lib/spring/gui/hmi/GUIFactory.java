@@ -12,7 +12,7 @@ import java.util.Locale;
 
 import org.springframework.stereotype.Component;
 
-import de.cookindustries.lib.spring.gui.function.FunctionCall;
+import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.hmi.container.Button;
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
 import de.cookindustries.lib.spring.gui.hmi.container.ContentContainer;
@@ -295,12 +295,13 @@ public final class GUIFactory
      * @return a response with the processed content
      */
     public ContentResponse createStaticComponentResponse(String resourcePath, String elementId, Boolean replace,
-        List<FunctionCall> functionCalls)
+        List<AbsFunctionCall> functionCalls)
     {
         Container content = readStaticComponent(resourcePath);
 
         return ContentResponse
             .builder()
+            .elementId(elementId)
             .content(content)
             .calls(functionCalls)
             .replace(replace)
@@ -351,12 +352,13 @@ public final class GUIFactory
      * @return a response with the processed content
      */
     public ContentResponse createDynamicComponentResponse(String resourcePath, Locale locale, String elementId, Boolean replace,
-        List<FunctionCall> functionCalls, ValueMap... valueMaps)
+        List<AbsFunctionCall> functionCalls, ValueMap... valueMaps)
     {
         Container content = readDynamicComponent(resourcePath, locale, valueMaps);
 
         return ContentResponse
             .builder()
+            .elementId(elementId)
             .content(content)
             .calls(functionCalls)
             .replace(replace)
@@ -403,7 +405,7 @@ public final class GUIFactory
      * @param functionCalls to perform
      * @return a response containing a popup notification and function calls
      */
-    public NotificationResponse createPopUpResponse(String msg, MessageType type, List<FunctionCall> functionCalls)
+    public NotificationResponse createPopUpResponse(String msg, MessageType type, List<AbsFunctionCall> functionCalls)
     {
         return NotificationResponse
             .builder()

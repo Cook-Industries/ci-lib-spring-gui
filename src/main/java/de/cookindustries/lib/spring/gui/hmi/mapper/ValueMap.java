@@ -10,7 +10,7 @@ package de.cookindustries.lib.spring.gui.hmi.mapper;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.cookindustries.lib.spring.gui.function.FunctionCall;
+import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.ValueMapKeyAlreadyInUseException;
@@ -141,7 +141,7 @@ public class ValueMap extends Sealable
     }
 
     /**
-     * Add a {@link FunctionCall} value to this map
+     * Add a {@link AbsFunctionCall} value to this map
      * 
      * @param key to link
      * @param call to link
@@ -149,7 +149,7 @@ public class ValueMap extends Sealable
      * @throws ObjectSealedException if this map is already sealed
      * @throws ValueMapKeyAlreadyInUseException if {@code key} is already in use
      */
-    public ValueMap add(String key, FunctionCall call)
+    public ValueMap add(String key, AbsFunctionCall call)
     {
         checkSeal();
         checkKey(key);

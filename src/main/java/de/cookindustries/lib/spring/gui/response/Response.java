@@ -9,7 +9,7 @@ package de.cookindustries.lib.spring.gui.response;
 
 import java.util.List;
 
-import de.cookindustries.lib.spring.gui.function.FunctionCall;
+import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
 import lombok.Getter;
 import lombok.NonNull;
@@ -38,10 +38,10 @@ public abstract class Response
     private List<ResponseMessage> messages;
 
     /**
-     * a list of {@link FunctionCall}s to perform on the GUI
+     * a list of {@link AbsFunctionCall}s to perform on the GUI
      */
     @Singular
-    private List<FunctionCall>    calls;
+    private List<AbsFunctionCall> calls;
 
     /**
      * Infer the concrete type of action for the implementing class

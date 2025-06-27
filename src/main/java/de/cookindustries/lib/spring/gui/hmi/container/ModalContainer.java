@@ -10,7 +10,6 @@ package de.cookindustries.lib.spring.gui.hmi.container;
 import java.util.List;
 
 import de.cookindustries.lib.spring.gui.function.CloseModalCall;
-import de.cookindustries.lib.spring.gui.function.FunctionCall;
 import de.cookindustries.lib.spring.gui.hmi.input.ButtonClass;
 import lombok.Getter;
 import lombok.NonNull;
@@ -41,7 +40,7 @@ public final class ModalContainer extends Container
     private ButtonClass     btnClassLeft        = ButtonClass.DEFAULT;
 
     @Default
-    private FunctionCall    btnFunctionLeft     = null;
+    private String          btnFunctionLeft     = null;
 
     @Default
     private String          btnNameCenter       = null;
@@ -51,7 +50,7 @@ public final class ModalContainer extends Container
     private ButtonClass     btnClassCenter      = ButtonClass.DEFAULT;
 
     @Default
-    private FunctionCall    btnFunctionCenter   = null;
+    private String          btnFunctionCenter   = null;
 
     @NonNull
     private String          btnNameRight;
@@ -61,7 +60,7 @@ public final class ModalContainer extends Container
     private ButtonClass     btnClassRight       = ButtonClass.DEFAULT;
 
     @Default
-    private FunctionCall    btnFunctionRight    = new CloseModalCall();
+    private String          btnFunctionRight    = new CloseModalCall().parse();
 
     @NonNull
     @Singular

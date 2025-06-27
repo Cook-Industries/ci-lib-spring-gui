@@ -12,7 +12,6 @@ import java.util.List;
 
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
-import lombok.Data;
 
 /**
  * A generic function definition to send to the receiver
@@ -20,8 +19,7 @@ import lombok.Data;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@Data
-public abstract class FunctionCall
+public abstract class AbsFunctionCall
 {
 
     private final String   functionName;
@@ -31,7 +29,7 @@ public abstract class FunctionCall
     /**
      * Construct a new instance
      */
-    protected FunctionCall()
+    protected AbsFunctionCall()
     {
         this.functionName = functionName();
         this.parameters = new Object[numberOfParameters()];
@@ -52,42 +50,44 @@ public abstract class FunctionCall
      */
     protected abstract Integer numberOfParameters();
 
-    protected final FunctionCall setStringParam(String param)
+    protected final AbsFunctionCall setStringParam(String param)
     {
-        setParameter(paramsSet++, param);
+        setParameter(param);
 
         return this;
     }
 
-    protected final FunctionCall setIntegerParam(Integer param)
+    protected final AbsFunctionCall setIntegerParam(Integer param)
     {
-        setParameter(paramsSet++, param);
+        setParameter(param);
 
         return this;
     }
 
-    protected final FunctionCall setBooleanParam(Boolean param)
+    protected final AbsFunctionCall setBooleanParam(Boolean param)
     {
-        setParameter(paramsSet++, param);
+        setParameter(param);
 
         return this;
     }
 
-    protected final FunctionCall setDoubleParam(Double param)
+    protected final AbsFunctionCall setDoubleParam(Double param)
     {
-        setParameter(paramsSet++, param);
+        setParameter(param);
 
         return this;
     }
 
-    private final void setParameter(Integer pos, Object param)
+    private final void setParameter(Object param)
     {
         if (paramsSet >= parameters.length)
         {
             throw new IndexOutOfBoundsException("all params are already set");
         }
 
-        parameters[pos] = param;
+        parameters[paramsSet] = param;
+
+        paramsSet++;
     }
 
     /**
@@ -109,23 +109,20 @@ public abstract class FunctionCall
             {
                 case "Integer":
                 case "Boolean":
-                    params.add(o.toString());
+                case "Double":
+                    params.add(String.valueOf(o));
                     break;
 
                 case "String":
                     params.add(StringAdapter.withPrefixAndSuffix("'", o.toString(), "'"));
                     break;
-
-                default:
-                    throw new IllegalArgumentException("not recognised class type as call parameter " + className);
             }
         }
 
         sc.append(functionName);
         sc.append("(");
         sc.append(params, ", ");
-        sc.append(")");
-        sc.append(";");
+        sc.append(");");
 
         return sc.getString();
     }

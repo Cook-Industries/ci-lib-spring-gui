@@ -11,13 +11,13 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public final class VoidCall extends FunctionCall
+public final class VoidCall extends AbsFunctionCall
 {
 
     @Override
     protected String functionName()
     {
-        return "";
+        return "console.log";
     }
 
     @Override

@@ -313,7 +313,7 @@ public final class ContainerHtmlMapper
                 .builder()
                 .btnClass(modalContainer.getBtnClassRight())
                 .text(modalContainer.getBtnNameRight())
-                .onClick(modalContainer.getBtnFunctionRight().parse())
+                .onClick(modalContainer.getBtnFunctionRight())
                 .build());
 
         if (modalContainer.getBtnNameCenter() != null && !modalContainer.getBtnNameCenter().isEmpty())
@@ -323,7 +323,7 @@ public final class ContainerHtmlMapper
                     .builder()
                     .btnClass(modalContainer.getBtnClassCenter())
                     .text(modalContainer.getBtnNameCenter())
-                    .onClick(modalContainer.getBtnFunctionCenter().parse())
+                    .onClick(modalContainer.getBtnFunctionCenter())
                     .build());
         }
 
@@ -334,7 +334,7 @@ public final class ContainerHtmlMapper
                     .builder()
                     .btnClass(modalContainer.getBtnClassLeft())
                     .text(modalContainer.getBtnNameLeft())
-                    .onClick(modalContainer.getBtnFunctionLeft().parse())
+                    .onClick(modalContainer.getBtnFunctionLeft())
                     .build());
         }
 

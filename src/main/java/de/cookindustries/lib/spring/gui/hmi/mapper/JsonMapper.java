@@ -16,9 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import de.cookindustries.lib.spring.gui.function.CloseModalCall;
-import de.cookindustries.lib.spring.gui.function.FunctionCall;
-import de.cookindustries.lib.spring.gui.function.VoidCall;
+import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.hmi.container.*;
 import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
@@ -835,37 +833,73 @@ public class JsonMapper
      */
     private ModalContainer transformModal(PseudoElement element, Integer depth)
     {
-        String              uid                 = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes             = replaceClasses(element.getClasses());
-        Map<String, String> attributes          = element.getAttributes();
-        String              name                = getParameterValue(element, depth, NAME, String.class);
-        String              requestUrl          = getParameterValue(element, depth, "requestUrl", String.class);
-        Boolean             closeOnOverlayClick = getParameterValue(element, depth, NAME, Boolean.class);
+        String              uid                     = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
+        List<String>        classes                 = replaceClasses(element.getClasses());
+        Map<String, String> attributes              = element.getAttributes();
+        String              name                    = getParameterValue(element, depth, NAME, String.class);
+        String              requestUrl              = getParameterValue(element, depth, "requestUrl", String.class);
+        Boolean             closeOnOverlayClick     = getParameterValue(element, depth, NAME, Boolean.class);
 
-        String              btnNameLeft         = getParameterValue(element, depth, "btnNameLeft", String.class, "");
-        ButtonClass         btnClassLeft        = ButtonClass.valueOf(
+        String              btnNameLeft             = getParameterValue(element, depth, "btnNameLeft", String.class, "");
+        ButtonClass         btnClassLeft            = ButtonClass.valueOf(
             getParameterValue(element, depth, "btnClassLeft", String.class, "DEFAULT").toUpperCase());
-        FunctionCall        btnFunctionLeft     = getParameterValue(element, depth, "btnFunctionLeft", FunctionCall.class, new VoidCall());
 
-        String              btnNameCenter       = getParameterValue(element, depth, "btnNameCenter", String.class, "");
-        ButtonClass         btnClassCenter      = ButtonClass.valueOf(
+        AbsFunctionCall     btnFunctionLeft         = null;
+        String              fallbackBtnFunctionLeft = "";
+
+        try
+        {
+            btnFunctionLeft =
+                getParameterValue(element, depth, "btnFunctionLeft", AbsFunctionCall.class);
+        }
+        catch (JsonParsingException ex)
+        {
+            fallbackBtnFunctionLeft =
+                getParameterValue(element, depth, "btnFunctionLeft", String.class, "");
+        }
+
+        String          btnNameCenter             = getParameterValue(element, depth, "btnNameCenter", String.class, "");
+        ButtonClass     btnClassCenter            = ButtonClass.valueOf(
             getParameterValue(element, depth, "btnClassCenter", String.class, "DEFAULT").toUpperCase());
-        FunctionCall        btnFunctionCenter   =
-            getParameterValue(element, depth, "btnFunctionCenter", FunctionCall.class, new VoidCall());
 
-        String              btnNameRight        = getParameterValue(element, depth, "btnNameRight", String.class);
-        ButtonClass         btnClassRight       = ButtonClass.valueOf(
+        AbsFunctionCall btnFunctionCenter         = null;
+        String          fallbackBtnFunctionCenter = "";
+
+        try
+        {
+            btnFunctionCenter =
+                getParameterValue(element, depth, "btnFunctionCenter", AbsFunctionCall.class);
+        }
+        catch (JsonParsingException ex)
+        {
+            fallbackBtnFunctionCenter =
+                getParameterValue(element, depth, "btnFunctionCenter", String.class, "");
+        }
+
+        String          btnNameRight             = getParameterValue(element, depth, "btnNameRight", String.class);
+        ButtonClass     btnClassRight            = ButtonClass.valueOf(
             getParameterValue(element, depth, "btnClassRight", String.class, "SUCCESS").toUpperCase());
-        FunctionCall        btnFunctionRight    =
-            getParameterValue(element, depth, "btnFunctionRight", FunctionCall.class, new CloseModalCall());
 
-        Container           content             =
+        AbsFunctionCall btnFunctionRight         = null;
+        String          fallbackBtnFunctionRight = "";
+
+        try
+        {
+            btnFunctionRight =
+                getParameterValue(element, depth, "btnFunctionRight", AbsFunctionCall.class);
+        }
+        catch (JsonParsingException ex)
+        {
+            fallbackBtnFunctionRight =
+                getParameterValue(element, depth, "btnFunctionRight", String.class);
+        }
+
+        Container content =
             element
                 .getChildren()
                 .isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, MODAL_CHILDREN);
 
-        return ModalContainer
-            .builder()
+        return ModalContainer.builder()
             .uid(uid)
             .classes(classes)
             .dataAttributes(attributes)
@@ -873,13 +907,13 @@ public class JsonMapper
             .requestUrl(requestUrl)
             .btnNameLeft(btnNameLeft)
             .btnClassLeft(btnClassLeft)
-            .btnFunctionLeft(btnFunctionLeft)
+            .btnFunctionLeft(btnFunctionLeft == null ? fallbackBtnFunctionLeft : btnFunctionLeft.parse())
             .btnNameCenter(btnNameCenter)
             .btnClassCenter(btnClassCenter)
-            .btnFunctionCenter(btnFunctionCenter)
+            .btnFunctionCenter(btnFunctionCenter == null ? fallbackBtnFunctionCenter : btnFunctionCenter.parse())
             .btnNameRight(btnNameRight)
             .btnClassRight(btnClassRight)
-            .btnFunctionRight(btnFunctionRight)
+            .btnFunctionRight(btnFunctionRight == null ? fallbackBtnFunctionRight : btnFunctionRight.parse())
             .closeOnOverlayClick(closeOnOverlayClick)
             .content(content)
             .build();
