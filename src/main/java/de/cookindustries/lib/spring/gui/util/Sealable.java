@@ -26,7 +26,7 @@ public abstract class Sealable
 
     @Setter(value = AccessLevel.NONE)
     @Getter(value = AccessLevel.NONE)
-    private Boolean        sealed = false;
+    private boolean        sealed = false;
 
     /**
      * Seal this object so it cannot be modified anymore

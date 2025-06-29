@@ -4,29 +4,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class OpenSiteCall extends AbsFunctionCall
+public class OpenSite<T> extends AbsFunctionCall
 {
 
-    public OpenSiteCall(String requestUrl, List<ValuePair> parameters)
+    public OpenSite(String requestUrl, List<ValuePair> parameters)
     {
         this(requestUrl, null, parameters);
     }
 
-    public OpenSiteCall(String requestUrl, Integer uid, List<ValuePair> parameters)
+    public OpenSite(String requestUrl, T uid, List<ValuePair> jsonObjectParameters)
     {
 
         super();
 
         setStringParam(requestUrl);
 
-        List<ValuePair> list = new ArrayList<>(parameters);
+        List<ValuePair> list = new ArrayList<>(jsonObjectParameters);
 
         if (uid != null)
         {
-            list.add(0, new ValuePair("__uid", uid));
+            list.add(0, new ValuePair("__uid", String.valueOf(uid)));
         }
 
-        setStringParam(parameters.stream().map(p -> p.exportInJsonNotation()).collect(Collectors.joining(", ", "{", "}")));
+        setStringParam(list.stream().map(p -> p.exportInJsonNotation()).collect(Collectors.joining(", ", "{", "}")), false);
     }
 
     @Override

@@ -15,7 +15,6 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
@@ -25,7 +24,7 @@ import lombok.extern.jackson.Jacksonized;
 public final class Table extends Input
 {
 
-    private final Boolean        editable;
+    private final boolean        editable;
     private final List<String>   colNames;
     private final List<TableRow> rows;
 

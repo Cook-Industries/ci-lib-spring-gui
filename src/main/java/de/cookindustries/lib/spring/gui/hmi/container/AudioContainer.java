@@ -34,13 +34,13 @@ public final class AudioContainer extends Container
      * whether if controls should be shown or not
      */
     @NonNull
-    private final Boolean controls;
+    private final boolean controls;
 
     /**
      * whether this audio should start playing automatically
      */
     @NonNull
-    private final Boolean autoplay;
+    private final boolean autoplay;
 
     @Override
     protected ContainerType inferType()

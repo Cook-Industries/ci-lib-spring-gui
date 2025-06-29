@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class FunctionCallTest
+class AbsFunctionCallTest
 {
 
     private AbsFunctionCall functionCall;
@@ -38,10 +38,23 @@ class FunctionCallTest
         functionCall.setStringParam("test");
 
         // run
-        String result = functionCall.parse();
+        String result = functionCall.parseAsJS();
 
         // verify
         assertEquals("test('test');", result, "String param not set correctly");
+    }
+
+    @Test
+    void test_setStringParam_notPrefixed()
+    {
+        // setup
+        functionCall.setStringParam("test", false);
+
+        // run
+        String result = functionCall.parseAsJS();
+
+        // verify
+        assertEquals("test(test);", result, "String param not set correctly");
     }
 
     @Test
@@ -51,7 +64,7 @@ class FunctionCallTest
         functionCall.setIntegerParam(Integer.valueOf(0));
 
         // run
-        String result = functionCall.parse();
+        String result = functionCall.parseAsJS();
 
         // verify
         assertEquals("test(0);", result, "Integer param not set correctly");
@@ -64,7 +77,7 @@ class FunctionCallTest
         functionCall.setBooleanParam(Boolean.TRUE);
 
         // run
-        String result = functionCall.parse();
+        String result = functionCall.parseAsJS();
 
         // verify
         assertEquals("test(true);", result, "Boolean param not set correctly");
@@ -77,7 +90,7 @@ class FunctionCallTest
         functionCall.setDoubleParam(Double.valueOf(0.1d));
 
         // run
-        String result = functionCall.parse();
+        String result = functionCall.parseAsJS();
 
         // verify
         assertEquals("test(0.1);", result, "Double param not set correctly");
@@ -117,7 +130,7 @@ class FunctionCallTest
         functionCall.setDoubleParam(Double.valueOf(0.1d));
 
         // run
-        String result = functionCall.parse();
+        String result = functionCall.parseAsJS();
 
         // verify
         assertEquals("test(true, 0.1);", result, "Parmameter not set correctly");

@@ -15,7 +15,6 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockMultipartFile;
@@ -470,7 +469,7 @@ class InputExtractorTest
         // setup
 
         // run
-        InputExtractor extractor = new InputExtractor(inputs, Arrays.array());
+        InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {});
 
         extractor.checkFiles(true, false);
 
@@ -489,7 +488,7 @@ class InputExtractorTest
             "Sample file content".getBytes(StandardCharsets.UTF_8));
 
         // run
-        InputExtractor extractor = new InputExtractor(inputs, Arrays.array(file));
+        InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {file});
 
         extractor.checkFiles(false, false);
 
@@ -508,7 +507,7 @@ class InputExtractorTest
             "Sample file content".getBytes(StandardCharsets.UTF_8));
 
         // run
-        InputExtractor extractor = new InputExtractor(inputs, Arrays.array(file, file));
+        InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {file, file});
 
         extractor.checkFiles(false, true);
 
@@ -527,7 +526,7 @@ class InputExtractorTest
             "Sample file content".getBytes(StandardCharsets.UTF_8));
 
         // run
-        InputExtractor extractor = new InputExtractor(inputs, Arrays.array(file, file));
+        InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {file, file});
 
         extractor.checkFiles(false, false);
 

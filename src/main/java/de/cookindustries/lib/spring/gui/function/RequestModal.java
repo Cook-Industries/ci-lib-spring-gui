@@ -11,19 +11,18 @@ import lombok.EqualsAndHashCode;
 public final class RequestModal extends AbsFunctionCall
 {
 
-    public RequestModal(String requestUrl, List<ValuePair> parameters)
+    public RequestModal(String requestUrl, List<ValuePair> jsonObjectParameters)
     {
-
         super();
 
         setStringParam(requestUrl);
-        setStringParam(parameters.stream().map(p -> p.exportInJsonNotation()).collect(Collectors.joining(", ", "{", "}")));
+        setStringParam(jsonObjectParameters.stream().map(p -> p.exportInJsonNotation()).collect(Collectors.joining(", ", "{", "}")), false);
     }
 
     @Override
     protected String functionName()
     {
-        return "";
+        return "requestModal";
     }
 
     @Override

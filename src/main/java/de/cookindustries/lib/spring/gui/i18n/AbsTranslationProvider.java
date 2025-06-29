@@ -11,6 +11,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.lang.NonNull;
+
 /**
  * Base class for creation of {@link Locale} based translations.
  * 
@@ -74,7 +76,7 @@ public abstract class AbsTranslationProvider
      * @return either the associated text, or "I18N [{@code key}] not set." if no associate exists
      * @throws IllegalArgumentException if {@code locale} is null, or if {@code key} is null or empty
      */
-    public final String getText(Locale locale, String key)
+    public final String getText(Locale locale, @NonNull String key)
     {
         if (locale == null)
         {

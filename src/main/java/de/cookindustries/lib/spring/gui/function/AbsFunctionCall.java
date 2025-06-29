@@ -7,14 +7,11 @@
  */
 package de.cookindustries.lib.spring.gui.function;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
 
 /**
- * A generic function definition to send to the receiver
+ * A generic function definition to send to a receiver
  * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
@@ -50,13 +47,44 @@ public abstract class AbsFunctionCall
      */
     protected abstract Integer numberOfParameters();
 
+    /**
+     * Set the next {@link String} parameter for this function where {@code param} is pre- and suffixed with '.
+     * 
+     * @param param to set
+     * @return {@code this} for chaining
+     */
     protected final AbsFunctionCall setStringParam(String param)
     {
-        setParameter(param);
+        return setStringParam(param, true);
+    }
+
+    /**
+     * Set the next {@link String} parameter for this function.
+     * 
+     * @param param to set
+     * @param escape whether {@code param} should be pre- and suffixed with '
+     * @return {@code this} for chaining
+     */
+    protected final AbsFunctionCall setStringParam(String param, boolean escape)
+    {
+        if (escape)
+        {
+            setParameter(StringAdapter.prefixAndSuffix("'", param, "'"));
+        }
+        else
+        {
+            setParameter(param);
+        }
 
         return this;
     }
 
+    /**
+     * Set the next {@link Integer} parameter for this function
+     * 
+     * @param param to set
+     * @return {@code this} for chaining
+     */
     protected final AbsFunctionCall setIntegerParam(Integer param)
     {
         setParameter(param);
@@ -64,6 +92,12 @@ public abstract class AbsFunctionCall
         return this;
     }
 
+    /**
+     * Set the next {@link Boolean} parameter for this function
+     * 
+     * @param param to set
+     * @return {@code this} for chaining
+     */
     protected final AbsFunctionCall setBooleanParam(Boolean param)
     {
         setParameter(param);
@@ -71,6 +105,12 @@ public abstract class AbsFunctionCall
         return this;
     }
 
+    /**
+     * Set the next {@link Double} parameter for this function
+     * 
+     * @param param to set
+     * @return {@code this} for chaining
+     */
     protected final AbsFunctionCall setDoubleParam(Double param)
     {
         setParameter(param);
@@ -78,6 +118,11 @@ public abstract class AbsFunctionCall
         return this;
     }
 
+    /**
+     * Internal function to add a parameter
+     * 
+     * @param param to add
+     */
     private final void setParameter(Object param)
     {
         if (paramsSet >= parameters.length)
@@ -95,36 +140,16 @@ public abstract class AbsFunctionCall
      * 
      * @return a JS callable String
      */
-    public final String parse()
+    public final String parseAsJS()
     {
-        StringConcat sc     = new StringConcat();
-
-        List<String> params = new ArrayList<>();
-
-        for (Object o : parameters)
-        {
-            String className = o.getClass().getSimpleName();
-
-            switch (className)
-            {
-                case "Integer":
-                case "Boolean":
-                case "Double":
-                    params.add(String.valueOf(o));
-                    break;
-
-                case "String":
-                    params.add(StringAdapter.withPrefixAndSuffix("'", o.toString(), "'"));
-                    break;
-            }
-        }
+        StringConcat sc = new StringConcat();
 
         sc.append(functionName);
         sc.append("(");
-        sc.append(params, ", ");
+        sc.append(parameters, ", ");
         sc.append(");");
 
-        return sc.getString();
+        return sc.toString();
     }
 
 }

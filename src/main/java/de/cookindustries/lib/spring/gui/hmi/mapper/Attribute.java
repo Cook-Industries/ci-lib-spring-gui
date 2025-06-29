@@ -43,12 +43,12 @@ public final class Attribute implements HtmlExportable
      */
     @Setter(value = AccessLevel.NONE)
     @Getter(value = AccessLevel.NONE)
-    private Boolean      valueless = false;
+    private boolean      valueless = false;
 
     /**
      * if this attribute is valueless, it can be active or not
      */
-    private Boolean      active    = true;
+    private boolean      active    = true;
 
     /**
      * Create a valueless html attribute. E.g. 'checked';
@@ -56,7 +56,7 @@ public final class Attribute implements HtmlExportable
      * @param name of this {@code Attribute}
      * @param active wether this attribute is active or not
      */
-    public Attribute(String name, Boolean active)
+    public Attribute(String name, boolean active)
     {
         this(name, "", active, true);
     }

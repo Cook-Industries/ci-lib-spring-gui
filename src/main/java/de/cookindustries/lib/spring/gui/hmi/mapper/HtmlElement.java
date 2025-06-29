@@ -65,7 +65,7 @@ public final class HtmlElement
      * Whether this element is a single tag and has no closing '</tag>'
      */
     @Default
-    private Boolean             isSingleTag = false;
+    private boolean             isSingleTag = false;
 
     /**
      * A list of {@code String}s between the opening and closing tag. They get appened one after another
@@ -85,17 +85,17 @@ public final class HtmlElement
         StringConcat sc = new StringConcat();
 
         sc
-            .append(StringAdapter.withPrefixAndSuffix(LT, tag, SPACE))
+            .append(StringAdapter.prefixAndSuffix(LT, tag, SPACE))
             .append(getAttributes())
             .append(SPACE)
-            .append(StringAdapter.withPrefixAndSuffix("class=\"", StringAdapter.withSeparatorFrom(classes, SPACE), QTM))
+            .append(StringAdapter.prefixAndSuffix("class=\"", StringAdapter.separate(classes, SPACE), QTM))
             .append(SPACE)
             .append(getDataAttributes())
             .append(GT)
             .append(!isSingleTag, () -> StringAdapter.from(contents))
-            .append(!isSingleTag, () -> StringAdapter.withPrefixAndSuffix(LTS, tag, GT));
+            .append(!isSingleTag, () -> StringAdapter.prefixAndSuffix(LTS, tag, GT));
 
-        return sc.getString();
+        return sc.toString();
     }
 
     /**
@@ -121,7 +121,7 @@ public final class HtmlElement
         return dataAttributes
             .entrySet()
             .stream()
-            .map(e -> StringAdapter.withPrefixAndSuffix("data-", e.getKey(), "=\"") + StringAdapter.withSuffix(e.getValue(), QTM))
+            .map(e -> StringAdapter.prefixAndSuffix("data-", e.getKey(), "=\"") + StringAdapter.suffix(e.getValue(), QTM))
             .collect(Collectors.joining(SPACE));
     }
 

@@ -180,8 +180,8 @@ public class JsonMapperTest
 
         AudioContainer audioContainer = (AudioContainer) container;
         assertEquals("path/to/resource", audioContainer.getSrc());
-        assertEquals(Boolean.FALSE, audioContainer.getControls());
-        assertEquals(Boolean.TRUE, audioContainer.getAutoplay());
+        assertEquals(false, audioContainer.isControls());
+        assertEquals(true, audioContainer.isAutoplay());
     }
 
     @Test

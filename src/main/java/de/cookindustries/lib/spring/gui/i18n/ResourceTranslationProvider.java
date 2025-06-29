@@ -7,10 +7,12 @@
  */
 package de.cookindustries.lib.spring.gui.i18n;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -23,9 +25,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public final class ResourceTranslationProvider extends AbsTranslationProvider
 {
 
-    private final List<String> paths;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private static final Logger LOG    = LoggerFactory.getLogger(ResourceTranslationProvider.class);
 
+    private final List<String>  paths;
+    private final ObjectMapper  mapper = new ObjectMapper();
+
+    /**
+     * Construct a new instance
+     * 
+     * @param paths a list of relative paths to the {@code resources} folder
+     */
     public ResourceTranslationProvider(List<String> paths)
     {
         this.paths = paths;
@@ -38,29 +47,33 @@ public final class ResourceTranslationProvider extends AbsTranslationProvider
         {
             try
             {
-                TranslationMapping mapping = map(path);
+                InputStream        inputStream = ResourceTranslationProvider.class.getClassLoader().getResourceAsStream(path);
 
-                toString();
+                TranslationMapping mapping     = mapper.readValue(inputStream, TranslationMapping.class);;
+
+                // TODO: remove this when update to 17+ is done
+                @SuppressWarnings("deprecation")
                 Locale locale = new Locale(mapping.getLanguage(), mapping.getCountry());
 
-                for (TranslationMappingText text : mapping.getElements())
+                for (TranslationMappingText text : mapping.getTexts())
                 {
-                    addTranslation(locale, text.getKey(), text.getText());
+                    try
+                    {
+                        addTranslation(locale, text.getKey(), text.getText());
+                    }
+                    catch (Exception ex)
+                    {
+                        LOG.error("error while reading translation entry [{}] - [{}]", text, ex);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                // TODO: write exception
+                LOG.error("error while reading translation resource [{}] - [{}]", path, ex);
             }
         }
 
         return this;
     }
 
-    private TranslationMapping map(String path) throws IOException
-    {
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(path);
-
-        return mapper.readValue(inputStream, TranslationMapping.class);
-    }
 }

@@ -18,7 +18,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public final class CloseModalCall extends AbsFunctionCall
+public final class CloseModal extends AbsFunctionCall
 {
 
     @Override

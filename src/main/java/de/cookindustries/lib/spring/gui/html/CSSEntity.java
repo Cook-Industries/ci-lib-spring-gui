@@ -47,7 +47,7 @@ public class CSSEntity implements HtmlExportable
 
         sc.appendnl("}");
 
-        return sc.getString();
+        return sc.toString();
     }
 
 }

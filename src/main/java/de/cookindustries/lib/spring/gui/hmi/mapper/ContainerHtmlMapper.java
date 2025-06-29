@@ -104,7 +104,7 @@ public final class ContainerHtmlMapper
             .stream()
             .forEach(c -> sc.append(mapper.render(c)));
 
-        return sc.getString();
+        return sc.toString();
     }
 
     /**
@@ -118,7 +118,7 @@ public final class ContainerHtmlMapper
     {
         String s = name + " element not supported yet.";
 
-        return StringAdapter.withPrefixAndSuffix("<div>", s, "</div>");
+        return StringAdapter.prefixAndSuffix("<div>", s, "</div>");
     }
 
     /**
@@ -549,7 +549,7 @@ public final class ContainerHtmlMapper
                 .attribute(new Attribute(ATT_ID, file.getUid()))
                 .attribute(new Attribute(ATT_TYPE, file.getType().name().toLowerCase()))
                 .attribute(new Attribute("multiple", file.getMultiple().toString()))
-                .attribute(new Attribute("accept", StringAdapter.withSeparatorFrom(file.getAccepts(), ",")))
+                .attribute(new Attribute("accept", StringAdapter.separate(file.getAccepts(), ",")))
                 .clazz(CLASS_FORM_CONTROL)
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
                 .dataAttribute(DATA_ATT_SUBMIT_AS, file.getSubmitAs())
@@ -674,7 +674,7 @@ public final class ContainerHtmlMapper
                 .tag(TAG_SELECT)
                 .attribute(new Attribute(ATT_ID, selectId.toString()))
                 .clazz("form-list-selection")
-                .dataAttribute("multiple", list.getMultiple().toString())
+                .dataAttribute("multiple", String.valueOf(list.isMultiple()))
                 .content(StringAdapter.from(options))
                 .build()
                 .html();
@@ -990,7 +990,7 @@ public final class ContainerHtmlMapper
                 .attribute(new Attribute(ATT_TYPE, "checkbox"))
                 // .attribute(ATT_ROLE, switch1.getType().name().toLowerCase())
                 .attribute(new Attribute(ATT_ON_INPUT, switch1.getOnInput()))
-                .attribute(new Attribute(ATT_CHECKED, switch1.getChecked()))
+                .attribute(new Attribute(ATT_CHECKED, switch1.isChecked()))
                 .clazz(CLASS_FORM_CHECK_INPUT)
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
                 .dataAttribute(DATA_ATT_SUBMIT_AS, switch1.getSubmitAs())

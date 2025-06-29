@@ -9,7 +9,7 @@ package de.cookindustries.lib.spring.gui.hmi.container;
 
 import java.util.List;
 
-import de.cookindustries.lib.spring.gui.function.CloseModalCall;
+import de.cookindustries.lib.spring.gui.function.CloseModal;
 import de.cookindustries.lib.spring.gui.hmi.input.ButtonClass;
 import lombok.Getter;
 import lombok.NonNull;
@@ -60,15 +60,14 @@ public final class ModalContainer extends Container
     private ButtonClass     btnClassRight       = ButtonClass.DEFAULT;
 
     @Default
-    private String          btnFunctionRight    = new CloseModalCall().parse();
+    private String          btnFunctionRight    = new CloseModal().parseAsJS();
 
     @NonNull
     @Singular
     private List<Container> contents;
 
-    @NonNull
     @Default
-    private Boolean         closeOnOverlayClick = false;
+    private boolean         closeOnOverlayClick = false;
 
     @Override
     protected ContainerType inferType()

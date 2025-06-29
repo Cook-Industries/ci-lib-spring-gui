@@ -86,6 +86,6 @@ public class HtmlSite implements HtmlExportable
         sc.appendnl("</body>");
         sc.appendnl("</html>");
 
-        return sc.getString();
+        return sc.toString();
     }
 }

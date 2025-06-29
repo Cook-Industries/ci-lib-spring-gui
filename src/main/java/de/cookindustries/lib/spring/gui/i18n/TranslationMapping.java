@@ -10,16 +10,20 @@ package de.cookindustries.lib.spring.gui.i18n;
 import java.util.List;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Data
+@NoArgsConstructor
 public class TranslationMapping
 {
 
     private String                       language;
+
     private String                       country;
-    private List<TranslationMappingText> elements;
+
+    private List<TranslationMappingText> texts;
 }

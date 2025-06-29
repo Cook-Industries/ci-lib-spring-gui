@@ -8,7 +8,6 @@
 package de.cookindustries.lib.spring.gui.hmi.mapper.exception;
 
 /**
- * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
@@ -33,4 +32,5 @@ public class JsonParsingException extends RuntimeException
             .format("uid [%s] pos: [%3d:%3d] - [%s] [%s]", uid, depth, element, msg,
                 t == null ? "no further error msg" : t.getMessage());
     }
+
 }

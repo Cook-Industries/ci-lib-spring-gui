@@ -43,9 +43,9 @@ public final class JsonTreeMapper
 
             return mapper.readValue(inputStream, JsonTreeRoot.class);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            throw new JsonMapperException(e);
+            throw new JsonMapperException(ex);
         }
     }
 
@@ -64,9 +64,9 @@ public final class JsonTreeMapper
 
             return mapper.readValue(inputStream, JsonTreeRoot.class);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            throw new JsonMapperException(e);
+            throw new JsonMapperException(ex);
         }
     }
 }

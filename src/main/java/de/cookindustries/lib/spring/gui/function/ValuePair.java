@@ -11,7 +11,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-import de.cookindustries.lib.spring.gui.util.StringAdapter;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
 
 /**
@@ -80,21 +79,11 @@ public final class ValuePair
      */
     public final String exportInJsonNotation()
     {
-        String className = value.getClass().getSimpleName();
-
-        String val       = switch (className)
-                         {
-                             case "Integer", "Boolean", "Double" -> String.valueOf(value);
-                             case "String" -> StringAdapter.withPrefixAndSuffix("\"", String.valueOf(value).replace("\"", "\\\""), "\"");
-
-                             default -> "";
-                         };
-
-        return String.format("\"%s\": \"%s\"", name.replace("\"", ""), val);
+        return String.format("\"%s\": \"%s\"", name.replace("\"", ""), String.valueOf(value).replace("\"", "\\\""));
     }
 
     /**
-     * Export this ValuePair as '{@code name}={@code value}' with both parts url encoded against UTF-8.
+     * Export this {@code ValuePair} as '{@code name}={@code value}' with both parts url encoded against UTF-8.
      * 
      * @return representation of this in form '{@code name}={@code value}'
      */
@@ -114,7 +103,7 @@ public final class ValuePair
             sc.append(urlEncode(String.valueOf(value)));
         }
 
-        return sc.getString();
+        return sc.toString();
 
     }
 }

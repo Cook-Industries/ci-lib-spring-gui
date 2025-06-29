@@ -48,6 +48,6 @@ class JsImportMap implements HtmlExportable
         sc.append("}}");
         sc.append("</script>");
 
-        return sc.getString();
+        return sc.toString();
     }
 }

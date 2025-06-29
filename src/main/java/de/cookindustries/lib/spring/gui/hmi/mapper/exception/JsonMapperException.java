@@ -8,7 +8,6 @@
 package de.cookindustries.lib.spring.gui.hmi.mapper.exception;
 
 /**
- * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */

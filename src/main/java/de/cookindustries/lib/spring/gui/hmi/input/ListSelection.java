@@ -17,7 +17,6 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
@@ -28,7 +27,7 @@ public final class ListSelection extends SubmittableInput
 {
 
     @Default
-    private final Boolean          multiple = false;
+    private final boolean          multiple = false;
 
     @Singular
     private final List<InputValue> values;
