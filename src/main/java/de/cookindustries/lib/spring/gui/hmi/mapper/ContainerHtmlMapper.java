@@ -9,7 +9,6 @@ package de.cookindustries.lib.spring.gui.hmi.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import de.cookindustries.lib.spring.gui.hmi.container.*;
@@ -431,13 +430,13 @@ public final class ContainerHtmlMapper
             case FILE -> render((File) input, formId);
             case HIDDEN -> render((Hidden) input, formId);
             case LINK -> render((Link) input, formId);
-            case LIST -> render((ListSelection) input, formId);
             case NUMBER -> render((Number) input, formId);
             case PASSWORD -> render((Password) input, formId);
             case RADIO -> render((Radio) input, formId);
             case SELECT -> render((Select) input, formId);
             case SLIDER -> render((Slider) input, formId);
             case SWITCH -> render((Switch) input, formId);
+            case TAG -> render((Tag) input, formId);
             case TABLE -> render((Table) input, formId);
             case TEXTAREA -> render((Textarea) input, formId);
             case TEXTBOX -> render((Textbox) input);
@@ -601,134 +600,6 @@ public final class ContainerHtmlMapper
     {
         // TODO: implement
         return elementNotYetImplemented("link input");
-    }
-
-    private String render(ListSelection list, String formId)
-    {
-        ArrayList<String> options = new ArrayList<>();
-
-        for (InputValue selection : list.getValues())
-        {
-            String option =
-                HtmlElement
-                    .builder()
-                    .tag(TAG_OPTION)
-                    .attribute(new Attribute(ATT_VALUE, selection.getValue()))
-                    .attribute(new Attribute(ATT_SELECTED, selection.getChecked()))
-                    .content(selection.getText())
-                    .build()
-                    .html();
-
-            options.add(option);
-        }
-
-        ArrayList<String> selections = new ArrayList<>();
-
-        for (InputValue selection : list.getSelected())
-        {
-            UUID   uuid   = UUID.randomUUID();
-
-            String option =
-                HtmlElement
-                    .builder()
-                    .tag(TAG_DIV)
-                    .attribute(new Attribute(ATT_ID, uuid.toString()))
-                    .content(
-                        render(
-                            ContentContainer
-                                .builder()
-                                .clazz("form-list-selection-item")
-                                .dataAttribute(ATT_VALUE, selection.getValue())
-                                .content(
-                                    TextContainer
-                                        .builder()
-                                        .text(selection.getText())
-                                        .build())
-                                .content(
-                                    Button
-                                        .builder()
-                                        .text("X")
-                                        .onClick(String.format("removeListSelectionItem('%s')", uuid))
-                                        .build())
-                                .build()))
-                    .build()
-                    .html();
-
-            selections.add(option);
-        }
-
-        String      label           =
-            HtmlElement
-                .builder()
-                .tag(TAG_LABEL)
-                .attribute(new Attribute(ATT_FOR, list.getUid()))
-                .clazz(CLASS_FORM_LABEL)
-                .content(list.getName())
-                .build()
-                .html();
-
-        UUID        selectId        = UUID.randomUUID();
-
-        String      input           =
-            HtmlElement
-                .builder()
-                .tag(TAG_SELECT)
-                .attribute(new Attribute(ATT_ID, selectId.toString()))
-                .clazz("form-list-selection")
-                .dataAttribute("multiple", String.valueOf(list.isMultiple()))
-                .content(StringAdapter.from(options))
-                .build()
-                .html();
-
-        String      selectHolder    =
-            HtmlElement
-                .builder()
-                .tag(TAG_DIV)
-                .clazz("form-list-selection-select-holder")
-                .content(input)
-                .content(
-                    render(
-                        Button
-                            .builder()
-                            .text("+")
-                            .onClick(String.format("addListSelectionItem('%s', '%s')", selectId, list.getUid()))
-                            .build()))
-                .build()
-                .html();
-
-        String      selectionHolder =
-            HtmlElement
-                .builder()
-                .tag(TAG_DIV)
-                .attribute(new Attribute(ATT_ID, list.getUid()))
-                .attribute(new Attribute(ATT_ON_INPUT, list.getOnInput()))
-                .dataAttributes(list.getDataAttributes())
-                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribute(DATA_ATT_SUBMIT_AS, list.getSubmitAs())
-                .dataAttribute(DATA_ATT_VALUE_TYPE, list.getType().name())
-                .dataAttributes(list.getDataAttributes())
-                .content(StringAdapter.from(selections))
-                .build()
-                .html();
-
-        String      outerBody       =
-            HtmlElement
-                .builder()
-                .tag(TAG_DIV)
-                .content(selectHolder)
-                .content(selectionHolder)
-                .build()
-                .html();
-
-        HtmlElement elementMapper   =
-            HtmlElement
-                .builder()
-                .tag(TAG_DIV)
-                .content(label)
-                .content(outerBody)
-                .build();
-
-        return elementMapper.html();
     }
 
     private String render(Number number, String formId)
@@ -1018,6 +889,46 @@ public final class ContainerHtmlMapper
                 .clazz(CLASS_FORM_CHECK)
                 .clazz("form-switch")
                 .content(StringAdapter.from(input, label))
+                .build();
+
+        return elementMapper.html();
+    }
+
+    private String render(Tag tag, String formId)
+    {
+        String      label         =
+            HtmlElement
+                .builder()
+                .tag(TAG_LABEL)
+                .attribute(new Attribute(ATT_FOR, tag.getUid()))
+                .clazz(CLASS_FORM_LABEL)
+                .content(tag.getName())
+                .build()
+                .html();
+
+        String      input         =
+            HtmlElement
+                .builder()
+                .isSingleTag(true)
+                .tag(TAG_INPUT)
+                .attribute(new Attribute(ATT_ID, tag.getUid()))
+                .attribute(new Attribute(ATT_TYPE, tag.getType().name().toLowerCase()))
+                .attribute(new Attribute(ATT_VALUE, tag.getValue()))
+                .attribute(new Attribute(ATT_ON_INPUT, tag.getOnInput()))
+                .clazz(CLASS_FORM_CONTROL)
+                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+                .dataAttribute(DATA_ATT_SUBMIT_AS, tag.getSubmitAs())
+                .dataAttribute(DATA_ATT_VALUE_TYPE, tag.getType().name())
+                .dataAttributes(tag.getDataAttributes())
+                .build()
+                .html();
+
+        String      content       = StringAdapter.from(label, resolveMarker(formId, tag.getSubmitAs(), tag.getMarker()), input);
+        HtmlElement elementMapper =
+            HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .content(content)
                 .build();
 
         return elementMapper.html();

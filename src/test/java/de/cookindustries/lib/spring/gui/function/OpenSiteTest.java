@@ -30,11 +30,11 @@ class OpenSiteTest
     void test_constructor()
     {
         // setup
-        String           requestUrl = "/test";
-        OpenSite<String> call       = new OpenSite<>(requestUrl, new TestObject());
+        String   requestUrl = "/test";
+        OpenSite call       = new OpenSite(requestUrl, new TestObject());
 
         // run
-        String           result     = call.parseAsJS();
+        String   result     = call.parseAsJS();
 
         // verify
         assertEquals("CILIB.FunctionRegistry.call('openSite', '/test', {\"uid\":2});", result);

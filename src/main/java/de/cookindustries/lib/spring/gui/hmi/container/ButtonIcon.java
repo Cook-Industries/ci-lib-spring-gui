@@ -25,8 +25,7 @@ public final class ButtonIcon extends Container
 
     @NonNull
     private String      image;
-    @NonNull
-    private String      onClick;
+
     @NonNull
     private ButtonClass btnClass;
 

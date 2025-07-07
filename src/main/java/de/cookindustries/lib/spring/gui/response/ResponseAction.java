@@ -37,5 +37,9 @@ public enum ResponseAction {
     PROGRESS,
 
     /** send generated data back to the gui */
-    DATA
+    DATA,
+
+    FETCH_TAGS,
+
+    FETCH_TAGS_RESULT
 }

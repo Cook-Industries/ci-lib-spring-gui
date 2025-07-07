@@ -7,38 +7,26 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input;
 
-import java.util.List;
-
-import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import lombok.Getter;
-import lombok.Singular;
+import lombok.NonNull;
 import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
-/**
- * @since 1.0.0
- * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
- */
 @SuperBuilder
 @Getter
 @Jacksonized
-public final class ListSelection extends SubmittableInput
+public final class Tag extends SubmittableInput
 {
 
+    @NonNull
     @Default
-    private final boolean          multiple = false;
-
-    @Singular
-    private final List<InputValue> values;
-
-    @Singular("select")
-    private final List<InputValue> selected;
+    private String value = "";
 
     @Override
     protected InputType inferType()
     {
-        return InputType.LIST;
+        return InputType.TAG;
     }
 
 }

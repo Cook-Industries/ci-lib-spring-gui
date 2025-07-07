@@ -7,26 +7,28 @@
  */
 package de.cookindustries.lib.spring.gui.function;
 
-public class OpenSite extends AbsFunctionCall
+public class RegisterTagInput extends AbsFunctionCall
 {
 
-    public OpenSite(String requestUrl, AbsFunctionArgs args)
+    public RegisterTagInput(String uid, String fetchUrl, String searchUrl, boolean enforceWhitelist)
     {
         super();
 
-        setParam(requestUrl);
-        setParam(args);
+        setParam(uid);
+        setParam(fetchUrl);
+        setParam(searchUrl);
+        setParam(enforceWhitelist);
     }
 
     @Override
     protected String functionName()
     {
-        return "openSite";
+        return "registerTagInput";
     }
 
     @Override
     protected Integer numberOfParameters()
     {
-        return 2;
+        return 4;
     }
 }

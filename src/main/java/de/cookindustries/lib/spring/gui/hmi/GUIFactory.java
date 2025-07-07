@@ -7,6 +7,7 @@
  */
 package de.cookindustries.lib.spring.gui.hmi;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -67,7 +68,9 @@ public final class GUIFactory
                 .jsScript(new JsPlainLink("/webjars/jquery/jquery.min.js"))
                 .jsScript(new JsPlainLink("/webjars/bootstrap/js/bootstrap.min.js"))
                 .jsScript(new JsPlainLink("/js/sprintf.min.js"))
+                .jsScript(new JsPlainLink("/webjars/yaireo__tagify/dist/tagify.js"))
                 .cssLink(new CSSLink("/webjars/bootstrap/css/bootstrap.min.css"))
+                .cssLink(new CSSLink("/webjars/yaireo__tagify/dist/tagify.css"))
                 .cssLink(
                     properties.getCssBaseFilePath() == null
                         ? new CSSLink("/css/ci-core.css")
@@ -104,7 +107,7 @@ public final class GUIFactory
      * @param valueMaps dynamic {@code valueMap}s
      * @return the parsed {@code Container}
      */
-    public Container readDynamicComponent(String resourcePath, Locale locale, ValueMap... valueMaps)
+    public Container readDynamicComponent(String resourcePath, Locale locale, List<ValueMap> valueMaps)
     {
         try
         {
@@ -157,8 +160,7 @@ public final class GUIFactory
      * @param valueMaps to fetch dynamic values from
      * @return a {@code HTML} {@code String} to render a website by a browser
      */
-    public String createHtmlSiteWithDynamicContent(String title, String resourcePath, Locale locale,
-        ValueMap... valueMaps)
+    public String createHtmlSiteWithDynamicContent(String title, String resourcePath, Locale locale, List<ValueMap> valueMaps)
     {
         Container content = readDynamicComponent(resourcePath, locale, valueMaps);
 
@@ -176,7 +178,7 @@ public final class GUIFactory
      * @return a {@code HTML} {@code String} to render a website by a browser
      */
     public String createHtmlSiteWithDynamicContent(String title, SiteImports imports, String resourcePath, Locale locale,
-        ValueMap... valueMaps)
+        List<ValueMap> valueMaps)
     {
         Container content = readDynamicComponent(resourcePath, locale, valueMaps);
 
@@ -257,7 +259,7 @@ public final class GUIFactory
                             Button
                                 .builder()
                                 .text("OK")
-                                .onClick("dismissErrors()")
+                                .onClick("CILIB.FunctionRegistry.call('dismissErrors');")
                                 .build())
                         .build())
                 .build())
@@ -281,7 +283,7 @@ public final class GUIFactory
      */
     public ContentResponse createStaticComponentResponse(String resourcePath, String elementId, Boolean replace)
     {
-        return createStaticComponentResponse(resourcePath, elementId, replace, List.of());
+        return createStaticComponentResponse(resourcePath, elementId, replace);
     }
 
     /**
@@ -291,11 +293,11 @@ public final class GUIFactory
      * @param resourcePath to load template from
      * @param elementId to append/replace content in
      * @param replace whether the content should be appende (false), or replaced (true)
-     * @param functionCalls to perform on the receiver
+     * @param calls to perform on the receiver
      * @return a response with the processed content
      */
     public ContentResponse createStaticComponentResponse(String resourcePath, String elementId, Boolean replace,
-        List<AbsFunctionCall> functionCalls)
+        AbsFunctionCall... calls)
     {
         Container content = readStaticComponent(resourcePath);
 
@@ -303,7 +305,7 @@ public final class GUIFactory
             .builder()
             .elementId(elementId)
             .content(content)
-            .calls(functionCalls)
+            .calls(Arrays.asList(calls))
             .replace(replace)
             .build();
     }
@@ -332,27 +334,11 @@ public final class GUIFactory
      * @param elementId to append/replace content in
      * @param replace whether the content should be appende (false), or replaced (true)
      * @param valueMaps to fetch dynamic values from
+     * @param calls to perform on the receiver
      * @return a response with the processed content
      */
     public ContentResponse createDynamicComponentResponse(String resourcePath, Locale locale, String elementId, Boolean replace,
-        ValueMap... valueMaps)
-    {
-        return createDynamicComponentResponse(resourcePath, locale, elementId, replace, List.of(), valueMaps);
-    }
-
-    /**
-     * Create a {@link ContentResponse} from a dynamic template to append or replace existing content on a receiver.
-     * 
-     * @param resourcePath to the dynamic component template
-     * @param locale to fetch translations with
-     * @param elementId to append/replace content in
-     * @param replace whether the content should be appende (false), or replaced (true)
-     * @param functionCalls to perform on the receiver
-     * @param valueMaps to fetch dynamic values from
-     * @return a response with the processed content
-     */
-    public ContentResponse createDynamicComponentResponse(String resourcePath, Locale locale, String elementId, Boolean replace,
-        List<AbsFunctionCall> functionCalls, ValueMap... valueMaps)
+        List<ValueMap> valueMaps, AbsFunctionCall... calls)
     {
         Container content = readDynamicComponent(resourcePath, locale, valueMaps);
 
@@ -360,7 +346,7 @@ public final class GUIFactory
             .builder()
             .elementId(elementId)
             .content(content)
-            .calls(functionCalls)
+            .calls(Arrays.asList(calls))
             .replace(replace)
             .build();
     }
@@ -371,15 +357,17 @@ public final class GUIFactory
      * @param resourcePath to the dynamic component template
      * @param locale to fetch translations with
      * @param valueMaps to fetch dynamic values from
+     * @param calls to perform on the receiver
      * @return a response with the processed content
      */
-    public ModalResponse createDynamicModalResponse(String resourcePath, Locale locale, ValueMap... valueMaps)
+    public ModalResponse createDynamicModalResponse(String resourcePath, Locale locale, List<ValueMap> valueMaps, AbsFunctionCall... calls)
     {
         ModalContainer content = (ModalContainer) readDynamicComponent(resourcePath, locale, valueMaps);
 
         return ModalResponse
             .builder()
             .modal(content)
+            .calls(Arrays.asList(calls))
             .build();
     }
 
@@ -402,10 +390,10 @@ public final class GUIFactory
      * 
      * @param msg of to show in the pop-up
      * @param type to color the pop-up
-     * @param functionCalls to perform
+     * @param calls to perform
      * @return a response containing a popup notification and function calls
      */
-    public NotificationResponse createPopUpResponse(String msg, MessageType type, List<AbsFunctionCall> functionCalls)
+    public NotificationResponse createPopUpResponse(String msg, MessageType type, AbsFunctionCall... calls)
     {
         return NotificationResponse
             .builder()
@@ -415,7 +403,7 @@ public final class GUIFactory
                     .msg(msg)
                     .type(type)
                     .build())
-            .calls(functionCalls)
+            .calls(Arrays.asList(calls))
             .build();
     }
 }

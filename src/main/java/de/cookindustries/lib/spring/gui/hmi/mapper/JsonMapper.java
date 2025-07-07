@@ -130,7 +130,7 @@ public class JsonMapper
     private final TreeHandling                     handling;
     private final Locale                           locale;
     private final AbsTranslationProvider           translationProvider;
-    private final ValueMap[]                       valueMaps;
+    private final List<ValueMap>                   valueMaps;
 
     @Getter(value = AccessLevel.NONE)
     @Setter(value = AccessLevel.NONE)
@@ -155,7 +155,7 @@ public class JsonMapper
         root.validate();
 
         final JsonMapper mapper = new JsonMapper(TreeHandling.valueOf(root.getHandling().toUpperCase()), Locale.ENGLISH,
-            NOOP_TRANSLATION_PROVIDER, new ValueMap[0]);
+            NOOP_TRANSLATION_PROVIDER, List.of());
 
         LOG.trace("mapper id [{}]", mapper.getUuid());
 
@@ -174,7 +174,7 @@ public class JsonMapper
      * @return the mapped {@code Container}
      * @throws JsonMapperException if mapping is set to dynamic but no {@code valueMap} is provided
      */
-    public static Container map(JsonTreeRoot root, Locale locale, AbsTranslationProvider translationProvider, final ValueMap... valueMaps)
+    public static Container map(JsonTreeRoot root, Locale locale, AbsTranslationProvider translationProvider, List<ValueMap> valueMaps)
     {
         Objects.requireNonNull(root, "root can not be null");
         Objects.requireNonNull(locale, "locale can not be null");
@@ -182,18 +182,17 @@ public class JsonMapper
 
         final TreeHandling handling = TreeHandling.valueOf(root.getHandling().toUpperCase());
 
-        if (handling == TreeHandling.DYNAMIC && valueMaps.length == 0)
+        if (handling == TreeHandling.DYNAMIC && valueMaps.size() == 0)
         {
             throw new JsonMapperException("mapping is set to [dynamic] fill-in-mode yet no [valueMap] is given");
         }
 
         LOG.trace("map dynamic content for [{}] from [{}] with [{}] value maps", locale.toLanguageTag(),
-            translationProvider.getClass().getSimpleName(), valueMaps.length);
+            translationProvider.getClass().getSimpleName(), valueMaps.size());
 
-        Arrays
-            .sort(valueMaps, Comparator.comparing(ValueMap::getPresedence).reversed());
-        Arrays
-            .stream(valueMaps)
+        valueMaps
+            .stream()
+            .sorted(Comparator.comparing(ValueMap::getPresedence).reversed())
             .forEach(ValueMap::seal);
 
         final JsonMapper mapper = new JsonMapper(handling, locale, translationProvider, valueMaps);
@@ -385,8 +384,8 @@ public class JsonMapper
 
         try
         {
-            opt = Arrays
-                .stream(valueMaps)
+            opt = valueMaps
+                .stream()
                 .map(m -> m.get(objName))
                 .findFirst();
         }
@@ -747,13 +746,26 @@ public class JsonMapper
      */
     private Button transfromButtonContainer(PseudoElement element, int depth)
     {
-        String              uid        = resolveUid(element, depth);
-        List<String>        classes    = resolveClasses(element.getClasses(), depth);
-        Map<String, String> attributes = resolveAttributes(element, depth);
-        String              text       = getParameterValue(element, depth, TEXT, String.class);
-        ButtonClass         btnClass   =
+        String              uid                 = resolveUid(element, depth);
+        List<String>        classes             = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes          = resolveAttributes(element, depth);
+        String              text                = getParameterValue(element, depth, TEXT, String.class);
+        ButtonClass         btnClass            =
             ButtonClass.valueOf(getParameterValue(element, depth, BTN_CLASS, String.class, "DEFAULT").toUpperCase());
-        String              onClick    = getParameterValue(element, depth, ON_CLICK, String.class);
+
+        AbsFunctionCall     btnFunction         = null;
+        String              fallbackBtnFunction = "";
+
+        try
+        {
+            btnFunction =
+                getParameterValue(element, depth, ON_CLICK, AbsFunctionCall.class);
+        }
+        catch (JsonParsingException ex)
+        {
+            fallbackBtnFunction =
+                getParameterValue(element, depth, ON_CLICK, String.class, "");
+        }
 
         return Button
             .builder()
@@ -762,7 +774,7 @@ public class JsonMapper
             .dataAttributes(attributes)
             .text(text)
             .btnClass(btnClass)
-            .onClick(onClick)
+            .onClick(btnFunction == null ? fallbackBtnFunction : btnFunction.parseAsJS())
             .build();
     }
 
@@ -1141,13 +1153,13 @@ public class JsonMapper
                 case FILE -> transformFileInput(element, depth);
                 case HIDDEN -> transformHiddenInput(element, depth);
                 case LINK -> transformLinkInput(element, depth);
-                case LIST -> transformListSelectionInput(element, depth);
                 case NUMBER -> transformNumberInput(element, depth);
                 case PASSWORD -> transformPasswordInput(element, depth);
                 case RADIO -> transformRadioInput(element, depth);
                 case SELECT -> transformSelectInput(element, depth);
                 case SLIDER -> transformSliderInput(element, depth);
                 case SWITCH -> transformSwitchInput(element, depth);
+                case TAG -> transformTagInput(element, depth);
                 case TABLE -> null; // TODO: fill
                 case TEXTAREA -> transformTextareaInput(element, depth);
                 case TEXTBOX -> transformTextboxInput(element, depth);
@@ -1354,42 +1366,6 @@ public class JsonMapper
             .href(href)
             .target(target)
             .onInput(onInput)
-            .build();
-    }
-
-    /**
-     * Transform a {@link PseudoElement} to an {@link Link} input
-     *
-     * @param element to transfrom
-     * @param depth of the recursive operation
-     * @return the transformed object
-     */
-    private ListSelection transformListSelectionInput(PseudoElement element, int depth)
-    {
-        String              uid            = resolveUid(element, depth);
-        List<String>        classes        = resolveClasses(element.getClasses(), depth);
-        Map<String, String> attributes     = resolveAttributes(element, depth);
-        List<Marker>        marker         = transformMarker(uid, element.getMarker(), depth);
-        String              name           = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs       = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput        = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
-        InputValueList      selectedValues =
-            getParameterValue(element, depth, "selectedValues", InputValueList.class, new InputValueList());
-        Boolean             multiple       = getParameterValue(element, depth, "multiple", Boolean.class, Boolean.FALSE);
-        InputValueList      inputValues    = handleInputValueChildren(element, depth, false);
-
-        return ListSelection
-            .builder()
-            .uid(uid)
-            .classes(classes)
-            .dataAttributes(attributes)
-            .marker(marker)
-            .name(name)
-            .submitAs(submitAs)
-            .onInput(onInput)
-            .values(inputValues)
-            .multiple(multiple)
-            .selected(selectedValues)
             .build();
     }
 
@@ -1605,6 +1581,35 @@ public class JsonMapper
     }
 
     /**
+     * Transform a {@link PseudoElement} to an {@link Textfield} input
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private Tag transformTagInput(PseudoElement element, int depth)
+    {
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
+        List<Marker>        marker     = transformMarker(uid, element.getMarker(), depth);
+        String              name       = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              value      = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
+
+        return Tag
+            .builder()
+            .uid(uid)
+            .classes(classes)
+            .dataAttributes(attributes)
+            .marker(marker)
+            .name(name)
+            .submitAs(submitAs)
+            .value(value)
+            .build();
+    }
+
+    /**
      * Transform a {@link PseudoElement} to an {@link Textarea} input
      *
      * @param element to transfrom
@@ -1673,11 +1678,11 @@ public class JsonMapper
         String              name        = getParameterValue(element, depth, NAME, String.class);
         String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
-        final String        value       = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
-        final String        placeholder = getParameterValue(element, depth, PLACEHOLDER, String.class, DEFAULT_VAL);
-        final String        prefix      = getParameterValue(element, depth, PREFIX, String.class, DEFAULT_VAL);
-        final String        suffix      = getParameterValue(element, depth, SUFFIX, String.class, DEFAULT_VAL);
-        final Integer       maxChars    = getParameterValue(element, depth, MAX_CHARS, Integer.class, 150);
+        String              value       = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
+        String              placeholder = getParameterValue(element, depth, PLACEHOLDER, String.class, DEFAULT_VAL);
+        String              prefix      = getParameterValue(element, depth, PREFIX, String.class, DEFAULT_VAL);
+        String              suffix      = getParameterValue(element, depth, SUFFIX, String.class, DEFAULT_VAL);
+        Integer             maxChars    = getParameterValue(element, depth, MAX_CHARS, Integer.class, 150);
 
         return Textfield
             .builder()

@@ -17,16 +17,16 @@ export {
  * Licensed under the MIT License.
  * <p>
  * See LICENSE file in the project root for full license information.
- * 
+ *
  * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
-const version = "ci-lib-dev-build";
+const version = "2.0.0";
 
 const CLASS_HIDDEN = "hidden";
 
 $(document).ready(function () {
-  console.log(version);
+  console.log("ci-lib-js: ", version);
 
   /**
    * OnClick function
@@ -35,41 +35,45 @@ $(document).ready(function () {
     event.stopPropagation();
 
     if (event.target === this) {
-      if ($(sprintf("#modal-overlay-%d", openModals)).attr("data-close-on-overlay") === "true") {
+      if (
+        $(sprintf("#modal-overlay-%d", openModals)).attr(
+          "data-close-on-overlay"
+        ) === "true"
+      ) {
         closeModal();
       }
     }
   });
 
-  FunctionRegistry._registerInternal("GET" , (url) => {
+  FunctionRegistry._registerInternal("GET", (url) => {
     GET(url);
   });
 
-  FunctionRegistry._registerInternal("POST" , (url, args = {}) => {
+  FunctionRegistry._registerInternal("POST", (url, args = {}) => {
     POST(url, args);
   });
 
-  FunctionRegistry._registerInternal("showGlobalLoader" , (text) => {
+  FunctionRegistry._registerInternal("showGlobalLoader", (text) => {
     showGlobalLoader(text);
   });
 
-  FunctionRegistry._registerInternal("hideGlobalLoader" , () => {
+  FunctionRegistry._registerInternal("hideGlobalLoader", () => {
     hideGlobalLoader();
   });
 
-  FunctionRegistry._registerInternal("requestModal" , (url, args = {}) => {
+  FunctionRegistry._registerInternal("requestModal", (url, args = {}) => {
     requestModal(url, args);
   });
 
-  FunctionRegistry._registerInternal("closeModal" , () => {
+  FunctionRegistry._registerInternal("closeModal", () => {
     closeModal();
   });
 
-  FunctionRegistry._registerInternal("submitFromModal" , () => {
+  FunctionRegistry._registerInternal("submitFromModal", () => {
     submitFromModal();
   });
 
-  FunctionRegistry._registerInternal("sendFromForm" , (id, url) => {
+  FunctionRegistry._registerInternal("sendFromForm", (id, url) => {
     sendFromForm(id, url);
   });
 
@@ -78,8 +82,17 @@ $(document).ready(function () {
   });
 
   FunctionRegistry._registerInternal("noop", () => {
-    console.log("a call to the NoOp funtcion occured. This is not normal and should not happen.")
+    console.log(
+      "a call to the NoOp funtcion occured. This is not normal and should be investigated happen."
+    );
   });
+
+  FunctionRegistry._registerInternal(
+    "registerTagInput",
+    (id, fetchUrl, searchUrl, enforceWhitelist) => {
+      registerTagInput(id, fetchUrl, searchUrl, enforceWhitelist);
+    }
+  );
 
   hideGlobalLoader();
 });
@@ -239,27 +252,39 @@ function handleResponse(response) {
         handleResponse(data);
       }
       break;
+
+    case "FETCH_TAGS":
+      tagifyWhitelists.set(response.inputId, response.results);
+      break;
+
+    case "FETCH_TAGS_RESULT":
+      let tagInputId = response.inputId;
+      let inputValue = response.originalInputValue;
+      let result = response.results;
+      let tagify = tagifyInstances.get(tagInputId);
+
+      tagify.settings.whitelist = result.concat(tagify.value || []);
+      tagify.loading(false).dropdown.show(result);
+      break;
   }
 
   call(response.calls);
 }
 
 function call(calls) {
-  calls.forEach(call => {
+  calls.forEach((call) => {
     FunctionRegistry.call(call.name, ...call.args);
   });
 }
 // === < global functions ==========================================================================
 // === > function register =========================================================================
-const FunctionRegistry = (function() {
-
+const FunctionRegistry = (function () {
   const internalFunctions = new Map();
   const externalFunctions = new Map();
 
   function registerInternal(name, fn) {
-    if (typeof fn !== 'function') {
+    if (typeof fn !== "function") {
       throw new Error("Must register a function.");
-    
     }
     internalFunctions.set(name, fn);
   }
@@ -293,7 +318,7 @@ const FunctionRegistry = (function() {
       };
     },
 
-    _registerInternal: registerInternal
+    _registerInternal: registerInternal,
   };
 })();
 // === < function register =========================================================================
@@ -417,7 +442,13 @@ function handlePopupMsg(msg) {
 
 function handleMarkerMsg(msg) {
   $(
-    sprintf("#error-marker-%s-%s-%s-%s", msg.formId, msg.transferId, msg.markerCategory, msg.markerType)
+    sprintf(
+      "#error-marker-%s-%s-%s-%s",
+      msg.formId,
+      msg.transferId,
+      msg.markerCategory,
+      msg.markerType
+    )
   ).removeClass(CLASS_HIDDEN);
 }
 
@@ -428,12 +459,11 @@ function resetMarker() {
 /**
  *
  * @param {String} msg  - message to be shown -> musst be set
- * @param {String} btn  - text on button -> can be set, default: 'dismiss'
  *
  * @return {undefined}
  */
-function clientsideError(msg, btn = "dismiss") {
-  handleMessages({ msg: msg, target: "POP_UP" }, btn);
+function clientsideError(msg) {
+  handleMessages([{ msg: msg, target: "MODAL", type: "ERROR" }]);
 }
 
 /**
@@ -520,7 +550,12 @@ function submitAbort() {
 function openModal(modalHtml) {
   openModals++;
 
-  $("#modal-container").append(sprintf('<div id="modal-overlay-%d" class="modal-overlay"></div>', openModals));
+  $("#modal-container").append(
+    sprintf(
+      '<div id="modal-overlay-%d" class="modal-overlay"></div>',
+      openModals
+    )
+  );
 
   $(sprintf("#modal-overlay-%d", openModals)).append(modalHtml);
 
@@ -573,12 +608,6 @@ function fillContent(content) {
   }
 }
 
-function replaceContent(obj) {
-  let contentIdentifier = obj.context;
-
-  $(sprintf("#%s", contentIdentifier)).replaceWith(write(obj.element));
-}
-
 function removeContent(obj) {
   let contentIdentifier = obj.context;
 
@@ -615,6 +644,7 @@ function extractValuesToSubmit(target) {
         case "PASSWORD":
         case "NUMBER":
         case "HIDDEN":
+        case "TAG":
           formData.append(id, $(elem).val());
           break;
 
@@ -640,7 +670,9 @@ function extractValuesToSubmit(target) {
           break;
 
         case "RADIO":
-          formData.append(id, $(elem).find('input[type="radio"]:checked').val()
+          formData.append(
+            id,
+            $(elem).find('input[type="radio"]:checked').val()
           );
           break;
 
@@ -651,22 +683,12 @@ function extractValuesToSubmit(target) {
           }
           break;
 
-        case "LIST":
-          let listArr = [];
-          $(elem)
-            .find(".form-list-selection-item")
-            .each(function () {
-              listArr.push($(this).attr("data-value"));
-            });
-          formData.append(id, listArr);
-          break;
-
         default:
           clientsideError(
-            "ERR_READ_FAIL",
             sprintf(
-              "a field value couldn't be fetched (field: %s)",
-              $(elem).attr("data-submit-as")
+              "a field value couldn't be fetched field [%s] type [%s]",
+              $(elem).attr("data-submit-as"),
+              $(elem).attr("data-value-type")
             )
           );
       }
@@ -675,74 +697,44 @@ function extractValuesToSubmit(target) {
 
   return formData;
 }
-
-async function extractFiles(files) {
-  const fileArray = [];
-  const promises = [];
-
-  if (files.length > 0) {
-    for (const file of files) {
-      const fileData = await read_file(file);
-      fileArray.push(fileData);
-    }
-  }
-
-  return fileArray;
-}
-
-function read_file(file) {
-  return new Promise((resolve, reject) => {
-    var fr = new FileReader();
-    fr.fileName = file.name;
-    fr.fileType = file.type;
-    fr.onload = (event) => {
-      resolve({
-        fileName: event.target.fileName,
-        fileType: event.target.fileType,
-        fileContent: event.target.result
-          .replace("data:", "")
-          .replace(/^.+,/, ""),
-      });
-    };
-    fr.onerror = (error) => {
-      console.log("error reading file");
-      reject(error);
-    };
-
-    fr.readAsDataURL(file);
-  });
-}
 // === < site ======================================================================================
 // === > form ======================================================================================
-function addListSelectionItem(inputUuid, holderUuid) {
-  const itemName = $(sprintf("#%s option:selected", inputUuid)).text();
-  const itemValue = $(sprintf("#%s", inputUuid)).val();
-  const isMultiple = $(sprintf("#%s", inputUuid)).data("multiple");
-  const newUuid = generateUUID();
+const tagifyInstances = new Map();
+const tagifyWhitelists = new Map();
 
-  if (itemName === undefined || itemName === "") {
-    return;
-  }
+function registerTagInput(id, fetchTagsUrl, searchTagsUrl, enforceWhitelist) {
+  const inputElm = document.querySelector(`#${id}`);
+  const initialValues = inputElm.value.trim().split(/\s*,\s*/);
 
-  if (
-    isMultiple ||
-    $(sprintf("#%s", holderUuid)).find(sprintf('[data-value="%s"]', itemValue))
-      .length === 0
-  ) {
-    $(sprintf("#%s", holderUuid)).append(
-      sprintf(
-        '<div id="%s"><div class="form-list-selection-item" data-value="%s"><p>%s</p><button onclick="removeListSelectionItem(\'%s\')" class="btn btn-primary">X</button></div></div>',
-        newUuid,
-        itemValue,
-        itemName,
-        newUuid
-      )
-    );
-  }
+  const tagify = new Tagify(inputElm, {
+    enforceWhitelist: enforceWhitelist,
+    whitelist: initialValues,
+    inputId: id,
+    searchTagsUrl: searchTagsUrl,
+  });
+
+  tagify
+    .on("add", (e) => onAddTag(e, tagify))
+    .on("input", (e) => onInput(e, tagify));
+
+  tagifyInstances.set(id, tagify);
+  tagifyWhitelists.set(id, initialValues);
+
+  POST(fetchTagsUrl, { id: id });
 }
 
-function removeListSelectionItem(uuid) {
-  $(sprintf("#%s", uuid)).remove();
+function onAddTag(e, tagify) {
+  tagify.off("add", onAddTag);
+}
+
+function onInput(e, tagify) {
+  tagify.whitelist = tagifyWhitelists.get(tagify.settings.inputId);
+  tagify.loading(true);
+
+  POST(tagify.settings.searchTagsUrl, {
+    id: tagify.settings.inputId,
+    input: e.detail.value,
+  });
 }
 // === < form ======================================================================================
 function generateUUID() {

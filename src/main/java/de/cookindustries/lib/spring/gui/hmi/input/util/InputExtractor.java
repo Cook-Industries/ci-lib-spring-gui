@@ -20,6 +20,8 @@ import java.util.regex.Pattern;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import de.cookindustries.lib.spring.gui.hmi.container.FormContainer;
 import de.cookindustries.lib.spring.gui.hmi.input.File;
 import de.cookindustries.lib.spring.gui.hmi.input.Input;
@@ -78,6 +80,8 @@ public final class InputExtractor
 {
 
     private static final String                 FILE_INPUT_SUBMIT_AS_ID = "files";
+
+    private static final ObjectMapper           TAG_LIST_MAPPER         = new ObjectMapper();
 
     private final String                        formId;
     private final MultiValueMap<String, String> inputs;
@@ -355,6 +359,7 @@ public final class InputExtractor
      * designated type.
      * 
      * @param key to extract
+     * @param consumer to feed value to
      * @return {@code this} for chaining
      */
     public InputExtractor extractAndConsumeAsDate(String key, Consumer<Date> consumer)
@@ -413,6 +418,80 @@ public final class InputExtractor
     }
 
     /**
+     * Extract a submitted {@code value} and consume it as a {@link TagList}. The {@code value} <b>must</b> be in JSON format
+     * {@code &#91;&#123;&quot;value&quot;:&quot;test 2&quot;&#125;, ...&#93;}.
+     * <p>
+     * A null or empty {@code value} will not be considered as a failure.
+     * <p>
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
+     * designated type.
+     * 
+     * @param key to extract
+     * @param consumer to feed value to
+     * @return {@code this} for chaining
+     */
+    public InputExtractor extractAndConsumeAsTagList(String key, Consumer<TagList> consumer)
+    {
+        return extractAsTagList(key, consumer, false);
+    }
+
+    /**
+     * Extract a submitted {@code value} and consume it as a {@link TagList}. The {@code value} <b>must</b> be in JSON format
+     * {@code &#91;&#123;&quot;value&quot;:&quot;test 2&quot;&#125;, ...&#93;}. The {@code value} can <b>not</b> be empty or {@code null}.
+     * <p>
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
+     * designated type.
+     * 
+     * @param key to extract
+     * @param consumer to feed value to
+     * @return {@code this} for chaining
+     */
+    public InputExtractor extractAndConsumeAsNotEmptyTagList(String key, Consumer<TagList> consumer)
+    {
+        return extractAsTagList(key, consumer, true);
+    }
+
+    /**
+     * Extract a submitted {@code value} and consume it as a {@link TagList}. The {@code value} <b>must</b> be in JSON format
+     * {@code &#91;&#123;&quot;value&quot;:&quot;test 2&quot;&#125;, ...&#93;}.
+     * <p>
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
+     * designated type.
+     * 
+     * @param key to extract
+     * @param consumer to feed value to
+     * @param raiseNullOrEmtpy wheter to activate a marker on {@code null} or empty {@code value}
+     * @return {@code this} for chaining
+     */
+    private InputExtractor extractAsTagList(String key, Consumer<TagList> consumer, boolean raiseNullOrEmtpy)
+    {
+        try
+        {
+            String value = getValue(key);
+
+            if (value == null || value.isEmpty())
+            {
+                if (raiseNullOrEmtpy)
+                {
+                    activateMarker(key, MarkerCategory.ERROR, MarkerType.EMPTY);
+                }
+
+                return this;
+            }
+
+            TagList list = TAG_LIST_MAPPER.readValue(value, TagList.class);
+
+            consumer.accept(list);
+        }
+        catch (Exception ex)
+        {
+            addUnexpectedErrorMessage(key, ex.getMessage());
+        }
+
+        return this;
+    }
+
+    /**
      * Check if {@code files} contain something.
      * <p>
      * This function assumes that the file transfer name - {@code submitAs} on the {@link File} input - is named {@code files} and will
@@ -424,7 +503,7 @@ public final class InputExtractor
      * @param multipleAllowed true, if more than one file can be uploaded
      * @return {@code this} for chaining
      */
-    public InputExtractor checkFiles(Boolean nullable, Boolean multipleAllowed)
+    public InputExtractor checkFiles(boolean nullable, boolean multipleAllowed)
     {
         if (files == null || files.length == 0)
         {

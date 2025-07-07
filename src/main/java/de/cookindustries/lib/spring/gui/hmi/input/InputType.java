@@ -12,5 +12,5 @@ package de.cookindustries.lib.spring.gui.hmi.input;
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 public enum InputType {
-    CHECKBOX, CURRENCY, DATE, FILE, HIDDEN, LINK, NUMBER, PASSWORD, RADIO, SELECT, SLIDER, SWITCH, TABLE, TEXTAREA, TEXTBOX, TEXTFIELD, LIST;
+    CHECKBOX, CURRENCY, DATE, FILE, HIDDEN, LINK, NUMBER, PASSWORD, RADIO, SELECT, SLIDER, SWITCH, TABLE, TEXTAREA, TEXTBOX, TEXTFIELD, TAG;
 }
