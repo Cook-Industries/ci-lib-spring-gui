@@ -13,8 +13,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.hmi.container.*;
@@ -60,6 +65,8 @@ import lombok.Setter;
 public class JsonMapper
 {
 
+    private static final Logger                    LOG                            = LoggerFactory.getLogger(JsonMapper.class);
+
     private static final String                    SRC                            = "src";
     private static final String                    SUFFIX                         = "suffix";
     private static final String                    PREFIX                         = "prefix";
@@ -86,6 +93,8 @@ public class JsonMapper
     private static final String                    INDICATOR_TEXT_PLACEHOLDER     = "$$text$";
     private static final String                    INDICATOR_CLASS_PLACEHOLDER    = "$$class$";
     private static final String                    INDICATOR_FUNCTION_PLACEHOLDER = "$$function$";
+
+    private static final String                    INDENT_STRING                  = "- ";
 
     private static final StaticTranslationProvider NOOP_TRANSLATION_PROVIDER      = new StaticTranslationProvider();
 
@@ -127,6 +136,10 @@ public class JsonMapper
     @Setter(value = AccessLevel.NONE)
     private Integer                                count                          = 0;
 
+    @Getter(value = AccessLevel.PRIVATE)
+    @Setter(value = AccessLevel.NONE)
+    private final String                           uuid                           = Long.toString(System.currentTimeMillis(), 36);;
+
     /**
      * Validate a {@link JsonTreeRoot} and map it to a {@link Container} tree in a {@link TreeHandling#STATIC} context.
      * <p>
@@ -137,10 +150,14 @@ public class JsonMapper
      */
     public static Container map(JsonTreeRoot root)
     {
+        LOG.trace("map static content");
+
         root.validate();
 
         final JsonMapper mapper = new JsonMapper(TreeHandling.valueOf(root.getHandling().toUpperCase()), Locale.ENGLISH,
             NOOP_TRANSLATION_PROVIDER, new ValueMap[0]);
+
+        LOG.trace("mapper id [{}]", mapper.getUuid());
 
         return mapper.transform(root);
     }
@@ -159,6 +176,10 @@ public class JsonMapper
      */
     public static Container map(JsonTreeRoot root, Locale locale, AbsTranslationProvider translationProvider, final ValueMap... valueMaps)
     {
+        Objects.requireNonNull(root, "root can not be null");
+        Objects.requireNonNull(locale, "locale can not be null");
+        Objects.requireNonNull(translationProvider, "translatioProvider can not be null");
+
         final TreeHandling handling = TreeHandling.valueOf(root.getHandling().toUpperCase());
 
         if (handling == TreeHandling.DYNAMIC && valueMaps.length == 0)
@@ -166,12 +187,18 @@ public class JsonMapper
             throw new JsonMapperException("mapping is set to [dynamic] fill-in-mode yet no [valueMap] is given");
         }
 
-        Arrays.sort(valueMaps, Comparator.comparing(ValueMap::getPresedence).reversed());
+        LOG.trace("map dynamic content for [{}] from [{}] with [{}] value maps", locale.toLanguageTag(),
+            translationProvider.getClass().getSimpleName(), valueMaps.length);
+
+        Arrays
+            .sort(valueMaps, Comparator.comparing(ValueMap::getPresedence).reversed());
         Arrays
             .stream(valueMaps)
             .forEach(ValueMap::seal);
 
         final JsonMapper mapper = new JsonMapper(handling, locale, translationProvider, valueMaps);
+
+        LOG.trace("mapper id [{}]", mapper.getUuid());
 
         return mapper.transform(root);
     }
@@ -180,10 +207,87 @@ public class JsonMapper
      * --- > utility functions -------------------------------------------------------------------------------------------------------------
      */
 
-    private Container throwNotSupported(PseudoElement element, Integer depth)
+    private Container throwNotSupported(PseudoElement element, int depth)
     {
         throw new JsonParsingException(element.getUid(), depth, this.count,
             String.format("container type [%s] is not supported", element.getType()));
+    }
+
+    /**
+     * Resolve the {@code uid} on a {@link PseudoElement}.
+     * 
+     * @param element to resolve
+     * @param depth the current depth in the tree
+     * @return the resolved {@code uid}
+     */
+    private String resolveUid(PseudoElement element, int depth)
+    {
+        String uid = element.getUid();
+
+        if (uid == null)
+        {
+            uid = UUID.randomUUID().toString();
+        }
+        else if (uid.startsWith(INDICATOR_VALUE_PLACEHOLDER))
+        {
+            uid = resolveUid(element, depth);
+        }
+
+        String indent = INDENT_STRING.repeat(depth + 1);
+
+        LOG.trace("[{}]:[{}]:{}resolve uid to [{}]", uuid, depth, indent, uid);
+
+        return uid;
+    }
+
+    /**
+     * Traverse the css classes and replace {@code $$class$} parameters from {@link #valueMaps}.
+     * <p>
+     * Not found {@code class}es will be ignored.
+     * 
+     * @param classes {@code List} of all classes {@code String}s to traverse
+     * @return a {@code List} of {@code String}s containing the non-altered and the replaced classes
+     */
+    private List<String> resolveClasses(List<String> classes, int depth)
+    {
+        String indent = INDENT_STRING.repeat(depth + 1);
+
+        LOG.trace("[{}]:[{}]:{}resolve classes {}", uuid, depth, indent, classes);
+
+        return classes.stream().map(c -> {
+            if (c.startsWith(INDICATOR_CLASS_PLACEHOLDER))
+            {
+                String key  = c.replace(INDICATOR_CLASS_PLACEHOLDER, "");
+                String text = extractFromValueMaps(key, String.class);
+
+                if (text == null)
+                {
+                    return "";
+                }
+
+                return text;
+            }
+
+            return c;
+        }).dropWhile(String::isBlank).collect(Collectors.toList());
+    }
+
+    /**
+     * Resolve the {@code attributes} on a {@link PseudoElement}.
+     * 
+     * @param element to resolve
+     * @param depth the current depth in the tree
+     * @return the resolved {@code attributes}
+     */
+    private Map<String, String> resolveAttributes(PseudoElement element, int depth)
+    {
+        Map<String, String> attributes = element.getAttributes();
+
+        String              indent     = INDENT_STRING.repeat(depth + 1);
+
+        LOG.trace("[{}]:[{}]:{}resolve attributes {}", uuid, depth, indent, attributes);
+
+        return attributes;
     }
 
     /**
@@ -195,11 +299,12 @@ public class JsonMapper
      * @param <I> the expected result type
      * @param key the key used to look up the value in the value map.
      * @param expectedType the expected type of the extracted value.
+     * @param depth the current depth in the tree
      * @return the extracted value if found, or {@code null}
      */
-    private <I> I handlePossiblePlaceholder(String key, Class<I> expectedType)
+    private <I> I handlePossiblePlaceholder(String key, Class<I> expectedType, int depth)
     {
-        return handlePossiblePlaceholder(key, expectedType, null);
+        return handlePossiblePlaceholder(key, expectedType, null, depth);
     }
 
     /**
@@ -212,31 +317,44 @@ public class JsonMapper
      * @param key the key used to look up the value in the value map.
      * @param expectedType the expected type of the extracted value.
      * @param defaultValue the default value to return if no value is found.
+     * @param depth the current depth in the tree
      * @return the extracted value if found, or {@code defaultValue} if not found
      */
-    private <I> I handlePossiblePlaceholder(String key, Class<I> expectedType, I defaultValue)
+    private <I> I handlePossiblePlaceholder(String key, Class<I> expectedType, I defaultValue, int depth)
     {
-        I value = null;
+        I      value  = null;
+
+        String indent = INDENT_STRING.repeat(depth + 1);
+
+        LOG.trace("[{}]:[{}]:{}try resolving placeholder [{}] as [{}]", uuid, depth, indent, key, expectedType.getSimpleName());
 
         if (this.handling == TreeHandling.DYNAMIC && key != null)
         {
             if (key.startsWith(INDICATOR_TEXT_PLACEHOLDER) && expectedType.equals(String.class))
             {
+                LOG.trace("[{}]:[{}]:{}resolve as [TEXT]", uuid, depth, indent);
+
                 String keyName = key.substring(INDICATOR_TEXT_PLACEHOLDER.length());
                 value = expectedType.cast(translationProvider.getText(locale, keyName));
             }
             else if (key.startsWith(INDICATOR_VALUE_PLACEHOLDER))
             {
+                LOG.trace("[{}]:[{}]:{}resolve as [VALUE]", uuid, depth, indent);
+
                 String keyName = key.substring(INDICATOR_VALUE_PLACEHOLDER.length());
                 value = extractFromValueMaps(keyName, expectedType);
             }
             else if (key.startsWith(INDICATOR_CLASS_PLACEHOLDER))
             {
+                LOG.trace("[{}]:[{}]:{}resolve as [CLASS]", uuid, depth, indent);
+
                 String keyName = key.substring(INDICATOR_CLASS_PLACEHOLDER.length());
                 value = extractFromValueMaps(keyName, expectedType);
             }
             else if (key.startsWith(INDICATOR_FUNCTION_PLACEHOLDER))
             {
+                LOG.trace("[{}]:[{}]:{}resolve as [FUNCTION]", uuid, depth, indent);
+
                 String keyName = key.substring(INDICATOR_FUNCTION_PLACEHOLDER.length());
                 value = extractFromValueMaps(keyName, expectedType);
             }
@@ -246,6 +364,8 @@ public class JsonMapper
         {
             value = defaultValue;
         }
+
+        LOG.trace("[{}]:[{}]:{}resolved to [{}]", uuid, depth, indent, String.valueOf(value));
 
         return value;
     }
@@ -294,7 +414,7 @@ public class JsonMapper
         }
     }
 
-    private <T> T getParameterValue(PseudoElement element, Integer depth, String key, Class<T> expectedType)
+    private <T> T getParameterValue(PseudoElement element, int depth, String key, Class<T> expectedType)
     {
         return getParameterValue(element, depth, key, expectedType, null);
     }
@@ -314,10 +434,15 @@ public class JsonMapper
      * @return the found parameter
      * @throws JsonParsingException if parameter is expected but not found and no {@code fallback} is provided
      */
-    private <T> T getParameterValue(PseudoElement element, Integer depth, String key, Class<T> expectedType, T fallback)
+    private <T> T getParameterValue(PseudoElement element, int depth, String key, Class<T> expectedType, T fallback)
     {
         String rawValue = element.getParameters().get(key);
         T      value    = null;
+
+        String indent   = INDENT_STRING.repeat(depth + 1);
+
+        LOG.trace("[{}]:[{}]:{}get parameter [{}] from [{}] as [{}]", uuid, depth, indent, key, element.getUid(),
+            expectedType.getSimpleName());
 
         if (rawValue == null || rawValue.isBlank())
         {
@@ -327,17 +452,21 @@ public class JsonMapper
                     String.format("parameter [%s] is expected but not set", key));
             }
 
+            LOG.trace("[{}]:[{}]:{}parameter is [{}]", uuid, depth, indent, String.valueOf(fallback));
+
             return fallback;
         }
 
         if (rawValue.startsWith(BASE_INDICATOR_START))
         {
-            value = handlePossiblePlaceholder(rawValue, expectedType, fallback);
+            value = handlePossiblePlaceholder(rawValue, expectedType, fallback, depth);
         }
         else
         {
             value = transformRawValue(element.getUid(), depth, rawValue, expectedType);
         }
+
+        LOG.trace("[{}]:[{}]:{}parameter is [{}]", uuid, depth, indent, String.valueOf(value));
 
         return value;
     }
@@ -355,7 +484,7 @@ public class JsonMapper
      * @return the transformed {@code vale}
      * @throws JsonParsingException if the value could not be transformed
      */
-    private <T> T transformRawValue(String uid, Integer depth, String value, Class<T> expectedType)
+    private <T> T transformRawValue(String uid, int depth, String value, Class<T> expectedType)
     {
         if (expectedType.equals(Boolean.class))
         {
@@ -387,42 +516,18 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Container transformInternalComponent(PseudoElement element, Integer depth)
+    private Container transformInternalComponent(PseudoElement element, int depth)
     {
         String         path   = getParameterValue(element, depth, "path", String.class);
         JsonTreeMapper mapper = new JsonTreeMapper();
 
-        JsonTreeRoot   root   = mapper.map(path);
+        String         indent = INDENT_STRING.repeat(depth + 1);
+
+        LOG.trace("[{}]:[{}]:{}map linked component @ [{}]", uuid, depth, indent, path);
+
+        JsonTreeRoot root = mapper.map(path);
 
         return JsonMapper.map(root, locale, translationProvider, valueMaps);
-    }
-
-    /**
-     * Traverse the css classes and replace {@code $$class$} parameters from {@link #valueMaps}.
-     * <p>
-     * Not founde {@code class}es will be ignored and will not be raised.
-     * 
-     * @param classes {@code List} of all classes {@code String}s to traverse
-     * @return a {@code List} of {@code String}s containing the non-altered and the replaced classes
-     */
-    private List<String> replaceClasses(List<String> classes)
-    {
-        return classes.stream().map(c -> {
-            if (c.startsWith(INDICATOR_CLASS_PLACEHOLDER))
-            {
-                String key  = c.replace(INDICATOR_CLASS_PLACEHOLDER, "");
-                String text = extractFromValueMaps(key, String.class);
-
-                if (text == null)
-                {
-                    return "";
-                }
-
-                return text;
-            }
-
-            return c;
-        }).dropWhile(String::isBlank).collect(Collectors.toList());
     }
 
     /**
@@ -433,8 +538,12 @@ public class JsonMapper
      * @param throwWhenEmpty whether to throw an exception on an empty children-list
      * @return a {@link InputValueList} of the transformed children
      */
-    private InputValueList handleInputValueChildren(PseudoElement element, Integer depth, Boolean throwWhenEmpty)
+    private InputValueList handleInputValueChildren(PseudoElement element, int depth, boolean throwWhenEmpty)
     {
+        String indent = INDENT_STRING.repeat(depth + 1);
+
+        LOG.trace("[{}]:[{}]:{}map input children", uuid, depth, indent);
+
         InputValueList values = new InputValueList();
 
         for (PseudoElement pe : element.getChildren())
@@ -460,9 +569,9 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private InputValue transformInputValue(PseudoElement element, Integer depth)
+    private InputValue transformInputValue(PseudoElement element, int depth)
     {
-        List<String> classes = replaceClasses(element.getClasses());
+        List<String> classes = resolveClasses(element.getClasses(), depth);
         String       text    = getParameterValue(element, depth, TEXT, String.class);
         String       value   = getParameterValue(element, depth, VALUE, String.class);
         Boolean      checked = getParameterValue(element, depth, CHECKED, Boolean.class, Boolean.FALSE);
@@ -494,7 +603,7 @@ public class JsonMapper
      * @param marker list of markers to transform
      * @return list containing all markers
      */
-    private List<Marker> transformMarker(String ownerId, List<PseudoMarker> marker)
+    private List<Marker> transformMarker(String ownerId, List<PseudoMarker> marker, int depth)
     {
         List<Marker> list = new ArrayList<>();
 
@@ -503,7 +612,7 @@ public class JsonMapper
             MarkerCategory category = MarkerCategory.valueOf(pm.getCategory().toUpperCase());
             MarkerType     type     = MarkerType.valueOf(pm.getType().toUpperCase());
             String         text     =
-                pm.getText().startsWith(BASE_INDICATOR_START) ? handlePossiblePlaceholder(pm.getText(), String.class) : pm.getText();
+                pm.getText().startsWith(BASE_INDICATOR_START) ? handlePossiblePlaceholder(pm.getText(), String.class, depth) : pm.getText();
 
             list.add(
                 Marker
@@ -531,9 +640,14 @@ public class JsonMapper
      * @return the transformed container
      * @throws JsonParsingException on any failure, refer to exception text
      */
-    private Container transform(PseudoElement element, Integer depth, ContainerType... allowedTypes) throws JsonParsingException
+    private Container transform(PseudoElement element, int depth, ContainerType... allowedTypes) throws JsonParsingException
     {
         this.count++;
+
+        String indent = INDENT_STRING.repeat(depth + 1);
+
+        LOG.trace("");
+        LOG.debug("[{}]:[{}]:{}map [{}] with allowed types [{}]", uuid, depth, indent, element.getUid(), allowedTypes);
 
         InternalElementType internalType = null;
 
@@ -572,6 +686,8 @@ public class JsonMapper
                     String.format("container type [%s] is not allowed here", element.getType()));
             }
 
+            LOG.debug("[{}]:[{}]:{}map CONTAINER [{}] as [{}]", uuid, depth, indent, element.getUid(), type);
+
             return switch (type)
             {
                 case AUDIO -> transfromAudioContainer(element, depth);
@@ -602,11 +718,11 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private AudioContainer transfromAudioContainer(PseudoElement element, Integer depth)
+    private AudioContainer transfromAudioContainer(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
         String              src        = getParameterValue(element, depth, SRC, String.class);
         Boolean             controls   = getParameterValue(element, depth, "controls", Boolean.class, Boolean.FALSE);
         Boolean             autoplay   = getParameterValue(element, depth, "autoplay", Boolean.class, Boolean.FALSE);
@@ -629,11 +745,11 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Button transfromButtonContainer(PseudoElement element, Integer depth)
+    private Button transfromButtonContainer(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
         String              text       = getParameterValue(element, depth, TEXT, String.class);
         ButtonClass         btnClass   =
             ButtonClass.valueOf(getParameterValue(element, depth, BTN_CLASS, String.class, "DEFAULT").toUpperCase());
@@ -657,7 +773,7 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private ButtonBarContainer transformButtonBarContainer(PseudoElement element, Integer depth)
+    private ButtonBarContainer transformButtonBarContainer(PseudoElement element, int depth)
     {
         return (ButtonBarContainer) throwNotSupported(element, depth);
     }
@@ -669,11 +785,11 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private ButtonIcon transformButtonIconContainer(PseudoElement element, Integer depth)
+    private ButtonIcon transformButtonIconContainer(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
         String              image      = getParameterValue(element, depth, IMAGE, String.class);
         ButtonClass         btnClass   = ButtonClass.valueOf(getParameterValue(element, depth, BTN_CLASS, String.class, "DEFAULT"));
         String              onClick    = getParameterValue(element, depth, ON_CLICK, String.class);
@@ -696,11 +812,11 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private ContentContainer transformContentContainer(PseudoElement element, Integer depth)
+    private ContentContainer transformContentContainer(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
         List<Container>     contents   = new ArrayList<>();
 
         element
@@ -724,11 +840,11 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private FormContainer transformFormContainer(PseudoElement element, Integer depth)
+    private FormContainer transformFormContainer(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
         List<Input>         inputs     = new ArrayList<>();
 
         element
@@ -752,11 +868,11 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private HiddenContainer transformHiddenContainer(PseudoElement element, Integer depth)
+    private HiddenContainer transformHiddenContainer(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
         Container           child      =
             element
                 .getChildren()
@@ -778,11 +894,11 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private ImageContainer transformImageContainer(PseudoElement element, Integer depth)
+    private ImageContainer transformImageContainer(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
         String              src        = getParameterValue(element, depth, SRC, String.class);
 
         return ImageContainer
@@ -801,11 +917,11 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private LinkContainer transformLinkContainer(PseudoElement element, Integer depth)
+    private LinkContainer transformLinkContainer(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
         String              href       = getParameterValue(element, depth, HREF, String.class);
         String              target     = getParameterValue(element, depth, TARGET, String.class, "_self");
         Container           content    =
@@ -831,11 +947,11 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private ModalContainer transformModal(PseudoElement element, Integer depth)
+    private ModalContainer transformModal(PseudoElement element, int depth)
     {
-        String              uid                     = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes                 = replaceClasses(element.getClasses());
-        Map<String, String> attributes              = element.getAttributes();
+        String              uid                     = resolveUid(element, depth);
+        List<String>        classes                 = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes              = resolveAttributes(element, depth);
         String              name                    = getParameterValue(element, depth, NAME, String.class);
         String              requestUrl              = getParameterValue(element, depth, "requestUrl", String.class);
         Boolean             closeOnOverlayClick     = getParameterValue(element, depth, NAME, Boolean.class);
@@ -894,12 +1010,15 @@ public class JsonMapper
                 getParameterValue(element, depth, "btnFunctionRight", String.class);
         }
 
-        Container content =
-            element
-                .getChildren()
-                .isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, MODAL_CHILDREN);
+        List<Container> children = new ArrayList<>();
 
-        return ModalContainer.builder()
+        for (PseudoElement pe : element.getChildren())
+        {
+            children.add(transform(pe, depth + 1, MODAL_CHILDREN));
+        }
+
+        return ModalContainer
+            .builder()
             .uid(uid)
             .classes(classes)
             .dataAttributes(attributes)
@@ -915,7 +1034,11 @@ public class JsonMapper
             .btnClassRight(btnClassRight)
             .btnFunctionRight(btnFunctionRight == null ? fallbackBtnFunctionRight : btnFunctionRight.parseAsJS())
             .closeOnOverlayClick(closeOnOverlayClick)
-            .content(content)
+            .content(
+                ContentContainer
+                    .builder()
+                    .contents(children)
+                    .build())
             .build();
     }
 
@@ -926,11 +1049,11 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private SplittedContainer transformSplittedContainer(PseudoElement element, Integer depth)
+    private SplittedContainer transformSplittedContainer(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
         Container           head       = null;
         Container           tail       = null;
         List<Container>     center     = new ArrayList<>();
@@ -971,7 +1094,7 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private TabContainer transformTabbedContainer(PseudoElement element, Integer depth)
+    private TabContainer transformTabbedContainer(PseudoElement element, int depth)
     {
         return (TabContainer) throwNotSupported(element, depth);
     }
@@ -983,11 +1106,11 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private TextContainer transformTextContainer(PseudoElement element, Integer depth)
+    private TextContainer transformTextContainer(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
         String              text       = getParameterValue(element, depth, TEXT, String.class);
 
         return TextContainer
@@ -999,11 +1122,18 @@ public class JsonMapper
             .build();
     }
 
-    private Input transformInput(PseudoElement element, Integer depth)
+    private Input transformInput(PseudoElement element, int depth)
     {
+        String    indent = INDENT_STRING.repeat(depth + 1);
+
+        InputType type   = InputType.valueOf(element.getType().toUpperCase());
+
+        LOG.trace("");
+        LOG.debug("[{}]:[{}]:{}map INPUT [{}] as [{}]", uuid, depth, indent, element.getUid(), type);
+
         try
         {
-            return switch (InputType.valueOf(element.getType().toUpperCase()))
+            return switch (type)
             {
                 case CHECKBOX -> transformCheckboxInput(element, depth);
                 case CURRENCY -> transformCurrencyInput(element, depth);
@@ -1038,12 +1168,12 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Checkbox transformCheckboxInput(PseudoElement element, Integer depth)
+    private Checkbox transformCheckboxInput(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
-        List<Marker>        marker     = transformMarker(uid, element.getMarker());
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
+        List<Marker>        marker     = transformMarker(uid, element.getMarker(), depth);
         String              name       = getParameterValue(element, depth, NAME, String.class);
         String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, "");
@@ -1069,12 +1199,12 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Currency transformCurrencyInput(PseudoElement element, Integer depth)
+    private Currency transformCurrencyInput(PseudoElement element, int depth)
     {
-        String              uid         = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes     = replaceClasses(element.getClasses());
-        Map<String, String> attributes  = element.getAttributes();
-        List<Marker>        marker      = transformMarker(uid, element.getMarker());
+        String              uid         = resolveUid(element, depth);
+        List<String>        classes     = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes  = resolveAttributes(element, depth);
+        List<Marker>        marker      = transformMarker(uid, element.getMarker(), depth);
         String              name        = getParameterValue(element, depth, NAME, String.class);
         String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, "");
@@ -1110,12 +1240,12 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Date transformDateInput(PseudoElement element, Integer depth)
+    private Date transformDateInput(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
-        List<Marker>        marker     = transformMarker(uid, element.getMarker());
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
+        List<Marker>        marker     = transformMarker(uid, element.getMarker(), depth);
         String              name       = getParameterValue(element, depth, NAME, String.class);
         String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
@@ -1141,12 +1271,12 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private File transformFileInput(PseudoElement element, Integer depth)
+    private File transformFileInput(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
-        List<Marker>        marker     = transformMarker(uid, element.getMarker());
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
+        List<Marker>        marker     = transformMarker(uid, element.getMarker(), depth);
         String              name       = getParameterValue(element, depth, NAME, String.class);
         String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
@@ -1174,12 +1304,12 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Hidden transformHiddenInput(PseudoElement element, Integer depth)
+    private Hidden transformHiddenInput(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
-        List<Marker>        marker     = transformMarker(uid, element.getMarker());
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
+        List<Marker>        marker     = transformMarker(uid, element.getMarker(), depth);
         String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              value      = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
 
@@ -1203,12 +1333,12 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Link transformLinkInput(PseudoElement element, Integer depth)
+    private Link transformLinkInput(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
-        List<Marker>        marker     = transformMarker(uid, element.getMarker());
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
+        List<Marker>        marker     = transformMarker(uid, element.getMarker(), depth);
         String              text       = getParameterValue(element, depth, TEXT, String.class);
         String              href       = getParameterValue(element, depth, HREF, String.class);
         String              target     = getParameterValue(element, depth, TARGET, String.class, "_self");
@@ -1234,12 +1364,12 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private ListSelection transformListSelectionInput(PseudoElement element, Integer depth)
+    private ListSelection transformListSelectionInput(PseudoElement element, int depth)
     {
-        String              uid            = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes        = replaceClasses(element.getClasses());
-        Map<String, String> attributes     = element.getAttributes();
-        List<Marker>        marker         = transformMarker(uid, element.getMarker());
+        String              uid            = resolveUid(element, depth);
+        List<String>        classes        = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes     = resolveAttributes(element, depth);
+        List<Marker>        marker         = transformMarker(uid, element.getMarker(), depth);
         String              name           = getParameterValue(element, depth, NAME, String.class);
         String              submitAs       = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput        = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
@@ -1270,12 +1400,12 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Number transformNumberInput(PseudoElement element, Integer depth)
+    private Number transformNumberInput(PseudoElement element, int depth)
     {
-        String              uid         = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes     = replaceClasses(element.getClasses());
-        Map<String, String> attributes  = element.getAttributes();
-        List<Marker>        marker      = transformMarker(uid, element.getMarker());
+        String              uid         = resolveUid(element, depth);
+        List<String>        classes     = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes  = resolveAttributes(element, depth);
+        List<Marker>        marker      = transformMarker(uid, element.getMarker(), depth);
         String              name        = getParameterValue(element, depth, NAME, String.class);
         String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
@@ -1311,12 +1441,12 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Password transformPasswordInput(PseudoElement element, Integer depth)
+    private Password transformPasswordInput(PseudoElement element, int depth)
     {
-        String              uid         = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes     = replaceClasses(element.getClasses());
-        Map<String, String> attributes  = element.getAttributes();
-        List<Marker>        marker      = transformMarker(uid, element.getMarker());
+        String              uid         = resolveUid(element, depth);
+        List<String>        classes     = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes  = resolveAttributes(element, depth);
+        List<Marker>        marker      = transformMarker(uid, element.getMarker(), depth);
         String              name        = getParameterValue(element, depth, NAME, String.class);
         String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
@@ -1342,12 +1472,12 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Radio transformRadioInput(PseudoElement element, Integer depth)
+    private Radio transformRadioInput(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
-        List<Marker>        marker     = transformMarker(uid, element.getMarker());
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
+        List<Marker>        marker     = transformMarker(uid, element.getMarker(), depth);
         String              name       = getParameterValue(element, depth, NAME, String.class);
         String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
@@ -1373,18 +1503,20 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Select transformSelectInput(PseudoElement element, Integer depth)
+    private Select transformSelectInput(PseudoElement element, int depth)
     {
-        String               uid         = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>         classes     = replaceClasses(element.getClasses());
-        Map<String, String>  attributes  = element.getAttributes();
-        List<Marker>         marker      = transformMarker(uid, element.getMarker());
+        String               uid         = resolveUid(element, depth);
+        List<String>         classes     = resolveClasses(element.getClasses(), depth);
+        Map<String, String>  attributes  = resolveAttributes(element, depth);
+        List<Marker>         marker      = transformMarker(uid, element.getMarker(), depth);
         String               name        = getParameterValue(element, depth, NAME, String.class);
         String               submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String               onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
         String               valueSrc    = getParameterValue(element, depth, "values", String.class, "");
-        InputValueList       values      = valueSrc.isBlank() ? handleInputValueChildren(element, depth, false)
-            : handlePossiblePlaceholder(valueSrc, InputValueList.class, new InputValueList());
+        InputValueList       values      =
+            valueSrc.isBlank()
+                ? handleInputValueChildren(element, depth, false)
+                : handlePossiblePlaceholder(valueSrc, InputValueList.class, new InputValueList(), depth);
 
         final InputValueList inputValues = new InputValueList();
 
@@ -1413,12 +1545,12 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Slider transformSliderInput(PseudoElement element, Integer depth)
+    private Slider transformSliderInput(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
-        List<Marker>        marker     = transformMarker(uid, element.getMarker());
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
+        List<Marker>        marker     = transformMarker(uid, element.getMarker(), depth);
         String              name       = getParameterValue(element, depth, NAME, String.class);
         String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
@@ -1448,12 +1580,12 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Switch transformSwitchInput(PseudoElement element, Integer depth)
+    private Switch transformSwitchInput(PseudoElement element, int depth)
     {
-        String              uid        = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes    = replaceClasses(element.getClasses());
-        Map<String, String> attributes = element.getAttributes();
-        List<Marker>        marker     = transformMarker(uid, element.getMarker());
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
+        List<Marker>        marker     = transformMarker(uid, element.getMarker(), depth);
         String              name       = getParameterValue(element, depth, NAME, String.class);
         String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
@@ -1479,12 +1611,12 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Textarea transformTextareaInput(PseudoElement element, Integer depth)
+    private Textarea transformTextareaInput(PseudoElement element, int depth)
     {
-        String              uid         = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes     = replaceClasses(element.getClasses());
-        Map<String, String> attributes  = element.getAttributes();
-        List<Marker>        marker      = transformMarker(uid, element.getMarker());
+        String              uid         = resolveUid(element, depth);
+        List<String>        classes     = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes  = resolveAttributes(element, depth);
+        List<Marker>        marker      = transformMarker(uid, element.getMarker(), depth);
         String              name        = getParameterValue(element, depth, NAME, String.class);
         String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
@@ -1514,7 +1646,7 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Textbox transformTextboxInput(PseudoElement element, Integer depth)
+    private Textbox transformTextboxInput(PseudoElement element, int depth)
     {
         final String value = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
 
@@ -1532,12 +1664,12 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Textfield transformTextfieldInput(PseudoElement element, Integer depth)
+    private Textfield transformTextfieldInput(PseudoElement element, int depth)
     {
-        String              uid         = handlePossiblePlaceholder(element.getUid(), String.class, element.getUid());
-        List<String>        classes     = replaceClasses(element.getClasses());
-        Map<String, String> attributes  = element.getAttributes();
-        List<Marker>        marker      = transformMarker(uid, element.getMarker());
+        String              uid         = resolveUid(element, depth);
+        List<String>        classes     = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes  = resolveAttributes(element, depth);
+        List<Marker>        marker      = transformMarker(uid, element.getMarker(), depth);
         String              name        = getParameterValue(element, depth, NAME, String.class);
         String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);

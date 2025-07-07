@@ -1,8 +1,5 @@
 package de.cookindustries.lib.spring.gui.function;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -11,12 +8,12 @@ import lombok.EqualsAndHashCode;
 public final class RequestModal extends AbsFunctionCall
 {
 
-    public RequestModal(String requestUrl, List<ValuePair> jsonObjectParameters)
+    public RequestModal(String requestUrl, AbsFunctionArgs args)
     {
         super();
 
-        setStringParam(requestUrl);
-        setStringParam(jsonObjectParameters.stream().map(p -> p.exportInJsonNotation()).collect(Collectors.joining(", ", "{", "}")), false);
+        setParam(requestUrl);
+        setParam(args);
     }
 
     @Override

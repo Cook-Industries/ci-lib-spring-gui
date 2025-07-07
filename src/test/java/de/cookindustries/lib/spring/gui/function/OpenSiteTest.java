@@ -2,44 +2,35 @@ package de.cookindustries.lib.spring.gui.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 class OpenSiteTest
 {
 
-    @Test
-    void test_constructor_withoutUid()
+    private class TestObject extends AbsFunctionArgs
     {
-        // setup
-        String          requestUrl = "/test";
-        List<ValuePair> params     = new ArrayList<>();
-        params.add(new ValuePair("test", "test"));
-        OpenSite<String> call   = new OpenSite<>(requestUrl, params);
 
-        // run
-        String           result = call.parseAsJS();
+        private final int uid = 2;
 
-        // verify
-        assertEquals("openSite('/test', {\"test\": \"test\"});", result, "String param not set correctly");
+        @SuppressWarnings("unused")
+        public int getUid()
+        {
+            return uid;
+        }
     }
 
     @Test
-    void test_constructor_withUid()
+    void test_constructor()
     {
         // setup
-        String          requestUrl = "/test";
-        List<ValuePair> params     = new ArrayList<>();
-        params.add(new ValuePair("test", "test"));
-        OpenSite<String> call   = new OpenSite<>(requestUrl, "aaa", params);
+        String           requestUrl = "/test";
+        OpenSite<String> call       = new OpenSite<>(requestUrl, new TestObject());
 
         // run
-        String           result = call.parseAsJS();
+        String           result     = call.parseAsJS();
 
         // verify
-        assertEquals("openSite('/test', {\"__uid\": \"aaa\", \"test\": \"test\"});", result, "String param not set correctly");
+        assertEquals("CILIB.FunctionRegistry.call('openSite', '/test', {\"uid\":2});", result);
     }
 
 }

@@ -17,7 +17,7 @@ class CloseModalTest
         String result = call.parseAsJS();
 
         // verify
-        assertEquals("closeModal();", result, "String param not set correctly");
+        assertEquals("CILIB.FunctionRegistry.call('closeModal');", result);
     }
 
 }

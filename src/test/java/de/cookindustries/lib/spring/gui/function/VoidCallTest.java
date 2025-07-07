@@ -17,7 +17,7 @@ class VoidCallTest
         String result = call.parseAsJS();
 
         // verify
-        assertEquals("console.log();", result, "String param not set correctly");
+        assertEquals("CILIB.FunctionRegistry.call('noop');", result);
     }
 
 }

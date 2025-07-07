@@ -17,7 +17,7 @@ public final class VoidCall extends AbsFunctionCall
     @Override
     protected String functionName()
     {
-        return "console.log";
+        return "noop";
     }
 
     @Override

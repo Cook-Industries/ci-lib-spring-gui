@@ -1,15 +1,14 @@
 export {
-  showGlobalLoader,
-  hideGlobalLoader,
-  getModal,
   GET,
   POST,
-  POSTFormData,
-  sendFromForm,
-  submitFromModal,
-  registerFunction,
+  showGlobalLoader,
+  hideGlobalLoader,
+  requestModal,
   closeModal,
+  submitFromModal,
+  sendFromForm,
   dismissErrors,
+  FunctionRegistry,
 };
 
 /**
@@ -22,42 +21,65 @@ export {
  * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
-const version = "";
-const customFunctionMap = new Map();
+const version = "ci-lib-dev-build";
 
 const CLASS_HIDDEN = "hidden";
 
 $(document).ready(function () {
-  console.log("ci-lib-dev-build");
+  console.log(version);
 
   /**
    * OnClick function
    */
   $("body").on("click", ".modal-overlay", function (event) {
     event.stopPropagation();
+
     if (event.target === this) {
-      if (
-        $(sprintf("#modal-overlay-%d", openModals)).attr(
-          "data-close-on-overlay"
-        ) === "true"
-      ) {
+      if ($(sprintf("#modal-overlay-%d", openModals)).attr("data-close-on-overlay") === "true") {
         closeModal();
       }
     }
   });
 
-  window.dismissErrors = () => {
-    dismissErrors();
-  };
-  window.closeModal = () => {
+  FunctionRegistry._registerInternal("GET" , (url) => {
+    GET(url);
+  });
+
+  FunctionRegistry._registerInternal("POST" , (url, args = {}) => {
+    POST(url, args);
+  });
+
+  FunctionRegistry._registerInternal("showGlobalLoader" , (text) => {
+    showGlobalLoader(text);
+  });
+
+  FunctionRegistry._registerInternal("hideGlobalLoader" , () => {
+    hideGlobalLoader();
+  });
+
+  FunctionRegistry._registerInternal("requestModal" , (url, args = {}) => {
+    requestModal(url, args);
+  });
+
+  FunctionRegistry._registerInternal("closeModal" , () => {
     closeModal();
-  };
-  window.removeListSelectionItem = (uuid) => {
-    removeListSelectionItem(uuid);
-  };
-  window.addListSelectionItem = (selectUuid, holderUuid) => {
-    addListSelectionItem(selectUuid, holderUuid);
-  };
+  });
+
+  FunctionRegistry._registerInternal("submitFromModal" , () => {
+    submitFromModal();
+  });
+
+  FunctionRegistry._registerInternal("sendFromForm" , (id, url) => {
+    sendFromForm(id, url);
+  });
+
+  FunctionRegistry._registerInternal("dismissErrors", () => {
+    dismissErrors();
+  });
+
+  FunctionRegistry._registerInternal("noop", () => {
+    console.log("a call to the NoOp funtcion occured. This is not normal and should not happen.")
+  });
 
   hideGlobalLoader();
 });
@@ -70,6 +92,10 @@ $(document).ready(function () {
  * @returns a Promise
  */
 function GET(endpointUrl) {
+  if (endpointUrl === undefined || endpointUrl === "") {
+    throw new Error("GET URL cannot be undefined/empty");
+  }
+
   return new Promise((resolve, reject) => {
     fetch(endpointUrl, {
       method: "GET",
@@ -133,6 +159,7 @@ function POST(endpointUrl, dataToSend = {}) {
 }
 
 /**
+ * Explicit function for form submit so that we can send data and files
  *
  * @param {String} endpointUrl
  * @param {FormData} formData
@@ -143,7 +170,6 @@ function POSTFormData(endpointUrl, formData = {}) {
   if (endpointUrl === undefined || endpointUrl === "") {
     throw new Error("POST URL cannot be undefined/empty");
   }
-  console.log(formData);
 
   return new Promise((resolve, reject) => {
     fetch(endpointUrl, {
@@ -170,6 +196,7 @@ function POSTFormData(endpointUrl, formData = {}) {
 }
 
 /**
+ * Extract and send data from a from to an url
  *
  * @param {String} id of form to grab values from
  * @param {String} url to call on backend
@@ -183,7 +210,7 @@ function sendFromForm(id, url) {
 }
 
 function handleResponse(response) {
-  triggerResponse(response.messages);
+  handleMessages(response.messages);
 
   switch (response.action) {
     case "NOTIFICATION":
@@ -193,32 +220,16 @@ function handleResponse(response) {
       openModal(response.contentHtml);
       break;
 
-    case "MODAL_CLOSE":
-      closeModal();
-      break;
-
-    case "TAB_CLOSE":
-      closeTab();
-      break;
-
-    case "GLOBAL_LOADER_SHOW":
-      showGlobalLoader();
-      break;
-
-    case "GLOBAL_LOADER_HIDE":
-      hideGlobalLoader();
-      break;
-
     case "CONTENT":
       fillContent(response);
       break;
 
-    case "REPLACE":
-      replaceContent(response);
-      break;
-
     case "REMOVE":
       removeContent(response);
+      break;
+
+    case "LOADING_PROGRESS":
+      changeGlobalLoaderText(response.text);
       break;
 
     case "COMPOUND":
@@ -228,51 +239,64 @@ function handleResponse(response) {
         handleResponse(data);
       }
       break;
-
-    case "audio_control":
-      audioControl(response);
-      break;
-
-    case "LOADING_PROGRESS":
-      changeGlobalLoaderText(response.text);
-      break;
-
-    default:
-      tryCustomFunction(response);
   }
 
   call(response.calls);
 }
 
-function tryCustomFunction(response) {
-  const key = response.action;
-
-  if (customFunctionMap.has(key)) {
-    const func = customFunctionMap.get(key);
-
-    return func(response);
-  } else {
-    clientsideError(sprintf("could not recognice response action [%s]", key));
-  }
-}
-
-function registerFunction(key, func) {
-  customFunctionMap.set(key, func);
-}
-
 function call(calls) {
-  for (let func in calls) {
-    let call = calls[func];
-    let fn = window[call.functionName];
-
-    if (typeof fn === "function") {
-      fn();
-    } else {
-      clientsideError(sprintf("call to non existent function '%s'", call));
-    }
-  }
+  calls.forEach(call => {
+    FunctionRegistry.call(call.name, ...call.args);
+  });
 }
 // === < global functions ==========================================================================
+// === > function register =========================================================================
+const FunctionRegistry = (function() {
+
+  const internalFunctions = new Map();
+  const externalFunctions = new Map();
+
+  function registerInternal(name, fn) {
+    if (typeof fn !== 'function') {
+      throw new Error("Must register a function.");
+    
+    }
+    internalFunctions.set(name, fn);
+  }
+
+  return {
+    // Public way for users to register their own functions
+    registerUserFunction(name, fn) {
+      if (internalFunctions.has(name)) {
+        throw new Error(`Cannot overwrite internal function: ${name}`);
+      }
+
+      externalFunctions.set(name, fn);
+    },
+
+    // Public function caller (calls either internal or user function)
+    call(name, ...args) {
+      const fn = internalFunctions.get(name) || externalFunctions.get(name);
+      if (typeof fn !== "function") {
+        console.warn(`Function '${name}' not found.`);
+        return;
+      }
+
+      return fn(...args);
+    },
+
+    // List registered functions
+    listFunctions() {
+      return {
+        internal: Array.from(internalFunctions.keys()),
+        external: Array.from(externalFunctions.keys()),
+      };
+    },
+
+    _registerInternal: registerInternal
+  };
+})();
+// === < function register =========================================================================
 // === > global loader =============================================================================
 /**
  * Shows the global loader overlay
@@ -310,7 +334,7 @@ function changeGlobalLoaderText(text) {
  *
  * @returns {undefined}
  */
-function triggerResponse(messages, btnName = "") {
+function handleMessages(messages, btnName = "ok") {
   hideGlobalLoader();
 
   let needOverlay = false;
@@ -409,7 +433,7 @@ function resetMarker() {
  * @return {undefined}
  */
 function clientsideError(msg, btn = "dismiss") {
-  triggerResponse({ msg: msg, target: "POP_UP" }, btn);
+  handleMessages({ msg: msg, target: "POP_UP" }, btn);
 }
 
 /**
@@ -425,10 +449,10 @@ function dismissErrors() {
 // === > modal =====================================================================================
 let openModals = 0;
 
-function getModal(url) {
+function requestModal(url, args = {}) {
   showGlobalLoader("load modal");
 
-  GET(url);
+  POST(url, args);
 }
 
 /**

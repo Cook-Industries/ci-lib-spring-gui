@@ -24,24 +24,18 @@ public enum ResponseAction {
     /** parse and show a {@link ModalContainer} as the top-most */
     MODAL,
 
-    /** hide the top-most open {@link ModalContainer} */
-    MODAL_HIDE,
-
     /** parse and either replace/append a {@link Container} */
     CONTENT,
 
     /** remove a {@link Container} */
     REMOVE,
 
-    /** TODO: what does this? */
-    TAB_OPEN,
-
-    /** TODO: what does this? */
-    TAB_CLOSE,
-
     /** a compund set of several {@link ResponseAction}s */
     COMPOUND,
 
-    /** a implementer defined call to a function */
-    CUSTOM;
+    /** update progress on the global loader */
+    PROGRESS,
+
+    /** send generated data back to the gui */
+    DATA
 }

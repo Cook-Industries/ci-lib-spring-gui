@@ -13,7 +13,6 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
@@ -25,8 +24,10 @@ public final class Link extends Input
 
     @NonNull
     private final String href;
+
     @NonNull
     private final String target;
+
     @NonNull
     private final String text;
 

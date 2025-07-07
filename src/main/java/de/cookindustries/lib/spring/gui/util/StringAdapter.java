@@ -51,12 +51,12 @@ public final class StringAdapter
     }
 
     /**
-     * Prefix and suffix a {@link String} with a {@prefix} and a {@suffix}.
+     * Prefix and suffix a {@link String} with a {@code prefix} and a {@code suffix}.
      * 
      * @param prefix to put in front of the {@code content}
      * @param content to include
      * @param suffix to put behind of the {@code content}
-     * @returna {@code String} in form '{@code prefix} {@code content} {@code suffix}'
+     * @return a {@code String} in form '{@code prefix} {@code content} {@code suffix}'
      */
     public static String prefixAndSuffix(String prefix, String content, String suffix)
     {

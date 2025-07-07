@@ -13,7 +13,6 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
@@ -24,7 +23,7 @@ public final class Checkbox extends SubmittableInput
 {
 
     @Default
-    private Boolean checked = false;
+    private final boolean checked = false;
 
     @Override
     protected InputType inferType()

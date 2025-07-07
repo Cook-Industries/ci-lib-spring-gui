@@ -13,7 +13,6 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
@@ -23,18 +22,19 @@ import lombok.extern.jackson.Jacksonized;
 public final class Currency extends SubmittableInput
 {
 
+    private int    valueF;
+
+    private int    valueB;
+
     @NonNull
-    private Integer valueF;
+    private String symbol;
+
+    private int    min;
+
+    private int    max;
+
     @NonNull
-    private Integer valueB;
-    @NonNull
-    private String  symbol;
-    @NonNull
-    private Integer min;
-    @NonNull
-    private Integer max;
-    @NonNull
-    private String  placeholder;
+    private String placeholder;
 
     @Override
     protected InputType inferType()

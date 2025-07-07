@@ -13,6 +13,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
+import lombok.ToString;
 import lombok.Builder.Default;
 
 /**
@@ -23,6 +24,7 @@ import lombok.Builder.Default;
  */
 @Builder
 @Getter
+@ToString
 public class InputValue
 {
 

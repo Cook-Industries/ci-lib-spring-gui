@@ -13,7 +13,6 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
@@ -24,13 +23,12 @@ public final class Textarea extends SubmittableInput
 {
 
     @NonNull
-    private final String  value;
+    private final String value;
 
     @NonNull
-    private final String  placeholder;
+    private final String placeholder;
 
-    @NonNull
-    private final Integer maxCharacters;
+    private final int    maxCharacters;
 
     @Override
     protected InputType inferType()

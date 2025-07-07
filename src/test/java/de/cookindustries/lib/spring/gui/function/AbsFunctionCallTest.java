@@ -32,78 +32,65 @@ class AbsFunctionCallTest
     }
 
     @Test
-    void test_setStringParam()
+    void test_setParam_string()
     {
         // setup
-        functionCall.setStringParam("test");
+        functionCall.setParam("test");
 
         // run
         String result = functionCall.parseAsJS();
 
         // verify
-        assertEquals("test('test');", result, "String param not set correctly");
+        assertEquals("CILIB.FunctionRegistry.call('test', 'test');", result, "String param not set correctly");
     }
 
     @Test
-    void test_setStringParam_notPrefixed()
+    void test_setParam_integer()
     {
         // setup
-        functionCall.setStringParam("test", false);
+        functionCall.setParam(Integer.valueOf(0));
 
         // run
         String result = functionCall.parseAsJS();
 
         // verify
-        assertEquals("test(test);", result, "String param not set correctly");
+        assertEquals("CILIB.FunctionRegistry.call('test', 0);", result, "Integer param not set correctly");
     }
 
     @Test
-    void test_setIntegerParam()
+    void test_setParam_boolean()
     {
         // setup
-        functionCall.setIntegerParam(Integer.valueOf(0));
+        functionCall.setParam(true);
 
         // run
         String result = functionCall.parseAsJS();
 
         // verify
-        assertEquals("test(0);", result, "Integer param not set correctly");
+        assertEquals("CILIB.FunctionRegistry.call('test', true);", result, "Boolean param not set correctly");
     }
 
     @Test
-    void test_setBooleanParam()
+    void test_setParam_double()
     {
         // setup
-        functionCall.setBooleanParam(Boolean.TRUE);
+        functionCall.setParam(0.1d);
 
         // run
         String result = functionCall.parseAsJS();
 
         // verify
-        assertEquals("test(true);", result, "Boolean param not set correctly");
-    }
-
-    @Test
-    void test_setDoubleParam()
-    {
-        // setup
-        functionCall.setDoubleParam(Double.valueOf(0.1d));
-
-        // run
-        String result = functionCall.parseAsJS();
-
-        // verify
-        assertEquals("test(0.1);", result, "Double param not set correctly");
+        assertEquals("CILIB.FunctionRegistry.call('test', 0.1);", result, "Double param not set correctly");
     }
 
     @Test
     void test_setMoreParamsThanAllowed()
     {
         // setup
-        functionCall.setStringParam("");
+        functionCall.setParam("");
 
         // run & verify
-        assertThrows(IndexOutOfBoundsException.class, () -> functionCall.setStringParam(""));
+        assertThrows(IndexOutOfBoundsException.class, () -> functionCall.setParam(""));
     }
 
     @Test
@@ -126,13 +113,13 @@ class AbsFunctionCallTest
 
         };
 
-        functionCall.setBooleanParam(Boolean.TRUE);
-        functionCall.setDoubleParam(Double.valueOf(0.1d));
+        functionCall.setParam(true);
+        functionCall.setParam(0.1d);
 
         // run
         String result = functionCall.parseAsJS();
 
         // verify
-        assertEquals("test(true, 0.1);", result, "Parmameter not set correctly");
+        assertEquals("CILIB.FunctionRegistry.call('test', true, 0.1);", result, "Parmameter not set correctly");
     }
 }

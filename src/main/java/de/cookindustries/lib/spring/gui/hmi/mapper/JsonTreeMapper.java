@@ -11,6 +11,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
@@ -26,7 +29,9 @@ import lombok.Data;
 public final class JsonTreeMapper
 {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private static final Logger LOG    = LoggerFactory.getLogger(JsonMapper.class);
+
+    private final ObjectMapper  mapper = new ObjectMapper();
 
     /**
      * Map a {@link JsonTreeRoot} from a {@code path}
@@ -39,6 +44,8 @@ public final class JsonTreeMapper
     {
         try
         {
+            LOG.trace("map content from resource [{}]", path);
+
             InputStream inputStream = JsonTreeRoot.class.getClassLoader().getResourceAsStream(path);
 
             return mapper.readValue(inputStream, JsonTreeRoot.class);
@@ -60,6 +67,8 @@ public final class JsonTreeMapper
     {
         try
         {
+            LOG.trace("map content from file [{}]", file);
+
             InputStream inputStream = new FileInputStream(file);
 
             return mapper.readValue(inputStream, JsonTreeRoot.class);

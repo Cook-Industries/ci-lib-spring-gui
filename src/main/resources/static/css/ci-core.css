@@ -306,12 +306,14 @@ html {
 
 /* === < modal ================================================================================== */
 /* === > form =================================================================================== */
-.form-container button {
-  margin: 1rem;
+.form-container {
+  margin: 0.5rem;
+  padding: 0.5rem;
 }
 
 .form-label {
   margin-top: 1rem;
+  font-weight: bold;
 }
 
 .form-list-selection-select-holder {
@@ -327,7 +329,8 @@ html {
 .form-list-selection-item {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: space-between;  
+  align-items: baseline;
 }
 
 .form-list-selection-item:first-child {

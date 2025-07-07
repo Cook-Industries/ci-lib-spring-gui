@@ -34,7 +34,7 @@ public final class TabContainer extends Container
     private Set<Container> bodies;
     @NonNull
     @Default
-    private Boolean        disabled = Boolean.FALSE;
+    private boolean        disabled = false;
 
     @Override
     protected ContainerType inferType()

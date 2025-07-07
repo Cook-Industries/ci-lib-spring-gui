@@ -25,7 +25,9 @@ public final class Table extends Input
 {
 
     private final boolean        editable;
+
     private final List<String>   colNames;
+
     private final List<TableRow> rows;
 
     @Override

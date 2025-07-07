@@ -7,8 +7,13 @@
  */
 package de.cookindustries.lib.spring.gui.function;
 
+import java.util.Arrays;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
+import lombok.Getter;
 
 /**
  * A generic function definition to send to a receiver
@@ -16,11 +21,14 @@ import de.cookindustries.lib.spring.gui.util.StringConcat;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
+@Getter
 public abstract class AbsFunctionCall
 {
 
-    private final String   functionName;
-    private final Object[] parameters;
+    private final String   name;
+    private final Object[] args;
+
+    @JsonIgnore
     private Integer        paramsSet;
 
     /**
@@ -28,8 +36,8 @@ public abstract class AbsFunctionCall
      */
     protected AbsFunctionCall()
     {
-        this.functionName = functionName();
-        this.parameters = new Object[numberOfParameters()];
+        this.name = functionName();
+        this.args = new Object[numberOfParameters()];
         this.paramsSet = 0;
     }
 
@@ -48,33 +56,14 @@ public abstract class AbsFunctionCall
     protected abstract Integer numberOfParameters();
 
     /**
-     * Set the next {@link String} parameter for this function where {@code param} is pre- and suffixed with '.
-     * 
-     * @param param to set
-     * @return {@code this} for chaining
-     */
-    protected final AbsFunctionCall setStringParam(String param)
-    {
-        return setStringParam(param, true);
-    }
-
-    /**
      * Set the next {@link String} parameter for this function.
      * 
      * @param param to set
-     * @param escape whether {@code param} should be pre- and suffixed with '
      * @return {@code this} for chaining
      */
-    protected final AbsFunctionCall setStringParam(String param, boolean escape)
+    protected final AbsFunctionCall setParam(String param)
     {
-        if (escape)
-        {
-            setParameter(StringAdapter.prefixAndSuffix("'", param, "'"));
-        }
-        else
-        {
-            setParameter(param);
-        }
+        setParameter(param);
 
         return this;
     }
@@ -85,7 +74,7 @@ public abstract class AbsFunctionCall
      * @param param to set
      * @return {@code this} for chaining
      */
-    protected final AbsFunctionCall setIntegerParam(Integer param)
+    protected final AbsFunctionCall setParam(int param)
     {
         setParameter(param);
 
@@ -98,7 +87,7 @@ public abstract class AbsFunctionCall
      * @param param to set
      * @return {@code this} for chaining
      */
-    protected final AbsFunctionCall setBooleanParam(Boolean param)
+    protected final AbsFunctionCall setParam(boolean param)
     {
         setParameter(param);
 
@@ -111,9 +100,16 @@ public abstract class AbsFunctionCall
      * @param param to set
      * @return {@code this} for chaining
      */
-    protected final AbsFunctionCall setDoubleParam(Double param)
+    protected final AbsFunctionCall setParam(double param)
     {
         setParameter(param);
+
+        return this;
+    }
+
+    protected final AbsFunctionCall setParam(AbsFunctionArgs args)
+    {
+        setParameter(args);
 
         return this;
     }
@@ -125,12 +121,12 @@ public abstract class AbsFunctionCall
      */
     private final void setParameter(Object param)
     {
-        if (paramsSet >= parameters.length)
+        if (paramsSet >= args.length)
         {
             throw new IndexOutOfBoundsException("all params are already set");
         }
 
-        parameters[paramsSet] = param;
+        args[paramsSet] = param;
 
         paramsSet++;
     }
@@ -144,10 +140,27 @@ public abstract class AbsFunctionCall
     {
         StringConcat sc = new StringConcat();
 
-        sc.append(functionName);
-        sc.append("(");
-        sc.append(parameters, ", ");
-        sc.append(");");
+        sc
+            .append("CILIB.FunctionRegistry.call('")
+            .append(name)
+            .append("'")
+            .append(args.length > 0, ", ")
+            .append(
+                Arrays
+                    .stream(args)
+                    .map(a -> {
+                        if (a instanceof String s)
+                        {
+                            return StringAdapter.prefixAndSuffix("'", s, "'");
+                        }
+                        else
+                        {
+                            return String.valueOf(a);
+                        }
+                    })
+                    .toList(),
+                ", ")
+            .append(");");
 
         return sc.toString();
     }
