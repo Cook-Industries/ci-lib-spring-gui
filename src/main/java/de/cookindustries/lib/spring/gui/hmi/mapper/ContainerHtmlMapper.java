@@ -369,7 +369,9 @@ public final class ContainerHtmlMapper
                 .builder()
                 .tag(TAG_DIV)
                 .attribute(new Attribute(ATT_ID, modalContainer.getUid()))
+                .clazz("modal-body")
                 .classes(modalContainer.getClasses())
+                .dataAttribute("close-on-overlay", String.valueOf(modalContainer.isCloseOnOverlayClick()))
                 .dataAttributes(modalContainer.getDataAttributes())
                 .content(render(modalInlay))
                 .build();

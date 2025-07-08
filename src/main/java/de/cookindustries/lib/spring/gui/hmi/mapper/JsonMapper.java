@@ -966,7 +966,7 @@ public class JsonMapper
         Map<String, String> attributes              = resolveAttributes(element, depth);
         String              name                    = getParameterValue(element, depth, NAME, String.class);
         String              requestUrl              = getParameterValue(element, depth, "requestUrl", String.class);
-        Boolean             closeOnOverlayClick     = getParameterValue(element, depth, NAME, Boolean.class);
+        Boolean             closeOnOverlayClick     = getParameterValue(element, depth, "closeOnOverlayClick", Boolean.class);
 
         String              btnNameLeft             = getParameterValue(element, depth, "btnNameLeft", String.class, "");
         ButtonClass         btnClassLeft            = ButtonClass.valueOf(

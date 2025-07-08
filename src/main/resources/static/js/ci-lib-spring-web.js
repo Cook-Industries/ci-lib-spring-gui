@@ -21,7 +21,7 @@ export {
  * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
-const version = "2.0.0";
+const version = "2.0.1";
 
 const CLASS_HIDDEN = "hidden";
 
@@ -31,17 +31,19 @@ $(document).ready(function () {
   /**
    * OnClick function
    */
-  $("body").on("click", ".modal-overlay", function (event) {
+  $(document).on("click", ".modal-overlay", function (event) {
     event.stopPropagation();
 
     if (event.target === this) {
-      if (
-        $(sprintf("#modal-overlay-%d", openModals)).attr(
-          "data-close-on-overlay"
-        ) === "true"
-      ) {
+      if ($(`#modal-overlay-${openModals} .modal-body`).attr("data-close-on-overlay") === "true") {
         closeModal();
       }
+    }
+  });
+
+  $(document).on("keydown", function (e) {
+    if (e.key === "Escape") {
+      CILIB.closeModal();
     }
   });
 
@@ -83,7 +85,7 @@ $(document).ready(function () {
 
   FunctionRegistry._registerInternal("noop", () => {
     console.log(
-      "a call to the NoOp funtcion occured. This is not normal and should be investigated happen."
+      "a call to the NoOp funtcion occured. This is not normal and should be investigated."
     );
   });
 
@@ -264,7 +266,7 @@ function handleResponse(response) {
       let tagify = tagifyInstances.get(tagInputId);
 
       tagify.settings.whitelist = result.concat(tagify.value || []);
-      tagify.loading(false).dropdown.show(result);
+      tagify.loading(false).dropdown.show(inputValue);
       break;
   }
 
@@ -286,6 +288,7 @@ const FunctionRegistry = (function () {
     if (typeof fn !== "function") {
       throw new Error("Must register a function.");
     }
+
     internalFunctions.set(name, fn);
   }
 
@@ -302,6 +305,7 @@ const FunctionRegistry = (function () {
     // Public function caller (calls either internal or user function)
     call(name, ...args) {
       const fn = internalFunctions.get(name) || externalFunctions.get(name);
+
       if (typeof fn !== "function") {
         console.warn(`Function '${name}' not found.`);
         return;
@@ -330,10 +334,8 @@ const FunctionRegistry = (function () {
  *
  * @returns {undefined}
  */
-function showGlobalLoader(text = "") {
-  if (text !== undefined) {
-    $("#global-loader-text").html(text);
-  }
+function showGlobalLoader(text = "loading...") {
+  $("#global-loader-text").html(text);
 
   $("#global-loader-overlay").removeClass(CLASS_HIDDEN);
 }
@@ -384,7 +386,7 @@ function handleMessages(messages, btnName = "ok") {
         break;
 
       default:
-        console.log(sprintf("unrecognized message type [%s]", msg.target));
+        console.log(`"unrecognized message type [${msg.target}]`);
     }
   }
 
@@ -420,36 +422,15 @@ function getMsgClass(type) {
 
 function handleModalMsg(msg) {
   let c = getMsgClass(msg.type);
-  $("#error-holder").append(
-    sprintf(
-      '<div class="message-container %s"><i class="material-icons">%s</i><div>%s</div></div>',
-      c,
-      c,
-      msg.msg
-    )
-  );
+  $("#error-holder").append(`<div class="message-container ${c}"><i class="material-icons">${c}</i><div>${msg.msg}</div></div>`);
 }
 
 function handlePopupMsg(msg) {
-  $("#popup-holder").append(
-    sprintf(
-      '<div class="pop-up pop-up-fade-out"><div class="%s">%s</div></div>',
-      getMsgClass(msg.type),
-      msg.msg
-    )
-  );
+  $("#popup-holder").append(`<div class="pop-up pop-up-fade-out"><div class="${getMsgClass(msg.type)}">${msg.msg}</div></div>`);
 }
 
 function handleMarkerMsg(msg) {
-  $(
-    sprintf(
-      "#error-marker-%s-%s-%s-%s",
-      msg.formId,
-      msg.transferId,
-      msg.markerCategory,
-      msg.markerType
-    )
-  ).removeClass(CLASS_HIDDEN);
+  $(`#error-marker-${msg.formId}-${msg.transferId}-${msg.markerCategory}-${msg.markerType}`).removeClass(CLASS_HIDDEN);
 }
 
 function resetMarker() {
@@ -491,53 +472,13 @@ function requestModal(url, args = {}) {
 function submitFromModal() {
   showGlobalLoader("collect data");
 
-  let modal = $(sprintf("#modal-overlay-%d", openModals));
-  let formData = extractValuesToSubmit(modal.attr("data-extraction-id"));
-  let url = modal.attr("data-server-target");
+  const modal = $(`#modal-overlay-${openModals}`);
+  const formData = extractValuesToSubmit(modal.attr("data-extraction-id"));
+  const url = modal.attr("data-server-target");
 
   resetMarker();
   changeGlobalLoaderText("send data");
   POSTFormData(url, formData);
-}
-
-function submitLeftBtnPress() {
-  let modal = $(sprintf("#modal-overlay-%d", openModals));
-  let arr = {
-    btn_left: true,
-    i_uuid: modal.attr("data-extraction-id"),
-  };
-
-  POST(modal.attr("data-request-url"), arr);
-}
-
-function submitMiddleBtnPress() {
-  let modal = $(sprintf("#modal-overlay-%d", openModals));
-  let arr = {
-    btn_middle: true,
-    i_uuid: modal.attr("data-extraction-id"),
-  };
-
-  POST(modal.attr("data-request-url"), arr);
-}
-
-function submitRightBtnPress() {
-  let modal = $(sprintf("#modal-overlay-%d", openModals));
-  let arr = {
-    btn_right: true,
-    i_uuid: modal.attr("data-extraction-id"),
-  };
-
-  POST(modal.attr("data-request-url"), arr);
-}
-
-function submitAbort() {
-  let modal = $(sprintf("#modal-overlay-%d", openModals));
-  let arr = {
-    aborted: true,
-    i_uuid: modal.attr("data-extraction-id"),
-  };
-
-  POST(modal.attr("data-request-url"), arr);
 }
 
 /**
@@ -550,28 +491,15 @@ function submitAbort() {
 function openModal(modalHtml) {
   openModals++;
 
-  $("#modal-container").append(
-    sprintf(
-      '<div id="modal-overlay-%d" class="modal-overlay"></div>',
-      openModals
-    )
-  );
+  $("#modal-container").append(`<div id="modal-overlay-${openModals}" class="modal-overlay"></div>`);
 
-  $(sprintf("#modal-overlay-%d", openModals)).append(modalHtml);
+  $(`#modal-overlay-${openModals}`).append(modalHtml);
 
-  $(sprintf("#modal-container")).removeClass(CLASS_HIDDEN);
-  $(sprintf("#modal-overlay-%d", openModals)).removeClass(CLASS_HIDDEN);
-  $(sprintf("#modal-inlay-%d :input", openModals)).first().focus();
+  $("#modal-container").removeClass(CLASS_HIDDEN);
+  $(`#modal-overlay-${openModals}`).removeClass(CLASS_HIDDEN);
+  $(`#modal-inlay-${openModals} :input`).first().focus();
 
   hideGlobalLoader();
-}
-
-function modalShowBtn() {
-  $(sprintf("#modal-overlay-%d", openModals)).attr(
-    "data-close-on-overlay",
-    "0"
-  );
-  $(sprintf("#modal-buttons-%d", openModals)).removeClass(CLASS_HIDDEN);
 }
 
 function radioClick(event) {
@@ -585,20 +513,18 @@ function radioClick(event) {
  * @returns {undefined}
  */
 function closeModal() {
-  if (
-    $(sprintf("#modal-overlay-%d", openModals)).attr("data-lock-set") === "1"
-  ) {
-    $(sprintf("#modal-overlay-%d", openModals)).attr("data-lock-set", "0");
+  if ($(`#modal-overlay-${openModals}`).attr("data-lock-set") === "1") {
+    $(`#modal-overlay-${openModals}`).attr("data-lock-set", "0");
     releaseLock();
   }
 
-  $(sprintf("#modal-overlay-%d", openModals)).remove();
+  $(`#modal-overlay-${openModals}`).remove();
   openModals--;
 }
 // === < modal =====================================================================================
 // === > site ======================================================================================
 function fillContent(content) {
-  let elementId = sprintf("#%s", content.elementId);
+  const elementId = `#${content.elementId}`;
   if ($(content).length) {
     if (content.replace) {
       $(elementId).html("");
@@ -609,9 +535,7 @@ function fillContent(content) {
 }
 
 function removeContent(obj) {
-  let contentIdentifier = obj.context;
-
-  $(sprintf("#%s", contentIdentifier)).remove();
+  $(`#${obj.context}`).remove();
 }
 
 /**
@@ -631,7 +555,7 @@ function extractValuesToSubmit(target) {
     if ($(elem).attr("data-submit-as") === "") {
       // no submit id set so ignore input
     } else {
-      changeGlobalLoaderText("extract: " + target);
+      changeGlobalLoaderText(`extract: ${target}`);
 
       const id = $(elem).attr("data-submit-as");
 
@@ -684,13 +608,7 @@ function extractValuesToSubmit(target) {
           break;
 
         default:
-          clientsideError(
-            sprintf(
-              "a field value couldn't be fetched field [%s] type [%s]",
-              $(elem).attr("data-submit-as"),
-              $(elem).attr("data-value-type")
-            )
-          );
+          clientsideError(`field value from [${$(elem).attr("data-submit-as")}] type [${$(elem).attr("data-value-type")}] couldn't be fetched`);
       }
     }
   }
@@ -711,6 +629,11 @@ function registerTagInput(id, fetchTagsUrl, searchTagsUrl, enforceWhitelist) {
     whitelist: initialValues,
     inputId: id,
     searchTagsUrl: searchTagsUrl,
+    dropdown: {
+      classname: "color-blue",
+      enabled: 0,
+      maxItems: 10
+    }
   });
 
   tagify
