@@ -30,9 +30,9 @@
 	<url>https://github.com/Cook-Industries/ci-lib-spring-gui</url>
 
 	<scm>
-	<url>https://github.com/Cook-Industries/ci-lib-spring-gui</url>
-	<connection>scm:git:https://github.com/Cook-Industries/ci-lib-spring-gui.git</connection>
-	<developerConnection>scm:git:git@github.com:Cook-Industries/ci-lib-spring-gui.git</developerConnection>
+		<url>https://github.com/Cook-Industries/ci-lib-spring-gui</url>
+		<connection>scm:git:https://github.com/Cook-Industries/ci-lib-spring-gui.git</connection>
+		<developerConnection>scm:git:git@github.com:Cook-Industries/ci-lib-spring-gui.git</developerConnection>
 	</scm>
 
 	<properties>
