@@ -10,6 +10,7 @@ package de.cookindustries.lib.spring.gui.util;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -234,7 +235,7 @@ public final class StringConcat
      * @param separator {@code non-null} {@code separator} to insert between each {@code item}
      * @return this object for chaining
      */
-    public StringConcat append(Collection<?> items, String separator)
+    public <T> StringConcat append(Collection<T> items, String separator)
     {
         if (Objects.nonNull(items) && Objects.nonNull(separator))
         {
@@ -246,6 +247,44 @@ public final class StringConcat
         }
 
         return this;
+    }
+
+    /**
+     * Append all elements from {@code items} with the content derived by {@code function}, joined by {@code separator}.
+     * <p>
+     * If either of the parameters is {@code null} this method does nothing and just returns.
+     * 
+     * @param items {@code non-null} collection to append (items themselves can be {@code null})
+     * @param function to retrive a {@code String} from each {@code item}
+     * @param separator {@code non-null} {@code separator} to insert between each {@code item}
+     * @return this object for chaining
+     */
+    public <T> StringConcat append(Collection<T> items, Function<T, String> function, String separator)
+    {
+        if (Objects.nonNull(items) && Objects.nonNull(separator))
+        {
+            append(
+                items
+                    .stream()
+                    .map(function)
+                    .collect(Collectors.joining(separator)));
+        }
+
+        return this;
+    }
+
+    /**
+     * Append all elements from {@code items} with the content derived by {@code function}, each on a new line.
+     * <p>
+     * If either of the parameters is {@code null} this method does nothing and just returns.
+     * 
+     * @param items {@code non-null} collection to append (items themselves can be {@code null})
+     * @param function to retrive a {@code String} from each {@code item}
+     * @return this object for chaining
+     */
+    public <T> StringConcat appendnl(Collection<T> items, Function<T, String> function)
+    {
+        return append(items, function, "\n");
     }
 
     /**
