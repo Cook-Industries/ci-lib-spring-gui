@@ -129,11 +129,11 @@ public final class GUIFactory
      * @param resourcePath to the static component template
      * @return a {@code HTML} {@code String} to render a website by a browser
      */
-    public String createHtmlSiteWithStaticContent(String title, String resourcePath)
+    public String createHtmlSiteWithStaticContent(String title, String resourcePath, AbsFunctionCall... initFunctions)
     {
         Container content = readStaticComponent(resourcePath);
 
-        return createHtmlSite(title, SiteImports.builder().build(), content);
+        return createHtmlSite(title, SiteImports.builder().build(), content, initFunctions);
     }
 
     /**
@@ -144,11 +144,11 @@ public final class GUIFactory
      * @param resourcePath to load template from
      * @return a {@code HTML} {@code String} to render a website by a browser
      */
-    public String createHtmlSiteWithStaticContent(String title, SiteImports imports, String resourcePath)
+    public String createHtmlSiteWithStaticContent(String title, SiteImports imports, String resourcePath, AbsFunctionCall... initFunctions)
     {
         Container content = readStaticComponent(resourcePath);
 
-        return createHtmlSite(title, imports, content);
+        return createHtmlSite(title, imports, content, initFunctions);
     }
 
     /**
@@ -160,11 +160,12 @@ public final class GUIFactory
      * @param valueMaps to fetch dynamic values from
      * @return a {@code HTML} {@code String} to render a website by a browser
      */
-    public String createHtmlSiteWithDynamicContent(String title, String resourcePath, Locale locale, List<ValueMap> valueMaps)
+    public String createHtmlSiteWithDynamicContent(String title, String resourcePath, Locale locale, List<ValueMap> valueMaps,
+        AbsFunctionCall... initFunctions)
     {
         Container content = readDynamicComponent(resourcePath, locale, valueMaps);
 
-        return createHtmlSite(title, SiteImports.builder().build(), content);
+        return createHtmlSite(title, SiteImports.builder().build(), content, initFunctions);
     }
 
     /**
@@ -178,11 +179,11 @@ public final class GUIFactory
      * @return a {@code HTML} {@code String} to render a website by a browser
      */
     public String createHtmlSiteWithDynamicContent(String title, SiteImports imports, String resourcePath, Locale locale,
-        List<ValueMap> valueMaps)
+        List<ValueMap> valueMaps, AbsFunctionCall... initFunctions)
     {
         Container content = readDynamicComponent(resourcePath, locale, valueMaps);
 
-        return createHtmlSite(title, imports, content);
+        return createHtmlSite(title, imports, content, initFunctions);
     }
 
     /**
@@ -193,7 +194,7 @@ public final class GUIFactory
      * @param content to set
      * @return a {@code HTML} {@code String} to render a website by a browser
      */
-    private String createHtmlSite(String title, SiteImports imports, Container content)
+    private String createHtmlSite(String title, SiteImports imports, Container content, AbsFunctionCall... initFunctions)
     {
         return HtmlSite.builder()
             .title(title)
@@ -269,6 +270,7 @@ public final class GUIFactory
                     .uid("popup-holder")
                     .build())
             .container(content)
+            .functions(Arrays.asList(initFunctions))
             .build()
             .getHtmlRep();
     }

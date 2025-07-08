@@ -21,7 +21,7 @@ export {
  * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
-const version = "2.0.1";
+const version = "2.0.2";
 
 const CLASS_HIDDEN = "hidden";
 
@@ -85,16 +85,13 @@ $(document).ready(function () {
 
   FunctionRegistry._registerInternal("noop", () => {
     console.log(
-      "a call to the NoOp funtcion occured. This is not normal and should be investigated."
+      "a call to the NoOp function occured. This is not normal and should be investigated."
     );
   });
 
-  FunctionRegistry._registerInternal(
-    "registerTagInput",
-    (id, fetchUrl, searchUrl, enforceWhitelist) => {
-      registerTagInput(id, fetchUrl, searchUrl, enforceWhitelist);
-    }
-  );
+  FunctionRegistry._registerInternal("registerTagInput", (id, fetchUrl, searchUrl, enforceWhitelist) => {
+    registerTagInput(id, fetchUrl, searchUrl, enforceWhitelist);
+  });
 
   hideGlobalLoader();
 });

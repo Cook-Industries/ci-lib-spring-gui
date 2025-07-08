@@ -9,6 +9,7 @@ package de.cookindustries.lib.spring.gui.html;
 
 import java.util.List;
 
+import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
 import de.cookindustries.lib.spring.gui.hmi.mapper.ContainerHtmlMapper;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
@@ -28,63 +29,61 @@ public class HtmlSite implements HtmlExportable
 {
 
     @NonNull
-    private final String              title;
+    private final String                title;
 
     @Singular
-    private final List<HtmlHeadValue> headers;
+    private final List<HtmlHeadValue>   headers;
 
     @Singular
-    private final List<CSSLink>       cssLinks;
+    private final List<CSSLink>         cssLinks;
 
     @Singular
-    private final List<CSSEntity>     cssEntities;
+    private final List<CSSEntity>       cssEntities;
 
     @Singular
-    private final List<AbsJsLink>     jsScripts;
+    private final List<AbsJsLink>       jsScripts;
 
     @Singular
-    private final List<JsImport>      jsImports;
+    private final List<JsImport>        jsImports;
 
     @Singular
-    private final List<Container>     containers;
+    private final List<Container>       containers;
+
+    @Singular
+    private final List<AbsFunctionCall> functions;
 
     public String getHtmlRep()
     {
         StringConcat sc = new StringConcat();
 
-        sc.appendnl("<!DOCTYPE html>");
-        sc.appendnl("<html>");
-        sc.appendnl("<head>");
-
-        sc.appendnl("<base href=\"/\">");
-
-        headers.forEach(h -> sc.append(h.getHtmlRep()));
-
-        cssLinks.forEach(h -> sc.append(h.getHtmlRep()));
-
-        sc.appendnl("<style>");
-
-        cssEntities.forEach(h -> sc.append(h.getHtmlRep()));
-
-        sc.appendnl("</style>");
-
-        sc.appendnl(
-            JsImportMap
-                .builder()
-                .entries(jsImports)
-                .build()
-                .getHtmlRep());
-
-        jsScripts.forEach(h -> sc.append(h.getHtmlRep()));
-
-        sc.appendnl("</head>");
-
-        sc.appendnl("<body>");
-
-        containers.forEach(c -> sc.append(ContainerHtmlMapper.map(c)));
-
-        sc.appendnl("</body>");
-        sc.appendnl("</html>");
+        sc
+            .appendnl("<!DOCTYPE html>")
+            .appendnl("<html>")
+            .appendnl("<head>")
+            .appendnl("<base href=\"/\">")
+            .appendnl(headers, HtmlHeadValue::getHtmlRep)
+            .appendnl(cssLinks, CSSLink::getHtmlRep)
+            .appendnl("<style>")
+            .appendnl(cssEntities, CSSEntity::getHtmlRep)
+            .appendnl("</style>")
+            .appendnl(
+                JsImportMap
+                    .builder()
+                    .entries(jsImports)
+                    .build()
+                    .getHtmlRep())
+            .appendnl(jsScripts, AbsJsLink::getHtmlRep)
+            .appendnl("</head>")
+            .appendnl("<body>")
+            .appendnl(containers, c -> ContainerHtmlMapper.map(c))
+            .appendnl("<script>")
+            .appendnl("document.addEventListener(\"DOMContentLoaded\", () => setTimeout(__onPageLoad, 1000));")
+            .appendnl("function __onPageLoad() {")
+            .append(functions, AbsFunctionCall::parseAsJS, title)
+            .appendnl("}")
+            .appendnl("</script>")
+            .appendnl("</body>")
+            .appendnl("</html>");
 
         return sc.toString();
     }
