@@ -37,7 +37,7 @@ class OpenSiteTest
         String   result     = call.parseAsJS();
 
         // verify
-        assertEquals("CILIB.FunctionRegistry.call('openSite', '/test', {\"uid\":2});", result);
+        assertEquals("CILIB.FunctionRegistry.call('openSite', '/test', {&quot;uid&quot;:2});", result);
     }
 
 }

@@ -23,7 +23,7 @@ public abstract class AbsFunctionArgs
     {
         try
         {
-            return objectMapper.writeValueAsString(this);
+            return objectMapper.writeValueAsString(this).replace("\"", "&quot;");
         }
         catch (JsonProcessingException ex)
         {
