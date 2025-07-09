@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.ValueMapKeyAlreadyInUseException;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.ValueMap;
 import de.cookindustries.lib.spring.gui.util.exception.ObjectSealedException;
 
 class ValueMapTest

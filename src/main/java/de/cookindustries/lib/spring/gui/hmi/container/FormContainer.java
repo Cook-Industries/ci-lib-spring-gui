@@ -31,7 +31,7 @@ public final class FormContainer extends Container
      * list of input children
      */
     @Singular
-    private List<Input> inputs;
+    private final List<Input> inputs;
 
     @Override
     protected ContainerType inferType()

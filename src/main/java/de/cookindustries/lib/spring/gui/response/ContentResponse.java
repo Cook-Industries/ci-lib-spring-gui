@@ -8,7 +8,7 @@
 package de.cookindustries.lib.spring.gui.response;
 
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
-import de.cookindustries.lib.spring.gui.hmi.mapper.ContainerHtmlMapper;
+import de.cookindustries.lib.spring.gui.hmi.mapper.html.HtmlMapper;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -57,7 +57,7 @@ public class ContentResponse extends Response
 
     public String getContentHtml()
     {
-        return ContainerHtmlMapper.map(content);
+        return HtmlMapper.map(content);
     }
 
 }

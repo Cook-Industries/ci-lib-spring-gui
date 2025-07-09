@@ -107,7 +107,7 @@ html {
   z-index: 500;
 }
 
-.message-container > * {
+.message-container>* {
   margin-left: 1rem;
 }
 
@@ -259,7 +259,7 @@ html {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  
+
   background: rgba(0, 0, 0, 0.5);
 }
 
@@ -281,7 +281,7 @@ html {
   min-width: 40rem;
   max-height: 90%;
   overflow-y: auto;
-  
+
   background: rgba(102, 153, 204, 1);
   border-radius: 1rem;
 }
@@ -341,11 +341,16 @@ html {
 .form-list-selection-item {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;  
+  justify-content: space-between;
   align-items: baseline;
 }
 
 .form-list-selection-item:first-child {
   width: 75%;
-} 
+}
+
 /* === < form =================================================================================== */
+.container-centered {
+  margin-left: 25%;
+  margin-right: 25%;
+}

@@ -30,7 +30,7 @@ public final class ButtonBarContainer extends Container
      * list of {@code buttons} in this bar
      */
     @Singular
-    private List<Button> buttons;
+    private final List<Button> buttons;
 
     @Override
     protected ContainerType inferType()

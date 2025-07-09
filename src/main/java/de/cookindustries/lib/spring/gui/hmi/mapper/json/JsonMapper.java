@@ -5,7 +5,7 @@
  * <p>
  * See LICENSE file in the project root for full license information.
  */
-package de.cookindustries.lib.spring.gui.hmi.mapper;
+package de.cookindustries.lib.spring.gui.hmi.mapper.json;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
+import de.cookindustries.lib.spring.gui.function.RegisterTagInput;
 import de.cookindustries.lib.spring.gui.hmi.container.*;
 import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
@@ -32,13 +33,9 @@ import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonParsingException;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.ValueMap;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 /**
  * This object is used to map a {@link PseudoElement} tree inside a {@link JsonTreeRoot} into a in-memory tree of {@link Container}s.
@@ -60,8 +57,6 @@ import lombok.Setter;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@Data
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class JsonMapper
 {
 
@@ -111,95 +106,108 @@ public class JsonMapper
             ContainerType.LINK,
             ContainerType.SPLITTED,
             ContainerType.TAB,
-            ContainerType.TEXT
+            ContainerType.TEXT,
+            ContainerType.TEXT_HEADER
         };
 
     private static final ContainerType[]           LINK_CHILDREN                  = {ContainerType.TEXT};
 
     private static final ContainerType[]           MODAL_CHILDREN                 =
         {
-            ContainerType.CONTENT,
             ContainerType.FORM,
-            ContainerType.HIDDEN,
             ContainerType.IMAGE,
             ContainerType.LINK,
-            ContainerType.SPLITTED,
-            ContainerType.TEXT
+            ContainerType.TEXT,
+            ContainerType.TEXT_HEADER
         };
 
+    private final JsonTreeRoot                     treeRoot;
     private final TreeHandling                     handling;
     private final Locale                           locale;
     private final AbsTranslationProvider           translationProvider;
     private final List<ValueMap>                   valueMaps;
+    private final List<AbsFunctionCall>            functions;
+    private final String                           uuid;
 
-    @Getter(value = AccessLevel.NONE)
-    @Setter(value = AccessLevel.NONE)
-    private Integer                                count                          = 0;
-
-    @Getter(value = AccessLevel.PRIVATE)
-    @Setter(value = AccessLevel.NONE)
-    private final String                           uuid                           = Long.toString(System.currentTimeMillis(), 36);;
+    private Integer                                count;
 
     /**
-     * Validate a {@link JsonTreeRoot} and map it to a {@link Container} tree in a {@link TreeHandling#STATIC} context.
-     * <p>
-     * Uses {@link Locale#ENGLISH} as a language, an {@link StaticTranslationProvider} and no {@link ValueMap}s.
+     * Create {@code JsonMapper} for {@link TreeHandling#STATIC} context.
      *
      * @param root to map
-     * @return the mapped {@code Container}
+     * @throws NullPointerException if any parameter is {@code null}
      */
-    public static Container map(JsonTreeRoot root)
+    public JsonMapper(JsonTreeRoot root)
     {
-        LOG.trace("map static content");
-
-        root.validate();
-
-        final JsonMapper mapper = new JsonMapper(TreeHandling.valueOf(root.getHandling().toUpperCase()), Locale.ENGLISH,
-            NOOP_TRANSLATION_PROVIDER, List.of());
-
-        LOG.trace("mapper id [{}]", mapper.getUuid());
-
-        return mapper.transform(root);
+        this(root, Locale.ENGLISH, NOOP_TRANSLATION_PROVIDER, List.of());
     }
 
     /**
-     * Map a {@link JsonTreeRoot} to a {@link Container} in a {@link TreeHandling#DYNAMIC} context.
+     * Create {@code JsonMapper} for {@link TreeHandling#DYNAMIC} context.
      * <p>
      * Note: any {@link ValueMap} provided for this will call {@link ValueMap#seal()} before it is used!
      *
      * @param root to map
-     * @param locale the language to use from {@code translationMap}
-     * @param translationProvider to fetch tranlation values
+     * @param locale the language to use fetch from {@code translationMap}
+     * @param translationProvider to fetch translation values
      * @param valueMaps {@code ValueMap}s to link to dynamic fill-in content. These will be sealed before usage!
-     * @return the mapped {@code Container}
-     * @throws JsonMapperException if mapping is set to dynamic but no {@code valueMap} is provided
+     * @throws NullPointerException if any parameter is {@code null}
+     * @throws JsonMapperException if mapping is set to dynamic but no {@code valueMap}s are provided
      */
-    public static Container map(JsonTreeRoot root, Locale locale, AbsTranslationProvider translationProvider, List<ValueMap> valueMaps)
+    public JsonMapper(JsonTreeRoot root, Locale locale, AbsTranslationProvider translationProvider, List<ValueMap> valueMaps)
     {
         Objects.requireNonNull(root, "root can not be null");
         Objects.requireNonNull(locale, "locale can not be null");
         Objects.requireNonNull(translationProvider, "translatioProvider can not be null");
+        Objects.requireNonNull(valueMaps, "valueMaps can not be null");
 
-        final TreeHandling handling = TreeHandling.valueOf(root.getHandling().toUpperCase());
+        root.validate();
+
+        TreeHandling handling = TreeHandling.valueOf(root.getHandling().toUpperCase());
 
         if (handling == TreeHandling.DYNAMIC && valueMaps.size() == 0)
         {
             throw new JsonMapperException("mapping is set to [dynamic] fill-in-mode yet no [valueMap] is given");
         }
 
-        LOG.trace("map dynamic content for [{}] from [{}] with [{}] value maps", locale.toLanguageTag(),
-            translationProvider.getClass().getSimpleName(), valueMaps.size());
+        this.treeRoot = root;
+        this.handling = handling;
+        this.locale = locale;
+        this.translationProvider = translationProvider;
+        this.valueMaps = valueMaps;
+        this.uuid = Long.toString(System.currentTimeMillis(), 36);
 
-        valueMaps
-            .stream()
-            .sorted(Comparator.comparing(ValueMap::getPresedence).reversed())
-            .forEach(ValueMap::seal);
+        functions = new ArrayList<>();
+        count = 0;
+    }
 
-        final JsonMapper mapper = new JsonMapper(handling, locale, translationProvider, valueMaps);
+    /**
+     * Run the mapping process.
+     * 
+     * @return the mapped result
+     */
+    public MapperResult map()
+    {
+        if (handling == TreeHandling.STATIC)
+        {
+            LOG.trace("[{}]: map static content", uuid);
+        }
+        else
+        {
+            LOG.trace("[{}]: map dynamic content for [{}] from [{}] with [{}] value maps", uuid, locale.toLanguageTag(),
+                translationProvider.getClass().getSimpleName(), valueMaps.size());
 
-        LOG.trace("mapper id [{}]", mapper.getUuid());
+            valueMaps
+                .stream()
+                .sorted(Comparator.comparing(ValueMap::getPresedence).reversed())
+                .forEach(ValueMap::seal);
+        }
 
-        return mapper.transform(root);
+        return MapperResult
+            .builder()
+            .container(transform(treeRoot))
+            .functions(functions)
+            .build();
     }
 
     /*
@@ -515,18 +523,19 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Container transformInternalComponent(PseudoElement element, int depth)
+    private MapperResult transformInternalComponent(PseudoElement element, int depth)
     {
-        String         path   = getParameterValue(element, depth, "path", String.class);
-        JsonTreeMapper mapper = new JsonTreeMapper();
+        String         path           = getParameterValue(element, depth, "path", String.class);
+        JsonTreeMapper mapper         = new JsonTreeMapper();
 
-        String         indent = INDENT_STRING.repeat(depth + 1);
+        String         indent         = INDENT_STRING.repeat(depth + 1);
 
-        LOG.trace("[{}]:[{}]:{}map linked component @ [{}]", uuid, depth, indent, path);
+        JsonTreeRoot   root           = mapper.map(path);
+        JsonMapper     internalMapper = new JsonMapper(root, locale, translationProvider, valueMaps);
 
-        JsonTreeRoot root = mapper.map(path);
+        LOG.trace("[{}]:[{}]:{}map linked component with [{}] @ [{}]", uuid, depth, indent, internalMapper.uuid, path);
 
-        return JsonMapper.map(root, locale, translationProvider, valueMaps);
+        return internalMapper.map();
     }
 
     /**
@@ -668,7 +677,11 @@ public class JsonMapper
                     switch (internalType)
                     {
                         case COMPONENT:
-                            return transformInternalComponent(element, depth);
+                            MapperResult result = transformInternalComponent(element, depth);
+
+                            functions.addAll(result.getFunctions());
+
+                            return result.getContainers().getFirst();
                     }
                 }
             }
@@ -702,6 +715,7 @@ public class JsonMapper
                 case SPLITTED -> transformSplittedContainer(element, depth);
                 case TAB -> transformTabbedContainer(element, depth);
                 case TEXT -> transformTextContainer(element, depth);
+                case TEXT_HEADER -> transformTextHeaderContainer(element, depth);
             };
         }
         catch (final Exception ex)
@@ -966,7 +980,8 @@ public class JsonMapper
         Map<String, String> attributes              = resolveAttributes(element, depth);
         String              name                    = getParameterValue(element, depth, NAME, String.class);
         String              requestUrl              = getParameterValue(element, depth, "requestUrl", String.class);
-        Boolean             closeOnOverlayClick     = getParameterValue(element, depth, "closeOnOverlayClick", Boolean.class);
+        Boolean             closeOnOverlayClick     =
+            getParameterValue(element, depth, "closeOnOverlayClick", Boolean.class, Boolean.FALSE);
 
         String              btnNameLeft             = getParameterValue(element, depth, "btnNameLeft", String.class, "");
         ButtonClass         btnClassLeft            = ButtonClass.valueOf(
@@ -1131,6 +1146,31 @@ public class JsonMapper
             .classes(classes)
             .dataAttributes(attributes)
             .text(text)
+            .build();
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link TextContainer}
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private TextHeaderContainer transformTextHeaderContainer(PseudoElement element, int depth)
+    {
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
+        String              text       = getParameterValue(element, depth, TEXT, String.class);
+        Integer             size       = getParameterValue(element, depth, "level", Integer.class, Integer.valueOf(1));
+
+        return TextHeaderContainer
+            .builder()
+            .uid(uid)
+            .classes(classes)
+            .dataAttributes(attributes)
+            .text(text)
+            .size(size)
             .build();
     }
 
@@ -1589,13 +1629,18 @@ public class JsonMapper
      */
     private Tag transformTagInput(PseudoElement element, int depth)
     {
-        String              uid        = resolveUid(element, depth);
-        List<String>        classes    = resolveClasses(element.getClasses(), depth);
-        Map<String, String> attributes = resolveAttributes(element, depth);
-        List<Marker>        marker     = transformMarker(uid, element.getMarker(), depth);
-        String              name       = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              value      = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
+        String              uid              = resolveUid(element, depth);
+        List<String>        classes          = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes       = resolveAttributes(element, depth);
+        List<Marker>        marker           = transformMarker(uid, element.getMarker(), depth);
+        String              name             = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs         = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              value            = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
+        String              fetchUrl         = getParameterValue(element, depth, "fetchUrl", String.class);
+        String              searchUrl        = getParameterValue(element, depth, "searchUrl", String.class);
+        Boolean             enforceWhitelist = getParameterValue(element, depth, "enforceWhitlist", Boolean.class, Boolean.FALSE);
+
+        functions.add(new RegisterTagInput(uid, fetchUrl, searchUrl, enforceWhitelist));
 
         return Tag
             .builder()

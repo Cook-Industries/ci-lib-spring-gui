@@ -5,7 +5,7 @@
  * <p>
  * See LICENSE file in the project root for full license information.
  */
-package de.cookindustries.lib.spring.gui.hmi.mapper;
+package de.cookindustries.lib.spring.gui.hmi.mapper.html;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ import lombok.Data;
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Data
-public final class ContainerHtmlMapper
+public final class HtmlMapper
 {
 
     private static final String TAG_DIV                 = "div";
@@ -70,7 +70,7 @@ public final class ContainerHtmlMapper
     /**
      * Internal constructor
      */
-    private ContainerHtmlMapper()
+    private HtmlMapper()
     {
         // private constructor
     }
@@ -83,7 +83,7 @@ public final class ContainerHtmlMapper
      */
     public static String map(Container container)
     {
-        ContainerHtmlMapper mapper = new ContainerHtmlMapper();
+        HtmlMapper mapper = new HtmlMapper();
 
         return mapper.render(container);
     }
@@ -96,8 +96,8 @@ public final class ContainerHtmlMapper
      */
     public static String map(List<Container> containers)
     {
-        ContainerHtmlMapper mapper = new ContainerHtmlMapper();
-        StringConcat        sc     = new StringConcat();
+        HtmlMapper   mapper = new HtmlMapper();
+        StringConcat sc     = new StringConcat();
 
         containers
             .stream()
@@ -148,6 +148,7 @@ public final class ContainerHtmlMapper
             case SPLITTED -> render((SplittedContainer) container);
             case TAB -> render((TabContainer) container);
             case TEXT -> render((TextContainer) container);
+            case TEXT_HEADER -> render((TextHeaderContainer) container);
         };
     }
 
@@ -371,7 +372,7 @@ public final class ContainerHtmlMapper
                 .attribute(new Attribute(ATT_ID, modalContainer.getUid()))
                 .clazz("modal-body")
                 .classes(modalContainer.getClasses())
-                .dataAttribute("close-on-overlay", String.valueOf(modalContainer.isCloseOnOverlayClick()))
+                .dataAttribute("close-on-overlay", modalContainer.getCloseOnOverlayClick().toString())
                 .dataAttributes(modalContainer.getDataAttributes())
                 .content(render(modalInlay))
                 .build();
@@ -422,6 +423,22 @@ public final class ContainerHtmlMapper
         return elementMapper.html();
     }
 
+    private String render(TextHeaderContainer textHeaderContainer)
+    {
+        HtmlElement elementMapper =
+            HtmlElement
+                .builder()
+                .tag(String.format("h%s", textHeaderContainer.getSize()))
+                .attribute(new Attribute(ATT_ID, textHeaderContainer.getUid()))
+                .attribute(new Attribute(ATT_ON_CLICK, textHeaderContainer.getOnClick()))
+                .classes(textHeaderContainer.getClasses())
+                .dataAttributes(textHeaderContainer.getDataAttributes())
+                .content(textHeaderContainer.getText())
+                .build();
+
+        return elementMapper.html();
+    }
+
     private String render(Input input, String formId)
     {
         return switch (input.getType())
@@ -456,7 +473,7 @@ public final class ContainerHtmlMapper
                 .attribute(new Attribute(ATT_ID, checkbox.getUid()))
                 .attribute(new Attribute(ATT_TYPE, checkbox.getType().name().toLowerCase()))
                 .attribute(new Attribute(ATT_ON_INPUT, checkbox.getOnInput()))
-                .attribute(new Attribute(ATT_CHECKED, checkbox.isChecked()))
+                .attribute(new Attribute(ATT_CHECKED, checkbox.getChecked()))
                 .clazz(CLASS_FORM_CHECK_INPUT)
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
                 .dataAttribute(DATA_ATT_SUBMIT_AS, checkbox.getSubmitAs())
@@ -550,7 +567,7 @@ public final class ContainerHtmlMapper
                 .tag(TAG_INPUT)
                 .attribute(new Attribute(ATT_ID, file.getUid()))
                 .attribute(new Attribute(ATT_TYPE, file.getType().name().toLowerCase()))
-                .attribute(new Attribute("multiple", file.isMultiple()))
+                .attribute(new Attribute("multiple", file.getMultiple()))
                 .attribute(new Attribute("accept", StringAdapter.separate(file.getAccepts(), ",")))
                 .clazz(CLASS_FORM_CONTROL)
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
@@ -864,7 +881,7 @@ public final class ContainerHtmlMapper
                 .attribute(new Attribute(ATT_TYPE, "checkbox"))
                 // .attribute(ATT_ROLE, switch1.getType().name().toLowerCase())
                 .attribute(new Attribute(ATT_ON_INPUT, switch1.getOnInput()))
-                .attribute(new Attribute(ATT_CHECKED, switch1.isChecked()))
+                .attribute(new Attribute(ATT_CHECKED, switch1.getChecked()))
                 .clazz(CLASS_FORM_CHECK_INPUT)
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
                 .dataAttribute(DATA_ATT_SUBMIT_AS, switch1.getSubmitAs())

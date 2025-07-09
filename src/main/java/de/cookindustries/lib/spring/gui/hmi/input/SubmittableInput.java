@@ -12,7 +12,6 @@ import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 
 /**
- * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
@@ -22,8 +21,8 @@ public abstract class SubmittableInput extends Input
 {
 
     @NonNull
-    private String name;
+    private final String name;
 
     @NonNull
-    private String submitAs;
+    private final String submitAs;
 }

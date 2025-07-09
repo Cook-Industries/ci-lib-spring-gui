@@ -10,6 +10,7 @@ package de.cookindustries.lib.spring.gui.hmi.input;
 import java.util.List;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Singular;
 import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
@@ -25,11 +26,12 @@ import lombok.extern.jackson.Jacksonized;
 public final class File extends SubmittableInput
 {
 
+    @NonNull
     @Default
-    private boolean      multiple = false;
+    private final Boolean      multiple = false;
 
     @Singular
-    private List<String> accepts;
+    private final List<String> accepts;
 
     @Override
     protected InputType inferType()

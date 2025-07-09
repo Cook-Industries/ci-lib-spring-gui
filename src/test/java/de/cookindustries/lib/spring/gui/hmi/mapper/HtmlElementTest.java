@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import de.cookindustries.lib.spring.gui.hmi.mapper.html.Attribute;
+import de.cookindustries.lib.spring.gui.hmi.mapper.html.HtmlElement;
 
 class HtmlElementTest
 {
@@ -23,12 +25,12 @@ class HtmlElementTest
         // setup
         String      expected = "<div checked class=\"\" data-test=\"test\">";
         HtmlElement element  = HtmlElement
-                .builder()
-                .tag("div")
-                .attribute(new Attribute("checked", true))
-                .dataAttribute(TEST_VAL, TEST_VAL)
-                .isSingleTag(true)
-                .build();
+            .builder()
+            .tag("div")
+            .attribute(new Attribute("checked", true))
+            .dataAttribute(TEST_VAL, TEST_VAL)
+            .isSingleTag(true)
+            .build();
 
         // run
         String      html     = element.html();
@@ -43,14 +45,14 @@ class HtmlElementTest
         // setup
         String      expected = "<div checked=\"test\" class=\"test\" data-test=\"test\">test</div>";
         HtmlElement element  = HtmlElement
-                .builder()
-                .tag("div")
-                .attribute(new Attribute("checked", TEST_VAL))
-                .clazz(TEST_VAL)
-                .dataAttribute(TEST_VAL, TEST_VAL)
-                .isSingleTag(false)
-                .content(TEST_VAL)
-                .build();
+            .builder()
+            .tag("div")
+            .attribute(new Attribute("checked", TEST_VAL))
+            .clazz(TEST_VAL)
+            .dataAttribute(TEST_VAL, TEST_VAL)
+            .isSingleTag(false)
+            .content(TEST_VAL)
+            .build();
 
         // run
         String      html     = element.html();

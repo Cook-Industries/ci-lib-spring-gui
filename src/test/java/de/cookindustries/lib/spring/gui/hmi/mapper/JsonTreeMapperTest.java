@@ -18,6 +18,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
+import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonTreeMapper;
+import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonTreeRoot;
 
 class JsonTreeMapperTest
 {

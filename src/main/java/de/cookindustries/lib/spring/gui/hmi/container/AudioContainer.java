@@ -9,6 +9,7 @@ package de.cookindustries.lib.spring.gui.hmi.container;
 
 import io.micrometer.common.lang.NonNull;
 import lombok.Getter;
+import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -34,13 +35,15 @@ public final class AudioContainer extends Container
      * whether if controls should be shown or not
      */
     @NonNull
-    private final boolean controls;
+    @Default
+    private final Boolean controls = true;
 
     /**
      * whether this audio should start playing automatically
      */
     @NonNull
-    private final boolean autoplay;
+    @Default
+    private final Boolean autoplay = false;
 
     @Override
     protected ContainerType inferType()

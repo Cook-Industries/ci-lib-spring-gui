@@ -14,14 +14,23 @@ package de.cookindustries.lib.spring.gui.html;
 public class JsPlainLink extends AbsJsLink
 {
 
+    private final boolean defer;
+
     public JsPlainLink(String href)
     {
+        this(href, false);
+    }
+
+    public JsPlainLink(String href, boolean defer)
+    {
         super(href);
+
+        this.defer = defer;
     }
 
     @Override
     public String getHtmlRep()
     {
-        return String.format("<script src=\"%s\"></script>", getHref());
+        return String.format("<script src=\"%s\"%s></script>", getHref(), defer ? " defer=\"defer\"" : "");
     }
 }

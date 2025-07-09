@@ -11,7 +11,7 @@ import java.util.List;
 
 import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
-import de.cookindustries.lib.spring.gui.hmi.mapper.ContainerHtmlMapper;
+import de.cookindustries.lib.spring.gui.hmi.mapper.html.HtmlMapper;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -75,7 +75,7 @@ public class HtmlSite implements HtmlExportable
             .appendnl(jsScripts, AbsJsLink::getHtmlRep)
             .appendnl("</head>")
             .appendnl("<body>")
-            .appendnl(containers, c -> ContainerHtmlMapper.map(c))
+            .appendnl(containers, c -> HtmlMapper.map(c))
             .appendnl("<script>")
             .appendnl("document.addEventListener(\"DOMContentLoaded\", () => setTimeout(__onPageLoad, 1000));")
             .appendnl("function __onPageLoad() {")

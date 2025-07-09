@@ -5,7 +5,7 @@
  * <p>
  * See LICENSE file in the project root for full license information.
  */
-package de.cookindustries.lib.spring.gui.hmi.mapper;
+package de.cookindustries.lib.spring.gui.hmi.mapper.html;
 
 import de.cookindustries.lib.spring.gui.html.HtmlExportable;
 import de.cookindustries.lib.spring.gui.util.StringAdapter;

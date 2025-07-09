@@ -9,7 +9,7 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
 
 import java.util.ArrayList;
 
-import de.cookindustries.lib.spring.gui.hmi.mapper.ValueMap;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.ValueMap;
 
 /**
  * A defnitive associated list implementation to use in the type-safe value extraction from {@link ValueMap}s.

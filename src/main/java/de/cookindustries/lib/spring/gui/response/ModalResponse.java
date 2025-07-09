@@ -8,7 +8,7 @@
 package de.cookindustries.lib.spring.gui.response;
 
 import de.cookindustries.lib.spring.gui.hmi.container.ModalContainer;
-import de.cookindustries.lib.spring.gui.hmi.mapper.ContainerHtmlMapper;
+import de.cookindustries.lib.spring.gui.hmi.mapper.html.HtmlMapper;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
@@ -35,6 +35,6 @@ public class ModalResponse extends Response
 
     public String getContentHtml()
     {
-        return ContainerHtmlMapper.map(modal);
+        return HtmlMapper.map(modal);
     }
 }

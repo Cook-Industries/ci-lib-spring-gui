@@ -5,7 +5,7 @@
  * <p>
  * See LICENSE file in the project root for full license information.
  */
-package de.cookindustries.lib.spring.gui.hmi.mapper;
+package de.cookindustries.lib.spring.gui.hmi.mapper.util;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +14,7 @@ import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.ValueMapKeyAlreadyInUseException;
+import de.cookindustries.lib.spring.gui.hmi.mapper.json.TreeHandling;
 import de.cookindustries.lib.spring.gui.util.Sealable;
 import de.cookindustries.lib.spring.gui.util.exception.ObjectSealedException;
 

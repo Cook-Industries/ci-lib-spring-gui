@@ -5,7 +5,7 @@
  * <p>
  * See LICENSE file in the project root for full license information.
  */
-package de.cookindustries.lib.spring.gui.hmi.mapper;
+package de.cookindustries.lib.spring.gui.hmi.mapper.json;
 
 import java.util.List;
 import java.util.Map;

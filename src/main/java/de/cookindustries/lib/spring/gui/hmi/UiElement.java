@@ -33,18 +33,18 @@ public abstract class UiElement
      */
     @NonNull
     @Default
-    private String              uid = UUID.randomUUID().toString();
+    private final String              uid = UUID.randomUUID().toString();
 
     /**
      * a list of styling classes
      */
     @Singular("clazz")
-    private Set<String>         classes;
+    private final Set<String>         classes;
 
     /**
      * a map of attributes for this element
      */
     @Singular
-    private Map<String, String> dataAttributes;
+    private final Map<String, String> dataAttributes;
 
 }

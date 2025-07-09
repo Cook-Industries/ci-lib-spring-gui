@@ -24,8 +24,10 @@ public final class Tab
 
     @NonNull
     private final String   uid;
+
     @NonNull
     private final String   text;
+
     @Singular
     private final Marker[] errors;
 

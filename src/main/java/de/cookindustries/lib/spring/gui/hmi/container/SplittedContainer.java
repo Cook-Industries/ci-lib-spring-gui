@@ -27,13 +27,13 @@ public final class SplittedContainer extends Container
 {
 
     @NonNull
-    private Container       head;
+    private final Container       head;
 
     @NonNull
-    private List<Container> center;
+    private final List<Container> center;
 
     @NonNull
-    private Container       tail;
+    private final Container       tail;
 
     @Override
     protected ContainerType inferType()

@@ -13,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonParsingException;
+import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonTreeRoot;
+import de.cookindustries.lib.spring.gui.hmi.mapper.json.PseudoElement;
 
 class JsonTreeRootTest
 {

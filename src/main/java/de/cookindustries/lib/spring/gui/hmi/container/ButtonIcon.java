@@ -24,10 +24,10 @@ public final class ButtonIcon extends Container
 {
 
     @NonNull
-    private String      image;
+    private final String      image;
 
     @NonNull
-    private ButtonClass btnClass;
+    private final ButtonClass btnClass;
 
     @Override
     protected ContainerType inferType()

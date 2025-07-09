@@ -22,20 +22,23 @@ import lombok.extern.jackson.Jacksonized;
 public final class Number extends SubmittableInput
 {
 
-    private final int    value;
-
-    private final int    min;
-
-    private final int    max;
+    @NonNull
+    private final Integer value;
 
     @NonNull
-    private final String placeholder;
+    private final Integer min;
 
     @NonNull
-    private final String prefix;
+    private final Integer max;
 
     @NonNull
-    private final String suffix;
+    private final String  placeholder;
+
+    @NonNull
+    private final String  prefix;
+
+    @NonNull
+    private final String  suffix;
 
     @Override
     protected InputType inferType()

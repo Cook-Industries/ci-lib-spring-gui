@@ -23,6 +23,11 @@ import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonParsingException;
+import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
+import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonTreeMapper;
+import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonTreeRoot;
+import de.cookindustries.lib.spring.gui.hmi.mapper.json.MapperResult;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.ValueMap;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
 
 public class JsonMapperTest
@@ -39,26 +44,29 @@ public class JsonMapperTest
     void test_map_basic()
     {
         // setup
-        JsonTreeRoot root = getRoot("json-test-files/json-mapper/basic-root-static.json");
+        JsonTreeRoot root   = getRoot("json-test-files/json-mapper/basic-root-static.json");
+        JsonMapper   mapper = new JsonMapper(root);
 
         // run
-        Container container = JsonMapper.map(root);
+        MapperResult result = mapper.map();
 
         // verify
-        assertNotNull(container);
+        assertNotNull(result);
+        assertEquals(1, result.getContainers().size());
     }
 
     @Test
     void test_map_customInputs()
     {
         // setup
-        JsonTreeRoot root = getRoot("json-test-files/json-mapper/basic-root-static.json");
+        JsonTreeRoot root   = getRoot("json-test-files/json-mapper/basic-root-static.json");
+        JsonMapper   mapper = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(new ValueMap()));
 
         // run
-        Container container = JsonMapper.map(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(new ValueMap()));
+        MapperResult result = mapper.map();
 
         // verify
-        assertNotNull(container);
+        assertNotNull(result);
     }
 
     @Test
@@ -68,30 +76,32 @@ public class JsonMapperTest
         JsonTreeRoot root = getRoot("json-test-files/json-mapper/basic-root-dynamic.json");
 
         // run & verify
-        assertThrows(JsonMapperException.class, () -> JsonMapper.map(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of()));
+        assertThrows(JsonMapperException.class, () -> new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of()));
     }
 
     @Test
     void test_map_withComponent()
     {
         // setup
-        JsonTreeRoot root = getRoot("json-test-files/json-mapper/root-with-component.json");
+        JsonTreeRoot root   = getRoot("json-test-files/json-mapper/root-with-component.json");
+        JsonMapper   mapper = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(new ValueMap()));
 
         // run
-        Container container = JsonMapper.map(root);
+        MapperResult result = mapper.map();
 
         // verify
-        assertNotNull(container);
+        assertNotNull(result);
     }
 
     @Test
     void test_map_withComponent_throws()
     {
         // setup
-        JsonTreeRoot root = getRoot("json-test-files/json-mapper/root-with-component-faulty.json");
+        JsonTreeRoot root   = getRoot("json-test-files/json-mapper/root-with-component-faulty.json");
+        JsonMapper   mapper = new JsonMapper(root);
 
         // run & verify
-        assertThrows(JsonParsingException.class, () -> JsonMapper.map(root));
+        assertThrows(JsonParsingException.class, () -> mapper.map());
     }
 
     @Test
@@ -101,41 +111,47 @@ public class JsonMapperTest
         JsonTreeRoot root     = getRoot("json-test-files/json-mapper/replace-class.json");
         ValueMap     valueMap = new ValueMap();
         valueMap.add("class1", "testClass");
+        JsonMapper   mapper = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
 
         // run
-        Container container = JsonMapper.map(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
+        MapperResult result = mapper.map();
 
         // verify
-        assertTrue(container.getClasses().contains("testClass"));
-        assertTrue(container.getClasses().contains("class2"));
+        assertNotNull(result);
+
+        // verify
+        assertTrue(result.getContainers().getFirst().getClasses().contains("testClass"));
+        assertTrue(result.getContainers().getFirst().getClasses().contains("class2"));
     }
 
     @Test
     void test_map_replaceClass_notExisting()
     {
         // setup
-        JsonTreeRoot root      = getRoot("json-test-files/json-mapper/replace-class.json");
-        ValueMap     valueMap  = new ValueMap();
+        JsonTreeRoot root     = getRoot("json-test-files/json-mapper/replace-class.json");
+        ValueMap     valueMap = new ValueMap();
+        JsonMapper   mapper   = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
 
         // run
-        Container    container = JsonMapper.map(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
+        MapperResult result   = mapper.map();
 
         // verify
-        assertFalse(container.getClasses().contains("testClass"));
-        assertTrue(container.getClasses().contains("class2"));
+        assertFalse(result.getContainers().getFirst().getClasses().contains("testClass"));
+        assertTrue(result.getContainers().getFirst().getClasses().contains("class2"));
     }
 
     @Test
     void test_map_attributes()
     {
         // setup
-        JsonTreeRoot root = getRoot("json-test-files/json-mapper/map-attributes.json");
+        JsonTreeRoot root   = getRoot("json-test-files/json-mapper/map-attributes.json");
+        JsonMapper   mapper = new JsonMapper(root);
 
         // run
-        Container container = JsonMapper.map(root);
+        MapperResult result = mapper.map();
 
         // verify
-        assertNotNull(container.getDataAttributes().get("key1"));
+        assertNotNull(result.getContainers().getFirst().getDataAttributes().get("key1"));
     }
 
     @Test
@@ -145,12 +161,13 @@ public class JsonMapperTest
         JsonTreeRoot root     = getRoot("json-test-files/json-mapper/replace-parameter.json");
         ValueMap     valueMap = new ValueMap();
         valueMap.add("param", "testText");
+        JsonMapper   mapper = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
 
         // run
-        Container container = JsonMapper.map(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
+        MapperResult result = mapper.map();
 
         // verify
-        assertEquals("testText", ((TextContainer) container).getText());
+        assertEquals("testText", ((TextContainer) result.getContainers().getFirst()).getText());
     }
 
     @Test
@@ -159,10 +176,11 @@ public class JsonMapperTest
         // setup
         JsonTreeRoot root     = getRoot("json-test-files/json-mapper/parameter-missing.json");
         ValueMap     valueMap = new ValueMap();
+        JsonMapper   mapper   = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
 
         // run & verify
         assertThrows(JsonParsingException.class,
-            () -> JsonMapper.map(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap)));
+            () -> mapper.map());
     }
 
     @Test
@@ -170,11 +188,13 @@ public class JsonMapperTest
     {
         // setup
         JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/audio-container.json");
+        JsonMapper   mapper    = new JsonMapper(root);
 
         // run
-        Container    container = JsonMapper.map(root);
+        MapperResult result    = mapper.map();
 
         // verify
+        Container    container = result.getContainers().getFirst();
         assertEquals(AudioContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -182,8 +202,8 @@ public class JsonMapperTest
 
         AudioContainer audioContainer = (AudioContainer) container;
         assertEquals("path/to/resource", audioContainer.getSrc());
-        assertEquals(false, audioContainer.isControls());
-        assertEquals(true, audioContainer.isAutoplay());
+        assertEquals(false, audioContainer.getControls());
+        assertEquals(true, audioContainer.getAutoplay());
     }
 
     @Test
@@ -191,11 +211,13 @@ public class JsonMapperTest
     {
         // setup
         JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/button-container.json");
+        JsonMapper   mapper    = new JsonMapper(root);
 
         // run
-        Container    container = JsonMapper.map(root);
+        MapperResult result    = mapper.map();
 
         // verify
+        Container    container = result.getContainers().getFirst();
         assertEquals(Button.class, container.getClass());
 
         Button button = (Button) container;
@@ -211,20 +233,22 @@ public class JsonMapperTest
     void test_map_ButtonBarContainer()
     {
         // setup
-        JsonTreeRoot root = getRoot("json-test-files/json-mapper/container/button-bar-container.json");
+        JsonTreeRoot root   = getRoot("json-test-files/json-mapper/container/button-bar-container.json");
+        JsonMapper   mapper = new JsonMapper(root);
 
         // run & verify
-        assertThrows(JsonParsingException.class, () -> JsonMapper.map(root));
+        assertThrows(JsonParsingException.class, () -> mapper.map());
     }
 
     @Test
     void test_map_ButtonIconContainer()
     {
         // setup
-        JsonTreeRoot root = getRoot("json-test-files/json-mapper/container/button-icon-container.json");
+        JsonTreeRoot root   = getRoot("json-test-files/json-mapper/container/button-icon-container.json");
+        JsonMapper   mapper = new JsonMapper(root);
 
         // run & verify
-        assertThrows(JsonParsingException.class, () -> JsonMapper.map(root));
+        assertThrows(JsonParsingException.class, () -> mapper.map());
     }
 
     @Test
@@ -232,11 +256,13 @@ public class JsonMapperTest
     {
         // setup
         JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/content-container.json");
+        JsonMapper   mapper    = new JsonMapper(root);
 
         // run
-        Container    container = JsonMapper.map(root);
+        MapperResult result    = mapper.map();
 
         // verify
+        Container    container = result.getContainers().getFirst();
         assertEquals(ContentContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -248,11 +274,13 @@ public class JsonMapperTest
     {
         // setup
         JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/form-container.json");
+        JsonMapper   mapper    = new JsonMapper(root);
 
         // run
-        Container    container = JsonMapper.map(root);
+        MapperResult result    = mapper.map();
 
         // verify
+        Container    container = result.getContainers().getFirst();
         assertEquals(FormContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -264,11 +292,13 @@ public class JsonMapperTest
     {
         // setup
         JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/hidden-container.json");
+        JsonMapper   mapper    = new JsonMapper(root);
 
         // run
-        Container    container = JsonMapper.map(root);
+        MapperResult result    = mapper.map();
 
         // verify
+        Container    container = result.getContainers().getFirst();
         assertEquals(HiddenContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -280,11 +310,13 @@ public class JsonMapperTest
     {
         // setup
         JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/image-container.json");
+        JsonMapper   mapper    = new JsonMapper(root);
 
         // run
-        Container    container = JsonMapper.map(root);
+        MapperResult result    = mapper.map();
 
         // verify
+        Container    container = result.getContainers().getFirst();
         assertEquals(ImageContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -299,11 +331,13 @@ public class JsonMapperTest
     {
         // setup
         JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/link-container.json");
+        JsonMapper   mapper    = new JsonMapper(root);
 
         // run
-        Container    container = JsonMapper.map(root);
+        MapperResult result    = mapper.map();
 
         // verify
+        Container    container = result.getContainers().getFirst();
         assertEquals(LinkContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -319,11 +353,13 @@ public class JsonMapperTest
     {
         // setup
         JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/splitted-container.json");
+        JsonMapper   mapper    = new JsonMapper(root);
 
         // run
-        Container    container = JsonMapper.map(root);
+        MapperResult result    = mapper.map();
 
         // verify
+        Container    container = result.getContainers().getFirst();
         assertEquals(SplittedContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -339,10 +375,11 @@ public class JsonMapperTest
     void test_map_TabbedContainer()
     {
         // setup
-        JsonTreeRoot root = getRoot("json-test-files/json-mapper/container/tabbed-container.json");
+        JsonTreeRoot root   = getRoot("json-test-files/json-mapper/container/tabbed-container.json");
+        JsonMapper   mapper = new JsonMapper(root);
 
         // run & verify
-        assertThrows(JsonParsingException.class, () -> JsonMapper.map(root));
+        assertThrows(JsonParsingException.class, () -> mapper.map());
     }
 
     @Test
@@ -350,11 +387,13 @@ public class JsonMapperTest
     {
         // setup
         JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/text-container.json");
+        JsonMapper   mapper    = new JsonMapper(root);
 
         // run
-        Container    container = JsonMapper.map(root);
+        MapperResult result    = mapper.map();
 
         // verify
+        Container    container = result.getContainers().getFirst();
         assertEquals(TextContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -368,13 +407,16 @@ public class JsonMapperTest
     void test_map_CheckboxInput()
     {
         // setup
-        JsonTreeRoot  root  = getRoot("json-test-files/json-mapper/input/checkbox-input.json");
+        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/checkbox-input.json");
+        JsonMapper    mapper    = new JsonMapper(root);
 
         // run
-        FormContainer form  = (FormContainer) JsonMapper.map(root);
+        MapperResult  result    = mapper.map();
 
         // verify
-        Input         input = form.getInputs().get(0);
+        Container     container = result.getContainers().getFirst();
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
         assertEquals(Checkbox.class, input.getClass());
 
         Checkbox checkbox = (Checkbox) input;
@@ -386,13 +428,16 @@ public class JsonMapperTest
     void test_map_CurrencyInput()
     {
         // setup
-        JsonTreeRoot  root  = getRoot("json-test-files/json-mapper/input/currency-input.json");
+        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/currency-input.json");
+        JsonMapper    mapper    = new JsonMapper(root);
 
         // run
-        FormContainer form  = (FormContainer) JsonMapper.map(root);
+        MapperResult  result    = mapper.map();
 
         // verify
-        Input         input = form.getInputs().get(0);
+        Container     container = result.getContainers().getFirst();
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
         assertEquals(Currency.class, input.getClass());
 
         Currency currency = (Currency) input;
@@ -404,13 +449,16 @@ public class JsonMapperTest
     void test_map_DateInput()
     {
         // setup
-        JsonTreeRoot  root  = getRoot("json-test-files/json-mapper/input/date-input.json");
+        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/date-input.json");
+        JsonMapper    mapper    = new JsonMapper(root);
 
         // run
-        FormContainer form  = (FormContainer) JsonMapper.map(root);
+        MapperResult  result    = mapper.map();
 
         // verify
-        Input         input = form.getInputs().get(0);
+        Container     container = result.getContainers().getFirst();
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
         assertEquals(Date.class, input.getClass());
 
         Date date = (Date) input;
@@ -422,13 +470,16 @@ public class JsonMapperTest
     void test_map_FileInput()
     {
         // setup
-        JsonTreeRoot  root  = getRoot("json-test-files/json-mapper/input/file-input.json");
+        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/file-input.json");
+        JsonMapper    mapper    = new JsonMapper(root);
 
         // run
-        FormContainer form  = (FormContainer) JsonMapper.map(root);
+        MapperResult  result    = mapper.map();
 
         // verify
-        Input         input = form.getInputs().get(0);
+        Container     container = result.getContainers().getFirst();
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
         assertEquals(File.class, input.getClass());
 
         File file = (File) input;
@@ -440,13 +491,16 @@ public class JsonMapperTest
     void test_map_HiddenInput()
     {
         // setup
-        JsonTreeRoot  root  = getRoot("json-test-files/json-mapper/input/hidden-input.json");
+        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/hidden-input.json");
+        JsonMapper    mapper    = new JsonMapper(root);
 
         // run
-        FormContainer form  = (FormContainer) JsonMapper.map(root);
+        MapperResult  result    = mapper.map();
 
         // verify
-        Input         input = form.getInputs().get(0);
+        Container     container = result.getContainers().getFirst();
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
         assertEquals(Hidden.class, input.getClass());
 
         Hidden hidden = (Hidden) input;
@@ -457,13 +511,16 @@ public class JsonMapperTest
     void test_map_LinkInput()
     {
         // setup
-        JsonTreeRoot  root  = getRoot("json-test-files/json-mapper/input/link-input.json");
+        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/link-input.json");
+        JsonMapper    mapper    = new JsonMapper(root);
 
         // run
-        FormContainer form  = (FormContainer) JsonMapper.map(root);
+        MapperResult  result    = mapper.map();
 
         // verify
-        Input         input = form.getInputs().get(0);
+        Container     container = result.getContainers().getFirst();
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
         assertEquals(Link.class, input.getClass());
 
         Link link = (Link) input;
@@ -475,13 +532,16 @@ public class JsonMapperTest
     void test_map_NumberInput()
     {
         // setup
-        JsonTreeRoot  root  = getRoot("json-test-files/json-mapper/input/number-input.json");
+        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/number-input.json");
+        JsonMapper    mapper    = new JsonMapper(root);
 
         // run
-        FormContainer form  = (FormContainer) JsonMapper.map(root);
+        MapperResult  result    = mapper.map();
 
         // verify
-        Input         input = form.getInputs().get(0);
+        Container     container = result.getContainers().getFirst();
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
         assertEquals(Number.class, input.getClass());
 
         Number number = (Number) input;
@@ -493,13 +553,16 @@ public class JsonMapperTest
     void test_map_PasswordInput()
     {
         // setup
-        JsonTreeRoot  root  = getRoot("json-test-files/json-mapper/input/password-input.json");
+        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/password-input.json");
+        JsonMapper    mapper    = new JsonMapper(root);
 
         // run
-        FormContainer form  = (FormContainer) JsonMapper.map(root);
+        MapperResult  result    = mapper.map();
 
         // verify
-        Input         input = form.getInputs().get(0);
+        Container     container = result.getContainers().getFirst();
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
         assertEquals(Password.class, input.getClass());
 
         Password password = (Password) input;
@@ -511,13 +574,16 @@ public class JsonMapperTest
     void test_map_RadioInput()
     {
         // setup
-        JsonTreeRoot  root  = getRoot("json-test-files/json-mapper/input/radio-input.json");
+        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/radio-input.json");
+        JsonMapper    mapper    = new JsonMapper(root);
 
         // run
-        FormContainer form  = (FormContainer) JsonMapper.map(root);
+        MapperResult  result    = mapper.map();
 
         // verify
-        Input         input = form.getInputs().get(0);
+        Container     container = result.getContainers().getFirst();
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
         assertEquals(Radio.class, input.getClass());
 
         Radio radio = (Radio) input;
@@ -530,13 +596,16 @@ public class JsonMapperTest
     void test_map_SelectInput()
     {
         // setup
-        JsonTreeRoot  root   = getRoot("json-test-files/json-mapper/input/select-input.json");
+        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/select-input.json");
+        JsonMapper    mapper    = new JsonMapper(root);
 
         // run
-        FormContainer form   = (FormContainer) JsonMapper.map(root);
+        MapperResult  result    = mapper.map();
 
         // verify
-        Input         input1 = form.getInputs().get(0);
+        Container     container = result.getContainers().getFirst();
+        FormContainer form      = (FormContainer) container;
+        Input         input1    = form.getInputs().get(0);
         assertEquals(Select.class, input1.getClass());
 
         Input input2 = form.getInputs().get(1);
@@ -557,13 +626,16 @@ public class JsonMapperTest
     void test_map_SliderInput()
     {
         // setup
-        JsonTreeRoot  root  = getRoot("json-test-files/json-mapper/input/slider-input.json");
+        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/slider-input.json");
+        JsonMapper    mapper    = new JsonMapper(root);
 
         // run
-        FormContainer form  = (FormContainer) JsonMapper.map(root);
+        MapperResult  result    = mapper.map();
 
         // verify
-        Input         input = form.getInputs().get(0);
+        Container     container = result.getContainers().getFirst();
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
         assertEquals(Slider.class, input.getClass());
 
         Slider slider = (Slider) input;
@@ -575,13 +647,16 @@ public class JsonMapperTest
     void test_map_SwitchInput()
     {
         // setup
-        JsonTreeRoot  root  = getRoot("json-test-files/json-mapper/input/switch-input.json");
+        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/switch-input.json");
+        JsonMapper    mapper    = new JsonMapper(root);
 
         // run
-        FormContainer form  = (FormContainer) JsonMapper.map(root);
+        MapperResult  result    = mapper.map();
 
         // verify
-        Input         input = form.getInputs().get(0);
+        Container     container = result.getContainers().getFirst();
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
         assertEquals(Switch.class, input.getClass());
 
         Switch switchi = (Switch) input;
@@ -593,13 +668,16 @@ public class JsonMapperTest
     void test_map_TextareaInput()
     {
         // setup
-        JsonTreeRoot  root  = getRoot("json-test-files/json-mapper/input/textarea-input.json");
+        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/textarea-input.json");
+        JsonMapper    mapper    = new JsonMapper(root);
 
         // run
-        FormContainer form  = (FormContainer) JsonMapper.map(root);
+        MapperResult  result    = mapper.map();
 
         // verify
-        Input         input = form.getInputs().get(0);
+        Container     container = result.getContainers().getFirst();
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
         assertEquals(Textarea.class, input.getClass());
 
         Textarea textarea = (Textarea) input;
@@ -611,13 +689,16 @@ public class JsonMapperTest
     void test_map_TextboxInput()
     {
         // setup
-        JsonTreeRoot  root  = getRoot("json-test-files/json-mapper/input/textbox-input.json");
+        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/textbox-input.json");
+        JsonMapper    mapper    = new JsonMapper(root);
 
         // run
-        FormContainer form  = (FormContainer) JsonMapper.map(root);
+        MapperResult  result    = mapper.map();
 
         // verify
-        Input         input = form.getInputs().get(0);
+        Container     container = result.getContainers().getFirst();
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
         assertEquals(Textbox.class, input.getClass());
     }
 
@@ -625,13 +706,16 @@ public class JsonMapperTest
     void test_map_TextfieldInput()
     {
         // setup
-        JsonTreeRoot  root  = getRoot("json-test-files/json-mapper/input/textfield-input.json");
+        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/textfield-input.json");
+        JsonMapper    mapper    = new JsonMapper(root);
 
         // run
-        FormContainer form  = (FormContainer) JsonMapper.map(root);
+        MapperResult  result    = mapper.map();
 
         // verify
-        Input         input = form.getInputs().get(0);
+        Container     container = result.getContainers().getFirst();
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
         assertEquals(Textfield.class, input.getClass());
 
         Textfield textfield = (Textfield) input;

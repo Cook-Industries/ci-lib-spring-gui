@@ -1,4 +1,5 @@
 export {
+  init,
   GET,
   POST,
   showGlobalLoader,
@@ -21,9 +22,13 @@ export {
  * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
-const version = "2.0.2";
+const version = "2.1.0";
 
 const CLASS_HIDDEN = "hidden";
+
+function init() {
+  window.CILIB = this;
+}
 
 $(document).ready(function () {
   console.log("ci-lib-js: ", version);

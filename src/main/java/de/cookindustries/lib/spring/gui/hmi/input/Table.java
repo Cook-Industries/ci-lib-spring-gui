@@ -11,6 +11,8 @@ import java.util.List;
 
 import de.cookindustries.lib.spring.gui.hmi.container.TableRow;
 import lombok.Getter;
+import lombok.NonNull;
+import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -24,10 +26,13 @@ import lombok.extern.jackson.Jacksonized;
 public final class Table extends Input
 {
 
-    private final boolean        editable;
+    @NonNull
+    private final Boolean        editable;
 
-    private final List<String>   colNames;
+    @Singular
+    private final List<String>   columnNames;
 
+    @Singular
     private final List<TableRow> rows;
 
     @Override

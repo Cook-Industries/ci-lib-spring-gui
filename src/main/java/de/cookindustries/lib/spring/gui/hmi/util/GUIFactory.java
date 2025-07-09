@@ -5,8 +5,9 @@
  * <p>
  * See LICENSE file in the project root for full license information.
  */
-package de.cookindustries.lib.spring.gui.hmi;
+package de.cookindustries.lib.spring.gui.hmi.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -20,11 +21,12 @@ import de.cookindustries.lib.spring.gui.hmi.container.ContentContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.ModalContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.TextContainer;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputExtractor;
-import de.cookindustries.lib.spring.gui.hmi.mapper.JsonMapper;
-import de.cookindustries.lib.spring.gui.hmi.mapper.JsonTreeMapper;
-import de.cookindustries.lib.spring.gui.hmi.mapper.JsonTreeRoot;
-import de.cookindustries.lib.spring.gui.hmi.mapper.ValueMap;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
+import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
+import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonTreeMapper;
+import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonTreeRoot;
+import de.cookindustries.lib.spring.gui.hmi.mapper.json.MapperResult;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.ValueMap;
 import de.cookindustries.lib.spring.gui.html.CSSClass;
 import de.cookindustries.lib.spring.gui.html.CSSLink;
 import de.cookindustries.lib.spring.gui.html.HtmlSite;
@@ -61,20 +63,19 @@ public final class GUIFactory
     {
         this.translationProvider = translationProvider;
 
+        List<CSSLink> cssLinks = properties.getCssPaths().stream().map(CSSLink::new).toList();
+
         basicImports =
             SiteImports
                 .builder()
                 .jsImport(new JsImport("cilib", "/js/ci-lib-spring-web.js"))
                 .jsScript(new JsPlainLink("/webjars/jquery/jquery.min.js"))
                 .jsScript(new JsPlainLink("/webjars/bootstrap/js/bootstrap.min.js"))
-                .jsScript(new JsPlainLink("/js/sprintf.min.js"))
                 .jsScript(new JsPlainLink("/webjars/yaireo__tagify/dist/tagify.js"))
                 .cssLink(new CSSLink("/webjars/bootstrap/css/bootstrap.min.css"))
                 .cssLink(new CSSLink("/webjars/yaireo__tagify/dist/tagify.css"))
-                .cssLink(
-                    properties.getCssBaseFilePath() == null
-                        ? new CSSLink("/css/ci-core.css")
-                        : new CSSLink(properties.getCssBaseFilePath()))
+                .cssLink(new CSSLink("/css/ci-core.css"))
+                .cssLinks(cssLinks)
                 .build();
     }
 
@@ -84,14 +85,15 @@ public final class GUIFactory
      * @param resourcePath to load template from
      * @return the parsed {@code Container}
      */
-    public Container readStaticComponent(String resourcePath)
+    public MapperResult readStaticComponent(String resourcePath)
     {
         try
         {
-            JsonTreeMapper mapper = new JsonTreeMapper();
-            JsonTreeRoot   root   = mapper.map(resourcePath);
+            JsonTreeMapper treeMapper = new JsonTreeMapper();
+            JsonTreeRoot   root       = treeMapper.map(resourcePath);
+            JsonMapper     mapper     = new JsonMapper(root);
 
-            return JsonMapper.map(root);
+            return mapper.map();
         }
         catch (Exception e)
         {
@@ -107,14 +109,15 @@ public final class GUIFactory
      * @param valueMaps dynamic {@code valueMap}s
      * @return the parsed {@code Container}
      */
-    public Container readDynamicComponent(String resourcePath, Locale locale, List<ValueMap> valueMaps)
+    public MapperResult readDynamicComponent(String resourcePath, Locale locale, List<ValueMap> valueMaps)
     {
         try
         {
-            JsonTreeMapper mapper = new JsonTreeMapper();
-            JsonTreeRoot   root   = mapper.map(resourcePath);
+            JsonTreeMapper treeMapper = new JsonTreeMapper();
+            JsonTreeRoot   root       = treeMapper.map(resourcePath);
+            JsonMapper     mapper     = new JsonMapper(root, locale, translationProvider, valueMaps);
 
-            return JsonMapper.map(root, locale, translationProvider, valueMaps);
+            return mapper.map();
         }
         catch (Exception e)
         {
@@ -129,11 +132,9 @@ public final class GUIFactory
      * @param resourcePath to the static component template
      * @return a {@code HTML} {@code String} to render a website by a browser
      */
-    public String createHtmlSiteWithStaticContent(String title, String resourcePath, AbsFunctionCall... initFunctions)
+    public String createHtmlSiteWithStaticContent(String title, String resourcePath, AbsFunctionCall... initCalls)
     {
-        Container content = readStaticComponent(resourcePath);
-
-        return createHtmlSite(title, SiteImports.builder().build(), content, initFunctions);
+        return createHtmlSiteWithStaticContent(title, SiteImports.builder().build(), resourcePath, initCalls);
     }
 
     /**
@@ -144,11 +145,14 @@ public final class GUIFactory
      * @param resourcePath to load template from
      * @return a {@code HTML} {@code String} to render a website by a browser
      */
-    public String createHtmlSiteWithStaticContent(String title, SiteImports imports, String resourcePath, AbsFunctionCall... initFunctions)
+    public String createHtmlSiteWithStaticContent(String title, SiteImports imports, String resourcePath, AbsFunctionCall... initCalls)
     {
-        Container content = readStaticComponent(resourcePath);
+        MapperResult          result = readStaticComponent(resourcePath);
+        List<AbsFunctionCall> calls  = new ArrayList<>();
+        calls.addAll(result.getFunctions());
+        calls.addAll(Arrays.asList(initCalls));
 
-        return createHtmlSite(title, imports, content, initFunctions);
+        return createHtmlSite(title, imports, result.getContainers(), calls);
     }
 
     /**
@@ -161,11 +165,9 @@ public final class GUIFactory
      * @return a {@code HTML} {@code String} to render a website by a browser
      */
     public String createHtmlSiteWithDynamicContent(String title, String resourcePath, Locale locale, List<ValueMap> valueMaps,
-        AbsFunctionCall... initFunctions)
+        AbsFunctionCall... initCalls)
     {
-        Container content = readDynamicComponent(resourcePath, locale, valueMaps);
-
-        return createHtmlSite(title, SiteImports.builder().build(), content, initFunctions);
+        return createHtmlSiteWithDynamicContent(title, SiteImports.builder().build(), resourcePath, locale, valueMaps, initCalls);
     }
 
     /**
@@ -179,11 +181,14 @@ public final class GUIFactory
      * @return a {@code HTML} {@code String} to render a website by a browser
      */
     public String createHtmlSiteWithDynamicContent(String title, SiteImports imports, String resourcePath, Locale locale,
-        List<ValueMap> valueMaps, AbsFunctionCall... initFunctions)
+        List<ValueMap> valueMaps, AbsFunctionCall... initCalls)
     {
-        Container content = readDynamicComponent(resourcePath, locale, valueMaps);
+        MapperResult          result = readDynamicComponent(resourcePath, locale, valueMaps);
+        List<AbsFunctionCall> calls  = new ArrayList<>();
+        calls.addAll(result.getFunctions());
+        calls.addAll(Arrays.asList(initCalls));
 
-        return createHtmlSite(title, imports, content, initFunctions);
+        return createHtmlSite(title, imports, result.getContainers(), calls);
     }
 
     /**
@@ -194,7 +199,7 @@ public final class GUIFactory
      * @param content to set
      * @return a {@code HTML} {@code String} to render a website by a browser
      */
-    private String createHtmlSite(String title, SiteImports imports, Container content, AbsFunctionCall... initFunctions)
+    private String createHtmlSite(String title, SiteImports imports, List<Container> content, List<AbsFunctionCall> initFunctions)
     {
         return HtmlSite.builder()
             .title(title)
@@ -269,23 +274,10 @@ public final class GUIFactory
                     .builder()
                     .uid("popup-holder")
                     .build())
-            .container(content)
-            .functions(Arrays.asList(initFunctions))
+            .containers(content)
+            .functions(initFunctions)
             .build()
             .getHtmlRep();
-    }
-
-    /**
-     * Create a {@link ContentResponse} from a static template to append or replace existing content on a receiver.
-     * 
-     * @param resourcePath to load template from
-     * @param elementId to append/replace content in
-     * @param replace whether the content should be appende (false), or replaced (true)
-     * @return a response with the processed content
-     */
-    public ContentResponse createStaticComponentResponse(String resourcePath, String elementId, Boolean replace)
-    {
-        return createStaticComponentResponse(resourcePath, elementId, replace);
     }
 
     /**
@@ -295,19 +287,58 @@ public final class GUIFactory
      * @param resourcePath to load template from
      * @param elementId to append/replace content in
      * @param replace whether the content should be appende (false), or replaced (true)
-     * @param calls to perform on the receiver
+     * @param initCalls to perform on the receiver
      * @return a response with the processed content
      */
     public ContentResponse createStaticComponentResponse(String resourcePath, String elementId, Boolean replace,
-        AbsFunctionCall... calls)
+        AbsFunctionCall... initCalls)
     {
-        Container content = readStaticComponent(resourcePath);
+        MapperResult          result = readStaticComponent(resourcePath);
+        List<AbsFunctionCall> calls  = new ArrayList<>();
+        calls.addAll(result.getFunctions());
+        calls.addAll(Arrays.asList(initCalls));
 
         return ContentResponse
             .builder()
             .elementId(elementId)
-            .content(content)
-            .calls(Arrays.asList(calls))
+            .content(
+                ContentContainer
+                    .builder()
+                    .contents(result.getContainers())
+                    .build())
+            .calls(calls)
+            .replace(replace)
+            .build();
+    }
+
+    /**
+     * Create a {@link ContentResponse} from a dynamic template to append or replace existing content on a receiver.
+     * 
+     * @param resourcePath to the dynamic component template
+     * @param locale to fetch translations with
+     * @param elementId to append/replace content in
+     * @param replace whether the content should be appende (false), or replaced (true)
+     * @param valueMaps to fetch dynamic values from
+     * @param initCalls to perform on the receiver
+     * @return a response with the processed content
+     */
+    public ContentResponse createDynamicComponentResponse(String resourcePath, Locale locale, String elementId, Boolean replace,
+        List<ValueMap> valueMaps, AbsFunctionCall... initCalls)
+    {
+        MapperResult          result = readDynamicComponent(resourcePath, locale, valueMaps);
+        List<AbsFunctionCall> calls  = new ArrayList<>();
+        calls.addAll(result.getFunctions());
+        calls.addAll(Arrays.asList(initCalls));
+
+        return ContentResponse
+            .builder()
+            .elementId(elementId)
+            .content(
+                ContentContainer
+                    .builder()
+                    .contents(result.getContainers())
+                    .build())
+            .calls(calls)
             .replace(replace)
             .build();
     }
@@ -320,36 +351,13 @@ public final class GUIFactory
      */
     public ModalResponse createStaticModalResponse(String resourcePath)
     {
-        ModalContainer content = (ModalContainer) readStaticComponent(resourcePath);
+        MapperResult   result  = readStaticComponent(resourcePath);
+        ModalContainer content = (ModalContainer) result.getContainers().getFirst();
 
         return ModalResponse
             .builder()
             .modal(content)
-            .build();
-    }
-
-    /**
-     * Create a {@link ContentResponse} from a dynamic template to append or replace existing content on a receiver.
-     * 
-     * @param resourcePath to the dynamic component template
-     * @param locale to fetch translations with
-     * @param elementId to append/replace content in
-     * @param replace whether the content should be appende (false), or replaced (true)
-     * @param valueMaps to fetch dynamic values from
-     * @param calls to perform on the receiver
-     * @return a response with the processed content
-     */
-    public ContentResponse createDynamicComponentResponse(String resourcePath, Locale locale, String elementId, Boolean replace,
-        List<ValueMap> valueMaps, AbsFunctionCall... calls)
-    {
-        Container content = readDynamicComponent(resourcePath, locale, valueMaps);
-
-        return ContentResponse
-            .builder()
-            .elementId(elementId)
-            .content(content)
-            .calls(Arrays.asList(calls))
-            .replace(replace)
+            .calls(result.getFunctions())
             .build();
     }
 
@@ -359,17 +367,22 @@ public final class GUIFactory
      * @param resourcePath to the dynamic component template
      * @param locale to fetch translations with
      * @param valueMaps to fetch dynamic values from
-     * @param calls to perform on the receiver
+     * @param initCalls to perform on the receiver
      * @return a response with the processed content
      */
-    public ModalResponse createDynamicModalResponse(String resourcePath, Locale locale, List<ValueMap> valueMaps, AbsFunctionCall... calls)
+    public ModalResponse createDynamicModalResponse(String resourcePath, Locale locale, List<ValueMap> valueMaps,
+        AbsFunctionCall... initCalls)
     {
-        ModalContainer content = (ModalContainer) readDynamicComponent(resourcePath, locale, valueMaps);
+        MapperResult          result  = readDynamicComponent(resourcePath, locale, valueMaps);
+        ModalContainer        content = (ModalContainer) result.getContainers().getFirst();
+        List<AbsFunctionCall> calls   = new ArrayList<>();
+        calls.addAll(result.getFunctions());
+        calls.addAll(Arrays.asList(initCalls));
 
         return ModalResponse
             .builder()
             .modal(content)
-            .calls(Arrays.asList(calls))
+            .calls(calls)
             .build();
     }
 

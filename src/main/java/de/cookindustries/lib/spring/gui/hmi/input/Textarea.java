@@ -23,12 +23,12 @@ public final class Textarea extends SubmittableInput
 {
 
     @NonNull
-    private final String value;
+    private final String  value;
 
     @NonNull
-    private final String placeholder;
+    private final String  placeholder;
 
-    private final int    maxCharacters;
+    private final Integer maxCharacters;
 
     @Override
     protected InputType inferType()

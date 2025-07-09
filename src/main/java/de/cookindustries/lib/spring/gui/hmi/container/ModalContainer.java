@@ -27,47 +27,48 @@ public final class ModalContainer extends Container
 {
 
     @NonNull
-    private String          name;
+    private final String          name;
 
     @NonNull
-    private String          requestUrl;
+    private final String          requestUrl;
 
     @Default
-    private String          btnNameLeft         = null;
-
-    @Default
-    @NonNull
-    private ButtonClass     btnClassLeft        = ButtonClass.DEFAULT;
-
-    @Default
-    private String          btnFunctionLeft     = null;
-
-    @Default
-    private String          btnNameCenter       = null;
-
-    @Default
-    @NonNull
-    private ButtonClass     btnClassCenter      = ButtonClass.DEFAULT;
-
-    @Default
-    private String          btnFunctionCenter   = null;
+    private final String          btnNameLeft         = null;
 
     @NonNull
-    private String          btnNameRight;
+    @Default
+    private final ButtonClass     btnClassLeft        = ButtonClass.DEFAULT;
 
     @Default
+    private final String          btnFunctionLeft     = null;
+
+    @Default
+    private final String          btnNameCenter       = null;
+
     @NonNull
-    private ButtonClass     btnClassRight       = ButtonClass.DEFAULT;
+    @Default
+    private final ButtonClass     btnClassCenter      = ButtonClass.DEFAULT;
 
     @Default
-    private String          btnFunctionRight    = new CloseModal().parseAsJS();
+    private final String          btnFunctionCenter   = null;
+
+    @NonNull
+    private final String          btnNameRight;
+
+    @NonNull
+    @Default
+    private final ButtonClass     btnClassRight       = ButtonClass.DEFAULT;
+
+    @Default
+    private final String          btnFunctionRight    = new CloseModal().parseAsJS();
 
     @NonNull
     @Singular
-    private List<Container> contents;
+    private final List<Container> contents;
 
+    @NonNull
     @Default
-    private boolean         closeOnOverlayClick = false;
+    private final Boolean         closeOnOverlayClick = Boolean.FALSE;
 
     @Override
     protected ContainerType inferType()
