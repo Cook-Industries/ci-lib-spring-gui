@@ -107,7 +107,8 @@ public final class HtmlElement
     {
         return attributes
             .stream()
-            .map(e -> e.getHtmlRep())
+            .map(att -> att.getHtmlRep())
+            .dropWhile(str -> str.isBlank())
             .collect(Collectors.joining(SPACE));
     }
 
@@ -121,7 +122,7 @@ public final class HtmlElement
         return dataAttributes
             .entrySet()
             .stream()
-            .map(e -> StringAdapter.prefixAndSuffix("data-", e.getKey(), "=\"") + StringAdapter.suffix(e.getValue(), QTM))
+            .map(daa -> StringAdapter.prefixAndSuffix("data-", daa.getKey(), "=\"") + StringAdapter.suffix(daa.getValue(), QTM))
             .collect(Collectors.joining(SPACE));
     }
 

@@ -23,7 +23,7 @@ class HtmlElementTest
     void test_html_singleTagNoClass()
     {
         // setup
-        String      expected = "<div checked class=\"\" data-test=\"test\">";
+        String      expected = "<div checked=\"checked\" class=\"\" data-test=\"test\">";
         HtmlElement element  = HtmlElement
             .builder()
             .tag("div")

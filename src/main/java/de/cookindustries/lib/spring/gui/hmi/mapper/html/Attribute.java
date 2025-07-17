@@ -67,6 +67,10 @@ public final class Attribute implements HtmlExportable
     @Override
     public String getHtmlRep()
     {
-        return valueless ? name : StringAdapter.from(name, "=\"", value, "\"");
+        return valueless
+            ? StringAdapter.from(name, "=\"", name, "\"")
+            : value.isBlank()
+                ? ""
+                : StringAdapter.from(name, "=\"", value, "\"");
     }
 }
