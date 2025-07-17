@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import de.cookindustries.lib.spring.gui.hmi.Position;
 import de.cookindustries.lib.spring.gui.hmi.container.*;
 import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
@@ -61,6 +62,7 @@ public final class HtmlMapper
     private static final String CLASS_FORM_SELECT       = "form-select";
     private static final String CLASS_ERROR_HIGHLIGHT   = "error-highlight";
     private static final String CLASS_TEXT_COLOR_RED    = "text-color-red";
+    private static final String INPUT_CONTAINER         = "input-container";
 
     private static final String DATA_ATT_SUBMIT_ID      = "submit-id";
     private static final String DATA_ATT_SUBMIT_AS      = "submit-as";
@@ -1013,15 +1015,52 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String      content       = StringAdapter.from(label, resolveMarker(formId, textfield.getSubmitAs(), textfield.getMarker()), input);
+        String      tooltip       = resolveTooltip(textfield.getTooltip(), textfield.getTooltipPosition());
+
+        String      content       =
+            StringAdapter.from(label, tooltip, resolveMarker(formId, textfield.getSubmitAs(), textfield.getMarker()), input);
+
         HtmlElement elementMapper =
             HtmlElement
                 .builder()
                 .tag(TAG_DIV)
+                .clazz(INPUT_CONTAINER)
                 .content(content)
                 .build();
 
         return elementMapper.html();
+    }
+
+    private String resolveTooltip(String tooltip, Position position)
+    {
+        if (tooltip.isBlank())
+        {
+            return "";
+        }
+
+        String positionClass = switch (position)
+        {
+            case TOP -> "input-tooltip-top";
+            case RIGHT -> "input-tooltip-right";
+            case BOTTOM -> "input-tooltip-bottom";
+            case LEFT -> "input-tooltip-left";
+        };
+
+        return HtmlElement
+            .builder()
+            .tag(TAG_DIV)
+            .clazz("input-tooltip")
+            .clazz(positionClass)
+            .content(
+                "&nbsp;&#9432;" +
+                    HtmlElement
+                        .builder()
+                        .tag("span")
+                        .content(tooltip)
+                        .build()
+                        .html())
+            .build()
+            .html();
     }
 
     private String resolveMarker(String formId, String submitAsId, List<Marker> marker)

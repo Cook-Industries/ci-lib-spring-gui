@@ -7,6 +7,8 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper.json;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import de.cookindustries.lib.spring.gui.hmi.input.marker.Marker;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,6 +25,7 @@ import lombok.extern.jackson.Jacksonized;
 @Builder
 @Getter
 @Jacksonized
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PseudoMarker
 {
 

@@ -9,10 +9,10 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
 
 import java.util.ArrayList;
 
-import de.cookindustries.lib.spring.gui.hmi.mapper.util.ValueMap;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.KeyReplacmentMap;
 
 /**
- * A defnitive associated list implementation to use in the type-safe value extraction from {@link ValueMap}s.
+ * A defnitive associated list implementation to use in the type-safe value extraction from {@link KeyReplacmentMap}s.
  * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>

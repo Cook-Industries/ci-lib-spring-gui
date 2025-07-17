@@ -34,14 +34,15 @@ public final class Currency extends SubmittableInput
 
     @NonNull
     @Default
-    private final Integer min = Integer.MIN_VALUE;
+    private final Integer min         = Integer.MIN_VALUE;
 
     @NonNull
     @Default
-    private final Integer max = Integer.MAX_VALUE;
+    private final Integer max         = Integer.MAX_VALUE;
 
     @NonNull
-    private String        placeholder;
+    @Default
+    private String        placeholder = "0.0";
 
     @Override
     protected InputType inferType()

@@ -11,13 +11,13 @@ package de.cookindustries.lib.spring.gui.hmi.mapper.exception;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-public class ValueMapKeyAlreadyInUseException extends RuntimeException
+public class KeyAlreadyInUseException extends RuntimeException
 {
 
     private static final long serialVersionUID = 1L;
 
-    public ValueMapKeyAlreadyInUseException(String key, Class<?> objectClass)
+    public KeyAlreadyInUseException(String key, Class<?> objectClass, String targetMap)
     {
-        super(String.format("key [%s] is already in use. source class [%s]", key, objectClass.getSimpleName()));
+        super(String.format("key [%s] type [%s] is already in use for [%s] ", key, objectClass.getSimpleName(), targetMap));
     }
 }

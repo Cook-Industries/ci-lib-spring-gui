@@ -10,6 +10,8 @@ package de.cookindustries.lib.spring.gui.hmi.mapper.json;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
 import de.cookindustries.lib.spring.gui.hmi.container.ContainerType;
 import de.cookindustries.lib.spring.gui.hmi.input.InputType;
@@ -30,6 +32,7 @@ import lombok.extern.jackson.Jacksonized;
 @Builder
 @Getter
 @Jacksonized
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PseudoElement
 {
 
@@ -60,6 +63,7 @@ public class PseudoElement
     /**
      * Parameters of this element
      */
+    @Singular
     private final Map<String, String> parameters;
 
     /**

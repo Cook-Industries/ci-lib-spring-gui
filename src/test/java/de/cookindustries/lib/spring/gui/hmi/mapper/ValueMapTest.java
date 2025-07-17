@@ -16,19 +16,19 @@ import org.junit.jupiter.api.Test;
 
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
-import de.cookindustries.lib.spring.gui.hmi.mapper.exception.ValueMapKeyAlreadyInUseException;
-import de.cookindustries.lib.spring.gui.hmi.mapper.util.ValueMap;
+import de.cookindustries.lib.spring.gui.hmi.mapper.exception.KeyAlreadyInUseException;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.KeyReplacmentMap;
 import de.cookindustries.lib.spring.gui.util.exception.ObjectSealedException;
 
 class ValueMapTest
 {
 
-    private ValueMap map;
+    private KeyReplacmentMap map;
 
     @BeforeEach
     public void init()
     {
-        map = new ValueMap();
+        map = new KeyReplacmentMap();
     }
 
     @Test
@@ -40,20 +40,20 @@ class ValueMapTest
         map.seal();
 
         // verify
-        assertThrows(ObjectSealedException.class, () -> map.add("test", true));
+        assertThrows(ObjectSealedException.class, () -> map.value("test", true));
     }
 
     @Test
     void test_keyAlreadyInUse()
     {
         // setup
-        map.add("integer", 1);
+        map.value("integer", 1);
 
         // run & verify
-        assertThrows(ValueMapKeyAlreadyInUseException.class, () -> map.add("integer", "2"));
-        assertNotNull(map.get("integer"));
-        assertEquals(Integer.class, map.get("integer").getClass());
-        assertEquals(Integer.valueOf(1), map.get("integer"));
+        assertThrows(KeyAlreadyInUseException.class, () -> map.value("integer", "2"));
+        assertNotNull(map.getValue("integer"));
+        assertEquals(Integer.class, map.getValue("integer").getClass());
+        assertEquals(Integer.valueOf(1), map.getValue("integer"));
     }
 
     @Test
@@ -64,16 +64,16 @@ class ValueMapTest
         inputValueList.add(InputValue.builder().text("test").value("val").build());
 
         // run
-        map.add("list", inputValueList);
-        map.add("integer", 1);
-        map.add("boolean", true);
-        map.add("string", "stuff");
+        map.value("list", inputValueList);
+        map.value("integer", 1);
+        map.value("boolean", true);
+        map.value("string", "stuff");
 
         // verify
-        assertNotNull(map.get("list"));
-        assertNotNull(map.get("integer"));
-        assertNotNull(map.get("boolean"));
-        assertNotNull(map.get("string"));
+        assertNotNull(map.getValue("list"));
+        assertNotNull(map.getValue("integer"));
+        assertNotNull(map.getValue("boolean"));
+        assertNotNull(map.getValue("string"));
     }
 
     @Test

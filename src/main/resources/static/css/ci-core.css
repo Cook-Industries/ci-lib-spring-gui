@@ -8,6 +8,41 @@
  * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
+/* === > var defs =============================================================================== */
+:root {
+  --ci-bgc-blue: #0099ff;
+  --ci-tc-f-blue: white;
+  --ci-bgc-nightblue: #6699cc;
+  --ci-tc-f-nightblue: white;
+
+  --ci-bgc-overlay-backdrop: rgba(0, 0, 0, 0.5);
+
+  --ci-bgc-error-25: rgba(255, 0, 0, 0.25);
+  --ci-bgc-error-50: rgba(255, 0, 0, 0.5);
+  --ci-tc-f-error: white;
+  --ci-color-error-icon: red;
+
+  --ci-bgc-warning-25: rgba(255, 179, 0, 0.25);
+  --ci-bgc-warning-50: rgba(255, 179, 0, 0.5);
+  --ci-tc-f-warning: black;
+  --ci-color-warning-icon: yellow;
+
+  --ci-bgc-success-25: rgba(0, 255, 0, 0.25);
+  --ci-bgc-success-50: rgba(0, 255, 0, 0.5);
+  --ci-tc-f-success: black;
+  --ci-color-success-icon: green;
+
+  --ci-bgc-notification-25: rgba(0, 59, 209, 0.25);
+  --ci-bgc-notification-50: rgba(0, 59, 209, 0.5);
+  --ci-tc-f-notification: white;
+  --ci-color-notification-icon: blue;
+
+  --ci-bgc-error-container: rgba(64, 64, 64, 1);
+  --ci-bgc-popup: var(--ci-bgc-error-container);
+}
+
+/* === < var defs =============================================================================== */
+
 body,
 html {
   position: absolute;
@@ -28,8 +63,8 @@ html {
 }
 
 .bgc-blue {
-  background-color: #0099ff;
-  color: white;
+  background-color: var(--ci-bgc-blue);
+  color: var(--ci-tc-f-blue);
 }
 
 .bgc-light-green {
@@ -37,8 +72,8 @@ html {
   color: black;
 }
 
-.bgc-light-red {
-  background-color: rgba(255, 0, 0, 0.5);
+.bgc-red {
+  background-color: red;
   color: black;
 }
 
@@ -76,16 +111,20 @@ html {
   left: 0px;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+
+  background: var(--ci-bgc-overlay-backdrop);
 }
 
-#error-border-container {
+#error-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+
   padding: 1rem;
-  background: rgba(64, 64, 64, 1);
+
+  background: var(--ci-bgc-error-container);
+
   border: 0.25rem solid black;
   border-radius: 0.5rem;
 }
@@ -93,9 +132,9 @@ html {
 #error-holder {
   display: flex;
   flex-direction: column;
-  /*justify-content: center;*/
   align-items: stretch;
   max-height: 65rem;
+
   overflow: auto;
 }
 
@@ -121,7 +160,9 @@ html {
 
 .pop-up {
   padding: 0.25rem;
-  background-color: lightgrey;
+
+  background-color: var(--ci-bgc-popup);
+
   border-radius: 0.5rem;
 }
 
@@ -129,7 +170,7 @@ html {
   opacity: 1;
   animation-name: fadeOutAnimation;
   animation-duration: 3s;
-  animation-delay: 3s;
+  animation-delay: 5s;
   animation-fill-mode: forwards;
 }
 
@@ -154,7 +195,8 @@ html {
   left: 0px;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+
+  background: var(--ci-bgc-overlay-backdrop)
 }
 
 #maintenance-box {
@@ -162,57 +204,62 @@ html {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+
   width: 10em;
   height: 10em;
   padding: 1em;
+
   background-color: #6699cc;
   border-radius: 1em;
 }
 
 .alert {
-  margin: 0.25rem;
+  margin: 0.15rem;
+  padding: 0.5rem;
   padding: 0.25rem 2.5rem;
-  border: solid 0.25rem;
-  border-radius: 0.5rem;
+
+  border-style: solid;
+  border-radius: 0.25rem;
 }
 
 .error {
-  margin: 0.15rem;
-  padding: 0.5rem;
-  background-color: rgba(255, 0, 0, 0.25);
-  border: 0.25rem solid rgba(255, 0, 0, 0.5);
-  border-radius: 0.5rem;
-  color: white;
+  background-color: var(--ci-bgc-error-25);
+  border-color: var(--ci-bgc-error-50);
+  color: var(--ci-tc-f-error);
 }
 
 .error-icon {
-  color: red;
+  color: var(--ci-color-error-icon);
 }
 
 .warning {
-  margin: 0.15rem;
-  padding: 0.5rem;
-  background-color: rgba(255, 179, 0, 0.25);
-  border: 0.25rem solid rgba(255, 179, 0, 0.5);
-  border-radius: 0.5rem;
-  color: black;
+  background-color: var(--ci-bgc-warning-25);
+  border-color: var(--ci-bgc-warning-50);
+  color: var(--ci-tc-f-warning);
+}
+
+.warning-icon {
+  color: var(--ci-color-warning-icon);
 }
 
 .success {
-  margin: 0.15rem;
-  padding: 0.5rem;
-  background-color: rgba(0, 255, 0, 0.25);
-  border: 0.25rem solid rgba(0, 255, 0, 0.5);
-  border-radius: 0.5rem;
-  color: black;
+  background-color: var(--ci-bgc-success-25);
+  border-color: var(--ci-bgc-success-50);
+  color: var(--ci-tc-f-success);
+}
+
+.success-icon {
+  color: var(--ci-color-success-icon);
 }
 
 .notification {
-  margin: 0.15rem;
-  padding: 0.5rem;
-  background-color: rgba(0, 59, 209, 0.5);
-  border: 0.25rem solid rgba(0, 59, 209, 1);
-  color: white;
+  background-color: var(--ci-bgc-notification-25);
+  border-color: var(--ci-bgc-notification-50);
+  color: var(--ci-tc-f-notification);
+}
+
+.notification-icon {
+  color: var(--ci-color-notification-icon);
 }
 
 .error-overlay button {
@@ -229,19 +276,24 @@ html {
   right: 0;
   z-index: 400;
 
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--ci-bgc-overlay-backdrop);
 }
 
 #global-loader {
   padding: 1rem;
-  background-color: #6699cc;
+
+  background-color: var(--ci-bgc-nightblue);
+
   border-radius: 1rem;
 }
 
 #global-loader-text {
   padding: 1rem;
-  background-color: #6699cc;
+
+  background-color: var(--ci-bgc-nightblue);
+
   border-radius: 1rem;
+
   font-size: 150%;
   margin: 1rem;
 }
@@ -260,7 +312,7 @@ html {
   justify-content: center;
   align-items: center;
 
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--ci-bgc-overlay-backdrop);
 }
 
 .modal-body {
@@ -282,7 +334,7 @@ html {
   max-height: 90%;
   overflow-y: auto;
 
-  background: rgba(102, 153, 204, 1);
+  background: var(--ci-bgc-nightblue);
   border-radius: 1rem;
 }
 
@@ -325,28 +377,58 @@ html {
 
 .form-label {
   margin-top: 1rem;
+
   font-weight: bold;
 }
 
-.form-list-selection-select-holder {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+.input-tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: help;
 }
 
-.form-list-selection-select-holder:first-child {
-  width: 75%;
+.input-tooltip span {
+  display: none;
+  position: absolute;
+
+  margin: 1rem;
+  padding: 1rem;
+
+  white-space: nowrap;
+
+  background-color: var(--ci-bgc-nightblue);
+  border: solid .1rem black;
+  border-radius: .5rem;
+
+  box-shadow: .5rem .5rem 1rem var(--ci-bgc-overlay-backdrop);
 }
 
-.form-list-selection-item {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: baseline;
+.input-tooltip:hover span {
+  display: block;
 }
 
-.form-list-selection-item:first-child {
-  width: 75%;
+.input-tooltip-top span {
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.input-tooltip-right span {
+  top: 50%;
+  left: 125%;
+  transform: translateY(-50%);
+}
+
+.input-tooltip-bottom span {
+  top: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.input-tooltip-left span {
+  top: 50%;
+  right: 125%;
+  transform: translateY(-50%);
 }
 
 /* === < form =================================================================================== */

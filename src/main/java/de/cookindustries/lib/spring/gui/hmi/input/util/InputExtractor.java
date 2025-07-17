@@ -108,7 +108,7 @@ public final class InputExtractor
      * 
      * @param inputs from the {@code Form}
      * @param files from the {@code Form}
-     * @throws IllegalArgumentException if {@code key} <b>__form_id</b> {@code null} or empty
+     * @throws IllegalArgumentException if {@code key} <b>__form_id</b> is {@code null} or empty
      */
     public InputExtractor(MultiValueMap<String, String> inputs, MultipartFile[] files)
     {

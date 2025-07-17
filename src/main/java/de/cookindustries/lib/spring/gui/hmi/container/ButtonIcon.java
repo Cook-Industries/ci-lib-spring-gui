@@ -7,7 +7,6 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.container;
 
-import de.cookindustries.lib.spring.gui.hmi.input.ButtonClass;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;

@@ -30,30 +30,30 @@ public abstract class AbsValueMapObjectMapper<T>
     }
 
     /**
-     * Export the values of an {@code obj} to a new {@link ValueMap} in {@link Locale#ENGLISH}
+     * Export the values of an {@code obj} to a new {@link KeyReplacmentMap} in {@link Locale#ENGLISH}
      * 
      * @param obj object to export
      * @return a new {@code ValueMap} filled with the extracted fields from this
      */
-    public final ValueMap export(final T obj)
+    public final KeyReplacmentMap export(final T obj)
     {
-        return exportInternal(obj, new ValueMap(), Locale.ENGLISH);
+        return exportInternal(obj, new KeyReplacmentMap(), Locale.ENGLISH);
     }
 
     /**
-     * Export the values of an {@code obj} to a {@link ValueMap}
+     * Export the values of an {@code obj} to a {@link KeyReplacmentMap}
      * 
      * @param obj object to export
      * @param valueMap to fill
      * @param locale local language to use for fields
      * @return a {@code ValueMap} filled with the extracted fields from this
      */
-    public final ValueMap export(final T obj, ValueMap valueMap, Locale locale)
+    public final KeyReplacmentMap export(final T obj, KeyReplacmentMap valueMap, Locale locale)
     {
         return exportInternal(obj, valueMap, locale);
     }
 
-    protected abstract ValueMap exportInternal(final T obj, ValueMap valueMap, Locale locale);
+    protected abstract KeyReplacmentMap exportInternal(final T obj, KeyReplacmentMap valueMap, Locale locale);
 
     /**
      * Extract {@link Enum}s to a {@link InputValueList} with the inclusion of the {@code selection} and a automatic translation.

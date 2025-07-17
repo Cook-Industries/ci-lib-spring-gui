@@ -10,7 +10,6 @@ package de.cookindustries.lib.spring.gui.hmi.container;
 import java.util.List;
 
 import de.cookindustries.lib.spring.gui.function.CloseModal;
-import de.cookindustries.lib.spring.gui.hmi.input.ButtonClass;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;

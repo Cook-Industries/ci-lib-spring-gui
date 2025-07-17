@@ -26,7 +26,7 @@ import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonTreeMapper;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonTreeRoot;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.MapperResult;
-import de.cookindustries.lib.spring.gui.hmi.mapper.util.ValueMap;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.KeyReplacmentMap;
 import de.cookindustries.lib.spring.gui.html.CSSClass;
 import de.cookindustries.lib.spring.gui.html.CSSLink;
 import de.cookindustries.lib.spring.gui.html.HtmlSite;
@@ -49,6 +49,8 @@ import de.cookindustries.lib.spring.gui.response.message.PopupMessage;
 @Component
 public final class GUIFactory
 {
+
+    private static final SiteImports     EMPTY_IMPORTS = SiteImports.builder().build();
 
     private final AbsTranslationProvider translationProvider;
     private final SiteImports            basicImports;
@@ -80,118 +82,6 @@ public final class GUIFactory
     }
 
     /**
-     * Read a static template and transform into a {@link Container}
-     * 
-     * @param resourcePath to load template from
-     * @return the parsed {@code Container}
-     */
-    public MapperResult readStaticComponent(String resourcePath)
-    {
-        try
-        {
-            JsonTreeMapper treeMapper = new JsonTreeMapper();
-            JsonTreeRoot   root       = treeMapper.map(resourcePath);
-            JsonMapper     mapper     = new JsonMapper(root);
-
-            return mapper.map();
-        }
-        catch (Exception e)
-        {
-            throw new JsonMapperException(String.format("error building gui component [%s] : [%s]", resourcePath, e.getMessage()));
-        }
-    }
-
-    /**
-     * Read a dynamic template and transform into a {@link Container}
-     * 
-     * @param resourcePath to load template from
-     * @param locale to fetch translated text with
-     * @param valueMaps dynamic {@code valueMap}s
-     * @return the parsed {@code Container}
-     */
-    public MapperResult readDynamicComponent(String resourcePath, Locale locale, List<ValueMap> valueMaps)
-    {
-        try
-        {
-            JsonTreeMapper treeMapper = new JsonTreeMapper();
-            JsonTreeRoot   root       = treeMapper.map(resourcePath);
-            JsonMapper     mapper     = new JsonMapper(root, locale, translationProvider, valueMaps);
-
-            return mapper.map();
-        }
-        catch (Exception e)
-        {
-            throw new JsonMapperException(String.format("error building gui component [%s] : [%s]", resourcePath, e.getMessage()));
-        }
-    }
-
-    /**
-     * Create a HTML site from a static content template.
-     * 
-     * @param title of the website
-     * @param resourcePath to the static component template
-     * @return a {@code HTML} {@code String} to render a website by a browser
-     */
-    public String createHtmlSiteWithStaticContent(String title, String resourcePath, AbsFunctionCall... initCalls)
-    {
-        return createHtmlSiteWithStaticContent(title, SiteImports.builder().build(), resourcePath, initCalls);
-    }
-
-    /**
-     * Create a HTML site from a static content template.
-     * 
-     * @param title of the website
-     * @param imports to include
-     * @param resourcePath to load template from
-     * @return a {@code HTML} {@code String} to render a website by a browser
-     */
-    public String createHtmlSiteWithStaticContent(String title, SiteImports imports, String resourcePath, AbsFunctionCall... initCalls)
-    {
-        MapperResult          result = readStaticComponent(resourcePath);
-        List<AbsFunctionCall> calls  = new ArrayList<>();
-        calls.addAll(result.getFunctions());
-        calls.addAll(Arrays.asList(initCalls));
-
-        return createHtmlSite(title, imports, result.getContainers(), calls);
-    }
-
-    /**
-     * Create a HTML site from a dynamic content template.
-     * 
-     * @param title of the website
-     * @param resourcePath to load template from
-     * @param locale to fetch translations with
-     * @param valueMaps to fetch dynamic values from
-     * @return a {@code HTML} {@code String} to render a website by a browser
-     */
-    public String createHtmlSiteWithDynamicContent(String title, String resourcePath, Locale locale, List<ValueMap> valueMaps,
-        AbsFunctionCall... initCalls)
-    {
-        return createHtmlSiteWithDynamicContent(title, SiteImports.builder().build(), resourcePath, locale, valueMaps, initCalls);
-    }
-
-    /**
-     * Create a HTML site from a dynamic content template.
-     * 
-     * @param title of the website
-     * @param imports to include
-     * @param resourcePath to load template from
-     * @param locale to fetch translations with
-     * @param valueMaps to fetch dynamic values from
-     * @return a {@code HTML} {@code String} to render a website by a browser
-     */
-    public String createHtmlSiteWithDynamicContent(String title, SiteImports imports, String resourcePath, Locale locale,
-        List<ValueMap> valueMaps, AbsFunctionCall... initCalls)
-    {
-        MapperResult          result = readDynamicComponent(resourcePath, locale, valueMaps);
-        List<AbsFunctionCall> calls  = new ArrayList<>();
-        calls.addAll(result.getFunctions());
-        calls.addAll(Arrays.asList(initCalls));
-
-        return createHtmlSite(title, imports, result.getContainers(), calls);
-    }
-
-    /**
      * Create a HTML website based on the standard imports added with user imports
      * 
      * @param title of the website
@@ -199,10 +89,13 @@ public final class GUIFactory
      * @param content to set
      * @return a {@code HTML} {@code String} to render a website by a browser
      */
-    private String createHtmlSite(String title, SiteImports imports, List<Container> content, List<AbsFunctionCall> initFunctions)
+    private String createHtmlSite(String title, SiteImports imports, Locale locale, List<Container> content,
+        List<AbsFunctionCall> initFunctions)
     {
+        String resolvedTitle = translationProvider.getText(locale, title);
+
         return HtmlSite.builder()
-            .title(title)
+            .title(resolvedTitle.startsWith("I18N") ? title : resolvedTitle)
             .jsImports(imports.getJsImports())
             .jsScripts(imports.getJsScripts())
             .cssLinks(imports.getCssLinks())
@@ -255,7 +148,7 @@ public final class GUIFactory
                 .content(
                     ContentContainer
                         .builder()
-                        .uid("error-border-container")
+                        .uid("error-container")
                         .content(
                             ContentContainer
                                 .builder()
@@ -281,6 +174,112 @@ public final class GUIFactory
     }
 
     /**
+     * Read a template and transform into a {@link Container}
+     * 
+     * @param resourcePath to load template from
+     * @return the parsed {@code Container}
+     */
+    public MapperResult readComponent(String resourcePath)
+    {
+        return readComponent(resourcePath, Locale.ENGLISH, List.of());
+    }
+
+    /**
+     * Read a template and transform into a {@link Container}
+     * 
+     * @param resourcePath to load template from
+     * @param locale to fetch translated text with
+     * @return the parsed {@code Container}
+     */
+    public MapperResult readComponent(String resourcePath, Locale locale)
+    {
+        return readComponent(resourcePath, locale, List.of());
+    }
+
+    /**
+     * Read a template and transform into a {@link Container}
+     * 
+     * @param resourcePath to load template from
+     * @param locale to fetch translated text with
+     * @param valueMaps dynamic {@code valueMap}s
+     * @return the parsed {@code Container}
+     */
+    public MapperResult readComponent(String resourcePath, Locale locale, List<KeyReplacmentMap> valueMaps)
+    {
+        try
+        {
+            JsonTreeMapper treeMapper = new JsonTreeMapper();
+            JsonTreeRoot   root       = treeMapper.map(resourcePath);
+            JsonMapper     mapper     = new JsonMapper(root, locale, translationProvider, valueMaps);
+
+            return mapper.map();
+        }
+        catch (Exception ex)
+        {
+            throw new JsonMapperException(String.format("error building gui component [%s]", resourcePath), ex);
+        }
+    }
+
+    /**
+     * Create a HTML site from a content template.
+     * 
+     * @param title of the website
+     * @param resourcePath to the static component template
+     * @return a {@code HTML} {@code String} to render a website by a browser
+     */
+    public String createHtmlSite(String resourcePath, String title, AbsFunctionCall... initCalls)
+    {
+        return createHtmlSite(title, EMPTY_IMPORTS, resourcePath, Locale.ENGLISH, List.of(), initCalls);
+    }
+
+    /**
+     * Create a HTML site from a content template.
+     * 
+     * @param title of the website
+     * @param imports to include
+     * @param resourcePath to load template from
+     * @return a {@code HTML} {@code String} to render a website by a browser
+     */
+    public String createHtmlSite(String resourcePath, String title, SiteImports imports, AbsFunctionCall... initCalls)
+    {
+        return createHtmlSite(title, imports, resourcePath, Locale.ENGLISH, List.of(), initCalls);
+    }
+
+    /**
+     * Create a HTML site from a content template.
+     * 
+     * @param title of the website
+     * @param imports to include
+     * @param resourcePath to load template from
+     * @return a {@code HTML} {@code String} to render a website by a browser
+     */
+    public String createHtmlSite(String resourcePath, String title, SiteImports imports, Locale locale, AbsFunctionCall... initCalls)
+    {
+        return createHtmlSite(title, imports, resourcePath, locale, List.of(), initCalls);
+    }
+
+    /**
+     * Create a HTML site from a content template.
+     * 
+     * @param title of the website
+     * @param imports to include
+     * @param resourcePath to load template from
+     * @param locale to fetch translations with
+     * @param valueMaps to fetch dynamic values from
+     * @return a {@code HTML} {@code String} to render a website by a browser
+     */
+    public String createHtmlSite(String title, SiteImports imports, String resourcePath, Locale locale,
+        List<KeyReplacmentMap> valueMaps, AbsFunctionCall... initCalls)
+    {
+        MapperResult          result = readComponent(resourcePath, locale, valueMaps);
+        List<AbsFunctionCall> calls  = new ArrayList<>();
+        calls.addAll(result.getFunctions());
+        calls.addAll(Arrays.asList(initCalls));
+
+        return createHtmlSite(title, imports, locale, result.getContainers(), calls);
+    }
+
+    /**
      * Create a {@link ContentResponse} from a static template to append or replace existing content on a receiver and perform function
      * calls.
      * 
@@ -290,10 +289,10 @@ public final class GUIFactory
      * @param initCalls to perform on the receiver
      * @return a response with the processed content
      */
-    public ContentResponse createStaticComponentResponse(String resourcePath, String elementId, Boolean replace,
+    public ContentResponse createComponentResponse(String resourcePath, String elementId, Boolean replace,
         AbsFunctionCall... initCalls)
     {
-        MapperResult          result = readStaticComponent(resourcePath);
+        MapperResult          result = readComponent(resourcePath);
         List<AbsFunctionCall> calls  = new ArrayList<>();
         calls.addAll(result.getFunctions());
         calls.addAll(Arrays.asList(initCalls));
@@ -322,10 +321,10 @@ public final class GUIFactory
      * @param initCalls to perform on the receiver
      * @return a response with the processed content
      */
-    public ContentResponse createDynamicComponentResponse(String resourcePath, Locale locale, String elementId, Boolean replace,
-        List<ValueMap> valueMaps, AbsFunctionCall... initCalls)
+    public ContentResponse createComponentResponse(String resourcePath, Locale locale, String elementId, Boolean replace,
+        List<KeyReplacmentMap> valueMaps, AbsFunctionCall... initCalls)
     {
-        MapperResult          result = readDynamicComponent(resourcePath, locale, valueMaps);
+        MapperResult          result = readComponent(resourcePath, locale, valueMaps);
         List<AbsFunctionCall> calls  = new ArrayList<>();
         calls.addAll(result.getFunctions());
         calls.addAll(Arrays.asList(initCalls));
@@ -349,9 +348,9 @@ public final class GUIFactory
      * @param resourcePath to load template from
      * @return a response with the processed content
      */
-    public ModalResponse createStaticModalResponse(String resourcePath)
+    public ModalResponse createModalResponse(String resourcePath)
     {
-        MapperResult   result  = readStaticComponent(resourcePath);
+        MapperResult   result  = readComponent(resourcePath);
         ModalContainer content = (ModalContainer) result.getContainers().getFirst();
 
         return ModalResponse
@@ -370,10 +369,10 @@ public final class GUIFactory
      * @param initCalls to perform on the receiver
      * @return a response with the processed content
      */
-    public ModalResponse createDynamicModalResponse(String resourcePath, Locale locale, List<ValueMap> valueMaps,
+    public ModalResponse createModalResponse(String resourcePath, Locale locale, List<KeyReplacmentMap> valueMaps,
         AbsFunctionCall... initCalls)
     {
-        MapperResult          result  = readDynamicComponent(resourcePath, locale, valueMaps);
+        MapperResult          result  = readComponent(resourcePath, locale, valueMaps);
         ModalContainer        content = (ModalContainer) result.getContainers().getFirst();
         List<AbsFunctionCall> calls   = new ArrayList<>();
         calls.addAll(result.getFunctions());
