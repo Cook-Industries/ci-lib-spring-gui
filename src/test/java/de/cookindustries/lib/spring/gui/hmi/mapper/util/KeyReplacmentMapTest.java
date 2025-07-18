@@ -5,7 +5,7 @@
  * <p>
  * See LICENSE file in the project root for full license information.
  */
-package de.cookindustries.lib.spring.gui.hmi.mapper;
+package de.cookindustries.lib.spring.gui.hmi.mapper.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -17,10 +17,9 @@ import org.junit.jupiter.api.Test;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.KeyAlreadyInUseException;
-import de.cookindustries.lib.spring.gui.hmi.mapper.util.KeyReplacmentMap;
 import de.cookindustries.lib.spring.gui.util.exception.ObjectSealedException;
 
-class ValueMapTest
+class KeyReplacmentMapTest
 {
 
     private KeyReplacmentMap map;

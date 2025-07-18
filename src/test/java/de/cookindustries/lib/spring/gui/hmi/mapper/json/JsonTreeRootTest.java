@@ -5,7 +5,7 @@
  * <p>
  * See LICENSE file in the project root for full license information.
  */
-package de.cookindustries.lib.spring.gui.hmi.mapper;
+package de.cookindustries.lib.spring.gui.hmi.mapper.json;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -13,8 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonParsingException;
-import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonTreeRoot;
-import de.cookindustries.lib.spring.gui.hmi.mapper.json.PseudoElement;
 
 class JsonTreeRootTest
 {

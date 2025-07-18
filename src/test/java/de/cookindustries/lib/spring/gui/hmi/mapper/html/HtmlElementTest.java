@@ -5,14 +5,11 @@
  * <p>
  * See LICENSE file in the project root for full license information.
  */
-package de.cookindustries.lib.spring.gui.hmi.mapper;
+package de.cookindustries.lib.spring.gui.hmi.mapper.html;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-
-import de.cookindustries.lib.spring.gui.hmi.mapper.html.Attribute;
-import de.cookindustries.lib.spring.gui.hmi.mapper.html.HtmlElement;
 
 class HtmlElementTest
 {

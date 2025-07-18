@@ -5,7 +5,7 @@
  * <p>
  * See LICENSE file in the project root for full license information.
  */
-package de.cookindustries.lib.spring.gui.hmi.mapper;
+package de.cookindustries.lib.spring.gui.hmi.mapper.json;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -22,10 +22,6 @@ import de.cookindustries.lib.spring.gui.hmi.container.*;
 import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonParsingException;
-import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
-import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonTreeMapper;
-import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonTreeRoot;
-import de.cookindustries.lib.spring.gui.hmi.mapper.json.MapperResult;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.KeyReplacmentMap;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
 
