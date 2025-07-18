@@ -79,14 +79,12 @@ import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
 public final class InputExtractor
 {
 
-    private static final String                 FILE_INPUT_SUBMIT_AS_ID = "files";
-
-    private static final ObjectMapper           TAG_LIST_MAPPER         = new ObjectMapper();
+    private static final ObjectMapper           TAG_LIST_MAPPER = new ObjectMapper();
 
     private final String                        formId;
     private final MultiValueMap<String, String> inputs;
     private final MultipartFile[]               files;
-    private final List<ResponseMessage>         messages                = new ArrayList<>();
+    private final List<ResponseMessage>         messages        = new ArrayList<>();
 
     /**
      * Create a extractor for a {@link FormContainer} result
@@ -149,6 +147,38 @@ public final class InputExtractor
     }
 
     /**
+     * Add a message for an unexpected exception case
+     * 
+     * @param key which prompted the message
+     * @param errorMsg to add
+     */
+    private void addUnexpectedErrorMessage(String key, String errorMsg)
+    {
+        String msg = String.format("key [%s] resulted in unexpected error [%s]", key, errorMsg);
+
+        messages.add(ModalMessage.builder().msg(msg).type(MessageType.ERROR).build());
+    }
+
+    /**
+     * Add a message to the internal list
+     * 
+     * @param key which prompted the message
+     * @param msg to add
+     * @param type that was tried to consume
+     */
+    private void activateMarker(String key, MarkerCategory category, MarkerType type)
+    {
+        messages.add(
+            ActivateMarkerMessage.builder()
+                .formId(formId)
+                .transferId(key)
+                .markerCategory(category)
+                .markerType(type)
+                .type(MessageType.ERROR)
+                .build());
+    }
+
+    /**
      * Extract a submitted {@code value} and consume it as a {@link String}. The {@code value} can be empty but not {@code null}.
      * <p>
      * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
@@ -157,6 +187,8 @@ public final class InputExtractor
      * @param key to extract
      * @param consumer to feed value to
      * @return {@code this} for chaining
+     * @throws IllegalArgumentException if key is {@code null} or empty
+     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsString(String key, Consumer<String> consumer)
     {
@@ -171,6 +203,8 @@ public final class InputExtractor
      * @param key to extract
      * @param consumer to feed value to
      * @return {@code this} for chaining
+     * @throws IllegalArgumentException if key is {@code null} or empty
+     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsNotEmptyString(String key, Consumer<String> consumer)
     {
@@ -205,6 +239,8 @@ public final class InputExtractor
      * @param pattern to apply
      * @param consumer to feed value to
      * @return {@code this} for chaining
+     * @throws IllegalArgumentException if key is {@code null} or empty
+     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsString(String key, String pattern, Consumer<String> consumer)
     {
@@ -244,6 +280,8 @@ public final class InputExtractor
      * @param key to extract
      * @param consumer to feed value to
      * @return {@code this} for chaining
+     * @throws IllegalArgumentException if key is {@code null} or empty
+     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsInteger(String key, Consumer<Integer> consumer)
     {
@@ -264,6 +302,8 @@ public final class InputExtractor
      * @param upperBound of valid {@code value} (inclusive)
      * @param consumer to feed value to
      * @return {@code this} for chaining
+     * @throws IllegalArgumentException if key is {@code null} or empty
+     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsInteger(String key, Integer lowerBound, Integer upperBound, Consumer<Integer> consumer)
     {
@@ -303,6 +343,8 @@ public final class InputExtractor
      * @param key to extract
      * @param consumer to feed value to
      * @return {@code this} for chaining
+     * @throws IllegalArgumentException if key is {@code null} or empty
+     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsDouble(String key, Consumer<Double> consumer)
     {
@@ -321,6 +363,8 @@ public final class InputExtractor
      * @param upperBound of valid {@code value} (inclusive)
      * @param consumer to feed value to
      * @return {@code this} for chaining
+     * @throws IllegalArgumentException if key is {@code null} or empty
+     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsDouble(String key, Double lowerBound, Double upperBound, Consumer<Double> consumer)
     {
@@ -361,6 +405,8 @@ public final class InputExtractor
      * @param key to extract
      * @param consumer to feed value to
      * @return {@code this} for chaining
+     * @throws IllegalArgumentException if key is {@code null} or empty
+     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsDate(String key, Consumer<Date> consumer)
     {
@@ -393,6 +439,8 @@ public final class InputExtractor
      * @param enumClass source of {@code Enum} values
      * @param consumer to feed value to
      * @return {@code this} for chaining
+     * @throws IllegalArgumentException if key is {@code null} or empty
+     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public <E extends Enum<E>> InputExtractor extractAndConsumeAsEnum(String key, Class<E> enumClass, Consumer<E> consumer)
     {
@@ -429,6 +477,8 @@ public final class InputExtractor
      * @param key to extract
      * @param consumer to feed value to
      * @return {@code this} for chaining
+     * @throws IllegalArgumentException if key is {@code null} or empty
+     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsTagList(String key, Consumer<TagList> consumer)
     {
@@ -445,6 +495,8 @@ public final class InputExtractor
      * @param key to extract
      * @param consumer to feed value to
      * @return {@code this} for chaining
+     * @throws IllegalArgumentException if key is {@code null} or empty
+     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsNotEmptyTagList(String key, Consumer<TagList> consumer)
     {
@@ -462,6 +514,8 @@ public final class InputExtractor
      * @param consumer to feed value to
      * @param raiseNullOrEmtpy wheter to activate a marker on {@code null} or empty {@code value}
      * @return {@code this} for chaining
+     * @throws IllegalArgumentException if key is {@code null} or empty
+     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     private InputExtractor extractAsTagList(String key, Consumer<TagList> consumer, boolean raiseNullOrEmtpy)
     {
@@ -499,57 +553,32 @@ public final class InputExtractor
      * <p>
      * This function only checks <b>if</b> files are present, but <b>nothing</b> about their state. This is up to the developer.
      * 
+     * @param key to bind error messages to file field
      * @param nullable true, if {@code files} is allowed to be {@code null} or {@code empty}
      * @param multipleAllowed true, if more than one file can be uploaded
      * @return {@code this} for chaining
+     * @throws IllegalArgumentException if key is {@code null} or empty
      */
-    public InputExtractor checkFiles(boolean nullable, boolean multipleAllowed)
+    public InputExtractor checkFiles(String key, boolean nullable, boolean multipleAllowed)
     {
+        if (key == null || key.isBlank())
+        {
+            throw new IllegalArgumentException("key cannot be null/empty");
+        }
+
         if (files == null || files.length == 0)
         {
             if (!nullable)
             {
-                activateMarker(FILE_INPUT_SUBMIT_AS_ID, MarkerCategory.ERROR, MarkerType.EMPTY);
+                activateMarker(key, MarkerCategory.ERROR, MarkerType.EMPTY);
             }
         }
-        else if (files.length > 1 && !multipleAllowed)
+        else if (!multipleAllowed && files.length > 1)
         {
-            activateMarker(FILE_INPUT_SUBMIT_AS_ID, MarkerCategory.ERROR, MarkerType.TOO_LONG);
+            activateMarker(key, MarkerCategory.ERROR, MarkerType.TOO_LONG);
         }
 
         return this;
-    }
-
-    /**
-     * Add a message for an unexpected exception case
-     * 
-     * @param key which prompted the message
-     * @param errorMsg to add
-     */
-    private void addUnexpectedErrorMessage(String key, String errorMsg)
-    {
-        String msg = String.format("key [%s] resulted in unexpected error [%s]", key, errorMsg);
-
-        messages.add(ModalMessage.builder().msg(msg).type(MessageType.ERROR).build());
-    }
-
-    /**
-     * Add a message to the internal list
-     * 
-     * @param key which prompted the message
-     * @param msg to add
-     * @param type that was tried to consume
-     */
-    private void activateMarker(String key, MarkerCategory category, MarkerType type)
-    {
-        messages.add(
-            ActivateMarkerMessage.builder()
-                .formId(formId)
-                .transferId(key)
-                .markerCategory(category)
-                .markerType(type)
-                .type(MessageType.ERROR)
-                .build());
     }
 
     /**

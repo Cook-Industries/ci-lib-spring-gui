@@ -455,11 +455,11 @@ class InputExtractorTest
         InputExtractor extractor = new InputExtractor(inputs, null);
 
         // run & verify
-        extractor.checkFiles(true, false);
+        extractor.checkFiles("files", true, false);
         assertEquals(Boolean.FALSE, extractor.hasMessages());
 
         // run & verify
-        extractor.checkFiles(false, false);
+        extractor.checkFiles("files", false, false);
         assertEquals(Boolean.TRUE, extractor.hasMessages());
     }
 
@@ -471,7 +471,7 @@ class InputExtractorTest
         // run
         InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {});
 
-        extractor.checkFiles(true, false);
+        extractor.checkFiles("files", true, false);
 
         // verify
         assertEquals(Boolean.FALSE, extractor.hasMessages());
@@ -490,7 +490,7 @@ class InputExtractorTest
         // run
         InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {file});
 
-        extractor.checkFiles(false, false);
+        extractor.checkFiles("files", false, false);
 
         // verify
         assertEquals(Boolean.FALSE, extractor.hasMessages());
@@ -509,7 +509,7 @@ class InputExtractorTest
         // run
         InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {file, file});
 
-        extractor.checkFiles(false, true);
+        extractor.checkFiles("files", false, true);
 
         // verify
         assertEquals(Boolean.FALSE, extractor.hasMessages());
@@ -528,7 +528,7 @@ class InputExtractorTest
         // run
         InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {file, file});
 
-        extractor.checkFiles(false, false);
+        extractor.checkFiles("files", false, false);
 
         // verify
         assertEquals(Boolean.TRUE, extractor.hasMessages());
