@@ -7,6 +7,8 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input.util.exception;
 
+import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
+
 /**
  * Excpetion raised when a value is expected but is {@code null}.
  * 
@@ -16,11 +18,20 @@ package de.cookindustries.lib.spring.gui.hmi.input.util.exception;
 public final class ValueNotPresentException extends RuntimeException
 {
 
+    private final MarkerType type;
+
     /**
      * @param key used to lookup
      */
-    public ValueNotPresentException(String key)
+    public ValueNotPresentException(MarkerType type)
     {
-        super(String.format("key [%s] was expected but was null", key));
+        super();
+
+        this.type = type;
+    }
+
+    public MarkerType getMarkerType()
+    {
+        return type;
     }
 }

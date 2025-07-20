@@ -1,0 +1,102 @@
+package de.cookindustries.lib.spring.gui.hmi.input.util;
+
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Singular;
+import lombok.Builder.Default;
+
+/**
+ * A processor to parse and check a {@code input} as {@link String}.
+ * 
+ * @since 2.4.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
+@Builder
+@Getter
+public final class StringInputProcessor extends AbsInputProcessor<String>
+{
+
+    /** Whether or not an empty {@code input} is allowed */
+    @Default
+    @NonNull
+    private final Boolean     allowEmpty         = true;
+
+    /** Fallback value if an empty {@code input} is detected and not allowed */
+    @Default
+    private final String      fallback           = null;
+
+    /** Pattern to match the {@code input} against */
+    @Default
+    private final Pattern     pattern            = null;
+
+    /** Set of allowed Strings to match the {@code input} */
+    @Singular
+    private final Set<String> accepts;
+
+    /** Set of <b>not</b> allowed Strings to check against the {@code input} */
+    @Singular
+    private final Set<String> rejects;
+
+    /** Whether the {@code accept} or {@code reject} sets should checked case sensitive */
+    @Default
+    @NonNull
+    private final Boolean     caseSensitiveCheck = true;
+
+    @Override
+    protected String parseRaw(String input)
+    {
+        return input;
+    }
+
+    @Override
+    protected InputCheckResult<String> check(final String input)
+    {
+        if (input.isEmpty())
+        {
+            if (allowEmpty)
+            {
+                return createResult(InputCheckResultType.PASS, input);
+            }
+
+            if (fallback != null)
+            {
+                return createResult(InputCheckResultType.FALLBACK_USED, fallback);
+            }
+
+            return createResult(InputCheckResultType.EMPTY_BUT_EXPECTED, input);
+        }
+
+        if (pattern != null)
+        {
+            if (pattern.matcher(input).matches())
+            {
+                return createResult(InputCheckResultType.PASS, input);
+            }
+
+            return createEmptyResult(InputCheckResultType.NO_PATTERN_MATCH);
+        }
+
+        Predicate<String> predicate =
+            caseSensitiveCheck
+                ? input::equals
+                : input::equalsIgnoreCase;
+
+        if (rejects.stream().anyMatch(predicate))
+        {
+            return createResult(InputCheckResultType.PASS, input);
+        }
+
+        if (!accepts.stream().anyMatch(predicate))
+        {
+            return createEmptyResult(InputCheckResultType.NOT_ACCEPTED_VALUE);
+        }
+
+        return createEmptyResult(InputCheckResultType.REJECTED_VALUE);
+    }
+
+}

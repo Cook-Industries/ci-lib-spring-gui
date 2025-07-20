@@ -14,8 +14,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +27,7 @@ import de.cookindustries.lib.spring.gui.hmi.input.marker.Marker;
 import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerCategory;
 import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
+import de.cookindustries.lib.spring.gui.response.Response;
 import de.cookindustries.lib.spring.gui.response.message.ActivateMarkerMessage;
 import de.cookindustries.lib.spring.gui.response.message.MessageType;
 import de.cookindustries.lib.spring.gui.response.message.ModalMessage;
@@ -40,18 +39,21 @@ import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
  * A {@code InputExtractor} is supposed to run as a helper to streamline the validation and retrival-of-data process. It is intended to work
  * with DTO objects either as POJOs with setters, or a builder.
  * <p>
+ * Depending on the data types of the fields the data can be validated via the corresponding {@link AbsInputProcessor}. Either create a new
+ * on with the restrictions that apply, or use on of the static defined ones in this class named with {@code DEFAULT_[...]}.
+ * <p>
  * A {@code InputExtractor} can olso validate a {@link MultipartFile} intended as a file upload from a {@link File} input. This validation
  * only checks whether there are any files uploaded and how many, but nothing about the state or value of the files, since this is up to the
  * developer.
  * <p>
- * Output of validation is given in the form of {@link ActivateMarkerMessage}s bound to {@link Marker} definitions on the {@link Input}, or
- * alternativly as {@link ModalMessage}s with more descriptive error messages for unexpected exceptions.
+ * Output of validation is given as a {@link Response} with {@link ActivateMarkerMessage}s bound to {@link Marker} definitions on the
+ * {@link Input}, or as {@link ModalMessage}s with more descriptive error messages for unexpected exceptions.
  * <p>
  * Example:
  * 
  * <pre>
  * 
- * public Response handleFrom(MultiValueMap&lt;String, String&gt; formData, MultipartFile[] files)
+ * public Response handleForm(MultiValueMap&lt;String, String&gt; formData, MultipartFile[] files)
  * {
  *     InputExtractor extractor = new InputExtractor(inputs, files);
  *     DtoBuilder dtoBuilder = Dto.builder();
@@ -79,12 +81,35 @@ import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
 public final class InputExtractor
 {
 
-    private static final ObjectMapper           TAG_LIST_MAPPER = new ObjectMapper();
+    /** A default String input processor. Allows empty {@code Strings} and imposes no restrictions. */
+    public static final StringInputProcessor    DEFAULT_STRING_PROCESSOR           = StringInputProcessor.builder().build();
+
+    /** A default String input processor. Rejects empty {@code Strings} and imposes no other restrictions. */
+    public static final StringInputProcessor    DEFAULT_STRING_NOT_EMPTY_PROCESSOR =
+        StringInputProcessor.builder().allowEmpty(false).build();
+
+    /** A default {@code Boolean} input processor. Defaults to {@code false}. */
+    public static final BooleanInputProcessor   DEFAULT_FALSE_BOOLEAN_PROCESSOR    =
+        BooleanInputProcessor.builder().fallback(false).build();
+
+    /** A default {@code Boolean} input processor. Defaults to {@code true}. */
+    public static final BooleanInputProcessor   DEFAULT_TRUE_BOOLEAN_PROCESSOR     = BooleanInputProcessor.builder().fallback(true).build();
+
+    /** A default {@code Integer} input processor. Imposes no restrictions. */
+    public static final IntegerInputProcessor   DEFAULT_INTEGER_PROCESSOR          = IntegerInputProcessor.builder().build();
+
+    /** A default {@code Double} input processor. Imposes no restrictions. */
+    public static final DoubleInputProcessor    DEFAULT_DOUBLE_PROCESSOR           = DoubleInputProcessor.builder().build();
+
+    /** A default {@code Date} input processor. Imposes no restrictions. */
+    public static final DateInputProcessor      DEFAULT_DATE_PROCESSOR             = DateInputProcessor.builder().build();
+
+    private static final ObjectMapper           TAG_LIST_MAPPER                    = new ObjectMapper();
 
     private final String                        formId;
     private final MultiValueMap<String, String> inputs;
     private final MultipartFile[]               files;
-    private final List<ResponseMessage>         messages        = new ArrayList<>();
+    private final List<ResponseMessage>         messages                           = new ArrayList<>();
 
     /**
      * Create a extractor for a {@link FormContainer} result
@@ -122,28 +147,43 @@ public final class InputExtractor
     }
 
     /**
-     * Get a value for a {@code key}
+     * Extract the value, parse and check it and give appropriate feedback.
      * 
-     * @param key to look-up
-     * @return the value as {@code String} associated with {@code key}
-     * @throws IllegalArgumentException if {@code key} is {@code null} or empty
-     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
+     * @param <T> the type of expected result
+     * @param key to lookup
+     * @param processor to apply
+     * @param consumer to feed
      */
-    private String getValue(String key)
+    private <T> void extractAndConsume(String key, AbsInputProcessor<T> processor, Consumer<T> consumer)
     {
-        if (key == null || key.isBlank())
+        try
         {
-            throw new IllegalArgumentException("key cannot be null/empty");
+            if (key == null || key.isBlank())
+            {
+                throw new IllegalArgumentException("key cannot be null/empty");
+            }
+
+            String              value  = inputs.getFirst(key);
+
+            InputCheckResult<T> result = processor.process(value);
+
+            T                   obj    = switch (result.getType())
+                                       {
+                                           case PASS, FALLBACK_USED -> result.getResult().get();
+
+                                           default -> throw new ValueNotPresentException(result.getType().getMarkerType());
+                                       };
+
+            consumer.accept(obj);
         }
-
-        String value = inputs.getFirst(key);
-
-        if (value == null)
+        catch (ValueNotPresentException ex)
         {
-            throw new ValueNotPresentException(key);
+            activateMarker(key, MarkerCategory.ERROR, ex.getMarkerType());
         }
-
-        return value;
+        catch (Exception ex)
+        {
+            addUnexpectedErrorMessage(key, ex.getMessage());
+        }
     }
 
     /**
@@ -179,94 +219,96 @@ public final class InputExtractor
     }
 
     /**
-     * Extract a submitted {@code value} and consume it as a {@link String}. The {@code value} can be empty but not {@code null}.
+     * Extract a submitted {@code value} and consume it as a {@link String}.
      * <p>
-     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
-     * designated type.
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null.
      * 
      * @param key to extract
      * @param consumer to feed value to
      * @return {@code this} for chaining
-     * @throws IllegalArgumentException if key is {@code null} or empty
-     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsString(String key, Consumer<String> consumer)
     {
-        extractAndConsumeAsString(key, null, consumer);
-
-        return this;
+        return extractAndConsumeAsString(key, DEFAULT_STRING_PROCESSOR, consumer);
     }
 
     /**
-     * Extract a submitted {@code value} and consume it as a {@link String}. The {@code value} can <b>not</b> be empty or {@code null}.
+     * Extract a submitted {@code value} and consume it as a {@link String}.
+     * <p>
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is is non-null and <b>not</b> empty.
      * 
      * @param key to extract
      * @param consumer to feed value to
      * @return {@code this} for chaining
-     * @throws IllegalArgumentException if key is {@code null} or empty
-     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsNotEmptyString(String key, Consumer<String> consumer)
     {
-        try
-        {
-            String value = getValue(key);
+        return extractAndConsumeAsString(key, DEFAULT_STRING_NOT_EMPTY_PROCESSOR, consumer);
+    }
 
-            if (value.isEmpty())
-            {
-                activateMarker(key, MarkerCategory.ERROR, MarkerType.EMPTY);
-
-                return this;
-            }
-
-            consumer.accept(value);
-        }
-        catch (Exception ex)
-        {
-            addUnexpectedErrorMessage(key, ex.getMessage());
-        }
+    /**
+     * Extract a submitted {@code value} and consume it as a {@link String}.
+     * <p>
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} clears all checks from the
+     * {@link StringInputProcessor}.
+     * 
+     * @param key to extract
+     * @param processor to apply
+     * @param consumer to feed value to
+     * @return {@code this} for chaining
+     */
+    public InputExtractor extractAndConsumeAsString(String key, StringInputProcessor processor, Consumer<String> consumer)
+    {
+        extractAndConsume(key, processor, consumer);
 
         return this;
     }
 
     /**
-     * Extract a submitted {@code value} and consume it as a {@link String}. The {@code value} <b>must</b> match the {@code pattern}.
+     * Extract a submitted {@code value} and consume it as a {@link Boolean}.
      * <p>
-     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
-     * designated type.
+     * If the {@code value} is non-null, it gets parsed as {@link Boolean}, if not, it will default to {@code false}.
      * 
      * @param key to extract
-     * @param pattern to apply
      * @param consumer to feed value to
      * @return {@code this} for chaining
-     * @throws IllegalArgumentException if key is {@code null} or empty
-     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
+     * @since 2.4.0
      */
-    public InputExtractor extractAndConsumeAsString(String key, String pattern, Consumer<String> consumer)
+    public InputExtractor extractAndConsumeAsBooleanDefaultFalse(String key, Consumer<Boolean> consumer)
     {
-        try
-        {
-            String value = getValue(key);
+        return extractAndConsumeAsBoolean(key, DEFAULT_FALSE_BOOLEAN_PROCESSOR, consumer);
+    }
 
-            if (pattern != null)
-            {
-                Pattern pat = Pattern.compile(pattern);
-                Matcher mat = pat.matcher(value);
+    /**
+     * Extract a submitted {@code value} and consume it as a {@link Boolean}.
+     * <p>
+     * If the {@code value} is non-null, it gets parsed as {@link Boolean}. if not, it will default to {@code true}.
+     * 
+     * @param key to extract
+     * @param consumer to feed value to
+     * @return {@code this} for chaining
+     * @since 2.4.0
+     */
+    public InputExtractor extractAndConsumeAsBooleanDefaultTrue(String key, Consumer<Boolean> consumer)
+    {
+        return extractAndConsumeAsBoolean(key, DEFAULT_TRUE_BOOLEAN_PROCESSOR, consumer);
+    }
 
-                if (!mat.matches())
-                {
-                    activateMarker(key, MarkerCategory.ERROR, MarkerType.OUT_OF_RANGE);
-
-                    return this;
-                }
-            }
-
-            consumer.accept(value);
-        }
-        catch (Exception ex)
-        {
-            addUnexpectedErrorMessage(key, ex.getMessage());
-        }
+    /**
+     * Extract a submitted {@code value} and consume it as a {@link Boolean}.
+     * <p>
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null, can be parsed as a
+     * {@link Boolean} and clears all checks from the {@link BooleanInputProcessor}.
+     * 
+     * @param key to extract
+     * @param processor to apply
+     * @param consumer to feed value to
+     * @return {@code this} for chaining
+     * @since 2.4.0
+     */
+    private InputExtractor extractAndConsumeAsBoolean(String key, BooleanInputProcessor processor, Consumer<Boolean> consumer)
+    {
+        extractAndConsume(key, processor, consumer);
 
         return this;
     }
@@ -274,62 +316,33 @@ public final class InputExtractor
     /**
      * Extract a submitted {@code value} and consume it as a {@link Integer}.
      * <p>
-     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
-     * designated type.
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null, can be parsed as a
+     * {@link Integer}.
      * 
      * @param key to extract
      * @param consumer to feed value to
      * @return {@code this} for chaining
-     * @throws IllegalArgumentException if key is {@code null} or empty
-     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsInteger(String key, Consumer<Integer> consumer)
     {
-        extractAndConsumeAsInteger(key, null, null, consumer);
-
-        return this;
+        return extractAndConsumeAsInteger(key, DEFAULT_INTEGER_PROCESSOR, consumer);
     }
 
     /**
      * Extract a submitted {@code value} and consume it as a {@link Integer}. The {@code value} <b>must</b> conform inside
      * {@code lower}(inclusive) &lt;= {@code value} &lt;= {@code upper}(inclusive) range.
      * <p>
-     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
-     * designated type.
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null, can be parsed as a
+     * {@link Integer} and clears all checks from the {@link IntegerInputProcessor}.
      * 
      * @param key to extract
-     * @param lowerBound of valid {@code value} (inclusive)
-     * @param upperBound of valid {@code value} (inclusive)
+     * @param processor to apply
      * @param consumer to feed value to
      * @return {@code this} for chaining
-     * @throws IllegalArgumentException if key is {@code null} or empty
-     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
-    public InputExtractor extractAndConsumeAsInteger(String key, Integer lowerBound, Integer upperBound, Consumer<Integer> consumer)
+    public InputExtractor extractAndConsumeAsInteger(String key, IntegerInputProcessor processor, Consumer<Integer> consumer)
     {
-        try
-        {
-            String  value = getValue(key);
-
-            Integer i     = Integer.parseInt(value);
-
-            if (lowerBound == null && upperBound == null)
-            {
-                consumer.accept(i);
-            }
-            else if (lowerBound != null && i >= lowerBound && upperBound != null && i <= upperBound)
-            {
-                consumer.accept(i);
-            }
-            else
-            {
-                activateMarker(key, MarkerCategory.ERROR, MarkerType.OUT_OF_RANGE);
-            }
-        }
-        catch (Exception ex)
-        {
-            addUnexpectedErrorMessage(key, ex.getMessage());
-        }
+        extractAndConsume(key, processor, consumer);
 
         return this;
     }
@@ -337,60 +350,32 @@ public final class InputExtractor
     /**
      * Extract a submitted {@code value} and consume it as a {@link Double}.
      * <p>
-     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
-     * designated type.
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null, can be parsed as a
+     * {@link Integer}.
      * 
      * @param key to extract
      * @param consumer to feed value to
      * @return {@code this} for chaining
-     * @throws IllegalArgumentException if key is {@code null} or empty
-     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsDouble(String key, Consumer<Double> consumer)
     {
-        return extractAndConsumeAsDouble(key, null, null, consumer);
+        return extractAndConsumeAsDouble(key, DEFAULT_DOUBLE_PROCESSOR, consumer);
     }
 
     /**
-     * Extract a submitted {@code value} and consume it as a {@link Double}. The {@code value} <b>must</b> conform inside
-     * {@code lower}(exclusive) &lt; {@code value} &lt; {@code upper}(exclusiv) range.
+     * Extract a submitted {@code value} and consume it as a {@link Double}.
      * <p>
-     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
-     * designated type.
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null, can be parsed as a
+     * {@link Double} and clears all checks from the {@link DoubleInputProcessor}.
      * 
      * @param key to extract
-     * @param lowerBound of valid {@code value} (inclusive)
-     * @param upperBound of valid {@code value} (inclusive)
+     * @param processor to apply
      * @param consumer to feed value to
      * @return {@code this} for chaining
-     * @throws IllegalArgumentException if key is {@code null} or empty
-     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
-    public InputExtractor extractAndConsumeAsDouble(String key, Double lowerBound, Double upperBound, Consumer<Double> consumer)
+    public InputExtractor extractAndConsumeAsDouble(String key, DoubleInputProcessor processor, Consumer<Double> consumer)
     {
-        try
-        {
-            String value = getValue(key);
-
-            Double i     = Double.parseDouble(value);
-
-            if (lowerBound == null && upperBound == null)
-            {
-                consumer.accept(i);
-            }
-            else if (lowerBound != null && i > lowerBound && upperBound != null && i < upperBound)
-            {
-                consumer.accept(i);
-            }
-            else
-            {
-                activateMarker(key, MarkerCategory.ERROR, MarkerType.OUT_OF_RANGE);
-            }
-        }
-        catch (Exception ex)
-        {
-            addUnexpectedErrorMessage(key, ex.getMessage());
-        }
+        extractAndConsume(key, processor, consumer);
 
         return this;
     }
@@ -399,29 +384,33 @@ public final class InputExtractor
      * Extract a submitted {@code value} and consume it as a {@link Date}. The {@code value} <b>must</b> be in the format
      * {@code yyyy-mm-dd}.
      * <p>
-     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
-     * designated type.
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as a
+     * {@link Date}.
      * 
      * @param key to extract
      * @param consumer to feed value to
      * @return {@code this} for chaining
-     * @throws IllegalArgumentException if key is {@code null} or empty
-     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsDate(String key, Consumer<Date> consumer)
     {
-        try
-        {
-            String value   = getValue(key);
+        return extractAndConsumeAsDate(key, DEFAULT_DATE_PROCESSOR, consumer);
+    }
 
-            Date   sqlDate = Date.valueOf(value);
-
-            consumer.accept(sqlDate);
-        }
-        catch (Exception ex)
-        {
-            addUnexpectedErrorMessage(key, ex.getMessage());
-        }
+    /**
+     * Extract a submitted {@code value} and consume it as a {@link Date}. The {@code value} <b>must</b> be in the format
+     * {@code yyyy-mm-dd}.
+     * <p>
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null, can be parsed as a
+     * {@link Double} and clears all checks from the {@link DoubleInputProcessor}.
+     * 
+     * @param key to extract
+     * @param processor to apply
+     * @param consumer to feed value to
+     * @return {@code this} for chaining
+     */
+    public InputExtractor extractAndConsumeAsDate(String key, DateInputProcessor processor, Consumer<Date> consumer)
+    {
+        extractAndConsume(key, processor, consumer);
 
         return this;
     }
@@ -439,12 +428,9 @@ public final class InputExtractor
      * @param enumClass source of {@code Enum} values
      * @param consumer to feed value to
      * @return {@code this} for chaining
-     * @throws IllegalArgumentException if key is {@code null} or empty
-     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public <E extends Enum<E>> InputExtractor extractAndConsumeAsEnum(String key, Class<E> enumClass, Consumer<E> consumer)
     {
-
         try
         {
             String value = getValue(key);
@@ -477,8 +463,6 @@ public final class InputExtractor
      * @param key to extract
      * @param consumer to feed value to
      * @return {@code this} for chaining
-     * @throws IllegalArgumentException if key is {@code null} or empty
-     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsTagList(String key, Consumer<TagList> consumer)
     {
@@ -495,8 +479,6 @@ public final class InputExtractor
      * @param key to extract
      * @param consumer to feed value to
      * @return {@code this} for chaining
-     * @throws IllegalArgumentException if key is {@code null} or empty
-     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     public InputExtractor extractAndConsumeAsNotEmptyTagList(String key, Consumer<TagList> consumer)
     {
@@ -514,8 +496,6 @@ public final class InputExtractor
      * @param consumer to feed value to
      * @param raiseNullOrEmtpy wheter to activate a marker on {@code null} or empty {@code value}
      * @return {@code this} for chaining
-     * @throws IllegalArgumentException if key is {@code null} or empty
-     * @throws ValueNotPresentException if the retrived {@code value} is {@code null}
      */
     private InputExtractor extractAsTagList(String key, Consumer<TagList> consumer, boolean raiseNullOrEmtpy)
     {
@@ -548,16 +528,12 @@ public final class InputExtractor
     /**
      * Check if {@code files} contain something.
      * <p>
-     * This function assumes that the file transfer name - {@code submitAs} on the {@link File} input - is named {@code files} and will
-     * activate the marker only on this
-     * <p>
-     * This function only checks <b>if</b> files are present, but <b>nothing</b> about their state. This is up to the developer.
+     * This function <b>only</b> checks if files are present, but <b>nothing</b> about their state. This is up to the developer.
      * 
-     * @param key to bind error messages to file field
+     * @param key to bind error messages to file field on {@code submitAs}
      * @param nullable true, if {@code files} is allowed to be {@code null} or {@code empty}
      * @param multipleAllowed true, if more than one file can be uploaded
      * @return {@code this} for chaining
-     * @throws IllegalArgumentException if key is {@code null} or empty
      */
     public InputExtractor checkFiles(String key, boolean nullable, boolean multipleAllowed)
     {
@@ -566,12 +542,10 @@ public final class InputExtractor
             throw new IllegalArgumentException("key cannot be null/empty");
         }
 
-        if (files == null || files.length == 0)
+        if ((files == null || files.length == 0) && !nullable)
         {
-            if (!nullable)
-            {
-                activateMarker(key, MarkerCategory.ERROR, MarkerType.EMPTY);
-            }
+            activateMarker(key, MarkerCategory.ERROR, MarkerType.EMPTY);
+
         }
         else if (!multipleAllowed && files.length > 1)
         {

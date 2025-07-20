@@ -1,0 +1,61 @@
+package de.cookindustries.lib.spring.gui.hmi.input.util;
+
+import java.sql.Date;
+
+import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
+import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Builder.Default;
+
+/**
+ * A processor to parse and check a {@code input} as {@link Integer}.
+ * 
+ * @since 2.4.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
+@Builder
+@Getter
+public class DateInputProcessor extends AbsInputProcessor<Date>
+{
+
+    /** Fallback value if an empty {@code input} is detected and not wanted */
+    @Default
+    private final Date fallback   = null;
+
+    /** Lower bound the {@code input} must clear (exclusive) {@code lowerBound} &lt; {@code input} */
+    @Default
+    private final Date lowerBound = null;
+
+    /** Upper bound the {@code input} must clear (exclusiv) {@code input} &lt; {@code upperBound} */
+    @Default
+    private final Date upperBound = null;
+
+    @Override
+    protected Date parseRaw(String input)
+    {
+        if (input == null || input.isEmpty())
+        {
+            if (fallback == null)
+            {
+                throw new ValueNotPresentException(MarkerType.NOT_PARSABLE);
+            }
+
+            return fallback;
+        }
+
+        return Date.valueOf(input);
+    }
+
+    @Override
+    protected InputCheckResult<Date> check(Date input)
+    {
+        if ((lowerBound != null && input.before(lowerBound)) || (upperBound != null && input.after(upperBound)))
+        {
+            return createEmptyResult(InputCheckResultType.OUT_OF_BOUNDS);
+        }
+
+        return createEmptyResult(InputCheckResultType.REJECTED_VALUE);
+    }
+
+}
