@@ -18,14 +18,14 @@ import lombok.Builder.Default;
  */
 @Builder
 @Getter
-public class DoubleInputProcessor extends AbsInputProcessor<Double>
+public final class DoubleInputProcessor extends AbsInputProcessor<Double>
 {
 
     /** Set a maximum number of decimal places for parsing ({@code input} gets rounded up on parsing) */
     @Default
     private final Integer decimalPlaces = null;
 
-    /** Fallback value if an empty {@code input} is detected and not wanted */
+    /** Default value if the {@code input} is {@code empty} */
     @Default
     private final Double  fallback      = null;
 
@@ -42,7 +42,7 @@ public class DoubleInputProcessor extends AbsInputProcessor<Double>
     @Override
     protected Double parseRaw(String input)
     {
-        if (input == null || input.isEmpty())
+        if (input.isEmpty())
         {
             if (fallback == null)
             {

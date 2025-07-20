@@ -43,11 +43,13 @@ public abstract class AbsInputProcessor<T>
 
     /**
      * Parse the raw {@link String} {@code input} value from the {@code UI form} to {@code T}.
+     * <p>
+     * Variable {@code input} is never {@code null};
      * 
      * @param input to transfrom to the designated type
      * @return the transformed {@code input}
      */
-    protected abstract T parseRaw(final String input);
+    protected abstract T parseRaw(String input);
 
     /**
      * Check function to test the {@code input} against type specific constraints.
@@ -61,17 +63,17 @@ public abstract class AbsInputProcessor<T>
      * @param input to check
      * @return a {@code InputCheckResult} containing the result type and a optional result object
      */
-    protected abstract InputCheckResult<T> check(final T input);
+    protected abstract InputCheckResult<T> check(T input);
 
     /**
      * Check the given {@code String} from the {@code UI form}.
      * <p>
      * This function does has 3 steps:
      * <ol>
-     * <li>check if the input is {@code null}. If so, return with an empty {@link InputCheckResult} set to
+     * <li>check if the {@code input} is {@code null}. If so, return with an empty {@link InputCheckResult} set to
      * {@link InputCheckResultType#NOT_PRESENT}.</li>
-     * <li>call {@link #parseRaw(String)}. If this throws an {@code Exception}, return with an empty {@link InputCheckResult} set to
-     * {@link InputCheckResultType#NOT_PARSABLE}.</li>
+     * <li>call {@link #parseRaw(String)} with {@code input}. If this throws an {@code Exception}, return with an empty
+     * {@link InputCheckResult} set to {@link InputCheckResultType#NOT_PARSABLE}.</li>
      * <li>call {@link #check(Object)} and return the appropriate {@link InputCheckResult}.</li>
      * </ol>
      * 
@@ -82,7 +84,7 @@ public abstract class AbsInputProcessor<T>
     {
         if (input == null)
         {
-            return createResult(InputCheckResultType.NOT_PRESENT, null);
+            return createEmptyResult(InputCheckResultType.NOT_PRESENT);
         }
 
         try

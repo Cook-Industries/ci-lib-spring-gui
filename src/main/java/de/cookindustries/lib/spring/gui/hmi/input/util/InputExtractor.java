@@ -82,34 +82,40 @@ public final class InputExtractor
 {
 
     /** A default String input processor. Allows empty {@code Strings} and imposes no restrictions. */
-    public static final StringInputProcessor    DEFAULT_STRING_PROCESSOR           = StringInputProcessor.builder().build();
+    public static final StringInputProcessor    DEFAULT_STRING_PROCESSOR            = StringInputProcessor.builder().build();
 
     /** A default String input processor. Rejects empty {@code Strings} and imposes no other restrictions. */
-    public static final StringInputProcessor    DEFAULT_STRING_NOT_EMPTY_PROCESSOR =
+    public static final StringInputProcessor    DEFAULT_STRING_NOT_EMPTY_PROCESSOR  =
         StringInputProcessor.builder().allowEmpty(false).build();
 
     /** A default {@code Boolean} input processor. Defaults to {@code false}. */
-    public static final BooleanInputProcessor   DEFAULT_FALSE_BOOLEAN_PROCESSOR    =
+    public static final BooleanInputProcessor   DEFAULT_FALSE_BOOLEAN_PROCESSOR     =
         BooleanInputProcessor.builder().fallback(false).build();
 
     /** A default {@code Boolean} input processor. Defaults to {@code true}. */
-    public static final BooleanInputProcessor   DEFAULT_TRUE_BOOLEAN_PROCESSOR     = BooleanInputProcessor.builder().fallback(true).build();
+    public static final BooleanInputProcessor   DEFAULT_TRUE_BOOLEAN_PROCESSOR      =
+        BooleanInputProcessor.builder().fallback(true).build();
 
     /** A default {@code Integer} input processor. Imposes no restrictions. */
-    public static final IntegerInputProcessor   DEFAULT_INTEGER_PROCESSOR          = IntegerInputProcessor.builder().build();
+    public static final IntegerInputProcessor   DEFAULT_INTEGER_PROCESSOR           = IntegerInputProcessor.builder().build();
 
     /** A default {@code Double} input processor. Imposes no restrictions. */
-    public static final DoubleInputProcessor    DEFAULT_DOUBLE_PROCESSOR           = DoubleInputProcessor.builder().build();
+    public static final DoubleInputProcessor    DEFAULT_DOUBLE_PROCESSOR            = DoubleInputProcessor.builder().build();
 
     /** A default {@code Date} input processor. Imposes no restrictions. */
-    public static final DateInputProcessor      DEFAULT_DATE_PROCESSOR             = DateInputProcessor.builder().build();
+    public static final DateInputProcessor      DEFAULT_DATE_PROCESSOR              = DateInputProcessor.builder().build();
 
-    private static final ObjectMapper           TAG_LIST_MAPPER                    = new ObjectMapper();
+    /** A default {@code Date} input processor. Imposes no restrictions. */
+    public static final TagListInputProcessor   DEFAULT_TAGLIST_PROCESSOR           = TagListInputProcessor.builder().build();
+
+    /** A default {@code Date} input processor. Imposes no restrictions. */
+    public static final TagListInputProcessor   DEFAULT_NON_EMPTY_TAGLIST_PROCESSOR =
+        TagListInputProcessor.builder().allowEmpty(false).build();
 
     private final String                        formId;
     private final MultiValueMap<String, String> inputs;
     private final MultipartFile[]               files;
-    private final List<ResponseMessage>         messages                           = new ArrayList<>();
+    private final List<ResponseMessage>         messages                            = new ArrayList<>();
 
     /**
      * Create a extractor for a {@link FormContainer} result
@@ -418,10 +424,10 @@ public final class InputExtractor
     /**
      * Extract a submitted {@code value} and consume it as a {@link Enum}.
      * <p>
-     * This function assumes that the {@code enumClass} constants conform to the default of all-caps form of enum names.
+     * This function assumes that the {@code enumClass} constants conform to the default of all-caps no spaces form of enum names.
      * <p>
      * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
-     * designated type.
+     * given {@code Enum} type.
      * 
      * @param <E> enum class type
      * @param key to extract
@@ -431,22 +437,13 @@ public final class InputExtractor
      */
     public <E extends Enum<E>> InputExtractor extractAndConsumeAsEnum(String key, Class<E> enumClass, Consumer<E> consumer)
     {
-        try
-        {
-            String value = getValue(key);
-
-            E      e     = Arrays.stream(enumClass.getEnumConstants()).filter(t -> value.toUpperCase().equals(t.name())).findFirst().get();
-
-            consumer.accept(e);
-        }
-        catch (NoSuchElementException ex)
-        {
-            activateMarker(key, MarkerCategory.ERROR, MarkerType.OUT_OF_RANGE);
-        }
-        catch (Exception ex)
-        {
-            addUnexpectedErrorMessage(key, ex.getMessage());
-        }
+        extractAndConsume(
+            key,
+            EnumInputProcessor
+                .<E>builder()
+                .enumClass(enumClass)
+                .build(),
+            consumer);
 
         return this;
     }
@@ -455,10 +452,7 @@ public final class InputExtractor
      * Extract a submitted {@code value} and consume it as a {@link TagList}. The {@code value} <b>must</b> be in JSON format
      * {@code &#91;&#123;&quot;value&quot;:&quot;test 2&quot;&#125;, ...&#93;}.
      * <p>
-     * A null or empty {@code value} will not be considered as a failure.
-     * <p>
-     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
-     * designated type.
+     * A empty {@code value} will <b>not</b> be considered as a failure.
      * 
      * @param key to extract
      * @param consumer to feed value to
@@ -466,15 +460,15 @@ public final class InputExtractor
      */
     public InputExtractor extractAndConsumeAsTagList(String key, Consumer<TagList> consumer)
     {
-        return extractAsTagList(key, consumer, false);
+        return extractAsTagList(key, DEFAULT_TAGLIST_PROCESSOR, consumer);
     }
 
     /**
      * Extract a submitted {@code value} and consume it as a {@link TagList}. The {@code value} <b>must</b> be in JSON format
      * {@code &#91;&#123;&quot;value&quot;:&quot;test 2&quot;&#125;, ...&#93;}. The {@code value} can <b>not</b> be empty or {@code null}.
      * <p>
-     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
-     * designated type.
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as a
+     * {@code TagList}.
      * 
      * @param key to extract
      * @param consumer to feed value to
@@ -482,45 +476,24 @@ public final class InputExtractor
      */
     public InputExtractor extractAndConsumeAsNotEmptyTagList(String key, Consumer<TagList> consumer)
     {
-        return extractAsTagList(key, consumer, true);
+        return extractAsTagList(key, DEFAULT_NON_EMPTY_TAGLIST_PROCESSOR, consumer);
     }
 
     /**
      * Extract a submitted {@code value} and consume it as a {@link TagList}. The {@code value} <b>must</b> be in JSON format
      * {@code &#91;&#123;&quot;value&quot;:&quot;test 2&quot;&#125;, ...&#93;}.
      * <p>
-     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as the
-     * designated type.
+     * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null and can be parsed as a
+     * {@code TagList} and clears all checks from the {@link TagListInputProcessor}.
      * 
      * @param key to extract
      * @param consumer to feed value to
      * @param raiseNullOrEmtpy wheter to activate a marker on {@code null} or empty {@code value}
      * @return {@code this} for chaining
      */
-    private InputExtractor extractAsTagList(String key, Consumer<TagList> consumer, boolean raiseNullOrEmtpy)
+    private InputExtractor extractAsTagList(String key, TagListInputProcessor processor, Consumer<TagList> consumer)
     {
-        try
-        {
-            String value = getValue(key);
-
-            if (value == null || value.isEmpty())
-            {
-                if (raiseNullOrEmtpy)
-                {
-                    activateMarker(key, MarkerCategory.ERROR, MarkerType.EMPTY);
-                }
-
-                return this;
-            }
-
-            TagList list = TAG_LIST_MAPPER.readValue(value, TagList.class);
-
-            consumer.accept(list);
-        }
-        catch (Exception ex)
-        {
-            addUnexpectedErrorMessage(key, ex.getMessage());
-        }
+        extractAndConsume(key, processor, consumer);
 
         return this;
     }

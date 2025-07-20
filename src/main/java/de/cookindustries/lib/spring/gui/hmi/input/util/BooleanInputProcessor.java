@@ -16,7 +16,7 @@ import lombok.Builder.Default;
 public final class BooleanInputProcessor extends AbsInputProcessor<Boolean>
 {
 
-    /** Default value if the {@code input} is {@code null} */
+    /** Default value if the {@code input} is {@code empty} */
     @NonNull
     @Default
     private final Boolean fallback = false;
@@ -24,7 +24,7 @@ public final class BooleanInputProcessor extends AbsInputProcessor<Boolean>
     @Override
     protected Boolean parseRaw(String input)
     {
-        return input == null || input.isEmpty()
+        return input.isEmpty()
             ? fallback
             : Boolean.parseBoolean(input.toLowerCase());
     }

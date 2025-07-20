@@ -26,7 +26,7 @@ public final class StringInputProcessor extends AbsInputProcessor<String>
     @NonNull
     private final Boolean     allowEmpty         = true;
 
-    /** Fallback value if an empty {@code input} is detected and not allowed */
+    /** Default value if the {@code input} is empty and is not allowed */
     @Default
     private final String      fallback           = null;
 
