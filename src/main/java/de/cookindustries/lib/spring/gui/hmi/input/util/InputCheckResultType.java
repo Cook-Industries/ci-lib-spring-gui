@@ -2,6 +2,12 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
 
 import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
 
+/**
+ * Type definition for {@link InputCheckResult}.
+ * 
+ * @since 2.4.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
 public enum InputCheckResultType {
 
     /** Indicates the check has passed */
@@ -33,11 +39,21 @@ public enum InputCheckResultType {
 
     private final MarkerType markerType;
 
+    /**
+     * Create a new {@code result type} with a corresponding {@link MarkerType}.
+     * 
+     * @param markerType to link
+     */
     private InputCheckResultType(MarkerType markerType)
     {
         this.markerType = markerType;
     }
 
+    /**
+     * Get the corresponding {@link MarkerType} to this result type.
+     * 
+     * @return the corresponding {@code MarkerType}
+     */
     public final MarkerType getMarkerType()
     {
         return markerType;

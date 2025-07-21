@@ -13,7 +13,7 @@ import lombok.Builder.Default;
 /**
  * A processor to parse and check a {@code input} as {@link Boolean}.
  * 
- * @since 2.4.0 *
+ * @since 2.4.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Builder
