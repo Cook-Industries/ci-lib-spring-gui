@@ -2,7 +2,6 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
 
 import java.util.Set;
 
-import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,11 +45,11 @@ public final class IntegerInputProcessor extends AbsInputProcessor<Integer>
     @Override
     protected Integer parseRaw(String input)
     {
-        if (input == null || input.isEmpty())
+        if (input.isEmpty())
         {
             if (fallback == null)
             {
-                throw new ValueNotPresentException(MarkerType.NOT_PARSABLE);
+                throw new ValueNotPresentException();
             }
 
             return fallback;
@@ -62,7 +61,7 @@ public final class IntegerInputProcessor extends AbsInputProcessor<Integer>
     @Override
     protected InputCheckResult<Integer> check(Integer input)
     {
-        if (lowerBound < input || input > upperBound)
+        if (input < lowerBound || input > upperBound)
         {
             return createEmptyResult(InputCheckResultType.OUT_OF_BOUNDS);
         }
@@ -72,12 +71,12 @@ public final class IntegerInputProcessor extends AbsInputProcessor<Integer>
             return createResult(InputCheckResultType.PASS, input);
         }
 
-        if (!accepts.stream().anyMatch(input::equals))
+        if (!accepts.isEmpty() && !accepts.stream().anyMatch(input::equals))
         {
             return createEmptyResult(InputCheckResultType.NOT_ACCEPTED_VALUE);
         }
 
-        return createEmptyResult(InputCheckResultType.REJECTED_VALUE);
+        return createResult(InputCheckResultType.PASS, input);
     }
 
 }

@@ -2,7 +2,6 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
 
 import java.sql.Date;
 
-import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,11 +33,11 @@ public class DateInputProcessor extends AbsInputProcessor<Date>
     @Override
     protected Date parseRaw(String input)
     {
-        if (input == null || input.isEmpty())
+        if (input.isEmpty())
         {
             if (fallback == null)
             {
-                throw new ValueNotPresentException(MarkerType.NOT_PARSABLE);
+                throw new ValueNotPresentException();
             }
 
             return fallback;
@@ -55,7 +54,7 @@ public class DateInputProcessor extends AbsInputProcessor<Date>
             return createEmptyResult(InputCheckResultType.OUT_OF_BOUNDS);
         }
 
-        return createEmptyResult(InputCheckResultType.REJECTED_VALUE);
+        return createResult(InputCheckResultType.PASS, input);
     }
 
 }

@@ -22,7 +22,6 @@ import de.cookindustries.lib.spring.gui.hmi.input.Input;
 import de.cookindustries.lib.spring.gui.hmi.input.marker.Marker;
 import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerCategory;
 import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
-import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
 import de.cookindustries.lib.spring.gui.response.Response;
 import de.cookindustries.lib.spring.gui.response.message.ActivateMarkerMessage;
 import de.cookindustries.lib.spring.gui.response.message.MessageType;
@@ -101,10 +100,10 @@ public final class InputExtractor
     /** A default {@code Date} input processor. Imposes no restrictions. */
     public static final DateInputProcessor      DEFAULT_DATE_PROCESSOR              = DateInputProcessor.builder().build();
 
-    /** A default {@code Date} input processor. Imposes no restrictions. */
+    /** A default {@code TagList} input processor. Imposes no restrictions. */
     public static final TagListInputProcessor   DEFAULT_TAGLIST_PROCESSOR           = TagListInputProcessor.builder().build();
 
-    /** A default {@code Date} input processor. Imposes no restrictions. */
+    /** A default {@code TagList} input processor. Fails on no tags given. Imposes no other restrictions. */
     public static final TagListInputProcessor   DEFAULT_NON_EMPTY_TAGLIST_PROCESSOR =
         TagListInputProcessor.builder().allowEmpty(false).build();
 
@@ -165,22 +164,25 @@ public final class InputExtractor
                 throw new IllegalArgumentException("key cannot be null/empty");
             }
 
-            String              value  = inputs.getFirst(key);
+            String               value      = inputs.getFirst(key);
 
-            InputCheckResult<T> result = processor.process(value);
+            InputCheckResult<T>  result     = processor.process(value);
 
-            T                   obj    = switch (result.getType())
-                                       {
-                                           case PASS, FALLBACK_USED -> result.getResult().get();
+            InputCheckResultType resultType = result.getType();
 
-                                           default -> throw new ValueNotPresentException(result.getType().getMarkerType());
-                                       };
+            switch (resultType)
+            {
+                case PASS, FALLBACK_USED -> {
+                    T obj = result.getResult().get();
 
-            consumer.accept(obj);
-        }
-        catch (ValueNotPresentException ex)
-        {
-            activateMarker(key, MarkerCategory.ERROR, ex.getMarkerType());
+                    consumer.accept(obj);
+                }
+
+                case NOT_PARSABLE -> addUnexpectedErrorMessage(key, String.format("value [%s] not parsable", value));
+
+                default -> activateMarker(key, MarkerCategory.ERROR, resultType.getMarkerType());
+
+            };
         }
         catch (Exception ex)
         {
@@ -229,9 +231,9 @@ public final class InputExtractor
      * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public InputExtractor extractAndConsumeAsString(String key, Consumer<String> consumer)
+    public InputExtractor checkAndConsumeAsString(String key, Consumer<String> consumer)
     {
-        return extractAndConsumeAsString(key, DEFAULT_STRING_PROCESSOR, consumer);
+        return checkAndConsumeAsString(key, DEFAULT_STRING_PROCESSOR, consumer);
     }
 
     /**
@@ -243,9 +245,9 @@ public final class InputExtractor
      * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public InputExtractor extractAndConsumeAsNotEmptyString(String key, Consumer<String> consumer)
+    public InputExtractor checkAndConsumeAsNotEmptyString(String key, Consumer<String> consumer)
     {
-        return extractAndConsumeAsString(key, DEFAULT_STRING_NOT_EMPTY_PROCESSOR, consumer);
+        return checkAndConsumeAsString(key, DEFAULT_STRING_NOT_EMPTY_PROCESSOR, consumer);
     }
 
     /**
@@ -259,7 +261,7 @@ public final class InputExtractor
      * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public InputExtractor extractAndConsumeAsString(String key, StringInputProcessor processor, Consumer<String> consumer)
+    public InputExtractor checkAndConsumeAsString(String key, StringInputProcessor processor, Consumer<String> consumer)
     {
         extractAndConsume(key, processor, consumer);
 
@@ -276,9 +278,9 @@ public final class InputExtractor
      * @return {@code this} for chaining
      * @since 2.4.0
      */
-    public InputExtractor extractAndConsumeAsBooleanDefaultFalse(String key, Consumer<Boolean> consumer)
+    public InputExtractor checkAndConsumeAsBooleanDefaultFalse(String key, Consumer<Boolean> consumer)
     {
-        return extractAndConsumeAsBoolean(key, DEFAULT_FALSE_BOOLEAN_PROCESSOR, consumer);
+        return checkAndConsumeAsBoolean(key, DEFAULT_FALSE_BOOLEAN_PROCESSOR, consumer);
     }
 
     /**
@@ -291,9 +293,9 @@ public final class InputExtractor
      * @return {@code this} for chaining
      * @since 2.4.0
      */
-    public InputExtractor extractAndConsumeAsBooleanDefaultTrue(String key, Consumer<Boolean> consumer)
+    public InputExtractor checkAndConsumeAsBooleanDefaultTrue(String key, Consumer<Boolean> consumer)
     {
-        return extractAndConsumeAsBoolean(key, DEFAULT_TRUE_BOOLEAN_PROCESSOR, consumer);
+        return checkAndConsumeAsBoolean(key, DEFAULT_TRUE_BOOLEAN_PROCESSOR, consumer);
     }
 
     /**
@@ -308,7 +310,7 @@ public final class InputExtractor
      * @return {@code this} for chaining
      * @since 2.4.0
      */
-    private InputExtractor extractAndConsumeAsBoolean(String key, BooleanInputProcessor processor, Consumer<Boolean> consumer)
+    private InputExtractor checkAndConsumeAsBoolean(String key, BooleanInputProcessor processor, Consumer<Boolean> consumer)
     {
         extractAndConsume(key, processor, consumer);
 
@@ -325,9 +327,9 @@ public final class InputExtractor
      * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public InputExtractor extractAndConsumeAsInteger(String key, Consumer<Integer> consumer)
+    public InputExtractor checkAndConsumeAsInteger(String key, Consumer<Integer> consumer)
     {
-        return extractAndConsumeAsInteger(key, DEFAULT_INTEGER_PROCESSOR, consumer);
+        return checkAndConsumeAsInteger(key, DEFAULT_INTEGER_PROCESSOR, consumer);
     }
 
     /**
@@ -342,7 +344,7 @@ public final class InputExtractor
      * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public InputExtractor extractAndConsumeAsInteger(String key, IntegerInputProcessor processor, Consumer<Integer> consumer)
+    public InputExtractor checkAndConsumeAsInteger(String key, IntegerInputProcessor processor, Consumer<Integer> consumer)
     {
         extractAndConsume(key, processor, consumer);
 
@@ -359,9 +361,9 @@ public final class InputExtractor
      * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public InputExtractor extractAndConsumeAsDouble(String key, Consumer<Double> consumer)
+    public InputExtractor checkAndConsumeAsDouble(String key, Consumer<Double> consumer)
     {
-        return extractAndConsumeAsDouble(key, DEFAULT_DOUBLE_PROCESSOR, consumer);
+        return checkAndConsumeAsDouble(key, DEFAULT_DOUBLE_PROCESSOR, consumer);
     }
 
     /**
@@ -375,7 +377,7 @@ public final class InputExtractor
      * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public InputExtractor extractAndConsumeAsDouble(String key, DoubleInputProcessor processor, Consumer<Double> consumer)
+    public InputExtractor checkAndConsumeAsDouble(String key, DoubleInputProcessor processor, Consumer<Double> consumer)
     {
         extractAndConsume(key, processor, consumer);
 
@@ -393,9 +395,9 @@ public final class InputExtractor
      * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public InputExtractor extractAndConsumeAsDate(String key, Consumer<Date> consumer)
+    public InputExtractor checkAndConsumeAsDate(String key, Consumer<Date> consumer)
     {
-        return extractAndConsumeAsDate(key, DEFAULT_DATE_PROCESSOR, consumer);
+        return checkAndConsumeAsDate(key, DEFAULT_DATE_PROCESSOR, consumer);
     }
 
     /**
@@ -410,7 +412,7 @@ public final class InputExtractor
      * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public InputExtractor extractAndConsumeAsDate(String key, DateInputProcessor processor, Consumer<Date> consumer)
+    public InputExtractor checkAndConsumeAsDate(String key, DateInputProcessor processor, Consumer<Date> consumer)
     {
         extractAndConsume(key, processor, consumer);
 
@@ -431,7 +433,7 @@ public final class InputExtractor
      * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public <E extends Enum<E>> InputExtractor extractAndConsumeAsEnum(String key, Class<E> enumClass, Consumer<E> consumer)
+    public <E extends Enum<E>> InputExtractor checkAndConsumeAsEnum(String key, Class<E> enumClass, Consumer<E> consumer)
     {
         extractAndConsume(
             key,
@@ -454,7 +456,7 @@ public final class InputExtractor
      * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public InputExtractor extractAndConsumeAsTagList(String key, Consumer<TagList> consumer)
+    public InputExtractor checkAndConsumeAsTagList(String key, Consumer<TagList> consumer)
     {
         return extractAsTagList(key, DEFAULT_TAGLIST_PROCESSOR, consumer);
     }
@@ -470,7 +472,7 @@ public final class InputExtractor
      * @param consumer to feed value to
      * @return {@code this} for chaining
      */
-    public InputExtractor extractAndConsumeAsNotEmptyTagList(String key, Consumer<TagList> consumer)
+    public InputExtractor checkAndConsumeAsNotEmptyTagList(String key, Consumer<TagList> consumer)
     {
         return extractAsTagList(key, DEFAULT_NON_EMPTY_TAGLIST_PROCESSOR, consumer);
     }
@@ -511,10 +513,12 @@ public final class InputExtractor
             throw new IllegalArgumentException("key cannot be null/empty");
         }
 
-        if ((files == null || files.length == 0) && !nullable)
+        if (files == null || files.length == 0)
         {
-            activateMarker(key, MarkerCategory.ERROR, MarkerType.EMPTY);
-
+            if (!nullable) // this needs to be in its own if since the null check against files will trigger
+            {
+                activateMarker(key, MarkerCategory.ERROR, MarkerType.EMPTY);
+            }
         }
         else if (!multipleAllowed && files.length > 1)
         {

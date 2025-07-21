@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,11 +68,11 @@ class InputExtractorTest
     {
         // setup
         List<String>   result    = new ArrayList<>();
+        InputExtractor extractor = new InputExtractor(inputs);
 
         // run
-        InputExtractor extractor = new InputExtractor(inputs);
-        extractor.extractAndConsumeAsString(null, s -> result.add(s));
-        extractor.extractAndConsumeAsString("", s -> result.add(s));
+        extractor.checkAndConsumeAsString(null, result::add);
+        extractor.checkAndConsumeAsString("", result::add);
 
         // verify
         assertEquals(Boolean.TRUE, extractor.hasMessages());
@@ -83,16 +84,15 @@ class InputExtractorTest
     }
 
     @Test
-    void test_extractAndConsumeAsString()
+    void test_checkAndConsumeAsString()
     {
         // setup
         inputs.add("testKey", "testValue");
         List<String>   result    = new ArrayList<>();
-
-        // run
         InputExtractor extractor = new InputExtractor(inputs);
 
-        extractor.extractAndConsumeAsString("testKey", s -> result.add(s));
+        // run
+        extractor.checkAndConsumeAsString("testKey", result::add);
 
         // verify
         assertEquals(Boolean.FALSE, extractor.hasMessages());
@@ -101,36 +101,20 @@ class InputExtractorTest
     }
 
     @Test
-    void test_extractAndConsumeAsString_unexpectedException()
+    void test_checkAndConsumeAsString_withPattern_match()
     {
         // setup
-        inputs.add("", "testValue");
-
-        // run
-        InputExtractor extractor = new InputExtractor(inputs);
-
-        extractor.extractAndConsumeAsString("testKey", s -> {
-            throw new IllegalArgumentException();
-        });
-
-        // verify
-        assertEquals(Boolean.TRUE, extractor.hasMessages());
-        assertEquals(1, extractor.getMessages().size());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(0).getType());
-        assertEquals(MessageTarget.MODAL, extractor.getMessages().get(0).getTarget());
-    }
-
-    @Test
-    void test_extractAndConsumeAsString_withPattern_match()
-    {
-        // setup
+        StringInputProcessor processor =
+            StringInputProcessor
+                .builder()
+                .pattern(Pattern.compile("test"))
+                .build();
         inputs.add("testKey", "test");
         List<String>   result    = new ArrayList<>();
-
-        // run
         InputExtractor extractor = new InputExtractor(inputs);
 
-        extractor.extractAndConsumeAsString("testKey", "test", s -> result.add(s));
+        // run
+        extractor.checkAndConsumeAsString("testKey", processor, result::add);
 
         // verify
         assertEquals(Boolean.FALSE, extractor.hasMessages());
@@ -139,16 +123,20 @@ class InputExtractorTest
     }
 
     @Test
-    void test_extractAndConsumeAsString_withPattern_noMatch()
+    void test_checkAndConsumeAsString_withPattern_noMatch()
     {
         // setup
+        StringInputProcessor processor =
+            StringInputProcessor
+                .builder()
+                .pattern(Pattern.compile("aaa"))
+                .build();
         inputs.add("testKey", "test");
         List<String>   result    = new ArrayList<>();
-
-        // run
         InputExtractor extractor = new InputExtractor(inputs);
 
-        extractor.extractAndConsumeAsString("testKey", "aaa", s -> result.add(s));
+        // run
+        extractor.checkAndConsumeAsString("testKey", processor, result::add);
 
         // verify
         assertEquals(Boolean.TRUE, extractor.hasMessages());
@@ -158,16 +146,15 @@ class InputExtractorTest
     }
 
     @Test
-    void test_extractAndConsumeAsNotEmptyString_pass()
+    void test_checkAndConsumeAsNotEmptyString_pass()
     {
         // setup
         inputs.add("testKey", "testValue");
         List<String>   result    = new ArrayList<>();
-
-        // run
         InputExtractor extractor = new InputExtractor(inputs);
 
-        extractor.extractAndConsumeAsNotEmptyString("testKey", s -> result.add(s));
+        // run
+        extractor.checkAndConsumeAsNotEmptyString("testKey", result::add);
 
         // verify
         assertEquals(Boolean.FALSE, extractor.hasMessages());
@@ -176,16 +163,15 @@ class InputExtractorTest
     }
 
     @Test
-    void test_extractAndConsumeAsNotEmptyString_noPass()
+    void test_checkAndConsumeAsNotEmptyString_noPass()
     {
         // setup
         inputs.add("testKey", "");
         List<String>   result    = new ArrayList<>();
-
-        // run
         InputExtractor extractor = new InputExtractor(inputs);
 
-        extractor.extractAndConsumeAsNotEmptyString("testKey", s -> result.add(s));
+        // run
+        extractor.checkAndConsumeAsNotEmptyString("testKey", result::add);
 
         // verify
         assertEquals(Boolean.TRUE, extractor.hasMessages());
@@ -195,16 +181,55 @@ class InputExtractorTest
     }
 
     @Test
-    void test_extractAndConsumeAsInteger()
+    void test_checkAndConsumeAsBooleanDefaultFalse()
+    {
+        // setup
+        inputs.add("testKey", "");
+        inputs.add("bool", "true");
+        List<Boolean>  result    = new ArrayList<>();
+        InputExtractor extractor = new InputExtractor(inputs);
+
+        // run
+        extractor.checkAndConsumeAsBooleanDefaultFalse("testKey", result::add);
+        extractor.checkAndConsumeAsBooleanDefaultFalse("bool", result::add);
+
+        // verify
+        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(0, extractor.getMessages().size());
+        assertEquals(Boolean.FALSE, result.get(0));
+        assertEquals(Boolean.TRUE, result.get(1));
+    }
+
+    @Test
+    void test_checkAndConsumeAsBooleanDefaultTrue()
+    {
+        // setup
+        inputs.add("testKey", "");
+        inputs.add("bool", "false");
+        List<Boolean>  result    = new ArrayList<>();
+        InputExtractor extractor = new InputExtractor(inputs);
+
+        // run
+        extractor.checkAndConsumeAsBooleanDefaultTrue("testKey", result::add);
+        extractor.checkAndConsumeAsBooleanDefaultTrue("bool", result::add);
+
+        // verify
+        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(0, extractor.getMessages().size());
+        assertEquals(Boolean.TRUE, result.get(0));
+        assertEquals(Boolean.FALSE, result.get(1));
+    }
+
+    @Test
+    void test_checkAndConsumeAsInteger()
     {
         // setup
         inputs.add("testKey", "1");
         List<Integer>  result    = new ArrayList<>();
-
-        // run
         InputExtractor extractor = new InputExtractor(inputs);
 
-        extractor.extractAndConsumeAsInteger("testKey", s -> result.add(s));
+        // run
+        extractor.checkAndConsumeAsInteger("testKey", result::add);
 
         // verify
         assertEquals(Boolean.FALSE, extractor.hasMessages());
@@ -213,59 +238,14 @@ class InputExtractorTest
     }
 
     @Test
-    void test_extractAndConsumeAsInteger_inBounds()
-    {
-        // setup
-        inputs.add("testKey", "1");
-        List<Integer>  result    = new ArrayList<>();
-
-        // run
-        InputExtractor extractor = new InputExtractor(inputs);
-
-        extractor.extractAndConsumeAsInteger("testKey", 0, 2, s -> result.add(s));
-
-        // verify
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
-        assertEquals(1, result.size());
-        assertEquals(Integer.valueOf(1), result.get(0));
-    }
-
-    @Test
-    void test_extractAndConsumeAsInteger_outOfBounds()
-    {
-        // setup
-        inputs.add("testKey", "1");
-        List<Integer>  result    = new ArrayList<>();
-
-        // run
-        InputExtractor extractor = new InputExtractor(inputs);
-
-        extractor.extractAndConsumeAsInteger("testKey", 2, 3, s -> result.add(s));
-        extractor.extractAndConsumeAsInteger("testKey", null, 3, s -> result.add(s));
-        extractor.extractAndConsumeAsInteger("testKey", 2, null, s -> result.add(s));
-        extractor.extractAndConsumeAsInteger("testKey", 3, 2, s -> result.add(s));
-
-        // verify
-        assertEquals(Boolean.TRUE, extractor.hasMessages());
-        assertEquals(4, extractor.getMessages().size());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(0).getType());
-        assertEquals(MessageTarget.MARKER, extractor.getMessages().get(0).getTarget());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(1).getType());
-        assertEquals(MessageTarget.MARKER, extractor.getMessages().get(1).getTarget());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(2).getType());
-        assertEquals(MessageTarget.MARKER, extractor.getMessages().get(2).getTarget());
-    }
-
-    @Test
-    void test_extractAndConsumeAsInteger_NumberFormatException()
+    void test_checkAndConsumeAsInteger_NumberFormatException()
     {
         // setup
         inputs.add("testKey", "a");
-
-        // run
         InputExtractor extractor = new InputExtractor(inputs);
 
-        extractor.extractAndConsumeAsInteger("testKey", s -> s.toString());
+        // run
+        extractor.checkAndConsumeAsInteger("testKey", s -> s.toString());
 
         // verify
         assertEquals(Boolean.TRUE, extractor.hasMessages());
@@ -275,16 +255,70 @@ class InputExtractorTest
     }
 
     @Test
-    void test_extractAndConsumeAsDouble()
+    void test_checkAndConsumeAsInteger_inBounds()
+    {
+        // setup
+        IntegerInputProcessor processor = IntegerInputProcessor
+            .builder()
+            .lowerBound(0)
+            .upperBound(2)
+            .build();
+        inputs.add("testKey", "1");
+        List<Integer>  result    = new ArrayList<>();
+        InputExtractor extractor = new InputExtractor(inputs);
+
+        // run
+        extractor.checkAndConsumeAsInteger("testKey", processor, result::add);
+
+        // verify
+        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(1, result.size());
+        assertEquals(Integer.valueOf(1), result.get(0));
+    }
+
+    @Test
+    void test_checkAndConsumeAsInteger_outOfBounds()
+    {
+        // setup
+        IntegerInputProcessor processor;
+        inputs.add("testKey", "1");
+        List<Integer>  result    = new ArrayList<>();
+        InputExtractor extractor = new InputExtractor(inputs);
+
+        // run
+        processor = IntegerInputProcessor
+            .builder()
+            .lowerBound(2)
+            .upperBound(2)
+            .build();
+        extractor.checkAndConsumeAsInteger("testKey", processor, result::add);
+
+        processor = IntegerInputProcessor
+            .builder()
+            .lowerBound(3)
+            .upperBound(2)
+            .build();
+        extractor.checkAndConsumeAsInteger("testKey", processor, result::add);
+
+        // verify
+        assertEquals(Boolean.TRUE, extractor.hasMessages());
+        assertEquals(2, extractor.getMessages().size());
+        assertEquals(MessageType.ERROR, extractor.getMessages().get(0).getType());
+        assertEquals(MessageTarget.MARKER, extractor.getMessages().get(0).getTarget());
+        assertEquals(MessageType.ERROR, extractor.getMessages().get(1).getType());
+        assertEquals(MessageTarget.MARKER, extractor.getMessages().get(1).getTarget());
+    }
+
+    @Test
+    void test_checkAndConsumeAsDouble()
     {
         // setup
         inputs.add("testKey", "1.0");
         List<Double>   result    = new ArrayList<>();
-
-        // run
         InputExtractor extractor = new InputExtractor(inputs);
 
-        extractor.extractAndConsumeAsDouble("testKey", s -> result.add(s));
+        // run
+        extractor.checkAndConsumeAsDouble("testKey", result::add);
 
         // verify
         assertEquals(Boolean.FALSE, extractor.hasMessages());
@@ -293,16 +327,15 @@ class InputExtractorTest
     }
 
     @Test
-    void test_extractAndConsumeAsDouble_NumberFormatException()
+    void test_checkAndConsumeAsDouble_NumberFormatException()
     {
         // setup
         inputs.add("testKey", "a");
         List<Double>   result    = new ArrayList<>();
-
-        // run
         InputExtractor extractor = new InputExtractor(inputs);
 
-        extractor.extractAndConsumeAsDouble("testKey", s -> result.add(s));
+        // run
+        extractor.checkAndConsumeAsDouble("testKey", result::add);
 
         // verify
         assertEquals(Boolean.TRUE, extractor.hasMessages());
@@ -312,16 +345,20 @@ class InputExtractorTest
     }
 
     @Test
-    void test_extractAndConsumeAsDouble_inBounds()
+    void test_checkAndConsumeAsDouble_inBounds()
     {
         // setup
+        DoubleInputProcessor processor = DoubleInputProcessor
+            .builder()
+            .lowerBound(0d)
+            .upperBound(2d)
+            .build();
         inputs.add("testKey", "1.0");
         List<Double>   result    = new ArrayList<>();
-
-        // run
         InputExtractor extractor = new InputExtractor(inputs);
 
-        extractor.extractAndConsumeAsDouble("testKey", 0.0, 2.0, s -> result.add(s));
+        // run
+        extractor.checkAndConsumeAsDouble("testKey", processor, result::add);
 
         // verify
         assertEquals(Boolean.FALSE, extractor.hasMessages());
@@ -330,32 +367,41 @@ class InputExtractorTest
     }
 
     @Test
-    void test_extractAndConsumeAsDouble_outOfBounds()
+    void test_checkAndConsumeAsDouble_outOfBounds()
     {
         // setup
+        DoubleInputProcessor processor;
         inputs.add("testKey", "1");
         List<Double>   result    = new ArrayList<>();
 
         // run
         InputExtractor extractor = new InputExtractor(inputs);
 
-        extractor.extractAndConsumeAsDouble("testKey", 2.0, 3.0, s -> result.add(s));
-        extractor.extractAndConsumeAsDouble("testKey", null, 3.0, s -> result.add(s));
-        extractor.extractAndConsumeAsDouble("testKey", 2.0, null, s -> result.add(s));
+        processor = DoubleInputProcessor
+            .builder()
+            .lowerBound(2d)
+            .upperBound(3d)
+            .build();
+        extractor.checkAndConsumeAsDouble("testKey", processor, result::add);
+
+        processor = DoubleInputProcessor
+            .builder()
+            .lowerBound(3d)
+            .upperBound(2d)
+            .build();
+        extractor.checkAndConsumeAsDouble("testKey", processor, result::add);
 
         // verify
         assertEquals(Boolean.TRUE, extractor.hasMessages());
-        assertEquals(3, extractor.getMessages().size());
+        assertEquals(2, extractor.getMessages().size());
         assertEquals(MessageType.ERROR, extractor.getMessages().get(0).getType());
         assertEquals(MessageTarget.MARKER, extractor.getMessages().get(0).getTarget());
         assertEquals(MessageType.ERROR, extractor.getMessages().get(1).getType());
         assertEquals(MessageTarget.MARKER, extractor.getMessages().get(1).getTarget());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(2).getType());
-        assertEquals(MessageTarget.MARKER, extractor.getMessages().get(2).getTarget());
     }
 
     @Test
-    void test_extractAndConsumeAsDate()
+    void test_checkAndConsumeAsDate()
     {
         // setup
         inputs.add("testKey", "2025-11-02");
@@ -364,7 +410,7 @@ class InputExtractorTest
         // run
         InputExtractor extractor = new InputExtractor(inputs);
 
-        extractor.extractAndConsumeAsDate("testKey", s -> result.add(s));
+        extractor.checkAndConsumeAsDate("testKey", result::add);
 
         // verify
         assertEquals(Boolean.FALSE, extractor.hasMessages());
@@ -373,7 +419,7 @@ class InputExtractorTest
     }
 
     @Test
-    void test_extractAndConsumeAsDate_notParsable()
+    void test_checkAndConsumeAsDate_notParsable()
     {
         // setup
         inputs.add("testKey", "a");
@@ -381,7 +427,7 @@ class InputExtractorTest
         // run
         InputExtractor extractor = new InputExtractor(inputs);
 
-        extractor.extractAndConsumeAsDate("testKey", s -> {
+        extractor.checkAndConsumeAsDate("testKey", s -> {
         });
 
         // verify
@@ -392,7 +438,7 @@ class InputExtractorTest
     }
 
     @Test
-    void test_extractAndConsumeAsEnum()
+    void test_checkAndConsumeAsEnum()
     {
         // setup
         inputs.add("testKey", "value1");
@@ -401,7 +447,7 @@ class InputExtractorTest
         // run
         InputExtractor extractor = new InputExtractor(inputs);
 
-        extractor.extractAndConsumeAsEnum("testKey", TestEnum.class, s -> result.add(s));
+        extractor.checkAndConsumeAsEnum("testKey", TestEnum.class, result::add);
 
         // verify
         assertEquals(Boolean.FALSE, extractor.hasMessages());
@@ -410,7 +456,7 @@ class InputExtractorTest
     }
 
     @Test
-    void test_extractAndConsumeAsEnum_noSuchElement()
+    void test_checkAndConsumeAsEnum_noSuchElement()
     {
         // setup
         inputs.add("testKey", "value3");
@@ -419,7 +465,7 @@ class InputExtractorTest
         // run
         InputExtractor extractor = new InputExtractor(inputs);
 
-        extractor.extractAndConsumeAsEnum("testKey", TestEnum.class, s -> result.add(s));
+        extractor.checkAndConsumeAsEnum("testKey", TestEnum.class, result::add);
 
         // verify
         assertEquals(Boolean.TRUE, extractor.hasMessages());
@@ -428,7 +474,7 @@ class InputExtractorTest
     }
 
     @Test
-    void test_consumeEnum_unexpectedException()
+    void test_checkAndConsumeAsEnum_unexpectedException()
     {
         // setup
         inputs.add("", "value1");
@@ -436,7 +482,7 @@ class InputExtractorTest
         // run
         InputExtractor extractor = new InputExtractor(inputs);
 
-        extractor.extractAndConsumeAsEnum("testKey", TestEnum.class, s -> {
+        extractor.checkAndConsumeAsEnum("testKey", TestEnum.class, s -> {
             throw new IllegalArgumentException();
         });
 
@@ -447,11 +493,53 @@ class InputExtractorTest
     }
 
     @Test
+    void test_checkAndConsumeAsTagList()
+    {
+        // setup
+        inputs.add("testKey", "[{\"value\":\"tag1\"}]");
+        List<TagList>  result    = new ArrayList<>();
+        InputExtractor extractor = new InputExtractor(inputs);
+
+        // run
+        extractor.checkAndConsumeAsTagList("testKey", result::add);
+
+        // verify
+        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(1, result.size());
+        assertEquals(new Tag("tag1"), result.get(0).getFirst());
+    }
+
+    @Test
+    void test_checkAndConsumeAsNotEmptyTagList()
+    {
+        // setup
+        inputs.add("testKey", "[]");
+        List<TagList>  result    = new ArrayList<>();
+        InputExtractor extractor = new InputExtractor(inputs);
+
+        // run
+        extractor.checkAndConsumeAsNotEmptyTagList("testKey", result::add);
+
+        // verify
+        assertEquals(Boolean.TRUE, extractor.hasMessages());
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void test_checkFiles_invalidKey()
+    {
+        // setup
+        InputExtractor extractor = new InputExtractor(inputs, null);
+
+        // run & verify
+        assertThrows(IllegalArgumentException.class, () -> extractor.checkFiles(null, false, false));
+        assertThrows(IllegalArgumentException.class, () -> extractor.checkFiles("", false, false));
+    }
+
+    @Test
     void test_checkFiles_nullArray()
     {
         // setup
-
-        // run
         InputExtractor extractor = new InputExtractor(inputs, null);
 
         // run & verify
@@ -467,10 +555,9 @@ class InputExtractorTest
     void test_checkFiles_nullFile()
     {
         // setup
-
-        // run
         InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {});
 
+        // run
         extractor.checkFiles("files", true, false);
 
         // verify

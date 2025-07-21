@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -38,9 +39,16 @@ public final class TagListInputProcessor extends AbsInputProcessor<TagList>
     @Override
     protected TagList parseRaw(String input)
     {
-        if (input.isEmpty() && allowEmpty)
+        if (input.isEmpty() || input.equals("[]"))
         {
-            return fallback;
+            if (allowEmpty)
+            {
+                return fallback;
+            }
+            else
+            {
+                throw new ValueNotPresentException();
+            }
         }
 
         try

@@ -68,7 +68,7 @@ public final class StringInputProcessor extends AbsInputProcessor<String>
                 return createResult(InputCheckResultType.FALLBACK_USED, fallback);
             }
 
-            return createResult(InputCheckResultType.EMPTY_BUT_EXPECTED, input);
+            return createEmptyResult(InputCheckResultType.EMPTY_BUT_EXPECTED);
         }
 
         if (pattern != null)
@@ -91,12 +91,12 @@ public final class StringInputProcessor extends AbsInputProcessor<String>
             return createResult(InputCheckResultType.PASS, input);
         }
 
-        if (!accepts.stream().anyMatch(predicate))
+        if (!accepts.isEmpty() && !accepts.stream().anyMatch(predicate))
         {
             return createEmptyResult(InputCheckResultType.NOT_ACCEPTED_VALUE);
         }
 
-        return createEmptyResult(InputCheckResultType.REJECTED_VALUE);
+        return createResult(InputCheckResultType.PASS, input);
     }
 
 }

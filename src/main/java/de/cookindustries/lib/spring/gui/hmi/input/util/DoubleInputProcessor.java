@@ -3,7 +3,6 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,7 +45,7 @@ public final class DoubleInputProcessor extends AbsInputProcessor<Double>
         {
             if (fallback == null)
             {
-                throw new ValueNotPresentException(MarkerType.NOT_PARSABLE);
+                throw new ValueNotPresentException();
             }
 
             return fallback;
@@ -71,12 +70,12 @@ public final class DoubleInputProcessor extends AbsInputProcessor<Double>
     @Override
     protected InputCheckResult<Double> check(Double input)
     {
-        if (lowerBound < input || input > upperBound)
+        if (input < lowerBound || input > upperBound)
         {
             return createEmptyResult(InputCheckResultType.OUT_OF_BOUNDS);
         }
 
-        return createEmptyResult(InputCheckResultType.REJECTED_VALUE);
+        return createResult(InputCheckResultType.PASS, input);
     }
 
 }
