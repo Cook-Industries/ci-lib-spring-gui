@@ -31,9 +31,6 @@ public enum InputCheckResultType {
     /** Indicated that the input value is a rejected (forbidden) value */
     REJECTED_VALUE(MarkerType.INVALID),
 
-    /** Indicates that the input value was empty (not {@code null}) and was replaced by a fallback */
-    FALLBACK_USED(null),
-
     /** Indicates that the input value was expected but was empty */
     EMPTY_BUT_EXPECTED(MarkerType.INVALID);
 

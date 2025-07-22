@@ -1,6 +1,7 @@
 package de.cookindustries.lib.spring.gui.hmi.input.util;
 
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -24,28 +25,31 @@ public final class StringInputProcessor extends AbsInputProcessor<String>
     /** Whether or not an empty {@code input} is allowed */
     @Default
     @NonNull
-    private final Boolean     allowEmpty         = true;
+    private final Boolean                  allowEmpty         = true;
 
     /** Default value if the {@code input} is empty and is not allowed */
     @Default
-    private final String      fallback           = null;
+    private final String                   fallback           = null;
 
     /** Pattern to match the {@code input} against */
     @Default
-    private final Pattern     pattern            = null;
+    private final Pattern                  pattern            = null;
 
     /** Set of allowed Strings to match the {@code input} */
     @Singular
-    private final Set<String> accepts;
+    private final Set<String>              accepts;
 
     /** Set of <b>not</b> allowed Strings to check against the {@code input} */
     @Singular
-    private final Set<String> rejects;
+    private final Set<String>              rejects;
 
     /** Whether the {@code accept} or {@code reject} sets should checked case sensitive */
     @Default
     @NonNull
-    private final Boolean     caseSensitiveCheck = true;
+    private final Boolean                  caseSensitiveCheck = true;
+
+    @Default
+    private final Function<String, String> sanitazation       = null;
 
     @Override
     protected String parseRaw(String input)
@@ -54,7 +58,7 @@ public final class StringInputProcessor extends AbsInputProcessor<String>
     }
 
     @Override
-    protected InputCheckResult<String> check(final String input)
+    protected InputCheckResult<String> check(String input)
     {
         if (input.isEmpty())
         {
@@ -65,7 +69,7 @@ public final class StringInputProcessor extends AbsInputProcessor<String>
 
             if (fallback != null)
             {
-                return createResult(InputCheckResultType.FALLBACK_USED, fallback);
+                return createResult(InputCheckResultType.PASS, fallback);
             }
 
             return createEmptyResult(InputCheckResultType.EMPTY_BUT_EXPECTED);
@@ -88,7 +92,7 @@ public final class StringInputProcessor extends AbsInputProcessor<String>
 
         if (rejects.stream().anyMatch(predicate))
         {
-            return createResult(InputCheckResultType.PASS, input);
+            return createEmptyResult(InputCheckResultType.REJECTED_VALUE);
         }
 
         if (!accepts.isEmpty() && !accepts.stream().anyMatch(predicate))
@@ -97,6 +101,17 @@ public final class StringInputProcessor extends AbsInputProcessor<String>
         }
 
         return createResult(InputCheckResultType.PASS, input);
+    }
+
+    @Override
+    protected String prepare(String output)
+    {
+        if (sanitazation != null)
+        {
+            return sanitazation.apply(output);
+        }
+
+        return output;
     }
 
 }

@@ -20,10 +20,6 @@ import lombok.Builder.Default;
 public final class DoubleInputProcessor extends AbsInputProcessor<Double>
 {
 
-    /** Set a maximum number of decimal places for parsing ({@code input} gets rounded up on parsing) */
-    @Default
-    private final Integer decimalPlaces = null;
-
     /** Default value if the {@code input} is {@code empty} */
     @Default
     private final Double  fallback      = null;
@@ -37,6 +33,10 @@ public final class DoubleInputProcessor extends AbsInputProcessor<Double>
     @NonNull
     @Default
     private final Double  upperBound    = Double.MAX_VALUE;
+
+    /** Set a maximum number of decimal places for parsing ({@code input} gets rounded up on parsing) */
+    @Default
+    private final Integer decimalPlaces = null;
 
     @Override
     protected Double parseRaw(String input)

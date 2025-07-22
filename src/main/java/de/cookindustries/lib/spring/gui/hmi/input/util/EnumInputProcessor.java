@@ -39,6 +39,7 @@ public final class EnumInputProcessor<T extends Enum<T>> extends AbsInputProcess
             .filter(
                 t -> input
                     .toUpperCase()
+                    .replace(" ", "_")
                     .equals(t.name()))
             .findFirst()
             .get();

@@ -22,7 +22,7 @@ public class DateInputProcessor extends AbsInputProcessor<Date>
     @Default
     private final Date fallback   = null;
 
-    /** Lower bound the {@code input} must clear (exclusive) {@code lowerBound} &lt; {@code input} */
+    /** Lower bound the {@code input} must clear (inclusive) {@code lowerBound} &gt; {@code input} */
     @Default
     private final Date lowerBound = null;
 

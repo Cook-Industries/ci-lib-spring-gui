@@ -172,8 +172,8 @@ public final class InputExtractor
 
             switch (resultType)
             {
-                case PASS, FALLBACK_USED -> {
-                    T obj = result.getResult().get();
+                case PASS -> {
+                    T obj = result.getResult();
 
                     consumer.accept(obj);
                 }

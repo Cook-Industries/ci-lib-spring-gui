@@ -68,7 +68,7 @@ public final class IntegerInputProcessor extends AbsInputProcessor<Integer>
 
         if (rejects.stream().anyMatch(input::equals))
         {
-            return createResult(InputCheckResultType.PASS, input);
+            return createEmptyResult(InputCheckResultType.REJECTED_VALUE);
         }
 
         if (!accepts.isEmpty() && !accepts.stream().anyMatch(input::equals))

@@ -4,10 +4,10 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Singular;
 import lombok.Builder.Default;
 
 /**
@@ -33,22 +33,15 @@ public final class TagListInputProcessor extends AbsInputProcessor<TagList>
     private final TagList             fallback        = new TagList();
 
     /** Whitelist value if the {@code input} is empty */
-    @Default
-    private final TagList             whitelist       = null;
+    @Singular("whitelist")
+    private final List<Tag>           whitelist;
 
     @Override
     protected TagList parseRaw(String input)
     {
         if (input.isEmpty() || input.equals("[]"))
         {
-            if (allowEmpty)
-            {
-                return fallback;
-            }
-            else
-            {
-                throw new ValueNotPresentException();
-            }
+            return new TagList();
         }
 
         try
@@ -64,9 +57,24 @@ public final class TagListInputProcessor extends AbsInputProcessor<TagList>
     @Override
     protected InputCheckResult<TagList> check(TagList input)
     {
+        if (input.isEmpty())
+        {
+            if (allowEmpty)
+            {
+                if (fallback != null)
+                {
+                    return createResult(InputCheckResultType.PASS, fallback);
+                }
+
+                return createResult(InputCheckResultType.PASS, new TagList());
+            }
+
+            return createEmptyResult(InputCheckResultType.EMPTY_BUT_EXPECTED);
+        }
+
         TagList tagList = new TagList();
 
-        if (whitelist != null)
+        if (!whitelist.isEmpty())
         {
             List<Tag> tags = input.stream().filter(whitelist::contains).toList();
 

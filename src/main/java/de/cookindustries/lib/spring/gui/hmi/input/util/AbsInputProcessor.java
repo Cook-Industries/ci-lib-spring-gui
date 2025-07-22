@@ -34,10 +34,12 @@ public abstract class AbsInputProcessor<T>
      */
     protected final InputCheckResult<T> createResult(InputCheckResultType type, T result)
     {
+        T endResult = prepare(result);
+
         return InputCheckResult
             .<T>builder()
             .type(type)
-            .result(Optional.ofNullable(result))
+            .result(Optional.ofNullable(endResult))
             .build();
     }
 
@@ -64,6 +66,20 @@ public abstract class AbsInputProcessor<T>
      * @return a {@code InputCheckResult} containing the result type and a optional result object
      */
     protected abstract InputCheckResult<T> check(T input);
+
+    /**
+     * Make final preparations to the {@code #check(Object)} result {@code output} before calling
+     * {@code #createResult(InputCheckResultType, Object)} the endresult.
+     * <p>
+     * The default implementation does nothing.
+     * 
+     * @param output to transform
+     * @return the transformed {@code output}
+     */
+    protected T prepare(T output)
+    {
+        return output;
+    }
 
     /**
      * Check the given {@code String} from the {@code UI form}.
