@@ -9,12 +9,10 @@ package de.cookindustries.lib.spring.gui.hmi.mapper.html;
 
 import de.cookindustries.lib.spring.gui.html.HtmlExportable;
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.NonNull;
+import lombok.Builder.Default;
 
 /**
  * Describes a HTML element attribute
@@ -22,44 +20,23 @@ import lombok.Setter;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@Data
-@RequiredArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
+@Getter
 public final class Attribute implements HtmlExportable
 {
 
-    /**
-     * name of the attribute
-     */
-    private final String name;
+    /** name of the attribute */
+    @NonNull
+    private final String  name;
 
-    /**
-     * value of the attribute
-     */
-    private final String value;
+    /** value of the attribute */
+    @Default
+    private final String  value  = null;
 
-    /**
-     * whether this attribute has a value or is name only, e.g. 'checked'
-     */
-    @Setter(value = AccessLevel.NONE)
-    @Getter(value = AccessLevel.NONE)
-    private boolean      valueless = false;
-
-    /**
-     * if this attribute is valueless, it can be active or not
-     */
-    private boolean      active    = true;
-
-    /**
-     * Create a valueless html attribute. E.g. 'checked';
-     *
-     * @param name of this {@code Attribute}
-     * @param active wether this attribute is active or not
-     */
-    public Attribute(String name, boolean active)
-    {
-        this(name, "", active, true);
-    }
+    /** whether this attribut should be active (inactive results in an empty result) */
+    @Default
+    @NonNull
+    private final Boolean active = true;
 
     /**
      * {@inheritDoc}
@@ -67,10 +44,13 @@ public final class Attribute implements HtmlExportable
     @Override
     public String getHtmlRep()
     {
-        return valueless
+        if (!active)
+        {
+            return "";
+        }
+
+        return value == null
             ? StringAdapter.from(name, "=\"", name, "\"")
-            : value.isBlank()
-                ? ""
-                : StringAdapter.from(name, "=\"", value, "\"");
+            : StringAdapter.from(name, "=\"", value, "\"");
     }
 }

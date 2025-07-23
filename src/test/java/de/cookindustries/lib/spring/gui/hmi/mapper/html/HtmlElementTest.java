@@ -24,7 +24,11 @@ class HtmlElementTest
         HtmlElement element  = HtmlElement
             .builder()
             .tag("div")
-            .attribute(new Attribute("checked", true))
+            .attribute(
+                Attribute
+                    .builder()
+                    .name("checked")
+                    .build())
             .dataAttribute(TEST_VAL, TEST_VAL)
             .isSingleTag(true)
             .build();
@@ -40,11 +44,16 @@ class HtmlElementTest
     void test_html_fullElement()
     {
         // setup
-        String      expected = "<div checked=\"test\" class=\"test\" data-test=\"test\">test</div>";
+        String      expected = "<div id=\"value\" class=\"test\" data-test=\"test\">test</div>";
         HtmlElement element  = HtmlElement
             .builder()
             .tag("div")
-            .attribute(new Attribute("checked", TEST_VAL))
+            .attribute(
+                Attribute
+                    .builder()
+                    .name("id")
+                    .value("value")
+                    .build())
             .clazz(TEST_VAL)
             .dataAttribute(TEST_VAL, TEST_VAL)
             .isSingleTag(false)

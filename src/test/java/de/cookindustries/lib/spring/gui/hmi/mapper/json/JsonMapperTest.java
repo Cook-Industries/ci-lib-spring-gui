@@ -22,7 +22,7 @@ import de.cookindustries.lib.spring.gui.hmi.container.*;
 import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonParsingException;
-import de.cookindustries.lib.spring.gui.hmi.mapper.util.KeyReplacmentMap;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.KeywordReplacmentMap;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
 
 public class JsonMapperTest
@@ -55,7 +55,8 @@ public class JsonMapperTest
     {
         // setup
         JsonTreeRoot root   = getRoot("json-test-files/json-mapper/basic-root-static.json");
-        JsonMapper   mapper = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(new KeyReplacmentMap()));
+        JsonMapper   mapper =
+            new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(KeywordReplacmentMap.builder().build()));
 
         // run
         MapperResult result = mapper.map();
@@ -69,7 +70,8 @@ public class JsonMapperTest
     {
         // setup
         JsonTreeRoot root   = getRoot("json-test-files/json-mapper/root-with-component.json");
-        JsonMapper   mapper = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(new KeyReplacmentMap()));
+        JsonMapper   mapper =
+            new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(KeywordReplacmentMap.builder().build()));
 
         // run
         MapperResult result = mapper.map();
@@ -93,13 +95,16 @@ public class JsonMapperTest
     void test_map_replaceClass_withExisting()
     {
         // setup
-        JsonTreeRoot     root     = getRoot("json-test-files/json-mapper/replace-class.json");
-        KeyReplacmentMap valueMap = new KeyReplacmentMap();
-        valueMap.clazz("class1", "testClass");
-        JsonMapper   mapper = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
+        JsonTreeRoot         root     = getRoot("json-test-files/json-mapper/replace-class.json");
+        KeywordReplacmentMap valueMap =
+            KeywordReplacmentMap
+                .builder()
+                .clazz("class1", "testClass")
+                .build();
+        JsonMapper           mapper   = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
 
         // run
-        MapperResult result = mapper.map();
+        MapperResult         result   = mapper.map();
 
         // verify
         assertNotNull(result);
@@ -113,12 +118,12 @@ public class JsonMapperTest
     void test_map_replaceClass_notExisting()
     {
         // setup
-        JsonTreeRoot     root     = getRoot("json-test-files/json-mapper/replace-class.json");
-        KeyReplacmentMap valueMap = new KeyReplacmentMap();
-        JsonMapper       mapper   = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
+        JsonTreeRoot         root     = getRoot("json-test-files/json-mapper/replace-class.json");
+        KeywordReplacmentMap valueMap = KeywordReplacmentMap.builder().build();
+        JsonMapper           mapper   = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
 
         // run
-        MapperResult     result   = mapper.map();
+        MapperResult         result   = mapper.map();
 
         // verify
         assertFalse(result.getContainers().getFirst().getClasses().contains("testClass"));
@@ -143,13 +148,16 @@ public class JsonMapperTest
     void test_map_parameter()
     {
         // setup
-        JsonTreeRoot     root     = getRoot("json-test-files/json-mapper/replace-parameter.json");
-        KeyReplacmentMap valueMap = new KeyReplacmentMap();
-        valueMap.value("param", "testText");
-        JsonMapper   mapper = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
+        JsonTreeRoot         root     = getRoot("json-test-files/json-mapper/replace-parameter.json");
+        KeywordReplacmentMap valueMap =
+            KeywordReplacmentMap
+                .builder()
+                .value("param", "testText")
+                .build();
+        JsonMapper           mapper   = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
 
         // run
-        MapperResult result = mapper.map();
+        MapperResult         result   = mapper.map();
 
         // verify
         assertEquals("testText", ((TextContainer) result.getContainers().getFirst()).getText());
@@ -159,9 +167,9 @@ public class JsonMapperTest
     void test_map_parameter_throws_onMiss()
     {
         // setup
-        JsonTreeRoot     root     = getRoot("json-test-files/json-mapper/parameter-missing.json");
-        KeyReplacmentMap valueMap = new KeyReplacmentMap();
-        JsonMapper       mapper   = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
+        JsonTreeRoot         root     = getRoot("json-test-files/json-mapper/parameter-missing.json");
+        KeywordReplacmentMap valueMap = KeywordReplacmentMap.builder().build();
+        JsonMapper           mapper   = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
 
         // run & verify
         assertThrows(JsonParsingException.class,

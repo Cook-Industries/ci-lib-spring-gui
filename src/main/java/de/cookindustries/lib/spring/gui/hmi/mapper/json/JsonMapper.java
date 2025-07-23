@@ -34,18 +34,18 @@ import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonParsingException;
-import de.cookindustries.lib.spring.gui.hmi.mapper.util.KeyReplacmentMap;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.KeywordReplacmentMap;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
 
 /**
  * This object is used to map a {@link PseudoElement} tree inside a {@link JsonTreeRoot} into a in-memory tree of {@link Container}s.
  * <p>
- * The {@code mapper} will try to replace certain keyword-trigger with their depending values from a given set of {@link KeyReplacmentMap}s.
- * These keywords are:
+ * The {@code mapper} will try to replace certain keyword-trigger with their depending values from a given set of
+ * {@link KeywordReplacmentMap}s. These keywords are:
  * <ul>
  * <li>$$value${@code name} - to replace values in {@code inputs} and so on, depending on type, with values from a
- * {@link KeyReplacmentMap}</li>
+ * {@link KeywordReplacmentMap}</li>
  * <li>$$text${@code name} - to replace text with a translation defined by a {@link Locale} and values from a
  * {@link AbsTranslationProvider}</li>
  * <li>$$function${@code name} - to replace trigger to {@link AbsFunctionCall} entries</li>
@@ -126,7 +126,7 @@ public class JsonMapper
     private final JsonTreeRoot                     treeRoot;
     private final Locale                           locale;
     private final AbsTranslationProvider           translationProvider;
-    private final List<KeyReplacmentMap>           keyReplacmentMaps;
+    private final List<KeywordReplacmentMap>       keyReplacmentMaps;
     private final List<AbsFunctionCall>            functions;
     private final String                           uuid;
 
@@ -146,7 +146,7 @@ public class JsonMapper
     /**
      * Create {@code JsonMapper}.
      * <p>
-     * Note: any {@link KeyReplacmentMap} provided for this will call {@link KeyReplacmentMap#seal()} before it is used!
+     * Note: any {@link KeywordReplacmentMap} provided for this will call {@link KeywordReplacmentMap#seal()} before it is used!
      *
      * @param root to map
      * @param locale the language to use fetch from {@code translationMap}
@@ -156,7 +156,7 @@ public class JsonMapper
      * @throws JsonMapperException if mapping is set to dynamic but no {@code valueMap}s are provided
      */
     public JsonMapper(JsonTreeRoot root, Locale locale, AbsTranslationProvider translationProvider,
-        List<KeyReplacmentMap> keyReplacmentMaps)
+        List<KeywordReplacmentMap> keyReplacmentMaps)
     {
         Objects.requireNonNull(root, "[root] can not be null");
         Objects.requireNonNull(locale, "[locale] can not be null");
@@ -187,8 +187,8 @@ public class JsonMapper
 
         keyReplacmentMaps
             .stream()
-            .sorted(Comparator.comparing(KeyReplacmentMap::getPresedence).reversed())
-            .forEach(KeyReplacmentMap::seal);
+            .sorted(Comparator.comparing(KeywordReplacmentMap::getPresedence).reversed())
+            .toList();
 
         return MapperResult
             .builder()
