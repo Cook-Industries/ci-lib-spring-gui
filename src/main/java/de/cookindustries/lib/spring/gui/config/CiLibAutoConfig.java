@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ComponentScan(basePackages = "de.cookindustries.lib.spring.gui")
-public class CiLibAutoConfig
+class CiLibAutoConfig
 {
 
 }

@@ -11,19 +11,14 @@ package de.cookindustries.lib.spring.gui.html;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-public enum CSSClass {
+public final class CssClass
+{
 
-    HIDDEN("hidden");
+    public static final String HIDDEN = "hidden";
 
-    private final String className;
-
-    private CSSClass(String className)
+    private CssClass()
     {
-        this.className = className;
+        // prevent instantiation
     }
 
-    public String getClassName()
-    {
-        return className;
-    }
 }

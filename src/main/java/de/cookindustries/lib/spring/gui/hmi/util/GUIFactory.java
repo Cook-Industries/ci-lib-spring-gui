@@ -27,7 +27,7 @@ import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonTreeMapper;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonTreeRoot;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.MapperResult;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.KeywordReplacmentMap;
-import de.cookindustries.lib.spring.gui.html.CSSClass;
+import de.cookindustries.lib.spring.gui.html.CssClass;
 import de.cookindustries.lib.spring.gui.html.CSSLink;
 import de.cookindustries.lib.spring.gui.html.HtmlSite;
 import de.cookindustries.lib.spring.gui.html.JsImport;
@@ -76,7 +76,7 @@ public final class GUIFactory
                 .jsScript(new JsPlainLink("/webjars/yaireo__tagify/dist/tagify.js"))
                 .cssLink(new CSSLink("/webjars/bootstrap/css/bootstrap.min.css"))
                 .cssLink(new CSSLink("/webjars/yaireo__tagify/dist/tagify.css"))
-                .cssLink(new CSSLink("/css/ci-core.css"))
+                .cssLink(new CSSLink("/css/cook-industries-core.css"))
                 .cssLinks(cssLinks)
                 .build();
     }
@@ -144,7 +144,7 @@ public final class GUIFactory
             .container(ContentContainer
                 .builder()
                 .uid("error-overlay")
-                .clazz(CSSClass.HIDDEN.getClassName())
+                .clazz(CssClass.HIDDEN)
                 .content(
                     ContentContainer
                         .builder()

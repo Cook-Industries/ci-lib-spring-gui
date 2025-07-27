@@ -25,7 +25,7 @@ public class SiteImports
     private final List<CSSLink>       cssLinks;
 
     @Singular
-    private final List<CSSEntity>     cssEntities;
+    private final List<CssEntity>     cssEntities;
 
     @Singular
     private final List<AbsJsLink>     jsScripts;

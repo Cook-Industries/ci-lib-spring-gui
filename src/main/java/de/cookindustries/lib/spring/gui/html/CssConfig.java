@@ -7,23 +7,27 @@
  */
 package de.cookindustries.lib.spring.gui.html;
 
+import java.util.List;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Singular;
+import lombok.extern.jackson.Jacksonized;
+
 /**
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-public enum CSSEntityType {
+@Builder
+@Getter
+@Jacksonized
+public class CssConfig
+{
 
-    CLASS("."), TAG("#");
+    @Singular
+    private final List<CssEntity>    rules;
 
-    private String prefix;
+    @Singular
+    private final List<CssAnimation> animations;
 
-    private CSSEntityType(String prefix)
-    {
-        this.prefix = prefix;
-    }
-
-    public final String getPrefix()
-    {
-        return prefix;
-    }
 }

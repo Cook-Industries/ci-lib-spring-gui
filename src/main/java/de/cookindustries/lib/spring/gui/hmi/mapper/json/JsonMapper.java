@@ -145,8 +145,6 @@ public class JsonMapper
 
     /**
      * Create {@code JsonMapper}.
-     * <p>
-     * Note: any {@link KeywordReplacmentMap} provided for this will call {@link KeywordReplacmentMap#seal()} before it is used!
      *
      * @param root to map
      * @param locale the language to use fetch from {@code translationMap}

@@ -20,7 +20,7 @@ import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Configuration
-public class CiLibBeanConfig
+class CiLibBeanConfig
 {
 
     /**

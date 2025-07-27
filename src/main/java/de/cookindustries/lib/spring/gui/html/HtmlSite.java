@@ -38,7 +38,7 @@ public class HtmlSite implements HtmlExportable
     private final List<CSSLink>         cssLinks;
 
     @Singular
-    private final List<CSSEntity>       cssEntities;
+    private final List<CssEntity>       cssEntities;
 
     @Singular
     private final List<AbsJsLink>       jsScripts;
@@ -64,7 +64,7 @@ public class HtmlSite implements HtmlExportable
             .appendnl(headers, HtmlHeadValue::getHtmlRep)
             .appendnl(cssLinks, CSSLink::getHtmlRep)
             .appendnl("<style>")
-            .appendnl(cssEntities, CSSEntity::getHtmlRep)
+            .appendnl(cssEntities, CssEntity::toCssString)
             .appendnl("</style>")
             .appendnl(
                 JsImportMap

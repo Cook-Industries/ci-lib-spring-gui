@@ -1,0 +1,449 @@
+/**
+ * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
+ * <p>
+ * Licensed under the MIT License.
+ * <p>
+ * See LICENSE file in the project root for full license information.
+ * 
+ * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
+
+/* === > var defs =============================================================================== */
+:root {
+  --ci-bgc-nightblue: #2b5782;
+  --ci-tc-f-nightblue: white;
+
+  --ci-bgc-overlay-backdrop: rgba(0, 0, 0, 0.5);
+
+  --ci-bgc-error-25: rgba(255, 0, 0, 0.25);
+  --ci-bgc-error-50: rgba(255, 0, 0, 0.5);
+  --ci-tc-f-error: white;
+  --ci-color-error-icon: red;
+
+  --ci-bgc-warning-25: rgba(255, 179, 0, 0.25);
+  --ci-bgc-warning-50: rgba(255, 179, 0, 0.5);
+  --ci-tc-f-warning: black;
+  --ci-color-warning-icon: yellow;
+
+  --ci-bgc-success-25: rgba(0, 255, 0, 0.25);
+  --ci-bgc-success-50: rgba(0, 255, 0, 0.5);
+  --ci-tc-f-success: black;
+  --ci-color-success-icon: green;
+
+  --ci-bgc-notification-25: rgba(0, 59, 209, 0.25);
+  --ci-bgc-notification-50: rgba(0, 59, 209, 0.5);
+  --ci-tc-f-notification: white;
+  --ci-color-notification-icon: blue;
+
+  --ci-bgc-error-container: rgba(64, 64, 64, 1);
+  --ci-bgc-popup: var(--ci-bgc-error-container);
+}
+
+/* === < var defs =============================================================================== */
+
+body,
+html {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.bgc-black {
+  background-color: black;
+  color: white;
+}
+
+.bgc-white {
+  background-color: white;
+  color: black;
+}
+
+.bgc-nightblue {
+  background-color: var(--ci-bgc-nightblue);
+  color: var(--ci-tc-f-nightblue);
+}
+
+.bgc-light-green {
+  background-color: lightgreen;
+  color: black;
+}
+
+.bgc-red {
+  background-color: red;
+  color: black;
+}
+
+.bgc-light-yellow {
+  background-color: lightgoldenrodyellow;
+  color: black;
+}
+
+.bgc-magenta {
+  background-color: rgb(153, 51, 153);
+  color: black;
+}
+
+.text-color-red {
+  color: red;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.overflow-auto {
+  overflow: auto;
+}
+
+/* === > notifications ========================================================================== */
+#error-overlay {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  z-index: 499;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+
+  background: var(--ci-bgc-overlay-backdrop);
+}
+
+#error-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  padding: 1rem;
+
+  background: var(--ci-bgc-error-container);
+
+  border: 0.25rem solid black;
+  border-radius: 0.5rem;
+}
+
+#error-holder {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  max-height: 65rem;
+
+  overflow: auto;
+}
+
+.message-container {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  max-width: 50rem;
+  z-index: 500;
+}
+
+.message-container>* {
+  margin-left: 1rem;
+}
+
+#popup-holder {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  padding: 2rem;
+  z-index: 490;
+}
+
+.pop-up {
+  margin: 0.5rem;
+  padding: 0.5rem;
+
+  background-color: var(--ci-bgc-popup);
+
+  border-radius: 0.5rem;
+}
+
+.pop-up>* {
+  margin: 0.25rem;
+  padding: 0.25rem;
+
+  border-radius: 0.5rem;
+}
+
+.pop-up-fade-out {
+  opacity: 1;
+  animation-name: fadeOutAnimation;
+  animation-duration: 3s;
+  animation-delay: 5s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fadeOutAnimation {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+#maintenance-overlay {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  z-index: 400;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+
+  background: var(--ci-bgc-overlay-backdrop)
+}
+
+#maintenance-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  width: 10em;
+  height: 10em;
+  padding: 1em;
+
+  background-color: #6699cc;
+  border-radius: 1em;
+}
+
+.alert {
+  margin: 0.15rem;
+  padding: 0.5rem;
+  padding: 0.25rem 2.5rem;
+
+  border-style: solid;
+  border-radius: 0.25rem;
+}
+
+.error {
+  background-color: var(--ci-bgc-error-25);
+  border-color: var(--ci-bgc-error-50);
+  color: var(--ci-tc-f-error);
+}
+
+.error-icon {
+  color: var(--ci-color-error-icon);
+}
+
+.warning {
+  background-color: var(--ci-bgc-warning-25);
+  border-color: var(--ci-bgc-warning-50);
+  color: var(--ci-tc-f-warning);
+}
+
+.warning-icon {
+  color: var(--ci-color-warning-icon);
+}
+
+.success {
+  background-color: var(--ci-bgc-success-25);
+  border-color: var(--ci-bgc-success-50);
+  color: var(--ci-tc-f-success);
+}
+
+.success-icon {
+  color: var(--ci-color-success-icon);
+}
+
+.notification {
+  background-color: var(--ci-bgc-notification-25);
+  border-color: var(--ci-bgc-notification-50);
+  color: var(--ci-tc-f-notification);
+}
+
+.notification-icon {
+  color: var(--ci-color-notification-icon);
+}
+
+.error-overlay button {
+  margin-top: 1rem;
+}
+
+/* === < notifications ========================================================================== */
+/* === > loader  ================================================================================ */
+#global-loader-overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 400;
+
+  background: var(--ci-bgc-overlay-backdrop);
+}
+
+#global-loader {
+  padding: 1rem;
+
+  background-color: var(--ci-bgc-nightblue);
+
+  border-radius: 1rem;
+}
+
+#global-loader-text {
+  margin: 1rem;
+  padding: 1rem;
+
+  color: var(--ci-tc-f-nightblue);
+  font-size: 150%;
+
+  border-radius: 1rem;
+}
+
+/* === < loader ================================================================================= */
+/* === > modal ================================================================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background: var(--ci-bgc-overlay-backdrop);
+}
+
+.modal-body {
+  max-height: 95vh;
+}
+
+.modal-name {
+  margin: 1rem;
+
+  font-weight: bold;
+}
+
+.modal-inlay {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+
+  min-width: 40rem;
+  max-height: 90%;
+  overflow-y: auto;
+
+  background-color: var(--ci-bgc-nightblue);
+  color: var(--ci-tc-f-nightblue);
+
+  border-radius: 1rem;
+}
+
+.modal-input {
+  overflow-y: auto;
+}
+
+.modal-inlay button {
+  margin-top: 1rem;
+}
+
+.modal-buttons {
+  display: flex;
+  flex-direction: row-reverse;
+
+  width: 100%;
+}
+
+/* One button: align to the right (already handled by row-reverse + flex-start) */
+.modal-buttons:has(> :nth-child(1):nth-last-child(1)) {
+  justify-content: flex-start;
+}
+
+/* Two buttons: one left, one right */
+.modal-buttons:has(> :nth-child(2):nth-last-child(1)) {
+  justify-content: space-between;
+}
+
+/* Three buttons: space evenly */
+.modal-buttons:has(> :nth-child(3):nth-last-child(1)) {
+  justify-content: space-evenly;
+}
+
+/* === < modal ================================================================================== */
+/* === > form =================================================================================== */
+.form-container {
+  margin: 0.5rem;
+  padding: 0.5rem;
+}
+
+.form-label {
+  margin-top: 1rem;
+
+  font-weight: bold;
+}
+
+.input-tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: help;
+}
+
+.input-tooltip span {
+  display: none;
+  position: absolute;
+
+  margin: 1rem;
+  padding: 1rem;
+
+  white-space: nowrap;
+
+  background-color: var(--ci-bgc-nightblue);
+  border: solid .1rem black;
+  border-radius: .5rem;
+
+  box-shadow: .5rem .5rem 1rem var(--ci-bgc-overlay-backdrop);
+}
+
+.input-tooltip:hover span {
+  display: block;
+}
+
+.input-tooltip-top span {
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.input-tooltip-right span {
+  top: 50%;
+  left: 125%;
+  transform: translateY(-50%);
+}
+
+.input-tooltip-bottom span {
+  top: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.input-tooltip-left span {
+  top: 50%;
+  right: 125%;
+  transform: translateY(-50%);
+}
+
+/* === < form =================================================================================== */
+.container-centered {
+  margin-left: 25%;
+  margin-right: 25%;
+}
+
+.no-scroll {
+  overflow: hidden;
+}
