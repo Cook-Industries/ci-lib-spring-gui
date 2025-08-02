@@ -1,40 +1,37 @@
 {
-    "handling": "static",
-    "root": {
-        "uid": "uid",
-        "type": "FORM",
-        "classes": [],
-        "attributes": {},
-        "parameters": {},
-        "children": [
-            {
-                "uid": "uid",
-                "type": "RADIO",
-                "classes": [],
-                "attributes": {},
-                "parameters": {
-                    "name": "name",
-                    "submitAs": "radio"
-                },
-                "children": [
-                    {
-                        "type": "INPUT_VALUE",
-                        "classes": [],
-                        "parameters": {
-                            "text": "radio 1",
-                            "value": "1"
-                        }
-                    },
-                    {
-                        "type": "INPUT_VALUE",
-                        "classes": [],
-                        "parameters": {
-                            "text": "radio 2",
-                            "value": "2"
-                        }
+    "uid": "uid",
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "RADIO",
+            "classes": [],
+            "attributes": {},
+            "parameters": {
+                "name": "name",
+                "submitAs": "radio"
+            },
+            "children": [
+                {
+                    "type": "INPUT_VALUE",
+                    "classes": [],
+                    "parameters": {
+                        "text": "radio 1",
+                        "value": "1"
                     }
-                ]
-            }
-        ]
-    }
+                },
+                {
+                    "type": "INPUT_VALUE",
+                    "classes": [],
+                    "parameters": {
+                        "text": "radio 2",
+                        "value": "2"
+                    }
+                }
+            ]
+        }
+    ]
 }

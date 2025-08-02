@@ -10,68 +10,72 @@ package de.cookindustries.lib.spring.gui.hmi.mapper.json;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
 import java.util.Locale;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import de.cookindustries.lib.spring.gui.config.properties.CiLibProperties;
+import de.cookindustries.lib.spring.gui.config.properties.CiLibResourcesPathProperties;
+import de.cookindustries.lib.spring.gui.config.properties.CiLibResourcesProperties;
 import de.cookindustries.lib.spring.gui.hmi.container.*;
 import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
-import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonParsingException;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableDissector;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableDissectorProperties;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.KeywordReplacmentMap;
+import de.cookindustries.lib.spring.gui.hmi.util.TemplateFileCache;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
 
 public class JsonMapperTest
 {
 
-    private JsonTreeRoot getRoot(String path)
-    {
-        JsonTreeMapper jsonTreeMapper = new JsonTreeMapper();
+    private TemplateFileCache     TEMPLATE_FILE_CACHE;
+    private FlatMappableDissector flatMappableDissector;
 
-        return jsonTreeMapper.map(path);
+    @BeforeEach
+    public void init()
+    {
+        CiLibResourcesPathProperties resPath = new CiLibResourcesPathProperties();
+        resPath.setTemplates("json-test-files");
+
+        CiLibResourcesProperties res = new CiLibResourcesProperties();
+        res.setPath(resPath);
+
+        CiLibProperties properties = new CiLibProperties();
+        properties.setResources(res);
+
+        TEMPLATE_FILE_CACHE = new TemplateFileCache(properties);
+        TEMPLATE_FILE_CACHE.init();
+
+        FlatMappableDissectorProperties dissectorProperties = new FlatMappableDissectorProperties();
+
+        flatMappableDissector = new FlatMappableDissector(dissectorProperties);
     }
 
-    @Test
-    void test_map_basic()
+    private void checkAgainstErrorContainer(Container container)
     {
-        // setup
-        JsonTreeRoot root   = getRoot("json-test-files/json-mapper/basic-root-static.json");
-        JsonMapper   mapper = new JsonMapper(root);
+        assertEquals(TextContainer.class, container.getClass());
 
-        // run
-        MapperResult result = mapper.map();
-
-        // verify
-        assertNotNull(result);
-        assertEquals(1, result.getContainers().size());
-    }
-
-    @Test
-    void test_map_customInputs()
-    {
-        // setup
-        JsonTreeRoot root   = getRoot("json-test-files/json-mapper/basic-root-static.json");
-        JsonMapper   mapper =
-            new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(KeywordReplacmentMap.builder().build()));
-
-        // run
-        MapperResult result = mapper.map();
-
-        // verify
-        assertNotNull(result);
+        TextContainer text = (TextContainer) container;
+        assertTrue(text.getText().startsWith("the creation of this element failed. please rever to the server log. mapper id: "));
     }
 
     @Test
     void test_map_withComponent()
     {
         // setup
-        JsonTreeRoot root   = getRoot("json-test-files/json-mapper/root-with-component.json");
-        JsonMapper   mapper =
-            new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(KeywordReplacmentMap.builder().build()));
+        JsonMapper mapper =
+            JsonMapper
+                .builder()
+                .path("json-mapper/root-with-component.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult result = mapper.map();
@@ -81,27 +85,25 @@ public class JsonMapperTest
     }
 
     @Test
-    void test_map_withComponent_throws()
-    {
-        // setup
-        JsonTreeRoot root   = getRoot("json-test-files/json-mapper/root-with-component-faulty.json");
-        JsonMapper   mapper = new JsonMapper(root);
-
-        // run & verify
-        assertThrows(JsonParsingException.class, () -> mapper.map());
-    }
-
-    @Test
     void test_map_replaceClass_withExisting()
     {
         // setup
-        JsonTreeRoot         root     = getRoot("json-test-files/json-mapper/replace-class.json");
         KeywordReplacmentMap valueMap =
             KeywordReplacmentMap
                 .builder()
                 .clazz("class1", "testClass")
                 .build();
-        JsonMapper           mapper   = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
+
+        JsonMapper           mapper   =
+            JsonMapper
+                .builder()
+                .path("json-mapper/replace-class.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .keyReplacmentMap(valueMap)
+                .build();
 
         // run
         MapperResult         result   = mapper.map();
@@ -118,9 +120,21 @@ public class JsonMapperTest
     void test_map_replaceClass_notExisting()
     {
         // setup
-        JsonTreeRoot         root     = getRoot("json-test-files/json-mapper/replace-class.json");
-        KeywordReplacmentMap valueMap = KeywordReplacmentMap.builder().build();
-        JsonMapper           mapper   = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
+        KeywordReplacmentMap valueMap =
+            KeywordReplacmentMap
+                .builder()
+                .build();
+
+        JsonMapper           mapper   =
+            JsonMapper
+                .builder()
+                .path("json-mapper/replace-class.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .keyReplacmentMap(valueMap)
+                .build();
 
         // run
         MapperResult         result   = mapper.map();
@@ -134,8 +148,15 @@ public class JsonMapperTest
     void test_map_attributes()
     {
         // setup
-        JsonTreeRoot root   = getRoot("json-test-files/json-mapper/map-attributes.json");
-        JsonMapper   mapper = new JsonMapper(root);
+        JsonMapper mapper =
+            JsonMapper
+                .builder()
+                .path("json-mapper/map-attributes.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult result = mapper.map();
@@ -148,13 +169,22 @@ public class JsonMapperTest
     void test_map_parameter()
     {
         // setup
-        JsonTreeRoot         root     = getRoot("json-test-files/json-mapper/replace-parameter.json");
         KeywordReplacmentMap valueMap =
             KeywordReplacmentMap
                 .builder()
                 .value("param", "testText")
                 .build();
-        JsonMapper           mapper   = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
+
+        JsonMapper           mapper   =
+            JsonMapper
+                .builder()
+                .path("json-mapper/replace-parameter.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .keyReplacmentMap(valueMap)
+                .build();
 
         // run
         MapperResult         result   = mapper.map();
@@ -167,21 +197,42 @@ public class JsonMapperTest
     void test_map_parameter_throws_onMiss()
     {
         // setup
-        JsonTreeRoot         root     = getRoot("json-test-files/json-mapper/parameter-missing.json");
-        KeywordReplacmentMap valueMap = KeywordReplacmentMap.builder().build();
-        JsonMapper           mapper   = new JsonMapper(root, Locale.ENGLISH, new StaticTranslationProvider(), List.of(valueMap));
+        KeywordReplacmentMap valueMap =
+            KeywordReplacmentMap
+                .builder()
+                .build();
 
-        // run & verify
-        assertThrows(JsonParsingException.class,
-            () -> mapper.map());
+        JsonMapper           mapper   =
+            JsonMapper
+                .builder()
+                .path("json-mapper/parameter-missing.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .keyReplacmentMap(valueMap)
+                .build();
+
+        // run
+        MapperResult         result   = mapper.map();
+
+        // verify
+        checkAgainstErrorContainer(result.getContainers().getFirst());
     }
 
     @Test
     void test_map_audioContainer()
     {
         // setup
-        JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/audio-container.json");
-        JsonMapper   mapper    = new JsonMapper(root);
+        JsonMapper   mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/container/audio-container.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult result    = mapper.map();
@@ -203,8 +254,15 @@ public class JsonMapperTest
     void test_map_Button()
     {
         // setup
-        JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/button-container.json");
-        JsonMapper   mapper    = new JsonMapper(root);
+        JsonMapper   mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/container/button-container.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult result    = mapper.map();
@@ -226,30 +284,57 @@ public class JsonMapperTest
     void test_map_ButtonBarContainer()
     {
         // setup
-        JsonTreeRoot root   = getRoot("json-test-files/json-mapper/container/button-bar-container.json");
-        JsonMapper   mapper = new JsonMapper(root);
+        JsonMapper mapper =
+            JsonMapper
+                .builder()
+                .path("json-mapper/container/button-bar-container.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
-        // run & verify
-        assertThrows(JsonParsingException.class, () -> mapper.map());
+        // run
+        MapperResult result = mapper.map();
+
+        // verify
+        checkAgainstErrorContainer(result.getContainers().getFirst());
     }
 
     @Test
     void test_map_ButtonIconContainer()
     {
         // setup
-        JsonTreeRoot root   = getRoot("json-test-files/json-mapper/container/button-icon-container.json");
-        JsonMapper   mapper = new JsonMapper(root);
+        JsonMapper mapper =
+            JsonMapper
+                .builder()
+                .path("json-mapper/container/button-icon-container.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
-        // run & verify
-        assertThrows(JsonParsingException.class, () -> mapper.map());
+        // run
+        MapperResult result = mapper.map();
+
+        // verify
+        checkAgainstErrorContainer(result.getContainers().getFirst());
     }
 
     @Test
     void test_map_ContentContainer()
     {
         // setup
-        JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/content-container.json");
-        JsonMapper   mapper    = new JsonMapper(root);
+        JsonMapper   mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/container/content-container.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult result    = mapper.map();
@@ -266,8 +351,15 @@ public class JsonMapperTest
     void test_map_FormContainer()
     {
         // setup
-        JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/form-container.json");
-        JsonMapper   mapper    = new JsonMapper(root);
+        JsonMapper   mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/container/form-container.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult result    = mapper.map();
@@ -284,8 +376,15 @@ public class JsonMapperTest
     void test_map_HiddenContainer()
     {
         // setup
-        JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/hidden-container.json");
-        JsonMapper   mapper    = new JsonMapper(root);
+        JsonMapper   mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/container/hidden-container.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult result    = mapper.map();
@@ -302,8 +401,15 @@ public class JsonMapperTest
     void test_map_ImageContainer()
     {
         // setup
-        JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/image-container.json");
-        JsonMapper   mapper    = new JsonMapper(root);
+        JsonMapper   mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/container/image-container.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult result    = mapper.map();
@@ -323,8 +429,15 @@ public class JsonMapperTest
     void test_map_LinkContainer()
     {
         // setup
-        JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/link-container.json");
-        JsonMapper   mapper    = new JsonMapper(root);
+        JsonMapper   mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/container/link-container.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult result    = mapper.map();
@@ -345,8 +458,15 @@ public class JsonMapperTest
     void test_map_SplittedContainer()
     {
         // setup
-        JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/splitted-container.json");
-        JsonMapper   mapper    = new JsonMapper(root);
+        JsonMapper   mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/container/splitted-container.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult result    = mapper.map();
@@ -368,19 +488,36 @@ public class JsonMapperTest
     void test_map_TabbedContainer()
     {
         // setup
-        JsonTreeRoot root   = getRoot("json-test-files/json-mapper/container/tabbed-container.json");
-        JsonMapper   mapper = new JsonMapper(root);
+        JsonMapper mapper =
+            JsonMapper
+                .builder()
+                .path("json-mapper/container/tabbed-container.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
-        // run & verify
-        assertThrows(JsonParsingException.class, () -> mapper.map());
+        // run
+        MapperResult result = mapper.map();
+
+        // verify
+        checkAgainstErrorContainer(result.getContainers().getFirst());
     }
 
     @Test
     void test_map_TextContainer()
     {
         // setup
-        JsonTreeRoot root      = getRoot("json-test-files/json-mapper/container/text-container.json");
-        JsonMapper   mapper    = new JsonMapper(root);
+        JsonMapper   mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/container/text-container.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult result    = mapper.map();
@@ -400,8 +537,15 @@ public class JsonMapperTest
     void test_map_CheckboxInput()
     {
         // setup
-        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/checkbox-input.json");
-        JsonMapper    mapper    = new JsonMapper(root);
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/input/checkbox-input.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult  result    = mapper.map();
@@ -421,8 +565,15 @@ public class JsonMapperTest
     void test_map_CurrencyInput()
     {
         // setup
-        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/currency-input.json");
-        JsonMapper    mapper    = new JsonMapper(root);
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/input/currency-input.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult  result    = mapper.map();
@@ -442,8 +593,15 @@ public class JsonMapperTest
     void test_map_DateInput()
     {
         // setup
-        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/date-input.json");
-        JsonMapper    mapper    = new JsonMapper(root);
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/input/date-input.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult  result    = mapper.map();
@@ -463,8 +621,15 @@ public class JsonMapperTest
     void test_map_FileInput()
     {
         // setup
-        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/file-input.json");
-        JsonMapper    mapper    = new JsonMapper(root);
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/input/file-input.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult  result    = mapper.map();
@@ -484,8 +649,15 @@ public class JsonMapperTest
     void test_map_HiddenInput()
     {
         // setup
-        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/hidden-input.json");
-        JsonMapper    mapper    = new JsonMapper(root);
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/input/hidden-input.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult  result    = mapper.map();
@@ -504,8 +676,15 @@ public class JsonMapperTest
     void test_map_LinkInput()
     {
         // setup
-        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/link-input.json");
-        JsonMapper    mapper    = new JsonMapper(root);
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/input/link-input.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult  result    = mapper.map();
@@ -525,8 +704,15 @@ public class JsonMapperTest
     void test_map_NumberInput()
     {
         // setup
-        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/number-input.json");
-        JsonMapper    mapper    = new JsonMapper(root);
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/input/number-input.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult  result    = mapper.map();
@@ -546,8 +732,15 @@ public class JsonMapperTest
     void test_map_PasswordInput()
     {
         // setup
-        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/password-input.json");
-        JsonMapper    mapper    = new JsonMapper(root);
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/input/password-input.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult  result    = mapper.map();
@@ -567,8 +760,15 @@ public class JsonMapperTest
     void test_map_RadioInput()
     {
         // setup
-        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/radio-input.json");
-        JsonMapper    mapper    = new JsonMapper(root);
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/input/radio-input.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult  result    = mapper.map();
@@ -589,8 +789,15 @@ public class JsonMapperTest
     void test_map_SelectInput()
     {
         // setup
-        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/select-input.json");
-        JsonMapper    mapper    = new JsonMapper(root);
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/input/select-input.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult  result    = mapper.map();
@@ -619,8 +826,15 @@ public class JsonMapperTest
     void test_map_SliderInput()
     {
         // setup
-        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/slider-input.json");
-        JsonMapper    mapper    = new JsonMapper(root);
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/input/slider-input.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult  result    = mapper.map();
@@ -640,8 +854,15 @@ public class JsonMapperTest
     void test_map_SwitchInput()
     {
         // setup
-        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/switch-input.json");
-        JsonMapper    mapper    = new JsonMapper(root);
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/input/switch-input.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult  result    = mapper.map();
@@ -661,8 +882,15 @@ public class JsonMapperTest
     void test_map_TextareaInput()
     {
         // setup
-        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/textarea-input.json");
-        JsonMapper    mapper    = new JsonMapper(root);
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/input/textarea-input.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult  result    = mapper.map();
@@ -682,8 +910,15 @@ public class JsonMapperTest
     void test_map_TextboxInput()
     {
         // setup
-        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/textbox-input.json");
-        JsonMapper    mapper    = new JsonMapper(root);
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/input/textbox-input.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult  result    = mapper.map();
@@ -699,8 +934,15 @@ public class JsonMapperTest
     void test_map_TextfieldInput()
     {
         // setup
-        JsonTreeRoot  root      = getRoot("json-test-files/json-mapper/input/textfield-input.json");
-        JsonMapper    mapper    = new JsonMapper(root);
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .path("json-mapper/input/textfield-input.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(TEMPLATE_FILE_CACHE)
+                .translationProvider(new StaticTranslationProvider())
+                .flatMappableDissector(flatMappableDissector)
+                .build();
 
         // run
         MapperResult  result    = mapper.map();

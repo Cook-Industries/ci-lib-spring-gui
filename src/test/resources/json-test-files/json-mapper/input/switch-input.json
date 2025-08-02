@@ -1,22 +1,19 @@
 {
-    "handling": "static",
-    "root": {
-        "uid": "uid",
-        "type": "FORM",
-        "classes": [],
-        "attributes": {},
-        "parameters": {},
-        "children": [
-            {
-                "uid": "uid",
-                "type": "SWITCH",
-                "classes": [],
-                "attributes": {},
-                "parameters": {
-                    "name": "name",
-                    "submitAs": "switch"
-                }
+    "uid": "uid",
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "SWITCH",
+            "classes": [],
+            "attributes": {},
+            "parameters": {
+                "name": "name",
+                "submitAs": "switch"
             }
-        ]
-    }
+        }
+    ]
 }

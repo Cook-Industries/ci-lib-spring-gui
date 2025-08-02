@@ -142,9 +142,10 @@ public final class HtmlMapper
             case BUTTON_BAR -> render((ButtonBarContainer) container);
             case BUTTON_ICON -> render((ButtonIcon) container);
             case CONTENT -> render((ContentContainer) container);
+            case EMPTY -> "";
+            case FORM -> render((FormContainer) container);
             case HIDDEN -> render((HiddenContainer) container);
             case IMAGE -> render((ImageContainer) container);
-            case FORM -> render((FormContainer) container);
             case LINK -> render((LinkContainer) container);
             case MODAL -> render((ModalContainer) container);
             case SPLITTED -> render((SplittedContainer) container);
@@ -209,6 +210,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_ON_CLICK)
+                        .active(button.getOnClick() != null)
                         .value(button.getOnClick())
                         .build())
                 .clazz("btn")
@@ -244,6 +246,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_ON_CLICK)
+                        .active(contentContainer.getOnClick() != null)
                         .value(contentContainer.getOnClick())
                         .build())
                 .classes(contentContainer.getClasses())
@@ -323,6 +326,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_ON_CLICK)
+                        .active(imageContainer.getOnClick() != null)
                         .value(imageContainer.getOnClick())
                         .build())
                 .attribute(
@@ -354,6 +358,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_ON_CLICK)
+                        .active(linkContainer.getOnClick() != null)
                         .value(linkContainer.getOnClick())
                         .build())
                 .attribute(
@@ -501,7 +506,7 @@ public final class HtmlMapper
         HtmlElement elementMapper =
             HtmlElement
                 .builder()
-                .tag("p")
+                .tag(textContainer.getInline() ? "span" : "p")
                 .attribute(
                     Attribute
                         .builder()
@@ -512,6 +517,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_ON_CLICK)
+                        .active(textContainer.getOnClick() != null)
                         .value(textContainer.getOnClick())
                         .build())
                 .classes(textContainer.getClasses())
@@ -538,6 +544,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_ON_CLICK)
+                        .active(textHeaderContainer.getOnClick() != null)
                         .value(textHeaderContainer.getOnClick())
                         .build())
                 .classes(textHeaderContainer.getClasses())

@@ -27,6 +27,17 @@ public final class StringAdapter
     {}
 
     /**
+     * Replace {@code \} with {@code /}.
+     * 
+     * @param path path to sanitize
+     * @return the sanitized path
+     */
+    public static String sanitizePath(String path)
+    {
+        return path.replace('\\', '/');
+    }
+
+    /**
      * Prefix a {@link String} with a {@code prefix}.
      * 
      * @param prefix to put in front of the {@code content}

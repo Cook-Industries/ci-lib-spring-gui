@@ -1,23 +1,20 @@
 {
-    "handling": "static",
-    "root": {
-        "uid": "uid",
-        "type": "FORM",
-        "classes": [],
-        "attributes": {},
-        "parameters": {},
-        "children": [
-            {
-                "uid": "uid",
-                "type": "BUTTON",
-                "classes": [],
-                "attributes": {},
-                "parameters": {
-                    "text": "text",
-                    "btnClass": "success",
-                    "onClick": "doShit()"
-                }
+    "uid": "uid",
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "BUTTON",
+            "classes": [],
+            "attributes": {},
+            "parameters": {
+                "text": "text",
+                "btnClass": "success",
+                "onClick": "doShit()"
             }
-        ]
-    }
+        }
+    ]
 }

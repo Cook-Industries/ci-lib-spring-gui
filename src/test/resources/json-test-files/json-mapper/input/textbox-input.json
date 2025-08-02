@@ -1,21 +1,18 @@
 {
-    "handling": "static",
-    "root": {
-        "uid": "uid",
-        "type": "FORM",
-        "classes": [],
-        "attributes": {},
-        "parameters": {},
-        "children": [
-            {
-                "uid": "uid",
-                "type": "TEXTBOX",
-                "classes": [],
-                "attributes": {},
-                "parameters": {
-                    "name": "name"
-                }
+    "uid": "uid",
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "TEXTBOX",
+            "classes": [],
+            "attributes": {},
+            "parameters": {
+                "name": "name"
             }
-        ]
-    }
+        }
+    ]
 }

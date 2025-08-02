@@ -1,22 +1,19 @@
 {
-    "handling": "static",
-    "root": {
-        "uid": "uid",
-        "type": "FORM",
-        "classes": [],
-        "attributes": {},
-        "parameters": {},
-        "children": [
-            {
-                "uid": "uid",
-                "type": "TEXTFIELD",
-                "classes": [],
-                "attributes": {},
-                "parameters": {
-                    "name": "name",
-                    "submitAs": "textfield"
-                }
+    "uid": "uid",
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "TEXTFIELD",
+            "classes": [],
+            "attributes": {},
+            "parameters": {
+                "name": "name",
+                "submitAs": "textfield"
             }
-        ]
-    }
+        }
+    ]
 }

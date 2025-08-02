@@ -16,7 +16,6 @@ import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Singular;
 
 /**
@@ -27,9 +26,6 @@ import lombok.Singular;
 @Getter(value = AccessLevel.PACKAGE)
 public class HtmlSite implements HtmlExportable
 {
-
-    @NonNull
-    private final String                title;
 
     @Singular
     private final List<HtmlHeadValue>   headers;
@@ -75,11 +71,11 @@ public class HtmlSite implements HtmlExportable
             .appendnl(jsScripts, AbsJsLink::getHtmlRep)
             .appendnl("</head>")
             .appendnl("<body>")
-            .appendnl(containers, c -> HtmlMapper.map(c))
+            .appendnl(containers, HtmlMapper::map)
             .appendnl("<script>")
             .appendnl("document.addEventListener(\"DOMContentLoaded\", () => setTimeout(__onPageLoad, 1000));")
             .appendnl("function __onPageLoad() {")
-            .append(functions, AbsFunctionCall::parseAsJS, title)
+            .appendnl(functions, AbsFunctionCall::parseAsJS)
             .appendnl("}")
             .appendnl("</script>")
             .appendnl("</body>")

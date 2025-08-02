@@ -23,11 +23,11 @@ import de.cookindustries.lib.spring.gui.hmi.container.TextContainer;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputExtractor;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
-import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonTreeMapper;
-import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonTreeRoot;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.MapperResult;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableDissector;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.KeywordReplacmentMap;
 import de.cookindustries.lib.spring.gui.html.CssClass;
+import de.cookindustries.lib.spring.gui.html.HeadTitle;
 import de.cookindustries.lib.spring.gui.html.CSSLink;
 import de.cookindustries.lib.spring.gui.html.HtmlSite;
 import de.cookindustries.lib.spring.gui.html.JsImport;
@@ -52,7 +52,9 @@ public final class GUIFactory
 
     private static final SiteImports     EMPTY_IMPORTS = SiteImports.builder().build();
 
+    private final TemplateFileCache      templateFileCache;
     private final AbsTranslationProvider translationProvider;
+    private final FlatMappableDissector  flatMappableDissector;
     private final SiteImports            basicImports;
 
     /**
@@ -61,9 +63,12 @@ public final class GUIFactory
      * @param properties to incorporate
      * @param translationProvider to fetch translated text from
      */
-    public GUIFactory(GuiFactoryProperties properties, AbsTranslationProvider translationProvider)
+    public GUIFactory(GuiFactoryProperties properties, TemplateFileCache templateFileCache, AbsTranslationProvider translationProvider,
+        FlatMappableDissector flatMappableDissector)
     {
+        this.templateFileCache = templateFileCache;
         this.translationProvider = translationProvider;
+        this.flatMappableDissector = flatMappableDissector;
 
         List<CSSLink> cssLinks = properties.getCssPaths().stream().map(CSSLink::new).toList();
 
@@ -95,7 +100,7 @@ public final class GUIFactory
         String resolvedTitle = translationProvider.getText(locale, title);
 
         return HtmlSite.builder()
-            .title(resolvedTitle.startsWith("I18N") ? title : resolvedTitle)
+            .header(new HeadTitle(resolvedTitle.startsWith("I18N") ? title : resolvedTitle))
             .jsImports(imports.getJsImports())
             .jsScripts(imports.getJsScripts())
             .cssLinks(imports.getCssLinks())
@@ -208,9 +213,16 @@ public final class GUIFactory
     {
         try
         {
-            JsonTreeMapper treeMapper = new JsonTreeMapper();
-            JsonTreeRoot   root       = treeMapper.map(resourcePath);
-            JsonMapper     mapper     = new JsonMapper(root, locale, translationProvider, valueMaps);
+            JsonMapper mapper =
+                JsonMapper
+                    .builder()
+                    .templateFileCache(templateFileCache)
+                    .translationProvider(translationProvider)
+                    .flatMappableDissector(flatMappableDissector)
+                    .path(resourcePath)
+                    .locale(locale)
+                    .keyReplacmentMaps(valueMaps)
+                    .build();
 
             return mapper.map();
         }

@@ -1,10 +1,21 @@
+/**
+ * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
+ * <p>
+ * Licensed under the MIT License.
+ * <p>
+ * See LICENSE file in the project root for full license information.
+ */
 package de.cookindustries.lib.spring.gui.util;
 
 import java.io.InputStream;
 import java.util.List;
 
+import org.springframework.core.io.DefaultResourceLoader;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+
+import de.cookindustries.lib.spring.gui.util.exception.ResourceLoaderException;
 
 /**
  * Utility to load resources and transform them.
@@ -14,7 +25,8 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 public final class ResourceLoader
 {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final org.springframework.core.io.ResourceLoader loader = new DefaultResourceLoader();
+    private static final ObjectMapper                               mapper = new ObjectMapper();
 
     private ResourceLoader()
     {
@@ -29,7 +41,14 @@ public final class ResourceLoader
      */
     public static InputStream load(String path)
     {
-        return ResourceLoader.class.getClassLoader().getResourceAsStream(path);
+        try
+        {
+            return loader.getResource(path).getInputStream();
+        }
+        catch (Exception ex)
+        {
+            throw new ResourceLoaderException(path, null);
+        }
     }
 
     /**
@@ -50,7 +69,7 @@ public final class ResourceLoader
         }
         catch (Exception ex)
         {
-            throw new IllegalStateException(ex);
+            throw new ResourceLoaderException(path, targetClass, ex);
         }
     }
 
@@ -76,7 +95,7 @@ public final class ResourceLoader
         }
         catch (Exception ex)
         {
-            throw new IllegalStateException(ex);
+            throw new ResourceLoaderException(path, targetClass, ex);
         }
     }
 

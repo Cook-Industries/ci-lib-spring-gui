@@ -55,6 +55,9 @@ public enum ContainerType {
     BUTTON_BAR,
 
     /** Type for modal {@link Container} */
-    MODAL;
+    MODAL,
+
+    /** Type for a empty (no) container */
+    EMPTY;
 
 }

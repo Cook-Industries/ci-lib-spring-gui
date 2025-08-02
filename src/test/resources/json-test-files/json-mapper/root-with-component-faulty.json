@@ -1,9 +1,6 @@
 {
-    "handling": "static",
-    "root": {
-        "type": "COMPONENT",
-        "parameters": {
-            "path": "json-test-files/json-mapper/basic-root.json"
-        }
+    "type": "COMPONENT",
+    "parameters": {
+        "path": "json-test-files/json-mapper/basic-root.json"
     }
 }

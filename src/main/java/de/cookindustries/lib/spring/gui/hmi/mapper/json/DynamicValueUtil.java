@@ -5,55 +5,28 @@
  * <p>
  * See LICENSE file in the project root for full license information.
  */
-package de.cookindustries.lib.spring.gui.hmi.mapper.util;
+package de.cookindustries.lib.spring.gui.hmi.mapper.json;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import org.springframework.stereotype.Component;
+
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 
-/**
- * @since 1.0.0
- * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
- */
-public abstract class AbsValueMapObjectMapper<T>
+@Component
+public final class DynamicValueUtil
 {
 
     private final AbsTranslationProvider translationProvider;
 
-    protected AbsValueMapObjectMapper(AbsTranslationProvider translationProvider)
+    protected DynamicValueUtil(AbsTranslationProvider translationProvider)
     {
         this.translationProvider = translationProvider;
     }
-
-    /**
-     * Export the values of an {@code obj} to a new {@link KeywordReplacmentMap} in {@link Locale#ENGLISH}
-     * 
-     * @param obj object to export
-     * @return a new {@code ValueMap} filled with the extracted fields from this
-     */
-    public final KeywordReplacmentMap export(final T obj)
-    {
-        return exportInternal(obj, KeywordReplacmentMap.builder().build(), Locale.ENGLISH);
-    }
-
-    /**
-     * Export the values of an {@code obj} to a {@link KeywordReplacmentMap}
-     * 
-     * @param obj object to export
-     * @param valueMap to fill
-     * @param locale local language to use for fields
-     * @return a {@code ValueMap} filled with the extracted fields from this
-     */
-    public final KeywordReplacmentMap export(final T obj, KeywordReplacmentMap valueMap, Locale locale)
-    {
-        return exportInternal(obj, valueMap, locale);
-    }
-
-    protected abstract KeywordReplacmentMap exportInternal(final T obj, KeywordReplacmentMap valueMap, Locale locale);
 
     /**
      * Extract {@link Enum}s to a {@link InputValueList} with the inclusion of the {@code selection} and a automatic translation.
@@ -66,7 +39,7 @@ public abstract class AbsValueMapObjectMapper<T>
      * @param locale language information to use
      * @return {@code InputValueList} containing the selection list with either the selected value or the first list value checked
      */
-    protected <E extends Enum<E>> InputValueList mapSelectionValue(E selection, Class<E> enumClass, Locale locale)
+    public <E extends Enum<E>> InputValueList mapSelectionValue(E selection, Class<E> enumClass, Locale locale)
     {
         return mapSelectionValue(
             selection.name(),
@@ -85,16 +58,13 @@ public abstract class AbsValueMapObjectMapper<T>
      * @param locale language information to use
      * @return {@code InputValueList} containing the selection list with either the selected value or the first list value checked
      */
-    protected InputValueList mapSelectionValue(String selection, List<String> values, Locale locale)
+    public InputValueList mapSelectionValue(String selection, List<String> values, Locale locale)
     {
-        final InputValueList list = new InputValueList();
-        String               text;
-        Boolean              checked;
+        InputValueList list = new InputValueList();
 
-        for (String value : values)
-        {
-            text = translationProvider.getText(locale, value);
-            checked = selection != null && value.equals(selection);
+        values.forEach(value -> {
+            String  text    = translationProvider.getText(locale, value);
+            Boolean checked = selection != null && value.equals(selection);
 
             list.add(
                 InputValue
@@ -103,7 +73,7 @@ public abstract class AbsValueMapObjectMapper<T>
                     .value(value)
                     .checked(checked)
                     .build());
-        }
+        });
 
         return list;
     }

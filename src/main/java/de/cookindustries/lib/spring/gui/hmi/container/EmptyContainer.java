@@ -8,13 +8,11 @@
 package de.cookindustries.lib.spring.gui.hmi.container;
 
 import lombok.Getter;
-import lombok.NonNull;
-import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * A {@link Container} representing a text build up of several text parts
+ * A {@link Container} representing at most two elements, that get put on the outer bounds of the container, depending on {@link Direction}
  * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
@@ -22,20 +20,13 @@ import lombok.extern.jackson.Jacksonized;
 @SuperBuilder
 @Getter
 @Jacksonized
-public class TextHeaderContainer extends Container
+public class EmptyContainer extends Container
 {
-
-    @NonNull
-    @Default
-    private final Integer size = 1;
-
-    @NonNull
-    private final String  text;
 
     @Override
     protected ContainerType inferType()
     {
-        return ContainerType.TEXT_HEADER;
+        return ContainerType.EMPTY;
     }
 
 }

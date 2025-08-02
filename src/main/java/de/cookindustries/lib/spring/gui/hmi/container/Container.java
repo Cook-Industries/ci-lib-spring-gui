@@ -34,9 +34,8 @@ public abstract class Container extends UiElement
     /**
      * a function to call when this {@code Container} is triggerd by a onClick-event
      */
-    @NonNull
     @Default
-    private final String        onClick   = "";
+    private final String        onClick   = null;
 
     @NonNull
     private final ContainerType type      = inferType();

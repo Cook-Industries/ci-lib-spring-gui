@@ -1,18 +1,15 @@
 {
-    "handling": "static",
-    "root": {
-        "uid": "uid",
-        "type": "BUTTON_BAR",
-        "classes": [
-            "class1"
-        ],
-        "attributes": {
-            "key1": "value1"
-        },
-        "parameters": {
-            "text": "this is a button",
-            "onClick": "doShit()",
-            "btnClass": "success"
-        }
+    "uid": "uid",
+    "type": "BUTTON_BAR",
+    "classes": [
+        "class1"
+    ],
+    "attributes": {
+        "key1": "value1"
+    },
+    "parameters": {
+        "text": "this is a button",
+        "onClick": "doShit()",
+        "btnClass": "success"
     }
 }

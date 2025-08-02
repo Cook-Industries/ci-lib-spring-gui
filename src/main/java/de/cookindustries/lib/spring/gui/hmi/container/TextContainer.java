@@ -9,6 +9,7 @@ package de.cookindustries.lib.spring.gui.hmi.container;
 
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -25,7 +26,11 @@ public final class TextContainer extends Container
 {
 
     @NonNull
-    private final String text;
+    private final String  text;
+
+    @NonNull
+    @Default
+    private final Boolean inline = false;
 
     @Override
     protected ContainerType inferType()

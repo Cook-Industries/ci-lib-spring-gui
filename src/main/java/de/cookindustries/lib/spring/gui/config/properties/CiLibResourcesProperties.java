@@ -17,10 +17,10 @@ import lombok.Data;
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Data
-public class CiLibWebProperties
+public class CiLibResourcesProperties
 {
 
     @NestedConfigurationProperty
-    private CiLibWebPathProperties path = new CiLibWebPathProperties();
+    private CiLibResourcesPathProperties path = new CiLibResourcesPathProperties();
 
 }

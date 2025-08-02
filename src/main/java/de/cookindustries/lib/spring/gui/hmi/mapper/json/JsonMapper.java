@@ -34,28 +34,38 @@ import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonParsingException;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappable;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableDissector;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableList;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.KeywordReplacmentMap;
+import de.cookindustries.lib.spring.gui.hmi.util.TemplateFileCache;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
+import lombok.Builder;
+import lombok.NonNull;
+import lombok.Singular;
+import lombok.Builder.Default;
 
 /**
- * This object is used to map a {@link PseudoElement} tree inside a {@link JsonTreeRoot} into a in-memory tree of {@link Container}s.
+ * This object is used read a path and map the result {@link PseudoElement} into a in-memory tree of {@link Container}s.
  * <p>
- * The {@code mapper} will try to replace certain keyword-trigger with their depending values from a given set of
+ * The {@code mapper} will try to replace certain keyword-trigger with their corresponding values from a given set of
  * {@link KeywordReplacmentMap}s. These keywords are:
  * <ul>
- * <li>$$value${@code name} - to replace values in {@code inputs} and so on, depending on type, with values from a
+ * <li>$$value${@code name} - to replace values, {@code parameters} on {@code elements} and so on, depending on type, with values from a
  * {@link KeywordReplacmentMap}</li>
  * <li>$$text${@code name} - to replace text with a translation defined by a {@link Locale} and values from a
  * {@link AbsTranslationProvider}</li>
- * <li>$$function${@code name} - to replace trigger to {@link AbsFunctionCall} entries</li>
- * <li>$$class${@code name} - to replace styling classes</li>
+ * <li>$$function${@code name} - to replace trigger to {@link AbsFunctionCall} entries, with functions from
+ * {@link KeywordReplacmentMap}</li>
+ * <li>$$class${@code name} - to replace styling classes with classes {@link KeywordReplacmentMap}</li>
  * </ul>
  * The {@code name} attribute is the key to lookup inside the respective source of values.
  * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
+@Builder
 public class JsonMapper
 {
 
@@ -91,7 +101,7 @@ public class JsonMapper
     private static final String                    INDICATOR_CLASS_PLACEHOLDER    = "$$class$";
     private static final String                    INDICATOR_FUNCTION_PLACEHOLDER = "$$function$";
 
-    private static final String                    INDENT_STRING                  = "- ";
+    private static final String                    LOG_INDENT_STRING              = "- ";
 
     private static final StaticTranslationProvider NOOP_TRANSLATION_PROVIDER      = new StaticTranslationProvider();
 
@@ -123,55 +133,35 @@ public class JsonMapper
             ContainerType.TEXT_HEADER
         };
 
-    private final JsonTreeRoot                     treeRoot;
-    private final Locale                           locale;
-    private final AbsTranslationProvider           translationProvider;
-    private final List<KeywordReplacmentMap>       keyReplacmentMaps;
-    private final List<AbsFunctionCall>            functions;
-    private final String                           uuid;
+    @NonNull
+    private final TemplateFileCache                templateFileCache;
 
-    private Integer                                count;
+    @NonNull
+    private final String                           path;
 
-    /**
-     * Create {@code JsonMapper}.
-     *
-     * @param root to map
-     * @throws NullPointerException if any parameter is {@code null}
-     */
-    public JsonMapper(JsonTreeRoot root)
-    {
-        this(root, Locale.ENGLISH, NOOP_TRANSLATION_PROVIDER, List.of());
-    }
+    private PseudoElement                          root;
 
-    /**
-     * Create {@code JsonMapper}.
-     *
-     * @param root to map
-     * @param locale the language to use fetch from {@code translationMap}
-     * @param translationProvider to fetch translation values
-     * @param keyReplacmentMaps {@code keyReplacmentMaps}s to link to dynamic fill-in content. These will be sealed before usage!
-     * @throws NullPointerException if any parameter is {@code null}
-     * @throws JsonMapperException if mapping is set to dynamic but no {@code valueMap}s are provided
-     */
-    public JsonMapper(JsonTreeRoot root, Locale locale, AbsTranslationProvider translationProvider,
-        List<KeywordReplacmentMap> keyReplacmentMaps)
-    {
-        Objects.requireNonNull(root, "[root] can not be null");
-        Objects.requireNonNull(locale, "[locale] can not be null");
-        Objects.requireNonNull(translationProvider, "[translationProvider] can not be null");
-        Objects.requireNonNull(keyReplacmentMaps, "[valueMaps] can not be null");
+    @NonNull
+    @Default
+    private final Locale                           locale                         = Locale.ENGLISH;
 
-        root.validate();
+    @NonNull
+    @Default
+    private final AbsTranslationProvider           translationProvider            = NOOP_TRANSLATION_PROVIDER;
 
-        this.treeRoot = root;
-        this.locale = locale;
-        this.translationProvider = translationProvider;
-        this.keyReplacmentMaps = keyReplacmentMaps;
-        this.uuid = Long.toString(System.currentTimeMillis(), 36);
+    @NonNull
+    private final FlatMappableDissector            flatMappableDissector;
 
-        functions = new ArrayList<>();
-        count = 0;
-    }
+    @Singular
+    private List<KeywordReplacmentMap>             keyReplacmentMaps;
+
+    private final List<AbsFunctionCall>            functions                      = new ArrayList<>();
+
+    @Default
+    private final String                           uuid                           = Long.toString(System.currentTimeMillis(), 36);;
+
+    @Default
+    private Integer                                count                          = 0;
 
     /**
      * Run the mapping process.
@@ -180,19 +170,35 @@ public class JsonMapper
      */
     public MapperResult map()
     {
+        long start = System.nanoTime();
+
+        this.root = templateFileCache.getTemplateTo(path);
+
+        LOG.debug("[{}]: ### start ###", uuid);
         LOG.trace("[{}]: map content for [{}] from [{}] with [{}] value maps", uuid, locale.toLanguageTag(),
             translationProvider.getClass().getSimpleName(), keyReplacmentMaps.size());
 
-        keyReplacmentMaps
+        keyReplacmentMaps = keyReplacmentMaps
             .stream()
-            .sorted(Comparator.comparing(KeywordReplacmentMap::getPresedence).reversed())
+            .sorted(
+                Comparator
+                    .comparing(KeywordReplacmentMap::getPresedence)
+                    .reversed())
             .toList();
 
-        return MapperResult
-            .builder()
-            .container(transform(treeRoot))
-            .functions(functions)
-            .build();
+        MapperResult result =
+            MapperResult
+                .builder()
+                .containers(transform(root))
+                .functions(functions)
+                .build();
+
+        long         end    = System.nanoTime();
+        long         time   = end - start;
+
+        LOG.debug("[{}]: ### done ### ... mapping took [{}]ms", uuid, time / 1000000L);
+
+        return result;
     }
 
     /*
@@ -225,7 +231,7 @@ public class JsonMapper
             uid = resolveUid(element, depth);
         }
 
-        String indent = INDENT_STRING.repeat(depth + 1);
+        String indent = LOG_INDENT_STRING.repeat(depth + 1);
 
         LOG.trace("[{}]:[{}]:{}resolve uid to [{}]", uuid, depth, indent, uid);
 
@@ -242,7 +248,7 @@ public class JsonMapper
      */
     private List<String> resolveClasses(List<String> classes, int depth)
     {
-        String indent = INDENT_STRING.repeat(depth + 1);
+        String indent = LOG_INDENT_STRING.repeat(depth + 1);
 
         LOG.trace("[{}]:[{}]:{}resolve classes {}", uuid, depth, indent, classes);
 
@@ -275,7 +281,7 @@ public class JsonMapper
     {
         Map<String, String> attributes = element.getAttributes();
 
-        String              indent     = INDENT_STRING.repeat(depth + 1);
+        String              indent     = LOG_INDENT_STRING.repeat(depth + 1);
 
         LOG.trace("[{}]:[{}]:{}resolve attributes {}", uuid, depth, indent, attributes);
 
@@ -316,7 +322,7 @@ public class JsonMapper
     {
         I      value  = null;
 
-        String indent = INDENT_STRING.repeat(depth + 1);
+        String indent = LOG_INDENT_STRING.repeat(depth + 1);
 
         LOG.trace("[{}]:[{}]:{}try resolving placeholder [{}] as [{}]", uuid, depth, indent, key, expectedType.getSimpleName());
 
@@ -337,7 +343,7 @@ public class JsonMapper
             {
                 LOG.trace("[{}]:[{}]:{}resolve as [VALUE]", uuid, depth, indent);
 
-                String keyName = key.substring(INDICATOR_VALUE_PLACEHOLDER.length());
+                String keyName = key.substring(INDICATOR_VALUE_PLACEHOLDER.length()).replaceFirst("[?]", "[]");
                 value = extractFromKeyMapsAsValue(keyName, expectedType);
             }
             else if (key.startsWith(INDICATOR_CLASS_PLACEHOLDER))
@@ -384,6 +390,7 @@ public class JsonMapper
             result = keyReplacmentMaps
                 .stream()
                 .map(m -> m.getValue(objName))
+                .dropWhile(Objects::isNull)
                 .findFirst();
         }
         catch (NullPointerException ex)
@@ -469,6 +476,20 @@ public class JsonMapper
         return result.orElse(null);
     }
 
+    /**
+     * Extract a paramater from the {@code element}.
+     * <p>
+     * Replaces the content of the result with a value fetched from {@link #keyReplacmentMaps} or {@link #translationProvider} if the
+     * {@code key} starts with '$$'
+     * 
+     * @param <T> the expected result type
+     * @param element the element to extract from
+     * @param depth the current depth in the tree
+     * @param key the key to lookup
+     * @param expectedType the expected result type
+     * @return the found parameter
+     * @throws JsonParsingException if parameter is expected but not found or could not be parsed
+     */
     private <T> T getParameterValue(PseudoElement element, int depth, String key, Class<T> expectedType)
     {
         return getParameterValue(element, depth, key, expectedType, null);
@@ -477,8 +498,8 @@ public class JsonMapper
     /**
      * Extract a paramater from the {@code element}.
      * <p>
-     * Replaces the content of the result with a value fetched from {@link #valueMaps} or {@link #translationMap} if the {@code key} starts
-     * with '$$'
+     * Replaces the content of the result with a value fetched from {@link #keyReplacmentMaps} or {@link #translationProvider} if the
+     * {@code key} starts with '$$'
      * 
      * @param <T> the expected result type
      * @param element the element to extract from
@@ -487,23 +508,25 @@ public class JsonMapper
      * @param expectedType the expected result type
      * @param fallback to use if no result is found, can be {@code null}
      * @return the found parameter
-     * @throws JsonParsingException if parameter is expected but not found and no {@code fallback} is provided
+     * @throws JsonParsingException if parameter is expected but not found and no {@code fallback} is provided, or could not be parsed
      */
     private <T> T getParameterValue(PseudoElement element, int depth, String key, Class<T> expectedType, T fallback)
     {
         String rawValue = element.getParameters().get(key);
         T      value    = null;
 
-        String indent   = INDENT_STRING.repeat(depth + 1);
+        String indent   = LOG_INDENT_STRING.repeat(depth + 1);
 
-        LOG.trace("[{}]:[{}]:{}get parameter [{}] from [{}] as [{}]", uuid, depth, indent, key, element.getUid(),
+        String uid      = element.getUid() == null ? "random id" : element.getUid();
+
+        LOG.trace("[{}]:[{}]:{}get parameter [{}] from [{}] as [{}]", uuid, depth, indent, key, uid,
             expectedType.getSimpleName());
 
         if (rawValue == null || rawValue.isBlank())
         {
             if (fallback == null)
             {
-                throw new JsonParsingException(element.getUid(), 0, this.count,
+                throw new JsonParsingException(uid, 0, this.count,
                     String.format("parameter [%s] is expected but not set", key));
             }
 
@@ -518,7 +541,7 @@ public class JsonMapper
         }
         else
         {
-            value = transformRawValue(element.getUid(), depth, rawValue, expectedType);
+            value = transformRawValue(uid, depth, rawValue, expectedType);
         }
 
         LOG.trace("[{}]:[{}]:{}parameter is [{}]", uuid, depth, indent, String.valueOf(value));
@@ -573,15 +596,112 @@ public class JsonMapper
      */
     private MapperResult transformInternalComponent(PseudoElement element, int depth)
     {
-        String         path           = getParameterValue(element, depth, "path", String.class);
-        JsonTreeMapper mapper         = new JsonTreeMapper();
-        JsonTreeRoot   root           = mapper.map(path);
-        JsonMapper     internalMapper = new JsonMapper(root, locale, translationProvider, keyReplacmentMaps);
-        String         indent         = INDENT_STRING.repeat(depth + 1);
+        String       indent       = LOG_INDENT_STRING.repeat(depth + 1);
+        String       path         = getParameterValue(element, depth, "path", String.class);
+        Boolean      isSourceList = getParameterValue(element, depth, "isSourceList", Boolean.class, false);
+        String       sourceKey    = null;
+        MapperResult result       = null;
 
-        LOG.trace("[{}]:[{}]:{}map linked component with [{}] @ [{}]", uuid, depth, indent, internalMapper.uuid, path);
+        try
+        {
+            sourceKey = getParameterValue(element, depth, "sourceKey", String.class);
+        }
+        catch (Exception ex)
+        {
+            // ignore it
+        }
 
-        return internalMapper.map();
+        if (sourceKey != null)
+        {
+            if (isSourceList)
+            {
+                FlatMappableList   srcList = extractFromKeyMapsAsValue(sourceKey, FlatMappableList.class);
+
+                List<MapperResult> results = new ArrayList<>();
+
+                srcList.getElements().forEach(src -> {
+                    JsonMapper internalMapper =
+                        JsonMapper
+                            .builder()
+                            .templateFileCache(templateFileCache)
+                            .translationProvider(translationProvider)
+                            .flatMappableDissector(flatMappableDissector)
+                            .path(path)
+                            .locale(locale)
+                            .keyReplacmentMaps(keyReplacmentMaps)
+                            .keyReplacmentMap(
+                                KeywordReplacmentMap
+                                    .builder()
+                                    .presedence(10)
+                                    .values(flatMappableDissector.dissect(src))
+                                    .build())
+                            .build();
+
+                    LOG.trace("[{}]:[{}]:{}map linked component list element [{}] @ [{}]", uuid, depth, indent, internalMapper.uuid, path);
+
+                    results.add(internalMapper.map());
+                });
+
+                List<Container>       containers = new ArrayList<>();
+                List<AbsFunctionCall> functions  = new ArrayList<>();
+
+                results.forEach(res -> {
+                    containers.addAll(res.getContainers());
+                    functions.addAll(res.getFunctions());
+                });
+
+                result =
+                    MapperResult
+                        .builder()
+                        .containers(containers)
+                        .functions(functions)
+                        .build();
+            }
+            else
+            {
+                FlatMappable srcElement     = extractFromKeyMapsAsValue(sourceKey, FlatMappable.class);
+
+                JsonMapper   internalMapper =
+                    JsonMapper
+                        .builder()
+                        .templateFileCache(templateFileCache)
+                        .translationProvider(translationProvider)
+                        .flatMappableDissector(flatMappableDissector)
+                        .path(path)
+                        .locale(locale)
+                        .keyReplacmentMaps(keyReplacmentMaps)
+                        .keyReplacmentMap(
+                            KeywordReplacmentMap
+                                .builder()
+                                .presedence(10)
+                                .values(flatMappableDissector.dissect(srcElement))
+                                .build())
+                        .build();
+
+                LOG.trace("[{}]:[{}]:{}map linked sourced component [{}] @ [{}]", uuid, depth, indent, internalMapper.uuid, path);
+
+                result = internalMapper.map();
+            }
+        }
+        else
+        {
+            JsonMapper internalMapper =
+                JsonMapper
+                    .builder()
+                    .templateFileCache(templateFileCache)
+                    .translationProvider(translationProvider)
+                    .flatMappableDissector(flatMappableDissector)
+                    .path(path)
+                    .locale(locale)
+                    .keyReplacmentMaps(keyReplacmentMaps)
+                    .build();
+
+            LOG.trace("[{}]:[{}]:{}map linked component with [{}] @ [{}]", uuid, depth, indent, internalMapper.uuid, path);
+
+            result = internalMapper.map();
+        }
+
+        return result;
     }
 
     /**
@@ -594,7 +714,7 @@ public class JsonMapper
      */
     private InputValueList handleInputValueChildren(PseudoElement element, int depth, boolean throwWhenEmpty)
     {
-        String indent = INDENT_STRING.repeat(depth + 1);
+        String indent = LOG_INDENT_STRING.repeat(depth + 1);
 
         LOG.trace("[{}]:[{}]:{}map input children", uuid, depth, indent);
 
@@ -645,9 +765,9 @@ public class JsonMapper
      * @param root
      * @return the transformed {@code Container}
      */
-    private Container transform(JsonTreeRoot root) throws JsonMapperException
+    private List<Container> transform(PseudoElement root) throws JsonMapperException
     {
-        return transform(root.getRoot(), 0, ContainerType.values());
+        return transform(root, 0, ContainerType.values());
     }
 
     /**
@@ -661,12 +781,15 @@ public class JsonMapper
     {
         List<Marker> list = new ArrayList<>();
 
-        for (PseudoMarker pm : marker)
+        for (PseudoMarker psm : marker)
         {
-            MarkerCategory category = MarkerCategory.valueOf(pm.getCategory().toUpperCase());
-            MarkerType     type     = MarkerType.valueOf(pm.getType().toUpperCase());
+            MarkerCategory category = MarkerCategory.valueOf(psm.getCategory().toUpperCase());
+            MarkerType     type     = MarkerType.valueOf(psm.getType().toUpperCase());
+            String         rawText  = psm.getText();
             String         text     =
-                pm.getText().startsWith(BASE_INDICATOR_START) ? handlePossiblePlaceholder(pm.getText(), String.class, depth) : pm.getText();
+                rawText.startsWith(BASE_INDICATOR_START)
+                    ? handlePossiblePlaceholder(rawText, String.class, depth)
+                    : rawText;
 
             list.add(
                 Marker
@@ -694,24 +817,26 @@ public class JsonMapper
      * @return the transformed container
      * @throws JsonParsingException on any failure, refer to exception text
      */
-    private Container transform(PseudoElement element, int depth, ContainerType... allowedTypes) throws JsonParsingException
+    private List<Container> transform(PseudoElement element, int depth, ContainerType... allowedTypes) throws JsonParsingException
     {
         this.count++;
 
-        String indent = INDENT_STRING.repeat(depth + 1);
+        String indent = LOG_INDENT_STRING.repeat(depth + 1);
 
         LOG.trace("");
 
         Boolean processElement = count < 2 ? true : getParameterValue(element, depth, PROCESS_ELEMENT, Boolean.class, true);
 
+        String  uid            = element.getUid() == null ? "random uid" : element.getUid();
+
         if (!processElement)
         {
-            LOG.debug("[{}]:[{}]:{} skip CONTAINER [{}] due to eval processElement is [false]", uuid, depth, indent, element.getUid());
+            LOG.debug("[{}]:[{}]:{} skip CONTAINER [{}] due to [processElement] is [false]", uuid, depth, indent, uid);
 
-            return ContentContainer.builder().uid(element.getUid()).build();
+            return List.of(EmptyContainer.builder().build());
         }
 
-        LOG.debug("[{}]:[{}]:{}map [{}] with allowed types [{}]", uuid, depth, indent, element.getUid(), allowedTypes);
+        LOG.trace("[{}]:[{}]:{}map [{}] with allowed types [{}]", uuid, depth, indent, uid, allowedTypes);
 
         InternalElementType internalType = null;
 
@@ -723,46 +848,40 @@ public class JsonMapper
             }
             catch (Exception ex)
             {
-                // do nothing
+                // do nothing since it is not a internal type
             }
 
-            try
+            if (internalType != null)
             {
-                if (internalType != null)
+                switch (internalType)
                 {
-                    switch (internalType)
-                    {
-                        case COMPONENT:
-                            MapperResult result = transformInternalComponent(element, depth);
+                    case COMPONENT:
+                        MapperResult result = transformInternalComponent(element, depth);
 
-                            functions.addAll(result.getFunctions());
+                        functions.addAll(result.getFunctions());
 
-                            return result.getContainers().getFirst();
-                    }
+                        return result.getContainers();
                 }
             }
-            catch (Exception ex)
-            {
-                throw new JsonParsingException(element.getUid(), depth, this.count, "error parsing imported element", ex);
-            }
 
-            final ContainerType type = ContainerType.valueOf(element.getType().toUpperCase());
+            ContainerType type = ContainerType.valueOf(element.getType().toUpperCase());
 
             if (!Arrays.asList(allowedTypes).contains(type))
             {
-                throw new JsonParsingException(element.getUid(), depth, this.count,
+                throw new JsonParsingException(uid, depth, this.count,
                     String.format("container type [%s] is not allowed here", element.getType()));
             }
 
-            LOG.debug("[{}]:[{}]:{}map CONTAINER [{}] as [{}]", uuid, depth, indent, element.getUid(), type);
+            LOG.debug("[{}]:[{}]:{}map CONTAINER [{}] as [{}]", uuid, depth, indent, uid, type);
 
-            return switch (type)
+            Container result = switch (type)
             {
                 case AUDIO -> transfromAudioContainer(element, depth);
                 case BUTTON -> transfromButtonContainer(element, depth);
                 case BUTTON_BAR -> transformButtonBarContainer(element, depth);
                 case BUTTON_ICON -> transformButtonIconContainer(element, depth);
                 case CONTENT -> transformContentContainer(element, depth);
+                case EMPTY -> EmptyContainer.builder().build();
                 case FORM -> transformFormContainer(element, depth);
                 case HIDDEN -> transformHiddenContainer(element, depth);
                 case IMAGE -> transformImageContainer(element, depth);
@@ -773,11 +892,30 @@ public class JsonMapper
                 case TEXT -> transformTextContainer(element, depth);
                 case TEXT_HEADER -> transformTextHeaderContainer(element, depth);
             };
+
+            return List.of(result);
         }
-        catch (final Exception ex)
+        catch (Exception ex)
         {
-            throw new JsonParsingException(element.getUid(), depth, this.count, "error parsing element", ex);
+            LOG.error("error parsing element", ex);
+
+            return List.of(failureContainer());
         }
+    }
+
+    /**
+     * Create a wrapper object for a failed transformation to show instead.
+     * 
+     * @return a {@code TextContainer} with an error message and appropriate styling
+     */
+    private TextContainer failureContainer()
+    {
+        return TextContainer
+            .builder()
+            .clazz("alert")
+            .clazz("error")
+            .text(String.format("the creation of this element failed. please rever to the server log. mapper id: [%s]", uuid))
+            .build();
     }
 
     /**
@@ -904,7 +1042,7 @@ public class JsonMapper
         element
             .getChildren()
             .stream()
-            .forEach(c -> contents.add(transform(c, depth + 1, CONTAINER_CHILDREN)));
+            .forEach(c -> contents.addAll(transform(c, depth + 1, CONTAINER_CHILDREN)));
 
         return ContentContainer
             .builder()
@@ -958,7 +1096,7 @@ public class JsonMapper
         Container           child      =
             element
                 .getChildren()
-                .isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, CONTAINER_CHILDREN);
+                .isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, CONTAINER_CHILDREN).getFirst();
 
         return HiddenContainer
             .builder()
@@ -1009,7 +1147,7 @@ public class JsonMapper
         Container           content    =
             element
                 .getChildren()
-                .isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, LINK_CHILDREN);
+                .isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, LINK_CHILDREN).getFirst();
 
         return LinkContainer
             .builder()
@@ -1097,7 +1235,7 @@ public class JsonMapper
 
         for (PseudoElement pe : element.getChildren())
         {
-            children.add(transform(pe, depth + 1, MODAL_CHILDREN));
+            children.addAll(transform(pe, depth + 1, MODAL_CHILDREN));
         }
 
         return ModalContainer
@@ -1146,16 +1284,17 @@ public class JsonMapper
         {
             if (cnt > 0 && cnt < element.getChildren().size() - 1)
             {
-                center.add(transform(pe, depth, ContainerType.values()));
+                center.addAll(transform(pe, depth, ContainerType.values()));
             }
             else if (cnt == 0)
             {
-                head = transform(pe, depth, ContainerType.values());
+                head = transform(pe, depth, ContainerType.values()).getFirst();
             }
             else
             {
-                tail = transform(pe, depth, ContainerType.values());
+                tail = transform(pe, depth, ContainerType.values()).getFirst();
             }
+
             cnt++;
         }
 
@@ -1195,6 +1334,7 @@ public class JsonMapper
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
         String              text       = getParameterValue(element, depth, TEXT, String.class);
+        Boolean             inline     = getParameterValue(element, depth, "inline", Boolean.class, false);
 
         return TextContainer
             .builder()
@@ -1202,6 +1342,7 @@ public class JsonMapper
             .classes(classes)
             .dataAttributes(attributes)
             .text(text)
+            .inline(inline)
             .build();
     }
 
@@ -1232,7 +1373,7 @@ public class JsonMapper
 
     private Input transformInput(PseudoElement element, int depth)
     {
-        String    indent = INDENT_STRING.repeat(depth + 1);
+        String    indent = LOG_INDENT_STRING.repeat(depth + 1);
 
         InputType type   = InputType.valueOf(element.getType().toUpperCase());
 
@@ -1627,25 +1768,25 @@ public class JsonMapper
      */
     private Select transformSelectInput(PseudoElement element, int depth)
     {
-        String               uid             = resolveUid(element, depth);
-        List<String>         classes         = resolveClasses(element.getClasses(), depth);
-        Map<String, String>  attributes      = resolveAttributes(element, depth);
-        List<Marker>         marker          = transformMarker(uid, element.getMarker(), depth);
-        String               tooltip         = getParameterValue(element, depth, TOOLTIP, String.class, "");
-        Position             tooltipPosition =
+        String              uid             = resolveUid(element, depth);
+        List<String>        classes         = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes      = resolveAttributes(element, depth);
+        List<Marker>        marker          = transformMarker(uid, element.getMarker(), depth);
+        String              tooltip         = getParameterValue(element, depth, TOOLTIP, String.class, "");
+        Position            tooltipPosition =
             Position.valueOf(getParameterValue(element, depth, TOOLTIP_POSITION, String.class, "RIGHT").toUpperCase());
-        String               name            = getParameterValue(element, depth, NAME, String.class);
-        String               submitAs        = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String               onInput         = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
-        String               valueSrc        = getParameterValue(element, depth, "values", String.class, "");
-        InputValueList       values          =
+        String              name            = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs        = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput         = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              valueSrc        = getParameterValue(element, depth, "values", String.class, "");
+        InputValueList      values          =
             valueSrc.isBlank()
                 ? handleInputValueChildren(element, depth, false)
                 : handlePossiblePlaceholder(valueSrc, InputValueList.class, new InputValueList(), depth);
 
-        final InputValueList inputValues     = new InputValueList();
+        InputValueList      inputValues     = new InputValueList();
 
-        for (final PseudoElement pe : element.getChildren())
+        for (PseudoElement pe : element.getChildren())
         {
             inputValues.add(transformInputValue(pe, depth));
         }
@@ -1829,7 +1970,7 @@ public class JsonMapper
      */
     private Textbox transformTextboxInput(PseudoElement element, int depth)
     {
-        final String value = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
+        String value = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
 
         return Textbox
             .builder()

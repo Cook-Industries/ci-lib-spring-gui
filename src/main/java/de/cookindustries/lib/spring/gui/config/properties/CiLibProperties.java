@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
+ * <p>
+ * Licensed under the MIT License.
+ * <p>
+ * See LICENSE file in the project root for full license information.
+ */
 package de.cookindustries.lib.spring.gui.config.properties;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -21,6 +28,9 @@ public class CiLibProperties
 {
 
     @NestedConfigurationProperty
-    private CiLibWebProperties web = new CiLibWebProperties();
+    private CiLibResourcesProperties resources = new CiLibResourcesProperties();
+
+    @NestedConfigurationProperty
+    private CiLibWebProperties       web       = new CiLibWebProperties();
 
 }

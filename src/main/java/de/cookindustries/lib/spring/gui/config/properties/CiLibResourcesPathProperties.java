@@ -7,6 +7,7 @@
  */
 package de.cookindustries.lib.spring.gui.config.properties;
 
+import de.cookindustries.lib.spring.gui.config.file.FileAndFolderPaths;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -16,15 +17,11 @@ import lombok.Data;
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Data
-public class CiLibWebPathProperties
+public class CiLibResourcesPathProperties
 {
 
-    /** A path for static content on the system */
-    @NotBlank(message = "static-web-resources path must not be blank")
-    private String staticWebResources = "./resources/";
-
-    /** A path where the server can place temporary up-/download data */
-    @NotBlank(message = "temp-upload path must not be blank")
-    private String tempUpload         = "./temp/";
+    /** A path for template content in the resources folder */
+    @NotBlank(message = "template-resources path must not be blank")
+    private String templates = FileAndFolderPaths.TEMPLATE_DEFAULT_PATH;
 
 }

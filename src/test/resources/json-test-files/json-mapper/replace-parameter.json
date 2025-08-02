@@ -1,12 +1,9 @@
 {
-    "handling": "dynamic",
-    "root": {
-        "uid": "uid",
-        "type": "TEXT",
-        "classes": [],
-        "attributes": {},
-        "parameters": {
-            "text": "$$value$param"
-        }
+    "uid": "uid",
+    "type": "TEXT",
+    "classes": [],
+    "attributes": {},
+    "parameters": {
+        "text": "$$value$param"
     }
 }
