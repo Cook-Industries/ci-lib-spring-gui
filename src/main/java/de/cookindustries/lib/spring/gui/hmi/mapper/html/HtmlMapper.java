@@ -144,6 +144,7 @@ public final class HtmlMapper
             case CONTENT -> render((ContentContainer) container);
             case EMPTY -> "";
             case FORM -> render((FormContainer) container);
+            case HEADING -> render((HeadingContainer) container);
             case HIDDEN -> render((HiddenContainer) container);
             case IMAGE -> render((ImageContainer) container);
             case LINK -> render((LinkContainer) container);
@@ -151,7 +152,6 @@ public final class HtmlMapper
             case SPLITTED -> render((SplittedContainer) container);
             case TAB -> render((TabContainer) container);
             case TEXT -> render((TextContainer) container);
-            case TEXT_HEADER -> render((TextHeaderContainer) container);
         };
     }
 
@@ -528,7 +528,7 @@ public final class HtmlMapper
         return elementMapper.html();
     }
 
-    private String render(TextHeaderContainer textHeaderContainer)
+    private String render(HeadingContainer textHeaderContainer)
     {
         HtmlElement elementMapper =
             HtmlElement

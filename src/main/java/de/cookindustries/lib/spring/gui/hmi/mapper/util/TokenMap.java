@@ -10,20 +10,20 @@ package de.cookindustries.lib.spring.gui.hmi.mapper.util;
 import java.util.Map;
 
 import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
-
+import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Singular;
 import lombok.Builder.Default;
 
 /**
- * Key/Value map to use for keyword replacement aggrigator.
+ * Key/Value map to use by the {@link JsonMapper} to replace {@code token}s.
  * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Builder
-public final class KeywordReplacmentMap
+public final class TokenMap
 {
 
     @NonNull

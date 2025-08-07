@@ -7,11 +7,11 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper.util;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 
 /**
  * A {@code Service} to dissect {@link FlatMappable} objects to use them in a repetition instantiation of {@code Components}.
@@ -30,30 +32,31 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public final class FlatMappableDissector
 {
 
-    private static final Logger                           LOG = LoggerFactory.getLogger(FlatMappableDissector.class);
+    private static final String          TRANSLATION_INDICATOR = "$$";
 
-    private final ObjectMapper                            objectMapper;
+    private static final Logger          LOG                   = LoggerFactory.getLogger(FlatMappableDissector.class);
 
-    private final Map<Class<?>, Function<Object, String>> transformers;
+    private final ObjectMapper           objectMapper;
+    private final AbsTranslationProvider translationProvider;
 
     /**
      * Create a {@code FlatMappableDissector}.
-     * 
-     * @param properties to use
      */
-    public FlatMappableDissector(FlatMappableDissectorProperties properties)
+    public FlatMappableDissector(AbsTranslationProvider translationProvider)
     {
         this.objectMapper = new ObjectMapper();
-        this.transformers = properties.getTransformers();
+        this.translationProvider = translationProvider;
     }
 
     /**
      * Dissect a {@link FlatMappable} object and map it to a {@link Map}.
      * 
      * @param obj to dissect
+     * @param presedence to add to the resulting {@code TokenMap}
+     * @param locale to use to translate
      * @return the filled unmodifiable {@code Map}, or {@code null} if the input was {@code null}
      */
-    public Map<String, Object> dissect(FlatMappable obj)
+    public TokenMap dissect(FlatMappable obj, int presedence, Locale locale)
     {
         if (obj == null)
         {
@@ -61,11 +64,21 @@ public final class FlatMappableDissector
         }
 
         Map<String, Object> nestedMap = objectMapper.convertValue(obj, new TypeReference<Map<String, Object>>() {});
-        Map<String, Object> flatMap   = new LinkedHashMap<>();
 
-        flatten("", nestedMap, flatMap);
+        nestedMap.remove("classes");
+        nestedMap.remove("calls");
 
-        return Collections.unmodifiableMap(flatMap);
+        Map<String, Object> flatMap = new LinkedHashMap<>();
+
+        flatten("", nestedMap, flatMap, locale);
+
+        return TokenMap
+            .builder()
+            .presedence(10 + 2 * presedence)
+            .values(flatMap)
+            .classes(obj.getClasses())
+            .functions(obj.getCalls())
+            .build();
     }
 
     /**
@@ -75,7 +88,7 @@ public final class FlatMappableDissector
      * @param value to flatten
      * @param result the result map to fill
      */
-    private void flatten(String prefix, Object value, Map<String, Object> result)
+    private void flatten(String prefix, Object value, Map<String, Object> result, Locale locale)
     {
         if (value == null)
         {
@@ -95,29 +108,34 @@ public final class FlatMappableDissector
 
                 String key = prefix.isEmpty() ? (String) k : prefix + "." + k;
 
-                flatten(key, entry.getValue(), result);
+                flatten(key, entry.getValue(), result, locale);
             }
         }
-        else if (value instanceof List<?>)
+        else if (value instanceof List<?> list)
         {
-            LOG.warn("lists not supported");
+            flatten(prefix, list.stream().map(String::valueOf).collect(Collectors.joining(" ")), result, locale);
         }
         else if (value != null && value.getClass().isArray())
         {
             LOG.warn("arrays not supported");
         }
+        else if (value instanceof Boolean bool)
+        {
+            result.put(prefix, bool);
+        }
         else
         {
-            Class<?> valueClass = value.getClass();
+            String var = String.valueOf(value);
 
-            if (transformers.containsKey(valueClass))
+            if (var.startsWith(TRANSLATION_INDICATOR))
             {
-                result.put(prefix, transformers.get(valueClass).apply(value));
+                result.put(prefix, translationProvider.getText(locale, var.substring(TRANSLATION_INDICATOR.length())));
             }
             else
             {
-                LOG.warn("dissection of unknown class: " + valueClass.getSimpleName());
+                result.put(prefix, var);
             }
+
         }
     }
 }

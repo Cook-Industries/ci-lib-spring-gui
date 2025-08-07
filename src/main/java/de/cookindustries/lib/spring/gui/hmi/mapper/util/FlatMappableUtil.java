@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -43,10 +44,28 @@ public final class FlatMappableUtil
      */
     public FlatMappableList createTranslatedTextElements(Locale locale, List<String> keys)
     {
+        return createTranslatedTextElements(locale, keys, Map.of());
+    }
+
+    /**
+     * Create a list of {@link TranslatedTextElement}s to use for looped {@code GUI} creation.
+     * 
+     * @param locale to fetch texts for
+     * @param keys to lookup
+     * @param classes map of classes to replace
+     * @return a list of {@code TranslatedTextElement}s in order of {@code keys} provided
+     */
+    public FlatMappableList createTranslatedTextElements(Locale locale, List<String> keys, Map<String, String> classes)
+    {
         List<FlatMappable> list = new ArrayList<>();
 
         Collections.unmodifiableList(keys).forEach(key -> {
-            list.add(new TranslatedTextElement(translationProvider.getText(locale, key)));
+            list.add(
+                TranslatedTextElement
+                    .builder()
+                    .text(translationProvider.getText(locale, key))
+                    .classes(classes)
+                    .build());
         });
 
         return FlatMappableList

@@ -7,18 +7,18 @@
  */
 package de.cookindustries.lib.spring.gui.html;
 
+import lombok.Data;
+
 /**
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
+@Data
 public final class CssClass
 {
 
     public static final String HIDDEN = "hidden";
 
-    private CssClass()
-    {
-        // prevent instantiation
-    }
+    private final String       name;
 
 }

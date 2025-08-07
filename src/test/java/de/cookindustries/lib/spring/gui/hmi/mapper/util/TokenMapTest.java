@@ -15,7 +15,7 @@ import de.cookindustries.lib.spring.gui.function.VoidCall;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
 
-class KeyReplacmentMapTest
+class TokenMapTest
 {
 
     @Test
@@ -31,8 +31,8 @@ class KeyReplacmentMapTest
                 .build());
 
         // run
-        KeywordReplacmentMap map =
-            KeywordReplacmentMap.builder()
+        TokenMap map =
+            TokenMap.builder()
                 .value("list", inputValueList)
                 .value("integer", 1)
                 .value("boolean", true)
@@ -54,7 +54,7 @@ class KeyReplacmentMapTest
     void test_getPresedence()
     {
         // setup
-        KeywordReplacmentMap map = KeywordReplacmentMap.builder().build();
+        TokenMap map = TokenMap.builder().build();
 
         // run & verify
         assertEquals(Integer.valueOf(0), map.getPresedence());

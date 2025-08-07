@@ -22,7 +22,7 @@ import lombok.extern.jackson.Jacksonized;
 @SuperBuilder
 @Getter
 @Jacksonized
-public class TextHeaderContainer extends Container
+public class HeadingContainer extends Container
 {
 
     @NonNull
@@ -35,7 +35,7 @@ public class TextHeaderContainer extends Container
     @Override
     protected ContainerType inferType()
     {
-        return ContainerType.TEXT_HEADER;
+        return ContainerType.HEADING;
     }
 
 }

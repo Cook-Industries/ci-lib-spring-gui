@@ -37,7 +37,7 @@ import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonParsingExceptio
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappable;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableDissector;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableList;
-import de.cookindustries.lib.spring.gui.hmi.mapper.util.KeywordReplacmentMap;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.TokenMap;
 import de.cookindustries.lib.spring.gui.hmi.util.TemplateFileCache;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
@@ -49,18 +49,15 @@ import lombok.Builder.Default;
 /**
  * This object is used read a path and map the result {@link PseudoElement} into a in-memory tree of {@link Container}s.
  * <p>
- * The {@code mapper} will try to replace certain keyword-trigger with their corresponding values from a given set of
- * {@link KeywordReplacmentMap}s. These keywords are:
+ * The {@code mapper} will try to replace certain {@code tokens} with their corresponding values from a given set of {@link TokenMap}s.
+ * These {@code tokens} are:
  * <ul>
- * <li>$$value${@code name} - to replace values, {@code parameters} on {@code elements} and so on, depending on type, with values from a
- * {@link KeywordReplacmentMap}</li>
- * <li>$$text${@code name} - to replace text with a translation defined by a {@link Locale} and values from a
- * {@link AbsTranslationProvider}</li>
- * <li>$$function${@code name} - to replace trigger to {@link AbsFunctionCall} entries, with functions from
- * {@link KeywordReplacmentMap}</li>
- * <li>$$class${@code name} - to replace styling classes with classes {@link KeywordReplacmentMap}</li>
+ * <li>$$value${@code name} - to replace {@code values}, {@code parameters} on {@code elements}/li>
+ * <li>$$text${@code name} - to replace text with a translation defined by a {@link Locale} from a {@link AbsTranslationProvider}</li>
+ * <li>$$function${@code name} - to replace trigger to {@link AbsFunctionCall} entries with functions</li>
+ * <li>$$class${@code name} - to replace styling classes with {@link TokenMap} classes</li>
  * </ul>
- * The {@code name} attribute is the key to lookup inside the respective source of values.
+ * The {@code name} attribute is the key to lookup inside the respective source of {@code tokens}.
  * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
@@ -93,7 +90,7 @@ public class JsonMapper
     private static final String                    ON_INPUT                       = "onInput";
     private static final String                    TOOLTIP                        = "tooltip";
     private static final String                    TOOLTIP_POSITION               = "tooltipPosition";
-    private static final String                    PROCESS_ELEMENT                = "processElement";
+    private static final String                    PROCESS_ELEMENT                = "active";
 
     private static final String                    BASE_INDICATOR_START           = "$$";
     private static final String                    INDICATOR_VALUE_PLACEHOLDER    = "$$value$";
@@ -119,7 +116,7 @@ public class JsonMapper
             ContainerType.SPLITTED,
             ContainerType.TAB,
             ContainerType.TEXT,
-            ContainerType.TEXT_HEADER
+            ContainerType.HEADING
         };
 
     private static final ContainerType[]           LINK_CHILDREN                  = {ContainerType.TEXT};
@@ -130,7 +127,7 @@ public class JsonMapper
             ContainerType.IMAGE,
             ContainerType.LINK,
             ContainerType.TEXT,
-            ContainerType.TEXT_HEADER
+            ContainerType.HEADING
         };
 
     @NonNull
@@ -153,7 +150,7 @@ public class JsonMapper
     private final FlatMappableDissector            flatMappableDissector;
 
     @Singular
-    private List<KeywordReplacmentMap>             keyReplacmentMaps;
+    private List<TokenMap>                         keyReplacmentMaps;
 
     private final List<AbsFunctionCall>            functions                      = new ArrayList<>();
 
@@ -182,7 +179,7 @@ public class JsonMapper
             .stream()
             .sorted(
                 Comparator
-                    .comparing(KeywordReplacmentMap::getPresedence)
+                    .comparing(TokenMap::getPresedence)
                     .reversed())
             .toList();
 
@@ -412,7 +409,8 @@ public class JsonMapper
         else
         {
             throw new JsonMapperException(String
-                .format("object [%s] could not be extracted due to expected class is [%s] but got [%s]", objName, expectedType,
+                .format("object [%s] could not be extracted due to expected class is [%s] but got [%s]", objName,
+                    expectedType.getSimpleName(),
                     o.getClass().getSimpleName()));
         }
     }
@@ -629,12 +627,7 @@ public class JsonMapper
                             .path(path)
                             .locale(locale)
                             .keyReplacmentMaps(keyReplacmentMaps)
-                            .keyReplacmentMap(
-                                KeywordReplacmentMap
-                                    .builder()
-                                    .presedence(10)
-                                    .values(flatMappableDissector.dissect(src))
-                                    .build())
+                            .keyReplacmentMap(flatMappableDissector.dissect(src, depth, locale))
                             .build();
 
                     LOG.trace("[{}]:[{}]:{}map linked component list element [{}] @ [{}]", uuid, depth, indent, internalMapper.uuid, path);
@@ -670,12 +663,7 @@ public class JsonMapper
                         .path(path)
                         .locale(locale)
                         .keyReplacmentMaps(keyReplacmentMaps)
-                        .keyReplacmentMap(
-                            KeywordReplacmentMap
-                                .builder()
-                                .presedence(10)
-                                .values(flatMappableDissector.dissect(srcElement))
-                                .build())
+                        .keyReplacmentMap(flatMappableDissector.dissect(srcElement, depth, locale))
                         .build();
 
                 LOG.trace("[{}]:[{}]:{}map linked sourced component [{}] @ [{}]", uuid, depth, indent, internalMapper.uuid, path);
@@ -883,6 +871,7 @@ public class JsonMapper
                 case CONTENT -> transformContentContainer(element, depth);
                 case EMPTY -> EmptyContainer.builder().build();
                 case FORM -> transformFormContainer(element, depth);
+                case HEADING -> transformHeadingContainer(element, depth);
                 case HIDDEN -> transformHiddenContainer(element, depth);
                 case IMAGE -> transformImageContainer(element, depth);
                 case LINK -> transformLinkContainer(element, depth);
@@ -890,7 +879,6 @@ public class JsonMapper
                 case SPLITTED -> transformSplittedContainer(element, depth);
                 case TAB -> transformTabbedContainer(element, depth);
                 case TEXT -> transformTextContainer(element, depth);
-                case TEXT_HEADER -> transformTextHeaderContainer(element, depth);
             };
 
             return List.of(result);
@@ -1353,7 +1341,7 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private TextHeaderContainer transformTextHeaderContainer(PseudoElement element, int depth)
+    private HeadingContainer transformHeadingContainer(PseudoElement element, int depth)
     {
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
@@ -1361,7 +1349,13 @@ public class JsonMapper
         String              text       = getParameterValue(element, depth, TEXT, String.class);
         Integer             size       = getParameterValue(element, depth, "level", Integer.class, Integer.valueOf(1));
 
-        return TextHeaderContainer
+        size = size < 0
+            ? 1
+            : size > 6
+                ? 6
+                : size;
+
+        return HeadingContainer
             .builder()
             .uid(uid)
             .classes(classes)

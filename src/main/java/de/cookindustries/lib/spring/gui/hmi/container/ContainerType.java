@@ -31,7 +31,7 @@ public enum ContainerType {
     TEXT,
 
     /** Type for text headers {@link Container} */
-    TEXT_HEADER,
+    HEADING,
 
     /** Type for link {@link Container} */
     LINK,

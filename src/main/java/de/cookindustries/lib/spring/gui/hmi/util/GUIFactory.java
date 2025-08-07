@@ -25,7 +25,7 @@ import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.MapperResult;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableDissector;
-import de.cookindustries.lib.spring.gui.hmi.mapper.util.KeywordReplacmentMap;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.TokenMap;
 import de.cookindustries.lib.spring.gui.html.CssClass;
 import de.cookindustries.lib.spring.gui.html.HeadTitle;
 import de.cookindustries.lib.spring.gui.html.CSSLink;
@@ -209,7 +209,7 @@ public final class GUIFactory
      * @param valueMaps dynamic {@code valueMap}s
      * @return the parsed {@code Container}
      */
-    public MapperResult readComponent(String resourcePath, Locale locale, List<KeywordReplacmentMap> valueMaps)
+    public MapperResult readComponent(String resourcePath, Locale locale, List<TokenMap> valueMaps)
     {
         try
         {
@@ -281,7 +281,7 @@ public final class GUIFactory
      * @return a {@code HTML} {@code String} to render a website by a browser
      */
     public String createHtmlSite(String title, SiteImports imports, String resourcePath, Locale locale,
-        List<KeywordReplacmentMap> valueMaps, AbsFunctionCall... initCalls)
+        List<TokenMap> valueMaps, AbsFunctionCall... initCalls)
     {
         MapperResult          result = readComponent(resourcePath, locale, valueMaps);
         List<AbsFunctionCall> calls  = new ArrayList<>();
@@ -334,7 +334,7 @@ public final class GUIFactory
      * @return a response with the processed content
      */
     public ContentResponse createComponentResponse(String resourcePath, Locale locale, String elementId, Boolean replace,
-        List<KeywordReplacmentMap> valueMaps, AbsFunctionCall... initCalls)
+        List<TokenMap> valueMaps, AbsFunctionCall... initCalls)
     {
         MapperResult          result = readComponent(resourcePath, locale, valueMaps);
         List<AbsFunctionCall> calls  = new ArrayList<>();
@@ -381,7 +381,7 @@ public final class GUIFactory
      * @param initCalls to perform on the receiver
      * @return a response with the processed content
      */
-    public ModalResponse createModalResponse(String resourcePath, Locale locale, List<KeywordReplacmentMap> valueMaps,
+    public ModalResponse createModalResponse(String resourcePath, Locale locale, List<TokenMap> valueMaps,
         AbsFunctionCall... initCalls)
     {
         MapperResult          result  = readComponent(resourcePath, locale, valueMaps);
