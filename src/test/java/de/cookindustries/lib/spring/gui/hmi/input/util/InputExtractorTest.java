@@ -506,7 +506,7 @@ class InputExtractorTest
         // verify
         assertEquals(Boolean.FALSE, extractor.hasMessages());
         assertEquals(1, result.size());
-        assertEquals(new Tag("tag1"), result.get(0).getFirst());
+        assertEquals(new Tag("tag1"), result.get(0).get(0));
     }
 
     @Test

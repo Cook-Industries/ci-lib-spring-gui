@@ -363,7 +363,7 @@ public final class GUIFactory
     public ModalResponse createModalResponse(String resourcePath)
     {
         MapperResult   result  = readComponent(resourcePath);
-        ModalContainer content = (ModalContainer) result.getContainers().getFirst();
+        ModalContainer content = (ModalContainer) result.getContainers().get(0);
 
         return ModalResponse
             .builder()
@@ -385,7 +385,7 @@ public final class GUIFactory
         AbsFunctionCall... initCalls)
     {
         MapperResult          result  = readComponent(resourcePath, locale, valueMaps);
-        ModalContainer        content = (ModalContainer) result.getContainers().getFirst();
+        ModalContainer        content = (ModalContainer) result.getContainers().get(0);
         List<AbsFunctionCall> calls   = new ArrayList<>();
         calls.addAll(result.getFunctions());
         calls.addAll(Arrays.asList(initCalls));

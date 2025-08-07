@@ -1084,7 +1084,7 @@ public class JsonMapper
         Container           child      =
             element
                 .getChildren()
-                .isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, CONTAINER_CHILDREN).getFirst();
+                .isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, CONTAINER_CHILDREN).get(0);
 
         return HiddenContainer
             .builder()
@@ -1135,7 +1135,7 @@ public class JsonMapper
         Container           content    =
             element
                 .getChildren()
-                .isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, LINK_CHILDREN).getFirst();
+                .isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, LINK_CHILDREN).get(0);
 
         return LinkContainer
             .builder()
@@ -1276,11 +1276,11 @@ public class JsonMapper
             }
             else if (cnt == 0)
             {
-                head = transform(pe, depth, ContainerType.values()).getFirst();
+                head = transform(pe, depth, ContainerType.values()).get(0);
             }
             else
             {
-                tail = transform(pe, depth, ContainerType.values()).getFirst();
+                tail = transform(pe, depth, ContainerType.values()).get(0);
             }
 
             cnt++;

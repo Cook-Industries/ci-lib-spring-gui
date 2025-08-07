@@ -47,8 +47,6 @@ public final class ResourceTranslationProvider extends AbsTranslationProvider
             {
                 TranslationMapping mapping = ResourceLoader.loadJsonFrom(path, TranslationMapping.class);
 
-                // TODO: remove this when update to 17+ is done
-                @SuppressWarnings("deprecation")
                 Locale             locale  = new Locale(mapping.getLanguage(), mapping.getCountry());
 
                 for (TranslationMappingText text : mapping.getTexts())

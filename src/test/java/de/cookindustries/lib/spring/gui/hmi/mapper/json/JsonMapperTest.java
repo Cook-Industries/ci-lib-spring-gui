@@ -109,8 +109,8 @@ public class JsonMapperTest
         assertNotNull(result);
 
         // verify
-        assertTrue(result.getContainers().getFirst().getClasses().contains("testClass"));
-        assertTrue(result.getContainers().getFirst().getClasses().contains("class2"));
+        assertTrue(result.getContainers().get(0).getClasses().contains("testClass"));
+        assertTrue(result.getContainers().get(0).getClasses().contains("class2"));
     }
 
     @Test
@@ -137,8 +137,8 @@ public class JsonMapperTest
         MapperResult result   = mapper.map();
 
         // verify
-        assertFalse(result.getContainers().getFirst().getClasses().contains("testClass"));
-        assertTrue(result.getContainers().getFirst().getClasses().contains("class2"));
+        assertFalse(result.getContainers().get(0).getClasses().contains("testClass"));
+        assertTrue(result.getContainers().get(0).getClasses().contains("class2"));
     }
 
     @Test
@@ -159,7 +159,7 @@ public class JsonMapperTest
         MapperResult result = mapper.map();
 
         // verify
-        assertNotNull(result.getContainers().getFirst().getDataAttributes().get("key1"));
+        assertNotNull(result.getContainers().get(0).getDataAttributes().get("key1"));
     }
 
     @Test
@@ -187,7 +187,7 @@ public class JsonMapperTest
         MapperResult result   = mapper.map();
 
         // verify
-        assertEquals("testText", ((TextContainer) result.getContainers().getFirst()).getText());
+        assertEquals("testText", ((TextContainer) result.getContainers().get(0)).getText());
     }
 
     // @Test
@@ -208,7 +208,7 @@ public class JsonMapperTest
         MapperResult result    = mapper.map();
 
         // verify
-        Container    container = result.getContainers().getFirst();
+        Container    container = result.getContainers().get(0);
         assertEquals(AudioContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -238,7 +238,7 @@ public class JsonMapperTest
         MapperResult result    = mapper.map();
 
         // verify
-        Container    container = result.getContainers().getFirst();
+        Container    container = result.getContainers().get(0);
         assertEquals(Button.class, container.getClass());
 
         Button button = (Button) container;
@@ -268,7 +268,7 @@ public class JsonMapperTest
         MapperResult result = mapper.map();
 
         // verify
-        checkAgainstErrorContainer(result.getContainers().getFirst());
+        checkAgainstErrorContainer(result.getContainers().get(0));
     }
 
     // @Test
@@ -289,7 +289,7 @@ public class JsonMapperTest
         MapperResult result = mapper.map();
 
         // verify
-        checkAgainstErrorContainer(result.getContainers().getFirst());
+        checkAgainstErrorContainer(result.getContainers().get(0));
     }
 
     @Test
@@ -310,7 +310,7 @@ public class JsonMapperTest
         MapperResult result    = mapper.map();
 
         // verify
-        Container    container = result.getContainers().getFirst();
+        Container    container = result.getContainers().get(0);
         assertEquals(ContentContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -335,7 +335,7 @@ public class JsonMapperTest
         MapperResult result    = mapper.map();
 
         // verify
-        Container    container = result.getContainers().getFirst();
+        Container    container = result.getContainers().get(0);
         assertEquals(FormContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -360,7 +360,7 @@ public class JsonMapperTest
         MapperResult result    = mapper.map();
 
         // verify
-        Container    container = result.getContainers().getFirst();
+        Container    container = result.getContainers().get(0);
         assertEquals(HiddenContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -385,7 +385,7 @@ public class JsonMapperTest
         MapperResult result    = mapper.map();
 
         // verify
-        Container    container = result.getContainers().getFirst();
+        Container    container = result.getContainers().get(0);
         assertEquals(ImageContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -413,7 +413,7 @@ public class JsonMapperTest
         MapperResult result    = mapper.map();
 
         // verify
-        Container    container = result.getContainers().getFirst();
+        Container    container = result.getContainers().get(0);
         assertEquals(LinkContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -442,7 +442,7 @@ public class JsonMapperTest
         MapperResult result    = mapper.map();
 
         // verify
-        Container    container = result.getContainers().getFirst();
+        Container    container = result.getContainers().get(0);
         assertEquals(SplittedContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -472,7 +472,7 @@ public class JsonMapperTest
         MapperResult result = mapper.map();
 
         // verify
-        checkAgainstErrorContainer(result.getContainers().getFirst());
+        checkAgainstErrorContainer(result.getContainers().get(0));
     }
 
     @Test
@@ -493,7 +493,7 @@ public class JsonMapperTest
         MapperResult result    = mapper.map();
 
         // verify
-        Container    container = result.getContainers().getFirst();
+        Container    container = result.getContainers().get(0);
         assertEquals(TextContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -521,7 +521,7 @@ public class JsonMapperTest
         MapperResult  result    = mapper.map();
 
         // verify
-        Container     container = result.getContainers().getFirst();
+        Container     container = result.getContainers().get(0);
         FormContainer form      = (FormContainer) container;
         Input         input     = form.getInputs().get(0);
         assertEquals(Checkbox.class, input.getClass());
@@ -549,7 +549,7 @@ public class JsonMapperTest
         MapperResult  result    = mapper.map();
 
         // verify
-        Container     container = result.getContainers().getFirst();
+        Container     container = result.getContainers().get(0);
         FormContainer form      = (FormContainer) container;
         Input         input     = form.getInputs().get(0);
         assertEquals(Currency.class, input.getClass());
@@ -577,7 +577,7 @@ public class JsonMapperTest
         MapperResult  result    = mapper.map();
 
         // verify
-        Container     container = result.getContainers().getFirst();
+        Container     container = result.getContainers().get(0);
         FormContainer form      = (FormContainer) container;
         Input         input     = form.getInputs().get(0);
         assertEquals(Date.class, input.getClass());
@@ -605,7 +605,7 @@ public class JsonMapperTest
         MapperResult  result    = mapper.map();
 
         // verify
-        Container     container = result.getContainers().getFirst();
+        Container     container = result.getContainers().get(0);
         FormContainer form      = (FormContainer) container;
         Input         input     = form.getInputs().get(0);
         assertEquals(File.class, input.getClass());
@@ -633,7 +633,7 @@ public class JsonMapperTest
         MapperResult  result    = mapper.map();
 
         // verify
-        Container     container = result.getContainers().getFirst();
+        Container     container = result.getContainers().get(0);
         FormContainer form      = (FormContainer) container;
         Input         input     = form.getInputs().get(0);
         assertEquals(Hidden.class, input.getClass());
@@ -660,7 +660,7 @@ public class JsonMapperTest
         MapperResult  result    = mapper.map();
 
         // verify
-        Container     container = result.getContainers().getFirst();
+        Container     container = result.getContainers().get(0);
         FormContainer form      = (FormContainer) container;
         Input         input     = form.getInputs().get(0);
         assertEquals(Link.class, input.getClass());
@@ -688,7 +688,7 @@ public class JsonMapperTest
         MapperResult  result    = mapper.map();
 
         // verify
-        Container     container = result.getContainers().getFirst();
+        Container     container = result.getContainers().get(0);
         FormContainer form      = (FormContainer) container;
         Input         input     = form.getInputs().get(0);
         assertEquals(Number.class, input.getClass());
@@ -716,7 +716,7 @@ public class JsonMapperTest
         MapperResult  result    = mapper.map();
 
         // verify
-        Container     container = result.getContainers().getFirst();
+        Container     container = result.getContainers().get(0);
         FormContainer form      = (FormContainer) container;
         Input         input     = form.getInputs().get(0);
         assertEquals(Password.class, input.getClass());
@@ -744,7 +744,7 @@ public class JsonMapperTest
         MapperResult  result    = mapper.map();
 
         // verify
-        Container     container = result.getContainers().getFirst();
+        Container     container = result.getContainers().get(0);
         FormContainer form      = (FormContainer) container;
         Input         input     = form.getInputs().get(0);
         assertEquals(Radio.class, input.getClass());
@@ -773,7 +773,7 @@ public class JsonMapperTest
         MapperResult  result    = mapper.map();
 
         // verify
-        Container     container = result.getContainers().getFirst();
+        Container     container = result.getContainers().get(0);
         FormContainer form      = (FormContainer) container;
         Input         input1    = form.getInputs().get(0);
         assertEquals(Select.class, input1.getClass());
@@ -810,7 +810,7 @@ public class JsonMapperTest
         MapperResult  result    = mapper.map();
 
         // verify
-        Container     container = result.getContainers().getFirst();
+        Container     container = result.getContainers().get(0);
         FormContainer form      = (FormContainer) container;
         Input         input     = form.getInputs().get(0);
         assertEquals(Slider.class, input.getClass());
@@ -838,7 +838,7 @@ public class JsonMapperTest
         MapperResult  result    = mapper.map();
 
         // verify
-        Container     container = result.getContainers().getFirst();
+        Container     container = result.getContainers().get(0);
         FormContainer form      = (FormContainer) container;
         Input         input     = form.getInputs().get(0);
         assertEquals(Switch.class, input.getClass());
@@ -866,7 +866,7 @@ public class JsonMapperTest
         MapperResult  result    = mapper.map();
 
         // verify
-        Container     container = result.getContainers().getFirst();
+        Container     container = result.getContainers().get(0);
         FormContainer form      = (FormContainer) container;
         Input         input     = form.getInputs().get(0);
         assertEquals(Textarea.class, input.getClass());
@@ -894,7 +894,7 @@ public class JsonMapperTest
         MapperResult  result    = mapper.map();
 
         // verify
-        Container     container = result.getContainers().getFirst();
+        Container     container = result.getContainers().get(0);
         FormContainer form      = (FormContainer) container;
         Input         input     = form.getInputs().get(0);
         assertEquals(Textbox.class, input.getClass());
@@ -918,7 +918,7 @@ public class JsonMapperTest
         MapperResult  result    = mapper.map();
 
         // verify
-        Container     container = result.getContainers().getFirst();
+        Container     container = result.getContainers().get(0);
         FormContainer form      = (FormContainer) container;
         Input         input     = form.getInputs().get(0);
         assertEquals(Textfield.class, input.getClass());
