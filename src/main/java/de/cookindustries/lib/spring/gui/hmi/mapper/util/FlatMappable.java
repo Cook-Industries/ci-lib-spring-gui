@@ -28,8 +28,13 @@ import lombok.experimental.SuperBuilder;
  * appended with the name of the variable in the nested object.
  * 
  * <pre>
- * Example: 1st level field: PlayerCount pc; nested fields in PlayerCount: text | number result entries in map: pc.text -> Player 1
- * pc.number -> 3 </pre
+ * Example:
+ * 1st level field: PlayerCount pc;
+ * nested fields in PlayerCount: text | number 
+ * result entries in map: 
+ *     pc.text   -&gt; Player 1
+ *     pc.number -&gt; 3
+ * </pre>
  * <p>
  * All predefined variables of this abstract class will be exported and removed before the object gets flattened. These exports are give to
  * the {@link JsonMapper} alongside the flattened {@link TokenMap}.
