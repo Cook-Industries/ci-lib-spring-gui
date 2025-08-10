@@ -264,7 +264,7 @@ public class JsonMapper
             }
 
             return c;
-        }).dropWhile(String::isBlank).collect(Collectors.toList());
+        }).filter(s -> !s.isBlank()).collect(Collectors.toList());
     }
 
     /**
@@ -387,7 +387,7 @@ public class JsonMapper
             result = keyReplacmentMaps
                 .stream()
                 .map(m -> m.getValue(objName))
-                .dropWhile(Objects::isNull)
+                .filter(Objects::nonNull)
                 .findFirst();
         }
         catch (NullPointerException ex)

@@ -41,5 +41,8 @@ public enum ResponseAction {
 
     FETCH_TAGS,
 
-    FETCH_TAGS_RESULT
+    FETCH_TAGS_RESULT,
+
+    /** initiate a redirect on the client */
+    REDIRECT,
 }

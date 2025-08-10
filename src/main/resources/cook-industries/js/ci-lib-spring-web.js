@@ -9,6 +9,7 @@ export {
   submitFromModal,
   sendFromForm,
   dismissErrors,
+  redirect,
   FunctionRegistry,
 };
 
@@ -84,6 +85,10 @@ $(document).ready(function () {
     sendFromForm(id, url);
   });
 
+  FunctionRegistry._registerInternal("redirect", (url) => {
+    redirect(url);
+  });
+
   FunctionRegistry._registerInternal("dismissErrors", () => {
     dismissErrors();
   });
@@ -131,6 +136,8 @@ function GET(endpointUrl) {
         resolve(responseData);
       })
       .catch((error) => {
+        hideGlobalLoader();
+        clientsideError(error.message);
         reject(error);
       });
   });
@@ -170,6 +177,8 @@ function POST(endpointUrl, dataToSend = {}) {
         resolve(responseData);
       })
       .catch((error) => {
+        hideGlobalLoader();
+        clientsideError(error.message);
         reject(error);
       });
   });
@@ -207,13 +216,15 @@ function POSTFormData(endpointUrl, formData = {}) {
         resolve(responseData);
       })
       .catch((error) => {
+        hideGlobalLoader();
+        clientsideError(error.message);
         reject(error);
       });
   });
 }
 
 /**
- * Extract and send data from a from to an url
+ * Extract and send data from a form to an url
  *
  * @param {String} id of form to grab values from
  * @param {String} url to call on backend
@@ -270,6 +281,10 @@ function handleResponse(response) {
       tagify.settings.whitelist = result.concat(tagify.value || []);
       tagify.loading(false).dropdown.show(inputValue);
       break;
+
+    case "REDIRECT":
+      redirect(response.url);
+      break;
   }
 
   call(response.calls);
@@ -279,6 +294,15 @@ function call(calls) {
   calls.forEach((call) => {
     FunctionRegistry.call(call.name, ...call.args);
   });
+}
+
+/**
+ * Reload the current site with a new url.
+ * 
+ * @param {*} url to load
+ */
+function redirect(url) {
+  window.location.href = url;
 }
 // === < global functions ==========================================================================
 // === > function register =========================================================================

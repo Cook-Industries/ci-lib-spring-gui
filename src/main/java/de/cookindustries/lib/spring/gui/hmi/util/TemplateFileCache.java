@@ -8,17 +8,15 @@
 package de.cookindustries.lib.spring.gui.hmi.util;
 
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,54 +60,57 @@ public class TemplateFileCache
     @PostConstruct
     public void init()
     {
-        LOG.debug("init [{}]", TemplateFileCache.class.getSimpleName());
+        LOG.info("init [{}]", TemplateFileCache.class.getSimpleName());
 
         ObjectMapper mapper = new ObjectMapper();
+        int          expected;
+        int          cnt    = 0;
 
         try
         {
-            URL resourceUrl = getClass().getClassLoader().getResource(path);
-            if (resourceUrl == null)
+            PathMatchingResourcePatternResolver resolver   = new PathMatchingResourcePatternResolver();
+
+            String                              searchPath = "classpath*:" + path + "**/*.json";
+
+            LOG.debug("load resources under [{}]", searchPath);
+
+            Resource[] resources = resolver.getResources(searchPath);
+
+            expected = resources.length;
+
+            for (Resource resource : resources)
             {
-                throw new IllegalArgumentException(String.format("Resource folder not found on classpath: [%s]", path));
-            }
+                LOG.debug("load resource [{}]", resource.getURI());
 
-            Path basePath = Paths.get(resourceUrl.toURI());
+                try (InputStream is = resource.getInputStream())
+                {
+                    String fullPath     = resource.getURL().getPath();
 
-            try (Stream<Path> paths = Files.walk(basePath))
-            {
-                paths
-                    .filter(Files::isRegularFile)
-                    .filter(p -> p.toString().endsWith(".json"))
-                    .forEach(p -> {
-                        try
-                        {
-                            String relativePath = StringAdapter.sanitizePath(basePath.relativize(p).toString());
+                    int    index        = fullPath.indexOf(path);
+                    String relativePath = index >= 0 ? fullPath.substring(index + path.length()) : resource.getFilename();
 
-                            LOG.debug("read template [{}]", relativePath);
+                    LOG.debug("read template [{}]", relativePath);
 
-                            PseudoElement element = mapper.readValue(p.toFile(), PseudoElement.class);
+                    PseudoElement element = mapper.readValue(is, PseudoElement.class);
 
-                            templateMap.put(relativePath, element);
-                        }
-                        catch (IOException ex)
-                        {
-                            LOG.error("error reading json", ex);
-                        }
-                    });
-            }
-            catch (IOException ex)
-            {
-                LOG.error("error accessing resources", ex);
+                    templateMap.put(relativePath, element);
 
-                new RuntimeException(ex);
+                    cnt++;
+                }
+                catch (IOException ex)
+                {
+                    LOG.error("error reading json from resource: " + resource, ex);
+                }
             }
         }
         catch (Exception ex)
         {
             LOG.error("error initializing TemplateFileCache", ex);
+
             throw new RuntimeException(ex);
         }
+
+        LOG.info("init finished with [{}] files from [{}] expected", cnt, expected);
     }
 
     /**

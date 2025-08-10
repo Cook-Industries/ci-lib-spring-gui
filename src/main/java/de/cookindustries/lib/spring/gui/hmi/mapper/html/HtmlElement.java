@@ -108,7 +108,7 @@ public final class HtmlElement
         return attributes
             .stream()
             .map(att -> att.getHtmlRep())
-            .dropWhile(str -> str.isBlank())
+            .filter(str -> !str.isBlank())
             .collect(Collectors.joining(SPACE));
     }
 

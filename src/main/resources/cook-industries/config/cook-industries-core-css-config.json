@@ -4,7 +4,7 @@
             "selector": ":root",
             "attributes": {
                 "--ci-bgc-nightblue": "#2b5782",
-                "--ci-tc-f-nightblue": "white",
+                "--ci-tc-nightblue": "white",
                 "--ci-bgc-overlay-backdrop": "rgba(0, 0, 0, 0.5)",
                 "--ci-bgc-error-25": "rgba(255, 0, 0, 0.25)",
                 "--ci-bgc-error-50": "rgba(255, 0, 0, 0.5)",
@@ -23,27 +23,8 @@
                 "--ci-tc-notification": "white",
                 "--ci-color-notification-icon": "blue",
                 "--ci-bgc-error-container": "rgba(64, 64, 64, 1)",
-                "--ci-bgc-popup": "var(--ci-bgc-error-container)"
-            }
-        },
-        {
-            "selector": "body",
-            "attributes": {
-                "postion": "absolute",
-                "top": "0",
-                "left": "0",
-                "right": "0",
-                "bottom": "0"
-            }
-        },
-        {
-            "selector": "html",
-            "attributes": {
-                "postion": "absolute",
-                "top": "0",
-                "left": "0",
-                "right": "0",
-                "bottom": "0"
+                "--ci-bgc-popup": "var(--ci-bgc-error-container)",
+                "--ci-modal-inlay-border-color": "white"
             }
         },
         {
@@ -256,7 +237,7 @@
             "attributes": {
                 "background-color": "var(--ci-bgc-error-25)",
                 "border-color": "var(--ci-bgc-error-50)",
-                "color": "var(--ci-tc-f-error)"
+                "color": "var(--ci-tc-error)"
             }
         },
         {
@@ -270,7 +251,7 @@
             "attributes": {
                 "background-color": "var(--ci-bgc-warning-25)",
                 "border-color": "var(--ci-bgc-warning-50)",
-                "color": "var(--ci-tc-f-warning)"
+                "color": "var(--ci-tc-warning)"
             }
         },
         {
@@ -284,7 +265,7 @@
             "attributes": {
                 "background-color": "var(--ci-bgc-success-25)",
                 "border-color": "var(--ci-bgc-success-50)",
-                "color": "var(--ci-tc-f-success)"
+                "color": "var(--ci-tc-success)"
             }
         },
         {
@@ -298,7 +279,7 @@
             "attributes": {
                 "background-color": "var(--ci-bgc-notification-25)",
                 "border-color": "var(--ci-bgc-notification-50)",
-                "color": "var(--ci-tc-f-notification)"
+                "color": "var(--ci-tc-notification)"
             }
         },
         {
@@ -338,7 +319,7 @@
             "attributes": {
                 "margin": "1rem",
                 "padding": "1rem",
-                "color": "var(--ci-tc-f-nightblue)",
+                "color": "var(--ci-tc-nightblue)",
                 "font-size": "150%",
                 "border-radius": "1rem"
             }
@@ -381,8 +362,10 @@
                 "max-height": "90%",
                 "overflow-y": "auto",
                 "background-color": "var(--ci-bgc-nightblue)",
-                "color": "var(--ci-tc-f-nightblue)",
-                "border-radius": "1rem"
+                "color": "var(--ci-tc-nightblue)",
+                "border": "solid .1rem var(--ci-modal-inlay-border-color)",
+                "border-radius": ".5rem",
+                "box-shadow": ".5rem .5rem 1rem var(--ci-bgc-overlay-backdrop)"
             }
         },
         {

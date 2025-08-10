@@ -15,6 +15,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.lang.NonNull;
@@ -32,6 +34,8 @@ import jakarta.annotation.PostConstruct;
 @Configuration
 public class CiLibStaticResourceConfig implements WebMvcConfigurer
 {
+
+    private static final Logger      LOG            = LoggerFactory.getLogger(CiLibStaticResourceConfig.class);
 
     private static final Set<String> STATIC_FOLDERS = Set.of("css", "js", "images");
 
@@ -55,11 +59,15 @@ public class CiLibStaticResourceConfig implements WebMvcConfigurer
     @PostConstruct
     public void init()
     {
+        LOG.info("init [{}]", CiLibStaticResourceConfig.class.getSimpleName());
+
         String basePath = properties.getWeb().getPath().getStaticWebResources();
         Path   path     = Path.of(basePath);
 
         try
         {
+            LOG.debug("create static resource folder [{}]", path);
+
             Files.createDirectories(path);
 
             STATIC_FOLDERS.forEach(folder -> {
@@ -95,26 +103,31 @@ public class CiLibStaticResourceConfig implements WebMvcConfigurer
 
         File              targetFile = new File(basePath + "/js/" + resource.getFilename());
 
+        LOG.debug("copy JsLib to [{}]", targetFile);
+
         try (InputStream in = resource.getInputStream())
         {
             Files.copy(in, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException("Failed to copy static resource JsLib", ex);
         }
     }
 
     @Override
     public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry)
     {
-        Path   resourcePath   = Path.of(properties.getWeb().getPath().getStaticWebResources()).toAbsolutePath();
+        Path   resourcePath    = Path.of(properties.getWeb().getPath().getStaticWebResources()).toAbsolutePath().normalize();
 
-        String osName         = System.getProperty("os.name").toLowerCase();
+        String location        = resourcePath.toUri().toString();
+        String staticClasspath = "classpath:/static/";
 
-        String osFileAddition = osName.contains("win") ? "//" : "";
-
-        String location       = String.format("file:/%s%s/", osFileAddition, resourcePath.toString());
+        LOG.debug("register [{}] and [{}] as static file paths", location, staticClasspath);
 
         registry
             .addResourceHandler("/**")
-            .addResourceLocations(location, "classpath:/static/");
+            .addResourceLocations(location, staticClasspath);
     }
 
 }
