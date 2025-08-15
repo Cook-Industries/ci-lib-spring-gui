@@ -56,9 +56,9 @@ public final class HtmlMapper
     private static final String CLASS_FORM_CONTROL      = "form-control";
     private static final String CLASS_HIDDEN            = "hidden";
     private static final String CLASS_USER_SELECT_NONE  = "user-select-none";
-    private static final String CLASS_FORM_CHECK        = "form-check";
-    private static final String CLASS_FORM_CHECK_INPUT  = "form-check-input";
-    private static final String CLASS_FORM_CHECK_LABEL  = "form-check-label";
+    private static final String CLASS_FORM_CHECK        = "form-checkbox";
+    private static final String CLASS_FORM_CHECK_INPUT  = "form-checkbox-input";
+    private static final String CLASS_FORM_CHECK_LABEL  = "form-checkbox-label";
     private static final String CLASS_FORM_SELECT       = "form-select";
     private static final String CLASS_ERROR_HIGHLIGHT   = "error-highlight";
     private static final String CLASS_TEXT_COLOR_RED    = "text-color-red";
@@ -151,6 +151,8 @@ public final class HtmlMapper
             case MODAL -> render((ModalContainer) container);
             case SPLITTED -> render((SplittedContainer) container);
             case TAB -> render((TabContainer) container);
+            case TABLE -> render((TableContainer) container);
+            case TABLE_ROW -> render((TableRowContainer) container);
             case TEXT -> render((TextContainer) container);
         };
     }
@@ -163,7 +165,38 @@ public final class HtmlMapper
 
     private String render(Button button)
     {
-        return renderInternal(button);
+        HtmlElement elementMapper =
+            HtmlElement
+                .builder()
+                .tag("button")
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ID)
+                        .value(button.getUid())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ON_CLICK)
+                        .active(button.getOnClick() != null)
+                        .value(button.getOnClick())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name("title")
+                        .active(button.getTitle() != null && !button.getTitle().isBlank())
+                        .value(button.getTitle())
+                        .build())
+                .clazz("btn")
+                .clazz(button.getBtnClass().getClassName())
+                .classes(button.getClasses())
+                .dataAttributes(button.getDataAttributes())
+                .content(button.getText())
+                .build();
+
+        return elementMapper.html();
     }
 
     private String render(ButtonBarContainer buttonBarContainer)
@@ -183,7 +216,7 @@ public final class HtmlMapper
                 buttonBarContainer
                     .getButtons()
                     .stream()
-                    .map(b -> renderInternal(b))
+                    .map(b -> render(b))
                     .toList())
             .build()
             .html();
@@ -191,33 +224,48 @@ public final class HtmlMapper
 
     private String render(ButtonIcon buttonIcon)
     {
-        return elementNotYetImplemented("btn icon");
-    }
-
-    private String renderInternal(Button button)
-    {
         HtmlElement elementMapper =
             HtmlElement
                 .builder()
-                .tag("button")
+                .tag(TAG_INPUT)
+                .isSingleTag(true)
                 .attribute(
                     Attribute
                         .builder()
                         .name(ATT_ID)
-                        .value(button.getUid())
+                        .value(buttonIcon.getUid())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_TYPE)
+                        .value("image")
                         .build())
                 .attribute(
                     Attribute
                         .builder()
                         .name(ATT_ON_CLICK)
-                        .active(button.getOnClick() != null)
-                        .value(button.getOnClick())
+                        .active(buttonIcon.getOnClick() != null)
+                        .value(buttonIcon.getOnClick())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name("title")
+                        .active(buttonIcon.getTitle() != null && !buttonIcon.getTitle().isBlank())
+                        .value(buttonIcon.getTitle())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_SRC)
+                        .value(buttonIcon.getImage())
                         .build())
                 .clazz("btn")
-                .clazz(button.getBtnClass().getClassName())
-                .classes(button.getClasses())
-                .dataAttributes(button.getDataAttributes())
-                .content(button.getText())
+                .clazz("btn-icon")
+                .clazz(buttonIcon.getBtnClass().getClassName())
+                .classes(buttonIcon.getClasses())
+                .dataAttributes(buttonIcon.getDataAttributes())
                 .build();
 
         return elementMapper.html();
@@ -501,6 +549,96 @@ public final class HtmlMapper
         return elementNotYetImplemented("tabbed container");
     }
 
+    private String render(TableContainer table)
+    {
+        List<String> headColumns   =
+            table
+                .getColumnNames()
+                .stream()
+                .map(name -> {
+                                               return HtmlElement
+                                                   .builder()
+                                                   .tag(TAG_DIV)
+                                                   .clazz("table-head-cell")
+                                                   .content(name)
+                                                   .build()
+                                                   .html();
+                                           })
+                .toList();
+
+        List<String> rows          =
+            table
+                .getRows()
+                .stream()
+                .map(tr -> render(tr))
+                .toList();
+
+        HtmlElement  tableHead     =
+            HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .clazz("table-head")
+                .clazz("table-" + table.getName())
+                .contents(headColumns)
+                .build();
+
+        HtmlElement  tableBody     =
+            HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .clazz("table-body")
+                .contents(rows)
+                .build();
+
+        HtmlElement  elementMapper =
+            HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ID)
+                        .value(table.getUid())
+                        .build())
+                .clazz("table")
+                .classes(table.getClasses())
+                .dataAttributes(table.getDataAttributes())
+                .content(tableHead.html())
+                .content(tableBody.html())
+                .build();
+
+        return elementMapper.html();
+    }
+
+    private String render(TableRowContainer row)
+    {
+        List<String> cells         =
+            row
+                .getCells()
+                .stream()
+                .map(tr -> render(tr))
+                .toList();
+
+        HtmlElement  elementMapper =
+            HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ID)
+                        .value(row.getUid())
+                        .build())
+                .clazz("table-row")
+                .clazz("table-" + row.getTableName())
+                .classes(row.getClasses())
+                .dataAttributes(row.getDataAttributes())
+                .contents(cells)
+                .build();
+
+        return elementMapper.html();
+    }
+
     private String render(TextContainer textContainer)
     {
         HtmlElement elementMapper =
@@ -572,7 +710,6 @@ public final class HtmlMapper
             case SLIDER -> render((Slider) input, formId);
             case SWITCH -> render((Switch) input, formId);
             case TAG -> render((Tag) input, formId);
-            case TABLE -> render((Table) input, formId);
             case TEXTAREA -> render((Textarea) input, formId);
             case TEXTBOX -> render((Textbox) input);
             case TEXTFIELD -> render((Textfield) input, formId);
@@ -581,54 +718,82 @@ public final class HtmlMapper
 
     private String render(Checkbox checkbox, String formId)
     {
-        String      input         =
-            HtmlElement
-                .builder()
-                .isSingleTag(true)
-                .tag(TAG_INPUT)
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ID)
-                        .value(checkbox.getUid())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_TYPE)
-                        .value(checkbox.getType().name().toLowerCase())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ON_INPUT)
-                        .value(checkbox.getOnInput())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_CHECKED)
-                        .active(checkbox.getChecked())
-                        .build())
-                .clazz(CLASS_FORM_CHECK_INPUT)
-                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribute(DATA_ATT_SUBMIT_AS, checkbox.getSubmitAs())
-                .dataAttribute(DATA_ATT_VALUE_TYPE, checkbox.getType().name())
-                .dataAttributes(checkbox.getDataAttributes())
-                .build()
-                .html();
+        List<String> boxes = new ArrayList<>();
 
-        String      label         =
+        checkbox.getBoxes().stream().forEach(box -> {
+
+            String      id      = checkbox.getSubmitAs().isBlank() ? box.getId() : checkbox.getSubmitAs() + "-" + box.getId();
+
+            String      label   =
+                HtmlElement
+                    .builder()
+                    .tag(TAG_LABEL)
+                    .attribute(
+                        Attribute
+                            .builder()
+                            .name(ATT_FOR)
+                            .value(id)
+                            .build())
+                    .clazz("checkbox-label")
+                    .clazz(CLASS_USER_SELECT_NONE)
+                    .content(box.getText())
+                    .build()
+                    .html();
+
+            String      input   =
+                HtmlElement
+                    .builder()
+                    .isSingleTag(true)
+                    .tag(TAG_INPUT)
+                    .attribute(
+                        Attribute
+                            .builder()
+                            .name(ATT_ID)
+                            .value(id)
+                            .build())
+                    .attribute(
+                        Attribute
+                            .builder()
+                            .name(ATT_TYPE)
+                            .value(checkbox.getType().name().toLowerCase())
+                            .build())
+                    .attribute(
+                        Attribute
+                            .builder()
+                            .name(ATT_ON_INPUT)
+                            .value(checkbox.getOnInput())
+                            .build())
+                    .attribute(
+                        Attribute
+                            .builder()
+                            .name(ATT_CHECKED)
+                            .active(box.getChecked())
+                            .build())
+                    .clazz(CLASS_FORM_CHECK_INPUT)
+                    .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+                    .dataAttribute(DATA_ATT_SUBMIT_AS, id)
+                    .dataAttribute(DATA_ATT_VALUE_TYPE, checkbox.getType().name())
+                    .dataAttributes(checkbox.getDataAttributes())
+                    .build()
+                    .html();
+
+            HtmlElement wrapper =
+                HtmlElement
+                    .builder()
+                    .tag(TAG_DIV)
+                    .clazz("checkbox-wrapper")
+                    .content(input)
+                    .content(label)
+                    .build();
+
+            boxes.add(wrapper.html());
+        });
+
+        String      legend        =
             HtmlElement
                 .builder()
-                .tag(TAG_LABEL)
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_FOR)
-                        .value(checkbox.getUid())
-                        .build())
-                .clazz(CLASS_FORM_CHECK_LABEL)
+                .tag(TAG_DIV)
+                .clazz(CLASS_FORM_LABEL)
                 .clazz(CLASS_USER_SELECT_NONE)
                 .content(checkbox.getName())
                 .build()
@@ -639,7 +804,8 @@ public final class HtmlMapper
                 .builder()
                 .tag(TAG_DIV)
                 .clazz(CLASS_FORM_CHECK)
-                .content(StringAdapter.from(input, label))
+                .content(StringAdapter.from(legend))
+                .contents(boxes)
                 .build();
 
         return elementMapper.html();
@@ -689,7 +855,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_VALUE)
-                        .value(date.getUid())
+                        .value(date.getValue())
                         .build())
                 .clazz(CLASS_FORM_CONTROL)
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
@@ -1086,7 +1252,7 @@ public final class HtmlMapper
                         Attribute
                             .builder()
                             .name(ATT_SELECTED)
-                            .active(selection.getChecked())
+                            .active(selection.getValue().equals(select.getSelected()))
                             .build())
                     .content(selection.getText())
                     .build()
@@ -1334,6 +1500,13 @@ public final class HtmlMapper
                         .name(ATT_ON_INPUT)
                         .value(tag.getOnInput())
                         .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name("pattern")
+                        .value(tag.getPattern())
+                        .active(tag.getPattern() != null && !tag.getPattern().isBlank())
+                        .build())
                 .clazz(CLASS_FORM_CONTROL)
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
                 .dataAttribute(DATA_ATT_SUBMIT_AS, tag.getSubmitAs())
@@ -1353,16 +1526,88 @@ public final class HtmlMapper
         return elementMapper.html();
     }
 
-    private String render(Table table, String formId)
-    {
-        // TODO: implement
-        return elementNotYetImplemented("table");
-    }
-
     private String render(Textarea textarea, String formId)
     {
-        // TODO: implement
-        return elementNotYetImplemented("textarea");
+        String      label         =
+            HtmlElement
+                .builder()
+                .tag(TAG_LABEL)
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_FOR)
+                        .value(textarea.getUid())
+                        .build())
+                .clazz(CLASS_FORM_LABEL)
+                .content(textarea.getName())
+                .build()
+                .html();
+
+        String      input         =
+            HtmlElement
+                .builder()
+                .tag("textarea")
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ID)
+                        .value(textarea.getUid())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ON_INPUT)
+                        .value(textarea.getOnInput())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_PLACEHOLDER)
+                        .value(textarea.getPlaceholder())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ON_KEY_DOWN)
+                        .value(textarea.getOnKeydown())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name("rows")
+                        .value(String.valueOf(textarea.getRows()))
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name("cols")
+                        .value(String.valueOf(textarea.getCols()))
+                        .active(textarea.getCols() != null)
+                        .build())
+                .clazz(CLASS_FORM_CONTROL)
+                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+                .dataAttribute(DATA_ATT_SUBMIT_AS, textarea.getSubmitAs())
+                .dataAttribute(DATA_ATT_VALUE_TYPE, textarea.getType().name())
+                .dataAttribute(DATA_ATT_MAX_CHARACTERS, String.valueOf(textarea.getMaxCharacters()))
+                .dataAttributes(textarea.getDataAttributes())
+                .content(textarea.getValue())
+                .build()
+                .html();
+
+        String      tooltip       = resolveTooltip(textarea.getTooltip(), textarea.getTooltipPosition());
+
+        String      content       =
+            StringAdapter.from(label, tooltip, resolveMarker(formId, textarea.getSubmitAs(), textarea.getMarker()), input);
+
+        HtmlElement elementMapper =
+            HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .clazz(INPUT_CONTAINER)
+                .content(content)
+                .build();
+
+        return elementMapper.html();
     }
 
     private String render(Textbox textbox)

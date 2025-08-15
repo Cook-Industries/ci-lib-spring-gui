@@ -7,36 +7,33 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.container;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Builder.Default;
+import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * @since 1.0.0
+ * @since 3.0.2
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @SuperBuilder
 @Getter
 @Jacksonized
-public final class ButtonIcon extends Container
+public final class TableRowContainer extends Container
 {
 
     @NonNull
-    private final String      image;
+    private final String          tableName;
 
-    @Default
-    private final String      title    = null;
-
-    @NonNull
-    @Default
-    private final ButtonClass btnClass = ButtonClass.DEFAULT;
+    @Singular
+    private final List<Container> cells;
 
     @Override
     protected ContainerType inferType()
     {
-        return ContainerType.BUTTON_ICON;
+        return ContainerType.TABLE_ROW;
     }
-
 }

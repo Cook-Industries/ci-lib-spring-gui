@@ -10,6 +10,7 @@ export {
   sendFromForm,
   dismissErrors,
   redirect,
+  reload,
   FunctionRegistry,
 };
 
@@ -23,7 +24,7 @@ export {
  * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
-const version = "2.2.0";
+const version = "3.0.0";
 
 const CLASS_HIDDEN = "hidden";
 
@@ -34,9 +35,6 @@ function init() {
 $(document).ready(function () {
   console.log("ci-lib-js: ", version);
 
-  /**
-   * OnClick function
-   */
   $(document).on("click", ".modal-overlay", function (event) {
     event.stopPropagation();
 
@@ -45,6 +43,13 @@ $(document).ready(function () {
         closeModal();
       }
     }
+  });
+
+  $(document).on('input change', '[data-connected-btn] input, [data-connected-btn] select, [data-connected-btn] textarea', function () {
+    var $container = $(this).closest('[data-connected-btn]');
+    var btnId = $container.data('connected-btn');
+
+    updateButton(btnId);
   });
 
   $(document).on("keydown", function (e) {
@@ -89,8 +94,16 @@ $(document).ready(function () {
     redirect(url);
   });
 
+  FunctionRegistry._registerInternal("reload", () => {
+    reload();
+  });
+
   FunctionRegistry._registerInternal("dismissErrors", () => {
     dismissErrors();
+  });
+
+  FunctionRegistry._registerInternal("resetButton", (id) => {
+    resetButton(id);
   });
 
   FunctionRegistry._registerInternal("noop", () => {
@@ -303,6 +316,10 @@ function call(calls) {
  */
 function redirect(url) {
   window.location.href = url;
+}
+
+function reload() {
+  location.reload();
 }
 // === < global functions ==========================================================================
 // === > function register =========================================================================
@@ -568,7 +585,7 @@ function closeModal() {
   toggleBodyScroll();
 }
 // === < modal =====================================================================================
-// === > site ======================================================================================
+// === > form ======================================================================================
 function fillContent(content) {
   const elementId = `#${content.elementId}`;
   if ($(content).length) {
@@ -597,12 +614,12 @@ function extractValuesToSubmit(target) {
 
   formData.append("__form_id", target);
 
+  changeGlobalLoaderText(`extract: ${target}`);
+
   for (const elem of $(`#${target} [data-submit-id="${target}"]`)) {
     if ($(elem).attr("data-submit-as") === "") {
       // no submit id set so ignore input
     } else {
-      changeGlobalLoaderText(`extract: ${target}`);
-
       const id = $(elem).attr("data-submit-as");
 
       switch ($(elem).attr("data-value-type")) {
@@ -626,13 +643,11 @@ function extractValuesToSubmit(target) {
           break;
 
         case "CHECKBOX":
-          let checkArr = [];
-          $(elem)
-            .find('input[type="checkbox"]:checked')
-            .each(function () {
-              checkArr.push($(elem).val());
-            });
-          formData.append(id, checkArr);
+          if ($(elem).prop("checked")) {
+            formData.append(id, "true");
+          } else {
+            formData.append(id, "false")
+          }
           break;
 
         case "SWITCH":
@@ -640,10 +655,7 @@ function extractValuesToSubmit(target) {
           break;
 
         case "RADIO":
-          formData.append(
-            id,
-            $(elem).find('input[type="radio"]:checked').val()
-          );
+          formData.append(id, $(elem).find('input[type="radio"]:checked').val());
           break;
 
         case "FILE":
@@ -661,8 +673,34 @@ function extractValuesToSubmit(target) {
 
   return formData;
 }
-// === < site ======================================================================================
-// === > form ======================================================================================
+
+function updateButton(btnId) {
+  var $btn = $('#' + btnId);
+
+  // Remove any btn-* style
+  $btn.removeClass(function (i, className) {
+    return (className.match(/(^|\s)btn-\S+/g) || []).join(' ');
+  });
+
+  // Add your "changed" style
+  $btn.addClass('btn btn-warning');
+
+  // Mark button as having unsaved changes
+  $btn.attr('data-pending-change', 'true');
+}
+
+function resetButton(btnId) {
+  var $btn = $('#' + btnId);
+
+  $btn.removeClass(function (i, className) {
+    return (className.match(/(^|\s)btn-\S+/g) || []).join(' ');
+  });
+
+  $btn.addClass('btn btn-primary');
+  $btn.removeAttr('data-pending-change');
+}
+// === < form ======================================================================================
+// === > tags ======================================================================================
 const tagifyInstances = new Map();
 const tagifyWhitelists = new Map();
 
@@ -689,7 +727,9 @@ function registerTagInput(id, fetchTagsUrl, searchTagsUrl, enforceWhitelist) {
   tagifyInstances.set(id, tagify);
   tagifyWhitelists.set(id, initialValues);
 
-  POST(fetchTagsUrl, { id: id });
+  if (fetchTagsUrl !== "") {
+    POST(fetchTagsUrl, { id: id });
+  }
 }
 
 function onAddTag(e, tagify) {
@@ -697,15 +737,17 @@ function onAddTag(e, tagify) {
 }
 
 function onInput(e, tagify) {
-  tagify.whitelist = tagifyWhitelists.get(tagify.settings.inputId);
-  tagify.loading(true);
+  if (tagify.settings.searchTagsUrl !== "") {
+    tagify.whitelist = tagifyWhitelists.get(tagify.settings.inputId);
+    tagify.loading(true);
 
-  POST(tagify.settings.searchTagsUrl, {
-    id: tagify.settings.inputId,
-    input: e.detail.value,
-  });
+    POST(tagify.settings.searchTagsUrl, {
+      id: tagify.settings.inputId,
+      input: e.detail.value,
+    });
+  }
 }
-// === < form ======================================================================================
+// === < tags ======================================================================================
 function toggleBodyScroll() {
   if (errorOverlayVisible || globalLoaderVisible || openModals > 0) {
     $("body").addClass("no-scroll");

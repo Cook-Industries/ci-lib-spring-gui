@@ -11,9 +11,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
-import lombok.Builder;
+
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.experimental.SuperBuilder;
 import lombok.Builder.Default;
 
 /**
@@ -22,7 +23,7 @@ import lombok.Builder.Default;
  * @since 2.4.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@Builder
+@SuperBuilder
 @Getter
 public final class DoubleInputProcessor extends AbsInputProcessor<Double>
 {

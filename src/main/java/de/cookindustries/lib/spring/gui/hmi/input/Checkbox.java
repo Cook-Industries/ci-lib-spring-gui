@@ -7,9 +7,11 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input;
 
+import java.util.List;
+
+import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import lombok.Getter;
-import lombok.NonNull;
-import lombok.Builder.Default;
+import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -23,9 +25,8 @@ import lombok.extern.jackson.Jacksonized;
 public final class Checkbox extends SubmittableInput
 {
 
-    @NonNull
-    @Default
-    private final Boolean checked = false;
+    @Singular
+    private final List<InputValue> boxes;
 
     @Override
     protected InputType inferType()

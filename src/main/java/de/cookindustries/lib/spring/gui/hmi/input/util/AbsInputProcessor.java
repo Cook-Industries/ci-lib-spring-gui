@@ -9,6 +9,12 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
 
 import java.util.Optional;
 
+import de.cookindustries.lib.spring.gui.hmi.input.util.exception.NullIgnoreException;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Builder.Default;
+import lombok.experimental.SuperBuilder;
+
 /**
  * A abstract processor to parse and check a {@link String} {@code input} to a generic type {@code T}.
  * <p>
@@ -18,8 +24,14 @@ import java.util.Optional;
  * @since 2.4.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
+@SuperBuilder
+@Getter
 public abstract class AbsInputProcessor<T>
 {
+
+    @NonNull
+    @Default
+    private final Boolean ignoreNull = false;
 
     /**
      * Create an {@link InputCheckResult} with a {@code type} and a empty result object.
@@ -78,7 +90,7 @@ public abstract class AbsInputProcessor<T>
      * Make final preparations to the {@code #check(Object)} result {@code output} before calling
      * {@code #createResult(InputCheckResultType, Object)} the endresult.
      * <p>
-     * The default implementation does nothing.
+     * The default implementation does nothing and simply returns the input as-is.
      * 
      * @param output to transform
      * @return the transformed {@code output}
@@ -91,7 +103,7 @@ public abstract class AbsInputProcessor<T>
     /**
      * Check the given {@code String} from the {@code UI form}.
      * <p>
-     * This function does has 3 steps:
+     * This function has 3 steps:
      * <ol>
      * <li>check if the {@code input} is {@code null}. If so, return with an empty {@link InputCheckResult} set to
      * {@link InputCheckResultType#NOT_PRESENT}.</li>
@@ -107,6 +119,11 @@ public abstract class AbsInputProcessor<T>
     {
         if (input == null)
         {
+            if (ignoreNull)
+            {
+                throw new NullIgnoreException();
+            }
+
             return createEmptyResult(InputCheckResultType.NOT_PRESENT);
         }
 

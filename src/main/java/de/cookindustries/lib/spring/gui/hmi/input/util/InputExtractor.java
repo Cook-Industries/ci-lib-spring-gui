@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +24,7 @@ import de.cookindustries.lib.spring.gui.hmi.input.Input;
 import de.cookindustries.lib.spring.gui.hmi.input.marker.Marker;
 import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerCategory;
 import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
+import de.cookindustries.lib.spring.gui.hmi.input.util.exception.NullIgnoreException;
 import de.cookindustries.lib.spring.gui.response.Response;
 import de.cookindustries.lib.spring.gui.response.message.ActivateMarkerMessage;
 import de.cookindustries.lib.spring.gui.response.message.MessageType;
@@ -76,36 +79,65 @@ import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
 public final class InputExtractor
 {
 
+    private static final Logger                 LOG                                 = LoggerFactory.getLogger(InputExtractor.class);
+
     /** A default String input processor. Allows empty {@code Strings} and imposes no restrictions. */
-    public static final StringInputProcessor    DEFAULT_STRING_PROCESSOR            = StringInputProcessor.builder().build();
+    public static final StringInputProcessor    DEFAULT_STRING_PROCESSOR            =
+        StringInputProcessor
+            .builder()
+            .build();
 
     /** A default String input processor. Rejects empty {@code Strings} and imposes no other restrictions. */
     public static final StringInputProcessor    DEFAULT_STRING_NOT_EMPTY_PROCESSOR  =
-        StringInputProcessor.builder().allowEmpty(false).build();
+        StringInputProcessor
+            .builder()
+            .allowEmpty(false)
+            .build();
 
     /** A default {@code Boolean} input processor. Defaults to {@code false}. */
     public static final BooleanInputProcessor   DEFAULT_FALSE_BOOLEAN_PROCESSOR     =
-        BooleanInputProcessor.builder().fallback(false).build();
+        BooleanInputProcessor
+            .builder()
+            .fallback(false)
+            .build();
 
     /** A default {@code Boolean} input processor. Defaults to {@code true}. */
     public static final BooleanInputProcessor   DEFAULT_TRUE_BOOLEAN_PROCESSOR      =
-        BooleanInputProcessor.builder().fallback(true).build();
+        BooleanInputProcessor
+            .builder()
+            .fallback(true)
+            .build();
 
     /** A default {@code Integer} input processor. Imposes no restrictions. */
-    public static final IntegerInputProcessor   DEFAULT_INTEGER_PROCESSOR           = IntegerInputProcessor.builder().build();
+    public static final IntegerInputProcessor   DEFAULT_INTEGER_PROCESSOR           =
+        IntegerInputProcessor
+            .builder()
+            .build();
 
     /** A default {@code Double} input processor. Imposes no restrictions. */
-    public static final DoubleInputProcessor    DEFAULT_DOUBLE_PROCESSOR            = DoubleInputProcessor.builder().build();
+    public static final DoubleInputProcessor    DEFAULT_DOUBLE_PROCESSOR            =
+        DoubleInputProcessor
+            .builder()
+            .build();
 
     /** A default {@code Date} input processor. Imposes no restrictions. */
-    public static final DateInputProcessor      DEFAULT_DATE_PROCESSOR              = DateInputProcessor.builder().build();
+    public static final DateInputProcessor      DEFAULT_DATE_PROCESSOR              =
+        DateInputProcessor
+            .builder()
+            .build();
 
     /** A default {@code TagList} input processor. Imposes no restrictions. */
-    public static final TagListInputProcessor   DEFAULT_TAGLIST_PROCESSOR           = TagListInputProcessor.builder().build();
+    public static final TagListInputProcessor   DEFAULT_TAGLIST_PROCESSOR           =
+        TagListInputProcessor
+            .builder()
+            .build();
 
     /** A default {@code TagList} input processor. Fails on no tags given. Imposes no other restrictions. */
     public static final TagListInputProcessor   DEFAULT_NON_EMPTY_TAGLIST_PROCESSOR =
-        TagListInputProcessor.builder().allowEmpty(false).build();
+        TagListInputProcessor
+            .builder()
+            .allowEmpty(false)
+            .build();
 
     private final String                        formId;
     private final MultiValueMap<String, String> inputs;
@@ -145,6 +177,17 @@ public final class InputExtractor
         {
             throw new IllegalArgumentException("key [__form_id] cannot be null/empty");
         }
+
+        LOG.debug("inputs given:");
+        if (LOG.isDebugEnabled())
+        {
+            inputs
+                .entrySet()
+                .stream()
+                .forEach(ent -> LOG.debug("[{}]:[{}]", ent.getKey(), ent.getValue()));
+        }
+
+        LOG.debug("files given: [{}]", files != null ? files.length : "none");
     }
 
     /**
@@ -181,8 +224,11 @@ public final class InputExtractor
                 case NOT_PARSABLE -> addUnexpectedErrorMessage(key, String.format("value [%s] not parsable", value));
 
                 default -> activateMarker(key, MarkerCategory.ERROR, resultType.getMarkerType());
-
             };
+        }
+        catch (NullIgnoreException ex)
+        {
+            // value to parse is null, but this will be ignored and not raise any error
         }
         catch (Exception ex)
         {

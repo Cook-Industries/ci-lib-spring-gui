@@ -23,6 +23,8 @@ import de.cookindustries.lib.spring.gui.config.properties.CiLibResourcesProperti
 import de.cookindustries.lib.spring.gui.hmi.container.*;
 import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
+import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
+import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableDissector;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.TokenMap;
 import de.cookindustries.lib.spring.gui.hmi.util.TemplateFileCache;
@@ -99,7 +101,7 @@ public class JsonMapperTest
                 .templateFileCache(TEMPLATE_FILE_CACHE)
                 .translationProvider(new StaticTranslationProvider())
                 .flatMappableDissector(flatMappableDissector)
-                .keyReplacmentMap(valueMap)
+                .tokenMap(valueMap)
                 .build();
 
         // run
@@ -130,7 +132,7 @@ public class JsonMapperTest
                 .templateFileCache(TEMPLATE_FILE_CACHE)
                 .translationProvider(new StaticTranslationProvider())
                 .flatMappableDissector(flatMappableDissector)
-                .keyReplacmentMap(valueMap)
+                .tokenMap(valueMap)
                 .build();
 
         // run
@@ -180,7 +182,7 @@ public class JsonMapperTest
                 .templateFileCache(TEMPLATE_FILE_CACHE)
                 .translationProvider(new StaticTranslationProvider())
                 .flatMappableDissector(flatMappableDissector)
-                .keyReplacmentMap(valueMap)
+                .tokenMap(valueMap)
                 .build();
 
         // run
@@ -759,6 +761,19 @@ public class JsonMapperTest
     void test_map_SelectInput()
     {
         // setup
+        InputValueList list = new InputValueList();
+        list.add(
+            InputValue
+                .builder()
+                .id("id")
+                .text("text")
+                .value("value")
+                .build());
+        TokenMap      map       =
+            TokenMap
+                .builder()
+                .value("list", list)
+                .build();
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
@@ -767,6 +782,7 @@ public class JsonMapperTest
                 .templateFileCache(TEMPLATE_FILE_CACHE)
                 .translationProvider(new StaticTranslationProvider())
                 .flatMappableDissector(flatMappableDissector)
+                .tokenMap(map)
                 .build();
 
         // run
@@ -789,7 +805,7 @@ public class JsonMapperTest
         Select select2 = (Select) input2;
         assertEquals("name", select2.getName());
         assertEquals("select2", select2.getSubmitAs());
-        assertEquals(0, select2.getValues().size());
+        assertEquals(1, select2.getValues().size());
     }
 
     @Test

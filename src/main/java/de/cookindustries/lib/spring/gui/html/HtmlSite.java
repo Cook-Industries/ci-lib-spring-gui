@@ -73,7 +73,7 @@ public class HtmlSite implements HtmlExportable
             .appendnl("<body>")
             .appendnl(containers, HtmlMapper::map)
             .appendnl("<script>")
-            .appendnl("document.addEventListener(\"DOMContentLoaded\", () => setTimeout(__onPageLoad, 1000));")
+            .appendnl("document.addEventListener(\"DOMContentLoaded\", () => setTimeout(__onPageLoad, 100));")
             .appendnl("function __onPageLoad() {")
             .appendnl(functions, AbsFunctionCall::parseAsJS)
             .appendnl("}")

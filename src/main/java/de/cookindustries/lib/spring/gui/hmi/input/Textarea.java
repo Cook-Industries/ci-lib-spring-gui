@@ -7,6 +7,7 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input;
 
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
@@ -23,12 +24,25 @@ public final class Textarea extends SubmittableInput
 {
 
     @NonNull
-    private final String  value;
+    @Default
+    private final String  value         = "";
 
     @NonNull
-    private final String  placeholder;
+    @Default
+    private final String  placeholder   = "";
 
-    private final Integer maxCharacters;
+    @Default
+    private final Integer maxCharacters = Integer.MAX_VALUE;
+
+    @Default
+    private final String  onKeydown     = "";
+
+    @NonNull
+    @Default
+    private final Integer rows          = 5;
+
+    @Default
+    private final Integer cols          = null;
 
     @Override
     protected InputType inferType()

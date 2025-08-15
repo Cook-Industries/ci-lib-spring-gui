@@ -492,6 +492,155 @@
             "attributes": {
                 "overflow": "hidden"
             }
+        },
+        {
+            "selector": ".table-head",
+            "attributes": {
+                "display": "grid",
+                "grid-auto-flow": "column",
+                "margin-bottom": "0.5rem",
+                "margin-right": "1rem !important",
+                "background-color": "#ccc",
+                "font-weight": "bold",
+                "border-radius": "0.5rem 0.5rem 0 0"
+            }
+        },
+        {
+            "selector": ".table-head-cell",
+            "attributes": {
+                "padding": "0.5rem"
+            }
+        },
+        {
+            "selector": ".table-body",
+            "attributes": {
+                "display": "grid",
+                "grid-template-rows": "auto",
+                "grid-auto-flow": "row",
+                "grid-column-gap": "0.25rem",
+                "overflow-y": "scroll"
+            }
+        },
+        {
+            "selector": ".table-row",
+            "attributes": {
+                "display": "grid",
+                "grid-template-rows": "1",
+                "grid-auto-flow": "column",
+                "background-color": "rgba(128, 128, 128, 0.15)"
+            }
+        },
+        {
+            "selector": ".table-row:hover",
+            "attributes": {
+                "background-color": "rgba(128, 128, 128, 0.5)"
+            }
+        },
+        {
+            "selector": ".checkbox-wrapper",
+            "attributes": {
+                "display": "flex",
+                "flex-direction": "row",
+                "margin-top": "1rem",
+                "margin-bottom": "1rem",
+                "margin-left": "1rem"
+            }
+        },
+        {
+            "selector": ".checkbox-wrapper>input",
+            "attributes": {
+                "margin": "0 0.4rem 0 0"
+            }
+        },
+        {
+            "selector": ".checkbox-wrapper>input",
+            "attributes": {
+                "margin": "0 0.4rem 0 0"
+            }
+        },
+        {
+            "selector": ".checkbox-label",
+            "attributes": {
+                "margin-top": "-0.3rem",
+                "font-weight": "bold"
+            }
+        },
+        {
+            "selector": ".checkbox-label:hover",
+            "attributes": {
+                "cursor": "pointer"
+            }
+        },
+        {
+            "selector": ".form-checkbox",
+            "attributes": {
+                "margin": "1rem 0"
+            }
+        },
+        {
+            "selector": ".form-checkbox-label",
+            "attributes": {
+                "font-weight": "bold",
+                "padding": "0 0.5rem"
+            }
+        },
+        {
+            "selector": ".flex-fill",
+            "attributes": {
+                "flex": "1 1 auto"
+            }
+        },
+        {
+            "selector": ".flex-row-spaced",
+            "attributes": {
+                "display": "flex",
+                "flex-direction": "row"
+            }
+        },
+        {
+            "selector": ".flex-row-spaced>*",
+            "attributes": {
+                "margin-left": "1rem"
+            }
+        },
+        {
+            "selector": ".input-container",
+            "attributes": {
+                "display": "grid",
+                "grid-template-columns": "6fr 1fr 1fr 1fr",
+                "grid-template-rows": "auto",
+                "grid-template-areas": "heading notification error free\\nfield field field field"
+            }
+        },
+        {
+            "selector": ".input-heading",
+            "attributes": {
+                "grid-area": "heading"
+            }
+        },
+        {
+            "selector": ".input-notification",
+            "attributes": {
+                "grid-area": "heading"
+            }
+        },
+        {
+            "selector": ".input-error",
+            "attributes": {
+                "grid-area": "error"
+            }
+        },
+        {
+            "selector": ".input-free",
+            "attributes": {
+                "grid-area": "error"
+            }
+        },
+        {
+            "selector": ".input-field",
+            "attributes": {
+                "grid-area": "field"
+            }
         }
     ],
     "animations": [

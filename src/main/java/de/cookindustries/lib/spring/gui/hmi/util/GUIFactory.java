@@ -87,6 +87,18 @@ public final class GUIFactory
     }
 
     /**
+     * Get a translation to an id.
+     * 
+     * @param language to use
+     * @param id to lookup
+     * @return the translated {@code text} or a placeholder if no mapping for {@code id} id found
+     */
+    public String getTranslatedText(Locale language, String id)
+    {
+        return translationProvider.getText(language, id);
+    }
+
+    /**
      * Create a HTML website based on the standard imports added with user imports
      * 
      * @param title of the website
@@ -221,7 +233,7 @@ public final class GUIFactory
                     .flatMappableDissector(flatMappableDissector)
                     .path(resourcePath)
                     .locale(locale)
-                    .keyReplacmentMaps(valueMaps)
+                    .tokenMaps(valueMaps)
                     .build();
 
             return mapper.map();

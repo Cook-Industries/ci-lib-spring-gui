@@ -57,6 +57,12 @@ public enum ContainerType {
     /** Type for modal {@link Container} */
     MODAL,
 
+    /** Type for table {@link Container} */
+    TABLE,
+
+    /** Type for table row {@link Container} */
+    TABLE_ROW,
+
     /** Type for a empty (no) container */
     EMPTY;
 

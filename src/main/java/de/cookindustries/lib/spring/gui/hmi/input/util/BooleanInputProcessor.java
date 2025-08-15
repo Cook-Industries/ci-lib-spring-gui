@@ -7,10 +7,10 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input.util;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Builder.Default;
+import lombok.experimental.SuperBuilder;
 
 /**
  * A processor to parse and check a {@code input} as {@link Boolean}.
@@ -18,7 +18,7 @@ import lombok.Builder.Default;
  * @since 2.4.0 *
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@Builder
+@SuperBuilder
 @Getter
 public final class BooleanInputProcessor extends AbsInputProcessor<Boolean>
 {

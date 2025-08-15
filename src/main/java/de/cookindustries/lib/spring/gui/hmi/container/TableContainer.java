@@ -5,40 +5,47 @@
  * <p>
  * See LICENSE file in the project root for full license information.
  */
-package de.cookindustries.lib.spring.gui.hmi.input;
+package de.cookindustries.lib.spring.gui.hmi.container;
 
 import java.util.List;
 
-import de.cookindustries.lib.spring.gui.hmi.container.TableRow;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
+import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * @since 1.0.0
+ * @since 3.0.2
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @SuperBuilder
 @Getter
 @Jacksonized
-public final class Table extends Input
+public final class TableContainer extends Container
 {
 
     @NonNull
-    private final Boolean        editable;
+    private final String          name;
+
+    @NonNull
+    private final Integer         numOfColumns;
 
     @Singular
-    private final List<String>   columnNames;
+    private final List<String>    columnNames;
+
+    @NonNull
+    @Default
+    private final Boolean         sortable = false;
 
     @Singular
-    private final List<TableRow> rows;
+    private final List<Container> rows;
 
     @Override
-    protected InputType inferType()
+    protected ContainerType inferType()
     {
-        return InputType.TABLE;
+        return ContainerType.TABLE;
     }
 
 }

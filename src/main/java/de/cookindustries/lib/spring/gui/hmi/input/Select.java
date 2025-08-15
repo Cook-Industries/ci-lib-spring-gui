@@ -10,13 +10,14 @@ package de.cookindustries.lib.spring.gui.hmi.input;
 import java.util.List;
 
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
+import io.micrometer.common.lang.NonNull;
 import lombok.Getter;
 import lombok.Singular;
+import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
- * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
@@ -25,6 +26,10 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 public final class Select extends SubmittableInput
 {
+
+    @NonNull
+    @Default
+    private final String           selected = "NOT_SELECTED";
 
     @Singular
     private final List<InputValue> values;

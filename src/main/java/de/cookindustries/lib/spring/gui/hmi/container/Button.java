@@ -26,6 +26,9 @@ public final class Button extends Container
     @NonNull
     private final String      text;
 
+    @Default
+    private final String      title    = null;
+
     @NonNull
     @Default
     private final ButtonClass btnClass = ButtonClass.DEFAULT;

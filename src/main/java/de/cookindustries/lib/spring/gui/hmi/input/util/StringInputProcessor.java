@@ -12,10 +12,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
+import lombok.experimental.SuperBuilder;
 import lombok.Builder.Default;
 
 /**
@@ -24,7 +24,7 @@ import lombok.Builder.Default;
  * @since 2.4.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@Builder
+@SuperBuilder
 @Getter
 public final class StringInputProcessor extends AbsInputProcessor<String>
 {

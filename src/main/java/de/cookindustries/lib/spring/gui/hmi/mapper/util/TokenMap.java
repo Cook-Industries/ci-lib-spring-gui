@@ -7,6 +7,7 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper.util;
 
+import java.util.List;
 import java.util.Map;
 
 import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
@@ -38,6 +39,9 @@ public final class TokenMap
 
     @Singular
     private final Map<String, AbsFunctionCall> functions;
+
+    @Singular
+    private final List<String>                 deactivateUids;
 
     /**
      * Get the presedence for this map
@@ -80,6 +84,19 @@ public final class TokenMap
     public AbsFunctionCall getFunction(String key)
     {
         return functions.get(key);
+    }
+
+    /**
+     * Checks whether a {@code uid} is active or not.
+     * <p>
+     * If the {@code uid} is not added via {@code #deactivateId()} this will return {@code true}.
+     * 
+     * @param uid to look up
+     * @return true if {@code id} is not explicitly disabled in this map
+     */
+    public boolean isUidActive(String uid)
+    {
+        return !deactivateUids.contains(uid);
     }
 
 }

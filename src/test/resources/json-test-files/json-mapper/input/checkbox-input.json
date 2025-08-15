@@ -13,7 +13,23 @@
             "parameters": {
                 "name": "name",
                 "submitAs": "checkbox"
-            }
+            },
+            "children": [
+                {
+                    "type": "INPUT_VALUE",
+                    "parameters": {
+                        "text": "checkbox 1",
+                        "value": "1"
+                    }
+                },
+                {
+                    "type": "INPUT_VALUE",
+                    "parameters": {
+                        "text": "checkbox 2",
+                        "value": "2"
+                    }
+                }
+            ]
         }
     ]
 }
