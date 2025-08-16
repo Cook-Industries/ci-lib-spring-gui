@@ -52,6 +52,11 @@ $(document).ready(function () {
     updateButton(btnId);
   });
 
+  $(document).on('mouseenter mouseleave', '.tooltip-container', function (e) {
+    $(this).find('.tooltip-text').toggleClass('tooltip-visible', e.type === 'mouseenter');
+  });
+
+
   $(document).on("keydown", function (e) {
     if (e.key === "Escape") {
       CILIB.closeModal();

@@ -77,5 +77,4 @@ public class PseudoElement
      */
     @Singular
     private final List<PseudoElement> children;
-
 }

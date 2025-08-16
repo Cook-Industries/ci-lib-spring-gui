@@ -18,7 +18,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -35,15 +36,17 @@ import jakarta.annotation.PostConstruct;
 public class CiLibStaticResourceConfig implements WebMvcConfigurer
 {
 
-    private static final Logger      LOG            = LoggerFactory.getLogger(CiLibStaticResourceConfig.class);
+    private static final Logger                       LOG            = LoggerFactory.getLogger(CiLibStaticResourceConfig.class);
 
-    private static final Set<String> STATIC_FOLDERS = Set.of("css", "js", "images");
+    private static final Set<String>                  STATIC_FOLDERS = Set.of("css", "js", "images");
 
-    private final CiLibProperties    properties;
+    private final CiLibProperties                     properties;
+    private final PathMatchingResourcePatternResolver pathResolver;
 
     public CiLibStaticResourceConfig(CiLibProperties properties)
     {
         this.properties = properties;
+        this.pathResolver = new PathMatchingResourcePatternResolver();
     }
 
     /**
@@ -84,6 +87,7 @@ public class CiLibStaticResourceConfig implements WebMvcConfigurer
             });
 
             copyJsLib(basePath);
+            copyImages(basePath);
         }
         catch (IOException ex)
         {
@@ -99,19 +103,48 @@ public class CiLibStaticResourceConfig implements WebMvcConfigurer
      */
     private void copyJsLib(String basePath) throws IOException
     {
-        ClassPathResource resource   = new ClassPathResource("cook-industries/js/ci-lib-spring-web.js");
-
-        File              targetFile = new File(basePath + "/js/" + resource.getFilename());
-
-        LOG.debug("copy JsLib to [{}]", targetFile);
-
-        try (InputStream in = resource.getInputStream())
+        try
         {
-            Files.copy(in, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Resource resource   = pathResolver.getResource("classpath:cook-industries/js/ci-lib-spring-web.js");
+
+            File     targetFile = new File(basePath + "/js/" + resource.getFilename());
+
+            LOG.debug("copy JsLib to [{}]", targetFile);
+
+            try (InputStream in = resource.getInputStream())
+            {
+                Files.copy(in, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+
         }
         catch (Exception ex)
         {
             throw new RuntimeException("Failed to copy static resource JsLib", ex);
+        }
+    }
+
+    private void copyImages(String basePath) throws IOException
+    {
+        try
+        {
+            Resource[] resources = pathResolver.getResources("classpath*:cook-industries/images/*");
+
+            for (Resource resource : resources)
+            {
+                File targetFile = new File(basePath + "/images/" + resource.getFilename());
+
+                LOG.debug("copy image to [{}]", targetFile);
+
+                try (InputStream in = resource.getInputStream())
+                {
+                    Files.copy(in, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException("Failed to copy static resources from images", ex);
         }
     }
 

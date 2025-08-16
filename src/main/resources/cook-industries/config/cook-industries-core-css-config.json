@@ -24,7 +24,12 @@
                 "--ci-color-notification-icon": "blue",
                 "--ci-bgc-error-container": "rgba(64, 64, 64, 1)",
                 "--ci-bgc-popup": "var(--ci-bgc-error-container)",
-                "--ci-modal-inlay-border-color": "white"
+                "--ci-modal-inlay-border-color": "white",
+                "--ci-tooltip-bg": "#333",
+                "--ci-tooltip-color": "#fff",
+                "--ci-tooltip-padding": "6px 10px",
+                "--ci-tooltip-radius": "6px",
+                "--ci-tooltip-shadow": "0 2px 8px rgba(0, 0, 0, 0.2)"
             }
         },
         {
@@ -359,6 +364,7 @@
                 "flex-direction": "column",
                 "padding": "1rem",
                 "min-width": "40rem",
+                "max-width": "40rem",
                 "max-height": "90%",
                 "overflow-y": "auto",
                 "background-color": "var(--ci-bgc-nightblue)",
@@ -609,37 +615,104 @@
                 "display": "grid",
                 "grid-template-columns": "6fr 1fr 1fr 1fr",
                 "grid-template-rows": "auto",
-                "grid-template-areas": "heading notification error free\\nfield field field field"
+                "grid-template-areas": "\"legend notification error info\"\n\"field field field field\"\n\"text text text text\"",
+                "align-items": "baseline"
             }
         },
         {
-            "selector": ".input-heading",
+            "selector": ".input-legend",
             "attributes": {
-                "grid-area": "heading"
+                "grid-area": "legend"
             }
         },
         {
             "selector": ".input-notification",
             "attributes": {
-                "grid-area": "heading"
+                "grid-area": "notification",
+                "justify-self": "center",
+                "color": "var(--ci-color-warning-icon)"
             }
         },
         {
             "selector": ".input-error",
             "attributes": {
-                "grid-area": "error"
+                "grid-area": "error",
+                "justify-self": "center",
+                "color": "var(--ci-color-error-icon)"
             }
         },
         {
-            "selector": ".input-free",
+            "selector": ".input-info",
             "attributes": {
-                "grid-area": "error"
+                "grid-area": "info",
+                "justify-self": "center",
+                "color": "var(--ci-color-notification-icon)"
             }
         },
         {
             "selector": ".input-field",
             "attributes": {
                 "grid-area": "field"
+            }
+        },
+        {
+            "selector": ".input-text",
+            "attributes": {
+                "grid-area": "text"
+            }
+        },
+        {
+            "selector": ".input-icon",
+            "attributes": {
+                "width": "24px",
+                "height": "24px"
+            }
+        },
+        {
+            "selector": ".tooltip-container",
+            "attributes": {
+                "position": "relative",
+                "display": "inline-block",
+                "cursor": "pointer"
+            }
+        },
+        {
+            "selector": ".tooltip-text",
+            "attributes": {
+                "position": "absolute",
+                "bottom": "125%",
+                "left": "50%",
+                "transform": "translateX(-50%)",
+                "background": "var(--ci-tooltip-bg)",
+                "color": "var(--ci-tooltip-color)",
+                "padding": "var(--ci-tooltip-padding)",
+                "border-radius": "var(--ci-tooltip-radius)",
+                "box-shadow": "var(--ci-tooltip-shadow)",
+                "white-space": "nowrap",
+                "opacity": "0",
+                "visibility": "hidden",
+                "transition": "opacity 0.25s ease",
+                "pointer-events": "none"
+            }
+        },
+        {
+            "selector": ".tooltip-text::after",
+            "attributes": {
+                "content": "''",
+                "position": "absolute",
+                "top": "100%",
+                "left": "50%",
+                "margin-left": "-5px",
+                "border-width": "5px",
+                "border-style": "solid",
+                "border-color": "var(--ci-tooltip-bg) transparent transparent transparent"
+            }
+        },
+        {
+            "selector": ".tooltip-visible",
+            "attributes": {
+                "opacity": "1",
+                "visibility": "visible"
             }
         }
     ],
