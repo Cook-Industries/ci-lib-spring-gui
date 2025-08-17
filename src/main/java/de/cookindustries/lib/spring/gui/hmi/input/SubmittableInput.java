@@ -28,5 +28,9 @@ public abstract class SubmittableInput extends Input
     private final String submitAs;
 
     @Default
-    private final String infoUrl = null;
+    private final String infoText = null;
+
+    @Default
+    private final String infoUrl  = null;
+
 }

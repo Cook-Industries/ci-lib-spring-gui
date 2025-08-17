@@ -56,6 +56,12 @@ $(document).ready(function () {
     $(this).find('.tooltip-text').toggleClass('tooltip-visible', e.type === 'mouseenter');
   });
 
+  $(document).on("click", "[data-fetch-input-info-url]", function () {
+    const url = $(this).attr("data-fetch-input-info-url");
+    if (url) {
+      GET(url);
+    }
+  });
 
   $(document).on("keydown", function (e) {
     if (e.key === "Escape") {

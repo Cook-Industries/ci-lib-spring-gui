@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
 import lombok.Builder.Default;
@@ -25,13 +26,15 @@ import lombok.Builder.Default;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@Builder
+@Builder(toBuilder = true)
+@Getter
 public final class HtmlElement
 {
 
     private static final String LT          = "<";
     private static final String LTS         = "</";
     private static final String GT          = ">";
+    private static final String GTS         = "/>";
     private static final String SPACE       = " ";
     private static final String QTM         = "\"";
 
@@ -91,7 +94,8 @@ public final class HtmlElement
             .append(StringAdapter.prefixAndSuffix("class=\"", StringAdapter.separate(classes, SPACE), QTM))
             .append(SPACE)
             .append(getDataAttributes())
-            .append(GT)
+            .append(isSingleTag, GTS)
+            .append(!isSingleTag, GT)
             .append(!isSingleTag, () -> StringAdapter.from(contents))
             .append(!isSingleTag, () -> StringAdapter.prefixAndSuffix(LTS, tag, GT));
 

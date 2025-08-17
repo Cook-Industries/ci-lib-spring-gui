@@ -9,13 +9,12 @@ package de.cookindustries.lib.spring.gui.hmi.mapper.html;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import de.cookindustries.lib.spring.gui.hmi.Position;
 import de.cookindustries.lib.spring.gui.hmi.container.*;
 import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
-import de.cookindustries.lib.spring.gui.hmi.input.marker.Marker;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
@@ -52,7 +51,7 @@ public final class HtmlMapper
     private static final String ATT_VALUE               = "value";
     private static final String ATT_ON_KEY_DOWN         = "onkeydown";
 
-    private static final String CLASS_INPUT_LABEL       = "input-label";
+    private static final String CLASS_INPUT_LEGEND      = "input-legend";
     private static final String CLASS_FORM_CONTROL      = "form-control";
     private static final String CLASS_HIDDEN            = "hidden";
     private static final String CLASS_USER_SELECT_NONE  = "user-select-none";
@@ -60,8 +59,6 @@ public final class HtmlMapper
     private static final String CLASS_FORM_CHECK_INPUT  = "form-checkbox-input";
     private static final String CLASS_FORM_CHECK_LABEL  = "form-checkbox-label";
     private static final String CLASS_FORM_SELECT       = "form-select";
-    private static final String CLASS_ERROR_HIGHLIGHT   = "error-highlight";
-    private static final String CLASS_TEXT_COLOR_RED    = "text-color-red";
     private static final String INPUT_CONTAINER         = "input-container";
 
     private static final String DATA_ATT_SUBMIT_ID      = "submit-id";
@@ -716,7 +713,12 @@ public final class HtmlMapper
         };
     }
 
-    private HtmlElement.HtmlElementBuilder createLegend(SubmittableInput input)
+    private HtmlElement createLegend(SubmittableInput input)
+    {
+        return createLegend(input, CLASS_INPUT_LEGEND);
+    }
+
+    private HtmlElement createLegend(SubmittableInput input, String formClass)
     {
         return HtmlElement
             .builder()
@@ -727,34 +729,70 @@ public final class HtmlMapper
                     .name(ATT_FOR)
                     .value(input.getUid())
                     .build())
-            .clazz(CLASS_INPUT_LABEL)
+            .clazz(formClass)
             .clazz(CLASS_USER_SELECT_NONE)
-            .content(input.getName());
+            .content(input.getName())
+            .build();
+    }
+
+    private HtmlElement createInput(SubmittableInput input, String formId, String formClass)
+    {
+        return HtmlElement
+            .builder()
+            .isSingleTag(true)
+            .tag(TAG_INPUT)
+            .attribute(
+                Attribute
+                    .builder()
+                    .name(ATT_ID)
+                    .value(input.getUid())
+                    .build())
+            .attribute(
+                Attribute
+                    .builder()
+                    .name(ATT_TYPE)
+                    .value(input.getType().name().toLowerCase())
+                    .build())
+            .attribute(
+                Attribute
+                    .builder()
+                    .name(ATT_ON_INPUT)
+                    .value(input.getOnInput())
+                    .build())
+            .clazz(formClass)
+            .clazz("input-field")
+            .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+            .dataAttribute(DATA_ATT_SUBMIT_AS, input.getSubmitAs())
+            .dataAttribute(DATA_ATT_VALUE_TYPE, input.getType().name())
+            .dataAttributes(input.getDataAttributes())
+            .build();
+    }
+
+    private String createInputWrapper(String legend, String notificationIcon, String errorIcon, String infoIcon, String input)
+    {
+        return HtmlElement
+            .builder()
+            .tag(TAG_DIV)
+            .clazz(INPUT_CONTAINER)
+            .content(legend)
+            .content(notificationIcon)
+            .content(errorIcon)
+            .content(infoIcon)
+            .content(input)
+            .build()
+            .html();
     }
 
     private String render(Checkbox checkbox, String formId)
     {
-        List<String> boxes = new ArrayList<>();
+        List<String>  boxes = new ArrayList<>();
+
+        AtomicInteger cnt   = new AtomicInteger();
 
         checkbox.getBoxes().stream().forEach(box -> {
 
-            String      id      = checkbox.getSubmitAs().isBlank() ? box.getId() : checkbox.getSubmitAs() + "-" + box.getId();
-
-            String      label   =
-                HtmlElement
-                    .builder()
-                    .tag(TAG_LABEL)
-                    .attribute(
-                        Attribute
-                            .builder()
-                            .name(ATT_FOR)
-                            .value(id)
-                            .build())
-                    .clazz("checkbox-label")
-                    .clazz(CLASS_USER_SELECT_NONE)
-                    .content(box.getText())
-                    .build()
-                    .html();
+            String      boxId   = box.getId().isBlank() ? "" + (cnt.getAndIncrement()) : box.getId();
+            String      id      = checkbox.getSubmitAs().isBlank() ? boxId : checkbox.getSubmitAs() + "-" + boxId;
 
             String      input   =
                 HtmlElement
@@ -793,13 +831,31 @@ public final class HtmlMapper
                     .build()
                     .html();
 
+            String      label   =
+                HtmlElement
+                    .builder()
+                    .tag(TAG_LABEL)
+                    .attribute(
+                        Attribute
+                            .builder()
+                            .name(ATT_FOR)
+                            .value(id)
+                            .build())
+                    .clazz("checkbox-label")
+                    .clazz(CLASS_USER_SELECT_NONE)
+                    .content(box.getText())
+                    .build()
+                    .html();
+
             HtmlElement wrapper =
                 HtmlElement
                     .builder()
                     .tag(TAG_DIV)
-                    .clazz("checkbox-wrapper")
+                    .clazz("input-checkbox-wrapper")
                     .content(input)
                     .content(label)
+                    .content(resolveNotificationIcon(formId, id))
+                    .content(resolveErrorIcon(formId, id))
                     .build();
 
             boxes.add(wrapper.html());
@@ -807,6 +863,14 @@ public final class HtmlMapper
 
         String      legend        =
             createLegend(checkbox)
+                .html();
+
+        String      checkboxes    =
+            HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .clazz("input-checkboxes-wrapper")
+                .contents(boxes)
                 .build()
                 .html();
 
@@ -816,7 +880,8 @@ public final class HtmlMapper
                 .tag(TAG_DIV)
                 .clazz(CLASS_FORM_CHECK)
                 .content(StringAdapter.from(legend))
-                .contents(boxes)
+                .content(resolveInfoIcon(formId, checkbox.getUid(), checkbox.getInfoText(), checkbox.getInfoUrl()))
+                .content(checkboxes)
                 .build();
 
         return elementMapper.html();
@@ -832,37 +897,17 @@ public final class HtmlMapper
     {
         String      label         =
             createLegend(date)
-                .build()
                 .html();
 
         String      input         =
-            HtmlElement
-                .builder()
-                .isSingleTag(true)
-                .tag(TAG_INPUT)
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ID)
-                        .value(date.getUid())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_TYPE)
-                        .value(date.getType().name().toLowerCase())
-                        .build())
+            createInput(date, formId, CLASS_FORM_CONTROL)
+                .toBuilder()
                 .attribute(
                     Attribute
                         .builder()
                         .name(ATT_VALUE)
                         .value(date.getValue())
                         .build())
-                .clazz(CLASS_FORM_CONTROL)
-                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribute(DATA_ATT_SUBMIT_AS, date.getSubmitAs())
-                .dataAttribute(DATA_ATT_VALUE_TYPE, date.getType().name())
-                .dataAttributes(date.getDataAttributes())
                 .build()
                 .html();
 
@@ -878,28 +923,13 @@ public final class HtmlMapper
 
     private String render(File file, String formId)
     {
-        String      label         =
+        String legend =
             createLegend(file)
-                .build()
                 .html();
 
-        String      input         =
-            HtmlElement
-                .builder()
-                .isSingleTag(true)
-                .tag(TAG_INPUT)
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ID)
-                        .value(file.getUid())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_TYPE)
-                        .value(file.getType().name().toLowerCase())
-                        .build())
+        String input  =
+            createInput(file, formId, CLASS_FORM_CONTROL)
+                .toBuilder()
                 .attribute(
                     Attribute
                         .builder()
@@ -912,22 +942,15 @@ public final class HtmlMapper
                         .name("accept")
                         .value(StringAdapter.separate(file.getAccepts(), ","))
                         .build())
-                .clazz(CLASS_FORM_CONTROL)
-                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribute(DATA_ATT_SUBMIT_AS, file.getSubmitAs())
-                .dataAttribute(DATA_ATT_VALUE_TYPE, file.getType().name())
-                .dataAttributes(file.getDataAttributes())
                 .build()
                 .html();
 
-        HtmlElement elementMapper =
-            HtmlElement
-                .builder()
-                .tag(TAG_DIV)
-                .content(StringAdapter.from(label, resolveMarker(formId, file.getSubmitAs(), file.getMarker()), input))
-                .build();
-
-        return elementMapper.html();
+        return createInputWrapper(
+            legend,
+            resolveNotificationIcon(formId, file.getUid()),
+            resolveErrorIcon(formId, file.getUid()),
+            resolveInfoIcon(formId, file.getUid(), file.getInfoText(), file.getInfoUrl()),
+            input);
     }
 
     private String render(Hidden hidden, String formId)
@@ -981,28 +1004,13 @@ public final class HtmlMapper
 
     private String render(Number number, String formId)
     {
-        String      label         =
+        String legend =
             createLegend(number)
-                .build()
                 .html();
 
-        String      input         =
-            HtmlElement
-                .builder()
-                .isSingleTag(true)
-                .tag(TAG_INPUT)
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ID)
-                        .value(number.getUid())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_TYPE)
-                        .value(number.getType().name().toLowerCase())
-                        .build())
+        String input  =
+            createInput(number, formId, CLASS_FORM_CONTROL)
+                .toBuilder()
                 .attribute(
                     Attribute
                         .builder()
@@ -1015,48 +1023,26 @@ public final class HtmlMapper
                         .name(ATT_PLACEHOLDER)
                         .value(number.getPlaceholder())
                         .build())
-                .clazz(CLASS_FORM_CONTROL)
-                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribute(DATA_ATT_SUBMIT_AS, number.getSubmitAs())
-                .dataAttribute(DATA_ATT_VALUE_TYPE, number.getType().name())
-                .dataAttributes(number.getDataAttributes())
                 .build()
                 .html();
 
-        HtmlElement elementMapper =
-            HtmlElement
-                .builder()
-                .tag(TAG_DIV)
-                .content(StringAdapter.from(label, resolveMarker(formId, number.getSubmitAs(), number.getMarker()), input))
-                .build();
-
-        return elementMapper.html();
+        return createInputWrapper(
+            legend,
+            resolveNotificationIcon(formId, number.getUid()),
+            resolveErrorIcon(formId, number.getUid()),
+            resolveInfoIcon(formId, number.getUid(), number.getInfoText(), number.getInfoUrl()),
+            input);
     }
 
     private String render(Password password, String formId)
     {
-        String      label         =
+        String legend =
             createLegend(password)
-                .build()
                 .html();
 
-        String      input         =
-            HtmlElement
-                .builder()
-                .isSingleTag(true)
-                .tag(TAG_INPUT)
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ID)
-                        .value(password.getUid())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_TYPE)
-                        .value(password.getType().name().toLowerCase())
-                        .build())
+        String input  =
+            createInput(password, formId, CLASS_FORM_CONTROL)
+                .toBuilder()
                 .attribute(
                     Attribute
                         .builder()
@@ -1069,22 +1055,15 @@ public final class HtmlMapper
                         .name(ATT_PLACEHOLDER)
                         .value(password.getPlaceholder())
                         .build())
-                .clazz(CLASS_FORM_CONTROL)
-                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribute(DATA_ATT_SUBMIT_AS, password.getSubmitAs())
-                .dataAttribute(DATA_ATT_VALUE_TYPE, password.getType().name())
-                .dataAttributes(password.getDataAttributes())
                 .build()
                 .html();
 
-        HtmlElement elementMapper =
-            HtmlElement
-                .builder()
-                .tag(TAG_DIV)
-                .content(StringAdapter.from(label, resolveMarker(formId, password.getSubmitAs(), password.getMarker()), input))
-                .build();
-
-        return elementMapper.html();
+        return createInputWrapper(
+            legend,
+            resolveNotificationIcon(formId, password.getUid()),
+            resolveErrorIcon(formId, password.getUid()),
+            resolveInfoIcon(formId, password.getUid(), password.getInfoText(), password.getInfoUrl()),
+            input);
     }
 
     private String render(Radio radio, String formId)
@@ -1180,16 +1159,11 @@ public final class HtmlMapper
             buttons.add(innerDiv.html());
         }
 
-        String      outerLabel =
-            HtmlElement
-                .builder()
-                .tag(TAG_LABEL)
-                .clazz(CLASS_USER_SELECT_NONE)
-                .content(radio.getName())
-                .build()
+        String      legend   =
+            createLegend(radio)
                 .html();
 
-        HtmlElement outerDiv   =
+        HtmlElement outerDiv =
             HtmlElement
                 .builder()
                 .tag(TAG_DIV)
@@ -1197,7 +1171,7 @@ public final class HtmlMapper
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
                 .dataAttribute(DATA_ATT_SUBMIT_AS, radio.getSubmitAs())
                 .dataAttribute(DATA_ATT_VALUE_TYPE, radio.getType().name())
-                .content(StringAdapter.from(outerLabel, StringAdapter.from(buttons)))
+                .content(StringAdapter.from(legend, StringAdapter.from(buttons)))
                 .build();
 
         return outerDiv.html();
@@ -1232,54 +1206,34 @@ public final class HtmlMapper
             selections.add(option);
         }
 
-        String      label         =
+        String legend =
             createLegend(select)
-                .build()
                 .html();
 
-        String      input         =
-            HtmlElement
-                .builder()
+        String input  =
+            createInput(select, formId, CLASS_FORM_SELECT)
+                .toBuilder()
                 .tag(TAG_SELECT)
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ID)
-                        .value(select.getUid())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ON_INPUT)
-                        .value(select.getOnInput())
-                        .build())
-                .clazz(CLASS_FORM_SELECT)
-                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribute(DATA_ATT_SUBMIT_AS, select.getSubmitAs())
-                .dataAttribute(DATA_ATT_VALUE_TYPE, select.getType().name())
-                .dataAttributes(select.getDataAttributes())
+                .isSingleTag(false)
                 .content(StringAdapter.from(selections))
                 .build()
                 .html();
 
-        HtmlElement elementMapper =
-            HtmlElement
-                .builder()
-                .tag(TAG_DIV)
-                .content(StringAdapter.from(label, input))
-                .build();
-
-        return elementMapper.html();
+        return createInputWrapper(
+            legend,
+            resolveNotificationIcon(formId, select.getUid()),
+            resolveErrorIcon(formId, select.getUid()),
+            resolveInfoIcon(formId, select.getUid(), select.getInfoText(), select.getInfoUrl()),
+            input);
     }
 
     private String render(Slider slider, String formId)
     {
-        String      label         =
+        String legend =
             createLegend(slider)
-                .build()
                 .html();
 
-        String      input         =
+        String input  =
             HtmlElement
                 .builder()
                 .isSingleTag(true)
@@ -1328,14 +1282,12 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        HtmlElement elementMapper =
-            HtmlElement
-                .builder()
-                .tag(TAG_DIV)
-                .content(StringAdapter.from(label, input))
-                .build();
-
-        return elementMapper.html();
+        return createInputWrapper(
+            legend,
+            resolveNotificationIcon(formId, slider.getUid()),
+            resolveErrorIcon(formId, slider.getUid()),
+            resolveInfoIcon(formId, slider.getUid(), slider.getInfoText(), slider.getInfoUrl()),
+            input);
     }
 
     private String render(Switch switch1, String formId)
@@ -1377,9 +1329,8 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String      label         =
+        String      legend        =
             createLegend(switch1)
-                .build()
                 .html();
 
         HtmlElement elementMapper =
@@ -1388,7 +1339,7 @@ public final class HtmlMapper
                 .tag(TAG_DIV)
                 .clazz(CLASS_FORM_CHECK)
                 .clazz("form-switch")
-                .content(StringAdapter.from(input, label))
+                .content(StringAdapter.from(input, legend))
                 .build();
 
         return elementMapper.html();
@@ -1396,28 +1347,13 @@ public final class HtmlMapper
 
     private String render(Tag tag, String formId)
     {
-        String      label         =
+        String legend =
             createLegend(tag)
-                .build()
                 .html();
 
-        String      input         =
-            HtmlElement
-                .builder()
-                .isSingleTag(true)
-                .tag(TAG_INPUT)
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ID)
-                        .value(tag.getUid())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_TYPE)
-                        .value(tag.getType().name().toLowerCase())
-                        .build())
+        String input  =
+            createInput(tag, formId, CLASS_FORM_CONTROL)
+                .toBuilder()
                 .attribute(
                     Attribute
                         .builder()
@@ -1427,58 +1363,32 @@ public final class HtmlMapper
                 .attribute(
                     Attribute
                         .builder()
-                        .name(ATT_ON_INPUT)
-                        .value(tag.getOnInput())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
                         .name("pattern")
                         .value(tag.getPattern())
                         .active(tag.getPattern() != null && !tag.getPattern().isBlank())
                         .build())
-                .clazz(CLASS_FORM_CONTROL)
-                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribute(DATA_ATT_SUBMIT_AS, tag.getSubmitAs())
-                .dataAttribute(DATA_ATT_VALUE_TYPE, tag.getType().name())
-                .dataAttributes(tag.getDataAttributes())
                 .build()
                 .html();
 
-        String      content       = StringAdapter.from(label, resolveMarker(formId, tag.getSubmitAs(), tag.getMarker()), input);
-        HtmlElement elementMapper =
-            HtmlElement
-                .builder()
-                .tag(TAG_DIV)
-                .content(content)
-                .build();
-
-        return elementMapper.html();
+        return createInputWrapper(
+            legend,
+            resolveNotificationIcon(formId, tag.getUid()),
+            resolveErrorIcon(formId, tag.getUid()),
+            resolveInfoIcon(formId, tag.getUid(), tag.getInfoText(), tag.getInfoUrl()),
+            input);
     }
 
     private String render(Textarea textarea, String formId)
     {
-        String      label         =
+        String legend =
             createLegend(textarea)
-                .build()
                 .html();
 
-        String      input         =
-            HtmlElement
-                .builder()
+        String input  =
+            createInput(textarea, formId, CLASS_FORM_CONTROL)
+                .toBuilder()
                 .tag("textarea")
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ID)
-                        .value(textarea.getUid())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ON_INPUT)
-                        .value(textarea.getOnInput())
-                        .build())
+                .isSingleTag(false)
                 .attribute(
                     Attribute
                         .builder()
@@ -1504,28 +1414,17 @@ public final class HtmlMapper
                         .value(String.valueOf(textarea.getCols()))
                         .active(textarea.getCols() != null)
                         .build())
-                .clazz(CLASS_FORM_CONTROL)
-                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribute(DATA_ATT_SUBMIT_AS, textarea.getSubmitAs())
-                .dataAttribute(DATA_ATT_VALUE_TYPE, textarea.getType().name())
                 .dataAttribute(DATA_ATT_MAX_CHARACTERS, String.valueOf(textarea.getMaxCharacters()))
-                .dataAttributes(textarea.getDataAttributes())
                 .content(textarea.getValue())
                 .build()
                 .html();
 
-        String      content       =
-            StringAdapter.from(label, resolveMarker(formId, textarea.getSubmitAs(), textarea.getMarker()), input);
-
-        HtmlElement elementMapper =
-            HtmlElement
-                .builder()
-                .tag(TAG_DIV)
-                .clazz(INPUT_CONTAINER)
-                .content(content)
-                .build();
-
-        return elementMapper.html();
+        return createInputWrapper(
+            legend,
+            resolveNotificationIcon(formId, textarea.getUid()),
+            resolveErrorIcon(formId, textarea.getUid()),
+            resolveInfoIcon(formId, textarea.getUid(), textarea.getInfoText(), textarea.getInfoUrl()),
+            input);
     }
 
     private String render(Textbox textbox)
@@ -1551,39 +1450,18 @@ public final class HtmlMapper
 
     private String render(Textfield textfield, String formId)
     {
-        String      label         =
+        String legend =
             createLegend(textfield)
-                .build()
                 .html();
 
-        String      input         =
-            HtmlElement
-                .builder()
-                .isSingleTag(true)
-                .tag(TAG_INPUT)
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ID)
-                        .value(textfield.getUid())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_TYPE)
-                        .value(textfield.getType().name().toLowerCase())
-                        .build())
+        String input  =
+            createInput(textfield, formId, CLASS_FORM_CONTROL)
+                .toBuilder()
                 .attribute(
                     Attribute
                         .builder()
                         .name(ATT_VALUE)
                         .value(textfield.getValue())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ON_INPUT)
-                        .value(textfield.getOnInput())
                         .build())
                 .attribute(
                     Attribute
@@ -1598,64 +1476,57 @@ public final class HtmlMapper
                         .value(textfield.getOnKeydown())
                         .build())
                 .clazz(CLASS_FORM_CONTROL)
-                .clazz("input-field")
-                .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
-                .dataAttribute(DATA_ATT_SUBMIT_AS, textfield.getSubmitAs())
-                .dataAttribute(DATA_ATT_VALUE_TYPE, textfield.getType().name())
                 .dataAttribute(DATA_ATT_MAX_CHARACTERS, String.valueOf(textfield.getMaxCharacters()))
-                .dataAttributes(textfield.getDataAttributes())
                 .build()
                 .html();
 
-        HtmlElement elementMapper =
-            HtmlElement
-                .builder()
-                .tag(TAG_DIV)
-                .clazz(INPUT_CONTAINER)
-                .content(label)
-                .content(resolveNotificationIcon(formId, textfield.getUid()))
-                .content(resolveErrorIcon(formId, textfield.getUid()))
-                .content(resolveInfoIcon(formId, textfield.getUid(), textfield.getInfoUrl()))
-                .content(input)
-                .build();
-
-        return elementMapper.html();
+        return createInputWrapper(
+            legend,
+            resolveNotificationIcon(formId, textfield.getUid()),
+            resolveErrorIcon(formId, textfield.getUid()),
+            resolveInfoIcon(formId, textfield.getUid(), textfield.getInfoText(), textfield.getInfoUrl()),
+            input);
     }
 
     private String resolveNotificationIcon(String formId, String submitId)
     {
-        return resolveIcon(formId, submitId, "notification", "/images/alert-triangle-warning.svg", null);
+        return resolveIcon(formId, submitId, "notification", "/images/alert-triangle-warning.svg", null, null);
     }
 
     private String resolveErrorIcon(String formId, String submitId)
     {
-        return resolveIcon(formId, submitId, "error", "/images/alert-triangle-error.svg", null);
+        return resolveIcon(formId, submitId, "error", "/images/alert-triangle-error.svg", null, null);
     }
 
-    private String resolveInfoIcon(String formId, String submitId, String url)
+    private String resolveInfoIcon(String formId, String submitId, String text, String url)
     {
-        return resolveIcon(formId, submitId, "info", "/images/alert-circle.svg", url);
+        return resolveIcon(formId, submitId, "info", "/images/alert-circle.svg", text, url);
     }
 
-    private String resolveIcon(String formId, String submitId, String type, String image)
+    private String resolveIcon(String formId, String submitId, String type, String image, String text, String url)
     {
-        return resolveIcon(formId, submitId, type, image, null);
-    }
 
-    private String resolveIcon(String formId, String submitId, String type, String image, String url)
-    {
-        HtmlElement.HtmlElementBuilder icon = HtmlElement
+        String                         id       = "input-icon-" + formId + "-" + type + "-" + submitId;
+        boolean                        hasUrl   = url != null && !url.isBlank();
+
+        boolean                        isHidden =
+            List.of("notification", "error").contains(type)
+                || !hasUrl
+                || (text == null || text.isBlank());
+
+        HtmlElement.HtmlElementBuilder icon     = HtmlElement
             .builder()
             .tag(TAG_DIV)
             .attribute(
                 Attribute
                     .builder()
                     .name(ATT_ID)
-                    .value("tooltip-" + type + "-" + submitId)
+                    .value(id)
                     .build())
             .clazz("input-icon-container")
             .clazz("input-icon-" + type)
-            .clazz(url == null ? CLASS_HIDDEN : "")
+            .clazz("tooltip-container")
+            .clazz(isHidden ? CLASS_HIDDEN : "")
             .content(
                 HtmlElement
                     .builder()
@@ -1676,17 +1547,18 @@ public final class HtmlMapper
                     .builder()
                     .tag(TAG_DIV)
                     .clazz("input-icon-text")
+                    .clazz("tooltip-text")
                     .attribute(
                         Attribute
                             .builder()
                             .name(ATT_ID)
-                            .value("input-icon-" + formId + "" + type + "-" + submitId + "-text")
+                            .value(id + "-text")
                             .build())
-                    .content("")
+                    .content(text == null ? "" : text)
                     .build()
                     .html());
 
-        if (url != null && !url.isBlank())
+        if (hasUrl)
         {
             icon.dataAttribute("fetch-input-info-url", url);
         }
@@ -1694,35 +1566,5 @@ public final class HtmlMapper
         return icon
             .build()
             .html();
-    }
-
-    private String resolveMarker(String formId, String submitAsId, List<Marker> marker)
-    {
-        List<String> results = new ArrayList<>();
-
-        for (Marker m : marker)
-        {
-            results
-                .add(
-                    HtmlElement
-                        .builder()
-                        .tag(TAG_DIV)
-                        .attribute(
-                            Attribute
-                                .builder()
-                                .name(ATT_ID)
-                                .value(String
-                                    .format("error-marker-%s-%s-%s-%s", formId, submitAsId, m.getCategory(), m.getType()))
-                                .build())
-                        .clazz(CLASS_HIDDEN)
-                        .clazz(CLASS_ERROR_HIGHLIGHT)
-                        .clazz("error-marker")
-                        .clazz(CLASS_TEXT_COLOR_RED)
-                        .content(m.getText())
-                        .build()
-                        .html());
-        }
-
-        return StringAdapter.from(results);
     }
 }

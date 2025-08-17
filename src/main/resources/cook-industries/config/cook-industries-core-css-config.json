@@ -142,7 +142,8 @@
                 "flex-direction": "column",
                 "align-items": "stretch",
                 "max-height": "65rem",
-                "overflow": "auto"
+                "overflow": "auto",
+                "margin-bottom": "2rem"
             }
         },
         {
@@ -543,51 +544,18 @@
             }
         },
         {
-            "selector": ".checkbox-wrapper",
+            "selector": ".input-checkbox-wrapper",
             "attributes": {
-                "display": "flex",
-                "flex-direction": "row",
-                "margin-top": "1rem",
-                "margin-bottom": "1rem",
-                "margin-left": "1rem"
-            }
-        },
-        {
-            "selector": ".checkbox-wrapper>input",
-            "attributes": {
-                "margin": "0 0.4rem 0 0"
-            }
-        },
-        {
-            "selector": ".checkbox-wrapper>input",
-            "attributes": {
-                "margin": "0 0.4rem 0 0"
-            }
-        },
-        {
-            "selector": ".checkbox-label",
-            "attributes": {
-                "margin-top": "-0.3rem",
-                "font-weight": "bold"
+                "display": "grid",
+                "grid-template-columns": "1fr 7fr 1fr 1fr",
+                "grid-template-rows": "1",
+                "align-items": "baseline"
             }
         },
         {
             "selector": ".checkbox-label:hover",
             "attributes": {
                 "cursor": "pointer"
-            }
-        },
-        {
-            "selector": ".form-checkbox",
-            "attributes": {
-                "margin": "1rem 0"
-            }
-        },
-        {
-            "selector": ".form-checkbox-label",
-            "attributes": {
-                "font-weight": "bold",
-                "padding": "0 0.5rem"
             }
         },
         {
@@ -616,17 +584,26 @@
                 "grid-template-columns": "6fr 1fr 1fr 1fr",
                 "grid-template-rows": "auto",
                 "grid-template-areas": "\"legend notification error info\"\n\"field field field field\"\n\"text text text text\"",
-                "align-items": "baseline"
+                "align-items": "baseline",
+                "margin-bottom": "1rem"
             }
         },
         {
             "selector": ".input-legend",
             "attributes": {
-                "grid-area": "legend"
+                "grid-area": "legend",
+                "margin": "0.5rem",
+                "font-weight": "bold"
             }
         },
         {
-            "selector": ".input-notification",
+            "selector": ".input-icon-container:hover",
+            "attributes": {
+                "cursor": "pointer"
+            }
+        },
+        {
+            "selector": ".input-icon-notification",
             "attributes": {
                 "grid-area": "notification",
                 "justify-self": "center",
@@ -634,7 +611,7 @@
             }
         },
         {
-            "selector": ".input-error",
+            "selector": ".input-icon-error",
             "attributes": {
                 "grid-area": "error",
                 "justify-self": "center",
@@ -642,7 +619,7 @@
             }
         },
         {
-            "selector": ".input-info",
+            "selector": ".input-icon-info",
             "attributes": {
                 "grid-area": "info",
                 "justify-self": "center",

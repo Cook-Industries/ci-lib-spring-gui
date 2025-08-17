@@ -90,7 +90,9 @@ public class JsonMapper
     private static final String                    ON_INPUT                       = "onInput";
     private static final String                    TOOLTIP                        = "tooltip";
     private static final String                    TOOLTIP_POSITION               = "tooltipPosition";
-    private static final String                    PROCESS_ELEMENT                = "active";
+    private static final String                    ACTIVE                         = "active";
+    private static final String                    INFO_TEXT                      = "infoText";
+    private static final String                    INFO_URL                       = "infoUrl";
 
     private static final String                    BASE_INDICATOR_START           = "$$";
     private static final String                    INDICATOR_VALUE_PLACEHOLDER    = "$$value$";
@@ -846,7 +848,7 @@ public class JsonMapper
 
         LOG.trace("");
 
-        Boolean processElement = count < 2 ? true : getParameterValue(element, depth, PROCESS_ELEMENT, Boolean.class, true);
+        Boolean processElement = count < 2 ? true : getParameterValue(element, depth, ACTIVE, Boolean.class, true);
 
         String  uid            = element.getUid() == null ? "random uid" : element.getUid();
 
@@ -1496,7 +1498,7 @@ public class JsonMapper
 
         LOG.trace("");
 
-        Boolean processElement = getParameterValue(element, depth, PROCESS_ELEMENT, Boolean.class, true);
+        Boolean processElement = getParameterValue(element, depth, ACTIVE, Boolean.class, true);
 
         if (!processElement)
         {
@@ -1554,8 +1556,9 @@ public class JsonMapper
             Position.valueOf(getParameterValue(element, depth, TOOLTIP_POSITION, String.class, "RIGHT").toUpperCase());
         String              name            = getParameterValue(element, depth, NAME, String.class);
         String              submitAs        = getParameterValue(element, depth, SUBMIT_AS, String.class, "");
-        String              onInput         = getParameterValue(element, depth, ON_INPUT, String.class, "");
-
+        String              onInput         = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              infoText        = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
+        String              infoUrl         = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
         String              boxesSrc        = getParameterValue(element, depth, "boxes", String.class, "");
         InputValueList      boxes           =
             boxesSrc.isBlank()
@@ -1573,6 +1576,8 @@ public class JsonMapper
             .name(name)
             .submitAs(submitAs)
             .onInput(onInput)
+            .infoText(infoText)
+            .infoUrl(infoUrl)
             .boxes(boxes)
             .build();
     }
@@ -1595,7 +1600,9 @@ public class JsonMapper
             Position.valueOf(getParameterValue(element, depth, TOOLTIP_POSITION, String.class, "RIGHT").toUpperCase());
         String              name            = getParameterValue(element, depth, NAME, String.class);
         String              submitAs        = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput         = getParameterValue(element, depth, ON_INPUT, String.class, "");
+        String              onInput         = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              infoText        = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
+        String              infoUrl         = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
         Integer             valueF          = getParameterValue(element, depth, "valueF", Integer.class, 0);
         Integer             valueB          = getParameterValue(element, depth, "valueB", Integer.class, 0);
         String              symbol          = getParameterValue(element, depth, "symbol", String.class, "");
@@ -1614,6 +1621,8 @@ public class JsonMapper
             .name(name)
             .submitAs(submitAs)
             .onInput(onInput)
+            .infoText(infoText)
+            .infoUrl(infoUrl)
             .valueF(valueF)
             .valueB(valueB)
             .symbol(symbol)
@@ -1642,6 +1651,8 @@ public class JsonMapper
         String              name            = getParameterValue(element, depth, NAME, String.class);
         String              submitAs        = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput         = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              infoText        = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
+        String              infoUrl         = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
         String              value           = getParameterValue(element, depth, VALUE, String.class, DEFAULT_DATE);
 
         return Date
@@ -1655,6 +1666,8 @@ public class JsonMapper
             .name(name)
             .submitAs(submitAs)
             .onInput(onInput)
+            .infoText(infoText)
+            .infoUrl(infoUrl)
             .value(value)
             .build();
     }
@@ -1678,6 +1691,8 @@ public class JsonMapper
         String              name            = getParameterValue(element, depth, NAME, String.class);
         String              submitAs        = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput         = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              infoText        = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
+        String              infoUrl         = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
         Boolean             multiple        = getParameterValue(element, depth, "multiple", Boolean.class, Boolean.FALSE);
         String              accept          = getParameterValue(element, depth, "accept", String.class, "*");
 
@@ -1692,6 +1707,8 @@ public class JsonMapper
             .name(name)
             .submitAs(submitAs)
             .onInput(onInput)
+            .infoText(infoText)
+            .infoUrl(infoUrl)
             .multiple(multiple)
             .accept(accept)
             .build();
@@ -1721,7 +1738,6 @@ public class JsonMapper
             .marker(marker)
             .name(DEFAULT_VAL)
             .submitAs(submitAs)
-            .onInput(DEFAULT_VAL)
             .value(value)
             .build();
     }
@@ -1745,7 +1761,6 @@ public class JsonMapper
         String              text            = getParameterValue(element, depth, TEXT, String.class);
         String              href            = getParameterValue(element, depth, HREF, String.class);
         String              target          = getParameterValue(element, depth, TARGET, String.class, "_self");
-        String              onInput         = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
 
         return Link
             .builder()
@@ -1758,7 +1773,6 @@ public class JsonMapper
             .text(text)
             .href(href)
             .target(target)
-            .onInput(onInput)
             .build();
     }
 
@@ -1781,6 +1795,8 @@ public class JsonMapper
         String              name            = getParameterValue(element, depth, NAME, String.class);
         String              submitAs        = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput         = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              infoText        = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
+        String              infoUrl         = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
         Integer             value           = getParameterValue(element, depth, VALUE, Integer.class, 0);
         Integer             min             = getParameterValue(element, depth, MIN, Integer.class, Integer.MIN_VALUE);
         Integer             max             = getParameterValue(element, depth, MAX, Integer.class, Integer.MAX_VALUE);
@@ -1799,6 +1815,8 @@ public class JsonMapper
             .name(name)
             .submitAs(submitAs)
             .onInput(onInput)
+            .infoText(infoText)
+            .infoUrl(infoUrl)
             .value(value)
             .min(min)
             .max(max)
@@ -1827,6 +1845,8 @@ public class JsonMapper
         String              name            = getParameterValue(element, depth, NAME, String.class);
         String              submitAs        = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput         = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              infoText        = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
+        String              infoUrl         = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
         String              placeholder     = getParameterValue(element, depth, PLACEHOLDER, String.class, "***");
 
         return Password
@@ -1840,6 +1860,8 @@ public class JsonMapper
             .name(name)
             .submitAs(submitAs)
             .onInput(onInput)
+            .infoText(infoText)
+            .infoUrl(infoUrl)
             .placeholder(placeholder)
             .build();
     }
@@ -1863,6 +1885,8 @@ public class JsonMapper
         String              name            = getParameterValue(element, depth, NAME, String.class);
         String              submitAs        = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput         = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              infoText        = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
+        String              infoUrl         = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
         List<InputValue>    values          = handleInputValueChildren(element, depth, true);
 
         return Radio
@@ -1876,6 +1900,8 @@ public class JsonMapper
             .name(name)
             .submitAs(submitAs)
             .onInput(onInput)
+            .infoText(infoText)
+            .infoUrl(infoUrl)
             .values(values)
             .build();
     }
@@ -1899,6 +1925,8 @@ public class JsonMapper
         String              name            = getParameterValue(element, depth, NAME, String.class);
         String              submitAs        = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput         = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              infoText        = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
+        String              infoUrl         = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
         String              value           = getParameterValue(element, depth, VALUE, String.class, "NOT_SELECTED");
         String              valueSrc        = getParameterValue(element, depth, "values", String.class, "");
         InputValueList      values          =
@@ -1917,6 +1945,8 @@ public class JsonMapper
             .name(name)
             .submitAs(submitAs)
             .onInput(onInput)
+            .infoText(infoText)
+            .infoUrl(infoUrl)
             .selected(value)
             .values(values)
             .build();
@@ -1941,6 +1971,8 @@ public class JsonMapper
         String              name            = getParameterValue(element, depth, NAME, String.class);
         String              submitAs        = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput         = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              infoText        = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
+        String              infoUrl         = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
         Integer             value           = getParameterValue(element, depth, VALUE, Integer.class, 0);
         Integer             min             = getParameterValue(element, depth, MIN, Integer.class, Integer.MIN_VALUE);
         Integer             max             = getParameterValue(element, depth, MAX, Integer.class, Integer.MAX_VALUE);
@@ -1956,6 +1988,8 @@ public class JsonMapper
             .name(name)
             .submitAs(submitAs)
             .onInput(onInput)
+            .infoText(infoText)
+            .infoUrl(infoUrl)
             .value(value)
             .min(min)
             .max(max)
@@ -1981,6 +2015,8 @@ public class JsonMapper
         String              name            = getParameterValue(element, depth, NAME, String.class);
         String              submitAs        = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput         = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              infoText        = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
+        String              infoUrl         = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
         Boolean             checked         = getParameterValue(element, depth, CHECKED, Boolean.class, Boolean.FALSE);
 
         return Switch
@@ -1994,6 +2030,8 @@ public class JsonMapper
             .name(name)
             .submitAs(submitAs)
             .onInput(onInput)
+            .infoText(infoText)
+            .infoUrl(infoUrl)
             .checked(checked)
             .build();
     }
@@ -2016,6 +2054,9 @@ public class JsonMapper
             Position.valueOf(getParameterValue(element, depth, TOOLTIP_POSITION, String.class, "RIGHT").toUpperCase());
         String              name             = getParameterValue(element, depth, NAME, String.class);
         String              submitAs         = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput          = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              infoText         = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
+        String              infoUrl          = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
         String              value            = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
         String              pattern          = getParameterValue(element, depth, "pattern", String.class, DEFAULT_VAL);
         String              fetchUrl         = getParameterValue(element, depth, "fetchUrl", String.class, DEFAULT_VAL);
@@ -2034,6 +2075,9 @@ public class JsonMapper
             .tooltipPosition(tooltipPosition)
             .name(name)
             .submitAs(submitAs)
+            .onInput(onInput)
+            .infoText(infoText)
+            .infoUrl(infoUrl)
             .value(value)
             .pattern(pattern)
             .build();
@@ -2058,6 +2102,8 @@ public class JsonMapper
         String              name            = getParameterValue(element, depth, NAME, String.class);
         String              submitAs        = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput         = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              infoText        = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
+        String              infoUrl         = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
         String              value           = getParameterValue(element, depth, VALUE, String.class, "");
         Integer             maxChars        = getParameterValue(element, depth, MAX_CHARS, Integer.class, 32000);
         String              placeholder     = getParameterValue(element, depth, PLACEHOLDER, String.class, "");
@@ -2073,6 +2119,8 @@ public class JsonMapper
             .name(name)
             .submitAs(submitAs)
             .onInput(onInput)
+            .infoText(infoText)
+            .infoUrl(infoUrl)
             .value(value)
             .maxCharacters(maxChars)
             .placeholder(placeholder)
@@ -2116,6 +2164,8 @@ public class JsonMapper
         String              name            = getParameterValue(element, depth, NAME, String.class);
         String              submitAs        = getParameterValue(element, depth, SUBMIT_AS, String.class);
         String              onInput         = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              infoText        = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
+        String              infoUrl         = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
         String              value           = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
         String              placeholder     = getParameterValue(element, depth, PLACEHOLDER, String.class, DEFAULT_VAL);
         String              prefix          = getParameterValue(element, depth, PREFIX, String.class, DEFAULT_VAL);
@@ -2133,6 +2183,8 @@ public class JsonMapper
             .name(name)
             .submitAs(submitAs)
             .onInput(onInput)
+            .infoText(infoText)
+            .infoUrl(infoUrl)
             .value(value)
             .placeholder(placeholder)
             .prefix(prefix)

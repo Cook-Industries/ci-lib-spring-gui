@@ -10,6 +10,7 @@ package de.cookindustries.lib.spring.gui.util;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -83,7 +84,12 @@ public final class StringAdapter
      */
     public static Collection<String> prefix(Collection<?> items, String prefix)
     {
-        return items == null ? List.of() : items.stream().map(i -> prefix(prefix, String.valueOf(i))).collect(Collectors.toList());
+        return items == null
+            ? List.of()
+            : items
+                .stream()
+                .map(i -> prefix(prefix, String.valueOf(i)))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -95,7 +101,12 @@ public final class StringAdapter
      */
     public static Collection<String> suffix(Collection<?> items, String suffix)
     {
-        return items == null ? List.of() : items.stream().map(i -> suffix(String.valueOf(i), suffix)).collect(Collectors.toList());
+        return items == null
+            ? List.of()
+            : items
+                .stream()
+                .map(i -> suffix(String.valueOf(i), suffix))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -108,8 +119,12 @@ public final class StringAdapter
      */
     public static Collection<String> prefixAndSuffix(Collection<?> items, String prefix, String suffix)
     {
-        return items == null ? List.of()
-            : items.stream().map(i -> prefixAndSuffix(prefix, String.valueOf(i), suffix)).collect(Collectors.toList());
+        return items == null
+            ? List.of()
+            : items
+                .stream()
+                .map(i -> prefixAndSuffix(prefix, String.valueOf(i), suffix))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -121,7 +136,13 @@ public final class StringAdapter
      */
     public static String separate(Collection<?> items, String separator)
     {
-        return items == null ? "" : items.stream().map(String::valueOf).collect(Collectors.joining(separator));
+        return items == null
+            ? ""
+            : items
+                .stream()
+                .filter(Objects::nonNull)
+                .map(String::valueOf)
+                .collect(Collectors.joining(separator));
     }
 
     /**
@@ -133,7 +154,12 @@ public final class StringAdapter
      */
     public static String separate(String separator, Object... items)
     {
-        return items == null ? "" : Arrays.stream(items).map(String::valueOf).collect(Collectors.joining(separator));
+        return items == null
+            ? ""
+            : Arrays
+                .stream(items)
+                .map(String::valueOf)
+                .collect(Collectors.joining(separator));
     }
 
     /**
