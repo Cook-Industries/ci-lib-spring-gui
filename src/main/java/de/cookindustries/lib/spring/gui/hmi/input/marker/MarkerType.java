@@ -41,4 +41,14 @@ public enum MarkerType {
 
     /** Non discrete value for free usage */
     CUSTOM;
+
+    public static String typeTranslationKey(MarkerType type)
+    {
+        return "error-description-"
+            .concat(
+                type
+                    .name()
+                    .toLowerCase()
+                    .replace('_', '-'));
+    }
 }

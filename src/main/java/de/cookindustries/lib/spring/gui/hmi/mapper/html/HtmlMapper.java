@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import de.cookindustries.lib.spring.gui.hmi.container.*;
 import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
+import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerCategory;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
@@ -768,14 +769,14 @@ public final class HtmlMapper
             .build();
     }
 
-    private String createInputWrapper(String legend, String notificationIcon, String errorIcon, String infoIcon, String input)
+    private String createInputWrapper(String legend, String warningIcon, String errorIcon, String infoIcon, String input)
     {
         return HtmlElement
             .builder()
             .tag(TAG_DIV)
             .clazz(INPUT_CONTAINER)
             .content(legend)
-            .content(notificationIcon)
+            .content(warningIcon)
             .content(errorIcon)
             .content(infoIcon)
             .content(input)
@@ -854,7 +855,7 @@ public final class HtmlMapper
                     .clazz("input-checkbox-wrapper")
                     .content(input)
                     .content(label)
-                    .content(resolveNotificationIcon(formId, id))
+                    .content(resolveWarningIcon(formId, id))
                     .content(resolveErrorIcon(formId, id))
                     .build();
 
@@ -878,7 +879,7 @@ public final class HtmlMapper
             HtmlElement
                 .builder()
                 .tag(TAG_DIV)
-                .clazz(CLASS_FORM_CHECK)
+                .clazz(INPUT_CONTAINER)
                 .content(StringAdapter.from(legend))
                 .content(resolveInfoIcon(formId, checkbox.getUid(), checkbox.getInfoText(), checkbox.getInfoUrl()))
                 .content(checkboxes)
@@ -895,11 +896,11 @@ public final class HtmlMapper
 
     private String render(Date date, String formId)
     {
-        String      label         =
+        String legend =
             createLegend(date)
                 .html();
 
-        String      input         =
+        String input  =
             createInput(date, formId, CLASS_FORM_CONTROL)
                 .toBuilder()
                 .attribute(
@@ -911,14 +912,12 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        HtmlElement elementMapper =
-            HtmlElement
-                .builder()
-                .tag(TAG_DIV)
-                .content(StringAdapter.from(label, input))
-                .build();
-
-        return elementMapper.html();
+        return createInputWrapper(
+            legend,
+            resolveWarningIcon(formId, date.getSubmitAs()),
+            resolveErrorIcon(formId, date.getSubmitAs()),
+            resolveInfoIcon(formId, date.getSubmitAs(), date.getInfoText(), date.getInfoUrl()),
+            input);
     }
 
     private String render(File file, String formId)
@@ -947,9 +946,9 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
-            resolveNotificationIcon(formId, file.getUid()),
-            resolveErrorIcon(formId, file.getUid()),
-            resolveInfoIcon(formId, file.getUid(), file.getInfoText(), file.getInfoUrl()),
+            resolveWarningIcon(formId, file.getSubmitAs()),
+            resolveErrorIcon(formId, file.getSubmitAs()),
+            resolveInfoIcon(formId, file.getSubmitAs(), file.getInfoText(), file.getInfoUrl()),
             input);
     }
 
@@ -1028,9 +1027,9 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
-            resolveNotificationIcon(formId, number.getUid()),
-            resolveErrorIcon(formId, number.getUid()),
-            resolveInfoIcon(formId, number.getUid(), number.getInfoText(), number.getInfoUrl()),
+            resolveWarningIcon(formId, number.getSubmitAs()),
+            resolveErrorIcon(formId, number.getSubmitAs()),
+            resolveInfoIcon(formId, number.getSubmitAs(), number.getInfoText(), number.getInfoUrl()),
             input);
     }
 
@@ -1060,9 +1059,9 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
-            resolveNotificationIcon(formId, password.getUid()),
-            resolveErrorIcon(formId, password.getUid()),
-            resolveInfoIcon(formId, password.getUid(), password.getInfoText(), password.getInfoUrl()),
+            resolveWarningIcon(formId, password.getSubmitAs()),
+            resolveErrorIcon(formId, password.getSubmitAs()),
+            resolveInfoIcon(formId, password.getSubmitAs(), password.getInfoText(), password.getInfoUrl()),
             input);
     }
 
@@ -1221,9 +1220,9 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
-            resolveNotificationIcon(formId, select.getUid()),
-            resolveErrorIcon(formId, select.getUid()),
-            resolveInfoIcon(formId, select.getUid(), select.getInfoText(), select.getInfoUrl()),
+            resolveWarningIcon(formId, select.getSubmitAs()),
+            resolveErrorIcon(formId, select.getSubmitAs()),
+            resolveInfoIcon(formId, select.getSubmitAs(), select.getInfoText(), select.getInfoUrl()),
             input);
     }
 
@@ -1284,9 +1283,9 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
-            resolveNotificationIcon(formId, slider.getUid()),
-            resolveErrorIcon(formId, slider.getUid()),
-            resolveInfoIcon(formId, slider.getUid(), slider.getInfoText(), slider.getInfoUrl()),
+            resolveWarningIcon(formId, slider.getSubmitAs()),
+            resolveErrorIcon(formId, slider.getSubmitAs()),
+            resolveInfoIcon(formId, slider.getSubmitAs(), slider.getInfoText(), slider.getInfoUrl()),
             input);
     }
 
@@ -1372,9 +1371,9 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
-            resolveNotificationIcon(formId, tag.getUid()),
-            resolveErrorIcon(formId, tag.getUid()),
-            resolveInfoIcon(formId, tag.getUid(), tag.getInfoText(), tag.getInfoUrl()),
+            resolveWarningIcon(formId, tag.getSubmitAs()),
+            resolveErrorIcon(formId, tag.getSubmitAs()),
+            resolveInfoIcon(formId, tag.getSubmitAs(), tag.getInfoText(), tag.getInfoUrl()),
             input);
     }
 
@@ -1421,9 +1420,9 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
-            resolveNotificationIcon(formId, textarea.getUid()),
-            resolveErrorIcon(formId, textarea.getUid()),
-            resolveInfoIcon(formId, textarea.getUid(), textarea.getInfoText(), textarea.getInfoUrl()),
+            resolveWarningIcon(formId, textarea.getSubmitAs()),
+            resolveErrorIcon(formId, textarea.getSubmitAs()),
+            resolveInfoIcon(formId, textarea.getSubmitAs(), textarea.getInfoText(), textarea.getInfoUrl()),
             input);
     }
 
@@ -1482,20 +1481,20 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
-            resolveNotificationIcon(formId, textfield.getUid()),
-            resolveErrorIcon(formId, textfield.getUid()),
-            resolveInfoIcon(formId, textfield.getUid(), textfield.getInfoText(), textfield.getInfoUrl()),
+            resolveWarningIcon(formId, textfield.getSubmitAs()),
+            resolveErrorIcon(formId, textfield.getSubmitAs()),
+            resolveInfoIcon(formId, textfield.getSubmitAs(), textfield.getInfoText(), textfield.getInfoUrl()),
             input);
     }
 
-    private String resolveNotificationIcon(String formId, String submitId)
+    private String resolveWarningIcon(String formId, String submitId)
     {
-        return resolveIcon(formId, submitId, "notification", "/images/alert-triangle-warning.svg", null, null);
+        return resolveIcon(formId, submitId, MarkerCategory.WARNING.name().toLowerCase(), "/images/alert-triangle-warning.svg", null, null);
     }
 
     private String resolveErrorIcon(String formId, String submitId)
     {
-        return resolveIcon(formId, submitId, "error", "/images/alert-triangle-error.svg", null, null);
+        return resolveIcon(formId, submitId, MarkerCategory.ERROR.name().toLowerCase(), "/images/alert-triangle-error.svg", null, null);
     }
 
     private String resolveInfoIcon(String formId, String submitId, String text, String url)
@@ -1505,13 +1504,11 @@ public final class HtmlMapper
 
     private String resolveIcon(String formId, String submitId, String type, String image, String text, String url)
     {
-
         String                         id       = "input-icon-" + formId + "-" + type + "-" + submitId;
         boolean                        hasUrl   = url != null && !url.isBlank();
 
         boolean                        isHidden =
-            List.of("notification", "error").contains(type)
-                || !hasUrl
+            List.of(MarkerCategory.WARNING.name().toLowerCase(), MarkerCategory.ERROR.name().toLowerCase()).contains(type)
                 || (text == null || text.isBlank());
 
         HtmlElement.HtmlElementBuilder icon     = HtmlElement
@@ -1526,6 +1523,7 @@ public final class HtmlMapper
             .clazz("input-icon-container")
             .clazz("input-icon-" + type)
             .clazz("tooltip-container")
+            .clazz(MarkerCategory.ERROR.name().equalsIgnoreCase(type) ? "error-marker" : "")
             .clazz(isHidden ? CLASS_HIDDEN : "")
             .content(
                 HtmlElement

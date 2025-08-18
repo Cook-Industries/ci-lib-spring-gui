@@ -20,16 +20,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import de.cookindustries.lib.spring.gui.hmi.container.FormContainer;
 import de.cookindustries.lib.spring.gui.hmi.input.File;
-import de.cookindustries.lib.spring.gui.hmi.input.Input;
-import de.cookindustries.lib.spring.gui.hmi.input.marker.Marker;
 import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerCategory;
 import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.NullIgnoreException;
-import de.cookindustries.lib.spring.gui.response.Response;
-import de.cookindustries.lib.spring.gui.response.message.ActivateMarkerMessage;
-import de.cookindustries.lib.spring.gui.response.message.MessageType;
-import de.cookindustries.lib.spring.gui.response.message.ModalMessage;
-import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
 
 /**
  * Utility to extract information from {@code Form} data into data objects.
@@ -38,14 +31,11 @@ import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
  * with DTO objects either as POJOs with setters, or a builder.
  * <p>
  * Depending on the data types of the fields the data can be validated via the corresponding {@link AbsInputProcessor}. Either create a new
- * on with the restrictions that apply, or use on of the static defined ones in this class named with {@code DEFAULT_[...]}.
+ * on with the restrictions that apply, or use on of the static defined ones in this class named with {@code DEFAULT_[type]}.
  * <p>
- * A {@code InputExtractor} can olso validate a {@link MultipartFile} intended as a file upload from a {@link File} input. This validation
+ * A {@code InputExtractor} can also validate a {@link MultipartFile} intended as a file upload from a {@link File} input. This validation
  * only checks whether there are any files uploaded and how many, but nothing about the state or value of the files, since this is up to the
  * developer.
- * <p>
- * Output of validation is given as a {@link Response} with {@link ActivateMarkerMessage}s bound to {@link Marker} definitions on the
- * {@link Input}, or as {@link ModalMessage}s with more descriptive error messages for unexpected exceptions.
  * <p>
  * Example:
  * 
@@ -53,6 +43,7 @@ import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
  * 
  * public Response handleForm(MultiValueMap&lt;String, String&gt; formData, MultipartFile[] files)
  * {
+ *     Locale locale = Locale.ENGLISH;
  *     InputExtractor extractor = new InputExtractor(inputs, files);
  *     DtoBuilder dtoBuilder = Dto.builder();
  * 
@@ -61,9 +52,9 @@ import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
  *     extractor.consumeEnum("resultType", ImageType.class, dtoBuilder::resultType);
  *     extractor.checkFiles(false, true);
  * 
- *     if (extractor.hasMessages())
+ *     if (extractor.hasMarker())
  *     {
- *         return guiFactory.getActiveMarkerResponse(extractor);
+ *         return guiFactory.getActiveMarkerResponse(extractor, locale);
  *     }
  * 
  *     Dto data = dtoBuilder.build();
@@ -142,7 +133,7 @@ public final class InputExtractor
     private final String                        formId;
     private final MultiValueMap<String, String> inputs;
     private final MultipartFile[]               files;
-    private final List<ResponseMessage>         messages                            = new ArrayList<>();
+    private final List<InputCheckMarker>        marker                              = new ArrayList<>();
 
     /**
      * Create a extractor for a {@link FormContainer} result
@@ -221,32 +212,13 @@ public final class InputExtractor
                     consumer.accept(obj);
                 }
 
-                case NOT_PARSABLE -> addUnexpectedErrorMessage(key, String.format("value [%s] not parsable", value));
-
                 default -> activateMarker(key, MarkerCategory.ERROR, resultType.getMarkerType());
             };
         }
         catch (NullIgnoreException ex)
         {
-            // value to parse is null, but this will be ignored and not raise any error
+            // value to parse is null, but this will be ignored and not raise a marker
         }
-        catch (Exception ex)
-        {
-            addUnexpectedErrorMessage(key, ex.getMessage());
-        }
-    }
-
-    /**
-     * Add a message for an unexpected exception case
-     * 
-     * @param key which prompted the message
-     * @param errorMsg to add
-     */
-    private void addUnexpectedErrorMessage(String key, String errorMsg)
-    {
-        String msg = String.format("key [%s] resulted in unexpected error [%s]", key, errorMsg);
-
-        messages.add(ModalMessage.builder().msg(msg).type(MessageType.ERROR).build());
     }
 
     /**
@@ -258,13 +230,13 @@ public final class InputExtractor
      */
     private void activateMarker(String key, MarkerCategory category, MarkerType type)
     {
-        messages.add(
-            ActivateMarkerMessage.builder()
+        marker.add(
+            InputCheckMarker
+                .builder()
                 .formId(formId)
                 .transferId(key)
-                .markerCategory(category)
-                .markerType(type)
-                .type(MessageType.ERROR)
+                .category(category)
+                .type(type)
                 .build());
     }
 
@@ -577,20 +549,20 @@ public final class InputExtractor
     /**
      * Check whether this extractor has raised any markers or unexpected exceptions
      * 
-     * @return true, if there are messages raise, false otherwise
+     * @return true, if there are markers raise, false otherwise
      */
-    public Boolean hasMessages()
+    public boolean hasMarker()
     {
-        return !messages.isEmpty();
+        return !marker.isEmpty();
     }
 
     /**
-     * Get a unmodifiable list of {@link ResponseMessage}s raised by the extractions
+     * Get a unmodifiable list of {@link InputCheckMarker}s raised by the extractions
      * 
      * @return list of messages
      */
-    public List<ResponseMessage> getMessages()
+    public List<InputCheckMarker> getMarker()
     {
-        return Collections.unmodifiableList(messages);
+        return Collections.unmodifiableList(marker);
     }
 }

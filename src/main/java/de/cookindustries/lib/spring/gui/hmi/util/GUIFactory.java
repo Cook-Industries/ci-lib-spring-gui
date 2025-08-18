@@ -20,6 +20,7 @@ import de.cookindustries.lib.spring.gui.hmi.container.Container;
 import de.cookindustries.lib.spring.gui.hmi.container.ContentContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.ModalContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.TextContainer;
+import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputExtractor;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
@@ -37,6 +38,7 @@ import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 import de.cookindustries.lib.spring.gui.response.ContentResponse;
 import de.cookindustries.lib.spring.gui.response.ModalResponse;
 import de.cookindustries.lib.spring.gui.response.NotificationResponse;
+import de.cookindustries.lib.spring.gui.response.message.ActivateMarkerMessage;
 import de.cookindustries.lib.spring.gui.response.message.MessageType;
 import de.cookindustries.lib.spring.gui.response.message.PopupMessage;
 
@@ -415,11 +417,23 @@ public final class GUIFactory
      * @param inputExtractor to extract messages from
      * @return a response containing the marker raised by {@code inputExtractor}
      */
-    public NotificationResponse createActiveMarkerResponseFrom(InputExtractor inputExtractor)
+    public NotificationResponse createActiveMarkerResponseFrom(InputExtractor inputExtractor, Locale locale)
     {
+        List<ActivateMarkerMessage> messages = new ArrayList<>();
+
+        inputExtractor.getMarker()
+            .stream()
+            .forEach(m -> messages.add(
+                ActivateMarkerMessage
+                    .builder()
+                    .text(translationProvider.getText(locale, MarkerType.typeTranslationKey(m.getType())))
+                    .uid(String.format("input-icon-%s-%s-%s", m.getFormId(), m.getCategory().name().toLowerCase(), m.getTransferId()))
+                    .type(MessageType.ERROR)
+                    .build()));
+
         return NotificationResponse
             .builder()
-            .messages(inputExtractor.getMessages())
+            .messages(messages)
             .build();
     }
 

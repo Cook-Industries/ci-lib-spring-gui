@@ -548,7 +548,8 @@
             "attributes": {
                 "display": "grid",
                 "grid-template-columns": "1fr 7fr 1fr 1fr",
-                "grid-template-rows": "1",
+                "grid-template-rows": "auto",
+                "grid-template-areas": "\"field label error info\"",
                 "align-items": "baseline"
             }
         },
@@ -603,9 +604,9 @@
             }
         },
         {
-            "selector": ".input-icon-notification",
+            "selector": ".input-icon-warning",
             "attributes": {
-                "grid-area": "notification",
+                "grid-area": "warning",
                 "justify-self": "center",
                 "color": "var(--ci-color-warning-icon)"
             }
@@ -646,6 +647,12 @@
             }
         },
         {
+            "selector": ".input-checkboxes-wrapper",
+            "attributes": {
+                "grid-area": "field"
+            }
+        },
+        {
             "selector": ".tooltip-container",
             "attributes": {
                 "position": "relative",
@@ -656,9 +663,7 @@
         {
             "selector": ".tooltip-text",
             "attributes": {
-                "position": "absolute",
-                "bottom": "125%",
-                "left": "50%",
+                "position": "fixed",
                 "transform": "translateX(-50%)",
                 "background": "var(--ci-tooltip-bg)",
                 "color": "var(--ci-tooltip-color)",

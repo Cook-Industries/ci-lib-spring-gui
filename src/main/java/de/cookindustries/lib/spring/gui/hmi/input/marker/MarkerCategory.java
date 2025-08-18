@@ -15,13 +15,13 @@ package de.cookindustries.lib.spring.gui.hmi.input.marker;
  */
 public enum MarkerCategory {
 
-    /** Anything related to errors */
-    ERROR,
-
     /** Anything related to warnings */
     WARNING,
 
-    /** Anything related to notes */
-    NOTICE
+    /** Anything related to errors */
+    ERROR,
+
+    /** Anything to highlight via Modal */
+    MODAL;
 
 }

@@ -53,7 +53,22 @@ $(document).ready(function () {
   });
 
   $(document).on('mouseenter mouseleave', '.tooltip-container', function (e) {
-    $(this).find('.tooltip-text').toggleClass('tooltip-visible', e.type === 'mouseenter');
+    const $tooltip = $(this).find('.tooltip-text');
+
+    if (e.type === 'mouseenter') {
+      const rect = this.getBoundingClientRect();
+
+      $tooltip.css({
+        position: 'fixed',
+        left: rect.left + rect.width / 2 + 'px',
+        top: rect.top - $tooltip.outerHeight() - 5 + 'px',
+      });
+
+      $tooltip.addClass('tooltip-visible');
+    } else {
+      $tooltip.removeClass('tooltip-visible');
+      $tooltip.css({ position: '', left: '', top: '' });
+    }
   });
 
   $(document).on("click", "[data-fetch-input-info-url]", function () {
@@ -492,7 +507,8 @@ function handlePopupMsg(msg) {
 }
 
 function handleMarkerMsg(msg) {
-  $(`#error-marker-${msg.formId}-${msg.transferId}-${msg.markerCategory}-${msg.markerType}`).removeClass(CLASS_HIDDEN);
+  $(`#${msg.uid}-text`).html(msg.text);
+  $(`#${msg.uid}`).removeClass(CLASS_HIDDEN);
 }
 
 function resetMarker() {

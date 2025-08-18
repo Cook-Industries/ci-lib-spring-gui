@@ -23,8 +23,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
-import de.cookindustries.lib.spring.gui.response.message.MessageTarget;
-import de.cookindustries.lib.spring.gui.response.message.MessageType;
+import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerCategory;
+import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
 
 class InputExtractorTest
 {
@@ -70,17 +70,9 @@ class InputExtractorTest
         List<String>   result    = new ArrayList<>();
         InputExtractor extractor = new InputExtractor(inputs);
 
-        // run
-        extractor.checkAndConsumeAsString(null, result::add);
-        extractor.checkAndConsumeAsString("", result::add);
-
-        // verify
-        assertEquals(Boolean.TRUE, extractor.hasMessages());
-        assertEquals(2, extractor.getMessages().size());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(0).getType());
-        assertEquals(MessageTarget.MODAL, extractor.getMessages().get(0).getTarget());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(1).getType());
-        assertEquals(MessageTarget.MODAL, extractor.getMessages().get(1).getTarget());
+        // run & verify
+        assertThrows(IllegalArgumentException.class, () -> extractor.checkAndConsumeAsString(null, result::add));
+        assertThrows(IllegalArgumentException.class, () -> extractor.checkAndConsumeAsString("", result::add));
     }
 
     @Test
@@ -95,7 +87,7 @@ class InputExtractorTest
         extractor.checkAndConsumeAsString("testKey", result::add);
 
         // verify
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(Boolean.FALSE, extractor.hasMarker());
         assertEquals(1, result.size());
         assertEquals("testValue", result.get(0));
     }
@@ -117,7 +109,7 @@ class InputExtractorTest
         extractor.checkAndConsumeAsString("testKey", processor, result::add);
 
         // verify
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(Boolean.FALSE, extractor.hasMarker());
         assertEquals(1, result.size());
         assertEquals("test", result.get(0));
     }
@@ -139,10 +131,10 @@ class InputExtractorTest
         extractor.checkAndConsumeAsString("testKey", processor, result::add);
 
         // verify
-        assertEquals(Boolean.TRUE, extractor.hasMessages());
-        assertEquals(1, extractor.getMessages().size());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(0).getType());
-        assertEquals(MessageTarget.MARKER, extractor.getMessages().get(0).getTarget());
+        assertEquals(Boolean.TRUE, extractor.hasMarker());
+        assertEquals(1, extractor.getMarker().size());
+        assertEquals(MarkerCategory.ERROR, extractor.getMarker().get(0).getCategory());
+        assertEquals(MarkerType.INVALID, extractor.getMarker().get(0).getType());
     }
 
     @Test
@@ -157,7 +149,7 @@ class InputExtractorTest
         extractor.checkAndConsumeAsNotEmptyString("testKey", result::add);
 
         // verify
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(Boolean.FALSE, extractor.hasMarker());
         assertEquals(1, result.size());
         assertEquals("testValue", result.get(0));
     }
@@ -174,10 +166,10 @@ class InputExtractorTest
         extractor.checkAndConsumeAsNotEmptyString("testKey", result::add);
 
         // verify
-        assertEquals(Boolean.TRUE, extractor.hasMessages());
-        assertEquals(1, extractor.getMessages().size());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(0).getType());
-        assertEquals(MessageTarget.MARKER, extractor.getMessages().get(0).getTarget());
+        assertEquals(Boolean.TRUE, extractor.hasMarker());
+        assertEquals(1, extractor.getMarker().size());
+        assertEquals(MarkerCategory.ERROR, extractor.getMarker().get(0).getCategory());
+        assertEquals(MarkerType.INVALID, extractor.getMarker().get(0).getType());
     }
 
     @Test
@@ -194,8 +186,8 @@ class InputExtractorTest
         extractor.checkAndConsumeAsBooleanDefaultFalse("bool", result::add);
 
         // verify
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
-        assertEquals(0, extractor.getMessages().size());
+        assertEquals(Boolean.FALSE, extractor.hasMarker());
+        assertEquals(0, extractor.getMarker().size());
         assertEquals(Boolean.FALSE, result.get(0));
         assertEquals(Boolean.TRUE, result.get(1));
     }
@@ -214,8 +206,8 @@ class InputExtractorTest
         extractor.checkAndConsumeAsBooleanDefaultTrue("bool", result::add);
 
         // verify
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
-        assertEquals(0, extractor.getMessages().size());
+        assertEquals(Boolean.FALSE, extractor.hasMarker());
+        assertEquals(0, extractor.getMarker().size());
         assertEquals(Boolean.TRUE, result.get(0));
         assertEquals(Boolean.FALSE, result.get(1));
     }
@@ -232,7 +224,7 @@ class InputExtractorTest
         extractor.checkAndConsumeAsInteger("testKey", result::add);
 
         // verify
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(Boolean.FALSE, extractor.hasMarker());
         assertEquals(1, result.size());
         assertEquals(Integer.valueOf(1), result.get(0));
     }
@@ -248,10 +240,10 @@ class InputExtractorTest
         extractor.checkAndConsumeAsInteger("testKey", s -> s.toString());
 
         // verify
-        assertEquals(Boolean.TRUE, extractor.hasMessages());
-        assertEquals(1, extractor.getMessages().size());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(0).getType());
-        assertEquals(MessageTarget.MODAL, extractor.getMessages().get(0).getTarget());
+        assertEquals(Boolean.TRUE, extractor.hasMarker());
+        assertEquals(1, extractor.getMarker().size());
+        assertEquals(MarkerCategory.ERROR, extractor.getMarker().get(0).getCategory());
+        assertEquals(MarkerType.NOT_PARSABLE, extractor.getMarker().get(0).getType());
     }
 
     @Test
@@ -271,7 +263,7 @@ class InputExtractorTest
         extractor.checkAndConsumeAsInteger("testKey", processor, result::add);
 
         // verify
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(Boolean.FALSE, extractor.hasMarker());
         assertEquals(1, result.size());
         assertEquals(Integer.valueOf(1), result.get(0));
     }
@@ -301,12 +293,12 @@ class InputExtractorTest
         extractor.checkAndConsumeAsInteger("testKey", processor, result::add);
 
         // verify
-        assertEquals(Boolean.TRUE, extractor.hasMessages());
-        assertEquals(2, extractor.getMessages().size());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(0).getType());
-        assertEquals(MessageTarget.MARKER, extractor.getMessages().get(0).getTarget());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(1).getType());
-        assertEquals(MessageTarget.MARKER, extractor.getMessages().get(1).getTarget());
+        assertEquals(Boolean.TRUE, extractor.hasMarker());
+        assertEquals(2, extractor.getMarker().size());
+        assertEquals(MarkerCategory.ERROR, extractor.getMarker().get(0).getCategory());
+        assertEquals(MarkerType.OUT_OF_RANGE, extractor.getMarker().get(0).getType());
+        assertEquals(MarkerCategory.ERROR, extractor.getMarker().get(1).getCategory());
+        assertEquals(MarkerType.OUT_OF_RANGE, extractor.getMarker().get(1).getType());
     }
 
     @Test
@@ -321,7 +313,7 @@ class InputExtractorTest
         extractor.checkAndConsumeAsDouble("testKey", result::add);
 
         // verify
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(Boolean.FALSE, extractor.hasMarker());
         assertEquals(1, result.size());
         assertEquals(Double.valueOf(1.0), result.get(0));
     }
@@ -338,10 +330,10 @@ class InputExtractorTest
         extractor.checkAndConsumeAsDouble("testKey", result::add);
 
         // verify
-        assertEquals(Boolean.TRUE, extractor.hasMessages());
-        assertEquals(1, extractor.getMessages().size());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(0).getType());
-        assertEquals(MessageTarget.MODAL, extractor.getMessages().get(0).getTarget());
+        assertEquals(Boolean.TRUE, extractor.hasMarker());
+        assertEquals(1, extractor.getMarker().size());
+        assertEquals(MarkerCategory.ERROR, extractor.getMarker().get(0).getCategory());
+        assertEquals(MarkerType.NOT_PARSABLE, extractor.getMarker().get(0).getType());
     }
 
     @Test
@@ -361,7 +353,7 @@ class InputExtractorTest
         extractor.checkAndConsumeAsDouble("testKey", processor, result::add);
 
         // verify
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(Boolean.FALSE, extractor.hasMarker());
         assertEquals(1, result.size());
         assertEquals(Double.valueOf(1.0d), result.get(0));
     }
@@ -392,12 +384,12 @@ class InputExtractorTest
         extractor.checkAndConsumeAsDouble("testKey", processor, result::add);
 
         // verify
-        assertEquals(Boolean.TRUE, extractor.hasMessages());
-        assertEquals(2, extractor.getMessages().size());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(0).getType());
-        assertEquals(MessageTarget.MARKER, extractor.getMessages().get(0).getTarget());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(1).getType());
-        assertEquals(MessageTarget.MARKER, extractor.getMessages().get(1).getTarget());
+        assertEquals(Boolean.TRUE, extractor.hasMarker());
+        assertEquals(2, extractor.getMarker().size());
+        assertEquals(MarkerCategory.ERROR, extractor.getMarker().get(0).getCategory());
+        assertEquals(MarkerType.OUT_OF_RANGE, extractor.getMarker().get(0).getType());
+        assertEquals(MarkerCategory.ERROR, extractor.getMarker().get(1).getCategory());
+        assertEquals(MarkerType.OUT_OF_RANGE, extractor.getMarker().get(1).getType());
     }
 
     @Test
@@ -413,7 +405,7 @@ class InputExtractorTest
         extractor.checkAndConsumeAsDate("testKey", result::add);
 
         // verify
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(Boolean.FALSE, extractor.hasMarker());
         assertEquals(1, result.size());
         assertEquals(Date.valueOf("2025-11-02"), result.get(0));
     }
@@ -431,10 +423,10 @@ class InputExtractorTest
         });
 
         // verify
-        assertEquals(Boolean.TRUE, extractor.hasMessages());
-        assertEquals(1, extractor.getMessages().size());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(0).getType());
-        assertEquals(MessageTarget.MODAL, extractor.getMessages().get(0).getTarget());
+        assertEquals(Boolean.TRUE, extractor.hasMarker());
+        assertEquals(1, extractor.getMarker().size());
+        assertEquals(MarkerCategory.ERROR, extractor.getMarker().get(0).getCategory());
+        assertEquals(MarkerType.NOT_PARSABLE, extractor.getMarker().get(0).getType());
     }
 
     @Test
@@ -450,7 +442,7 @@ class InputExtractorTest
         extractor.checkAndConsumeAsEnum("testKey", TestEnum.class, result::add);
 
         // verify
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(Boolean.FALSE, extractor.hasMarker());
         assertEquals(1, result.size());
         assertEquals(TestEnum.VALUE1, result.get(0));
     }
@@ -468,9 +460,10 @@ class InputExtractorTest
         extractor.checkAndConsumeAsEnum("testKey", TestEnum.class, result::add);
 
         // verify
-        assertEquals(Boolean.TRUE, extractor.hasMessages());
-        assertEquals(1, extractor.getMessages().size());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(0).getType());
+        assertEquals(Boolean.TRUE, extractor.hasMarker());
+        assertEquals(1, extractor.getMarker().size());
+        assertEquals(MarkerCategory.ERROR, extractor.getMarker().get(0).getCategory());
+        assertEquals(MarkerType.NOT_PARSABLE, extractor.getMarker().get(0).getType());
     }
 
     @Test
@@ -487,9 +480,10 @@ class InputExtractorTest
         });
 
         // verify
-        assertEquals(Boolean.TRUE, extractor.hasMessages());
-        assertEquals(1, extractor.getMessages().size());
-        assertEquals(MessageType.ERROR, extractor.getMessages().get(0).getType());
+        assertEquals(Boolean.TRUE, extractor.hasMarker());
+        assertEquals(1, extractor.getMarker().size());
+        assertEquals(MarkerCategory.ERROR, extractor.getMarker().get(0).getCategory());
+        assertEquals(MarkerType.NO_VALUE, extractor.getMarker().get(0).getType());
     }
 
     @Test
@@ -504,7 +498,7 @@ class InputExtractorTest
         extractor.checkAndConsumeAsTagList("testKey", result::add);
 
         // verify
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(Boolean.FALSE, extractor.hasMarker());
         assertEquals(1, result.size());
         assertEquals(new Tag("tag1"), result.get(0).get(0));
     }
@@ -521,7 +515,7 @@ class InputExtractorTest
         extractor.checkAndConsumeAsNotEmptyTagList("testKey", result::add);
 
         // verify
-        assertEquals(Boolean.TRUE, extractor.hasMessages());
+        assertEquals(Boolean.TRUE, extractor.hasMarker());
         assertEquals(0, result.size());
     }
 
@@ -544,11 +538,11 @@ class InputExtractorTest
 
         // run & verify
         extractor.checkFiles("files", true, false);
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(Boolean.FALSE, extractor.hasMarker());
 
         // run & verify
         extractor.checkFiles("files", false, false);
-        assertEquals(Boolean.TRUE, extractor.hasMessages());
+        assertEquals(Boolean.TRUE, extractor.hasMarker());
     }
 
     @Test
@@ -561,7 +555,7 @@ class InputExtractorTest
         extractor.checkFiles("files", true, false);
 
         // verify
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(Boolean.FALSE, extractor.hasMarker());
     }
 
     @Test
@@ -580,7 +574,7 @@ class InputExtractorTest
         extractor.checkFiles("files", false, false);
 
         // verify
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(Boolean.FALSE, extractor.hasMarker());
     }
 
     @Test
@@ -599,7 +593,7 @@ class InputExtractorTest
         extractor.checkFiles("files", false, true);
 
         // verify
-        assertEquals(Boolean.FALSE, extractor.hasMessages());
+        assertEquals(Boolean.FALSE, extractor.hasMarker());
     }
 
     @Test
@@ -618,7 +612,7 @@ class InputExtractorTest
         extractor.checkFiles("files", false, false);
 
         // verify
-        assertEquals(Boolean.TRUE, extractor.hasMessages());
+        assertEquals(Boolean.TRUE, extractor.hasMarker());
     }
 
 }
