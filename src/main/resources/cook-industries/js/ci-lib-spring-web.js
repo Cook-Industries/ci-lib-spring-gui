@@ -35,6 +35,7 @@ function init() {
 $(document).ready(function () {
   console.log("ci-lib-js: ", version);
 
+  // close modal on overlay click
   $(document).on("click", ".modal-overlay", function (event) {
     event.stopPropagation();
 
@@ -45,6 +46,7 @@ $(document).ready(function () {
     }
   });
 
+  // change color of button on form change
   $(document).on('input change', '[data-connected-btn] input, [data-connected-btn] select, [data-connected-btn] textarea', function () {
     var $container = $(this).closest('[data-connected-btn]');
     var btnId = $container.data('connected-btn');
@@ -52,6 +54,7 @@ $(document).ready(function () {
     updateButton(btnId);
   });
 
+  // trigger hover on tooltips
   $(document).on('mouseenter mouseleave', '.tooltip-container', function (e) {
     const $tooltip = $(this).find('.tooltip-text');
 
@@ -71,6 +74,7 @@ $(document).ready(function () {
     }
   });
 
+  // trigger info fetch for input fields
   $(document).on("click", "[data-fetch-input-info-url]", function () {
     const url = $(this).attr("data-fetch-input-info-url");
     if (url) {
@@ -78,12 +82,63 @@ $(document).ready(function () {
     }
   });
 
+  // close modal on esc button press
   $(document).on("keydown", function (e) {
     if (e.key === "Escape") {
       CILIB.closeModal();
     }
   });
 
+  // Toggle dropdown on burger click (delegated)
+  $(document).on("click", ".burger-icon", function (e) {
+    e.stopPropagation();
+
+    const $dropdown = $(this).siblings(".burger-dropdown");
+    const rect = this.getBoundingClientRect();
+    const dropdownWidth = $dropdown.outerWidth();
+    const dropdownHeight = $dropdown.outerHeight();
+    const viewportWidth = $(window).width();
+    const viewportHeight = $(window).height();
+
+    let top, left;
+
+    // Vertical positioning
+    if (rect.top + rect.height + dropdownHeight < viewportHeight) {
+      top = rect.bottom; // dropdown below button
+    } else {
+      top = rect.top - dropdownHeight; // dropdown above button
+    }
+
+    // Horizontal positioning
+    if (rect.left + dropdownWidth < viewportWidth) {
+      left = rect.left; // dropdown aligned left with button
+    } else if (rect.right - dropdownWidth > 0) {
+      left = rect.right - dropdownWidth; // dropdown aligned right
+    } else {
+      left = (viewportWidth - dropdownWidth) / 2; // center if too big
+    }
+
+    // Apply position
+    $dropdown.css({ top: top + "px", left: left + "px" });
+    $dropdown.toggleClass("show");
+  });
+
+  // Handle item click (delegated)
+  $(document).on("click", ".burger-item", function () {
+    var url = $(this).data("burger-url");
+    if (url) {
+      POST(url);
+    }
+  });
+
+  // Close dropdown when clicking outside
+  $(document).on("click", function (e) {
+    if (!$(e.target).closest(".burger-menu").length) {
+      $(".burger-dropdown").removeClass("show");
+    }
+  });
+
+  // --> register functions
   FunctionRegistry._registerInternal("GET", (url) => {
     GET(url);
   });

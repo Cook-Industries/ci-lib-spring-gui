@@ -31,18 +31,18 @@ import lombok.Builder.Default;
 public final class HtmlElement
 {
 
-    private static final String LT          = "<";
-    private static final String LTS         = "</";
-    private static final String GT          = ">";
-    private static final String GTS         = "/>";
-    private static final String SPACE       = " ";
-    private static final String QTM         = "\"";
+    private static final String       LT          = "<";
+    private static final String       LTS         = "</";
+    private static final String       GT          = ">";
+    private static final String       GTS         = "/>";
+    private static final String       SPACE       = " ";
+    private static final String       QTM         = "\"";
 
     /**
      * The HTML tag of this element
      */
     @NonNull
-    private String              tag;
+    private final String              tag;
 
     /**
      * A list of HTML attributes, except the 'class' attribute.
@@ -50,25 +50,25 @@ public final class HtmlElement
      * To set 'class' values use {@link HtmlElementBuilder#clazz(String)} or {@link HtmlElementBuilder#classes(java.util.Collection)}
      */
     @Singular
-    private List<Attribute>     attributes;
+    private final List<Attribute>     attributes;
 
     /**
      * A list of classes for this element
      */
     @Singular("clazz")
-    private Set<String>         classes;
+    private final Set<String>         classes;
 
     /**
      * A map of HTML 'data-' attributes
      */
     @Singular
-    private Map<String, String> dataAttributes;
+    private final Map<String, String> dataAttributes;
 
     /**
      * Whether this element is a single tag and has no closing '</tag>'
      */
     @Default
-    private boolean             isSingleTag = false;
+    private final boolean             isSingleTag = false;
 
     /**
      * A list of {@code String}s between the opening and closing tag. They get appened one after another
@@ -76,7 +76,10 @@ public final class HtmlElement
      * Is only used if {@link HtmlElementBuilder#isSingleTag(Boolean)} is {@code true}.
      */
     @Singular
-    private List<String>        contents;
+    private final List<String>        contents;
+
+    @Default
+    private final boolean             inactive    = false;
 
     /**
      * Generate a HTML string from this object
@@ -85,6 +88,11 @@ public final class HtmlElement
      */
     public String html()
     {
+        if (inactive)
+        {
+            return "";
+        }
+
         StringConcat sc = new StringConcat();
 
         sc

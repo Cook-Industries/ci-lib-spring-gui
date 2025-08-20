@@ -54,6 +54,9 @@ public enum ContainerType {
     /** Type for button bar {@link Container} */
     BUTTON_BAR,
 
+    /** Type for burger menu {@link Container} */
+    BURGER,
+
     /** Type for modal {@link Container} */
     MODAL,
 

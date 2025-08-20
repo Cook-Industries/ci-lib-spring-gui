@@ -143,7 +143,8 @@ public class JsonMapper
             ContainerType.IMAGE,
             ContainerType.LINK,
             ContainerType.TEXT,
-            ContainerType.HEADING
+            ContainerType.HEADING,
+            ContainerType.BURGER
         };
 
     @NonNull
@@ -478,11 +479,14 @@ public class JsonMapper
      */
     private boolean checkActiveStateFromTokenMaps(String uid) throws JsonMapperException
     {
-        return tokenMaps.stream()
-            .filter(Objects::nonNull)
-            .map(m -> m.isUidActive(uid))
-            .filter(Objects::nonNull)
-            .allMatch(b -> b);
+
+        return uid == null
+            ? true
+            : tokenMaps.stream()
+                .filter(Objects::nonNull)
+                .map(m -> m.isUidActive(uid))
+                .filter(Objects::nonNull)
+                .allMatch(b -> b);
     }
 
     /**
@@ -743,6 +747,18 @@ public class JsonMapper
 
         for (PseudoElement pe : element.getChildren())
         {
+            String  uid            = element.getUid() == null ? "random uid" : element.getUid();
+
+            boolean processElement = shouldProcess(element, uid, depth);
+
+            if (!processElement)
+            {
+                LOG.debug("[{}]:[{}]:{} skip InputValue [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth,
+                    indent, uid);
+
+                continue;
+            }
+
             if (pe.getType().toUpperCase().equals("INPUT_VALUE"))
             {
                 values.add(transformInputValue(pe, depth + 1));
@@ -827,6 +843,12 @@ public class JsonMapper
         return list;
     }
 
+    private boolean shouldProcess(PseudoElement element, String uid, int depth)
+    {
+        return getParameterValue(element, depth, ACTIVE, Boolean.class, true)
+            && checkActiveStateFromTokenMaps(uid);
+    }
+
     /*
      * --- < utility functions -------------------------------------------------------------------------------------------------------------
      */
@@ -848,11 +870,9 @@ public class JsonMapper
 
         LOG.trace("");
 
-        Boolean processElement = count < 2 ? true : getParameterValue(element, depth, ACTIVE, Boolean.class, true);
-
         String  uid            = element.getUid() == null ? "random uid" : element.getUid();
 
-        processElement = processElement && checkActiveStateFromTokenMaps(uid);
+        boolean processElement = shouldProcess(element, uid, depth);
 
         if (!processElement)
         {
@@ -903,6 +923,7 @@ public class JsonMapper
             Container result = switch (type)
             {
                 case AUDIO -> transfromAudioContainer(element, depth);
+                case BURGER -> transfromBurgerContainer(element, depth);
                 case BUTTON -> transfromButtonContainer(element, depth);
                 case BUTTON_BAR -> transformButtonBarContainer(element, depth);
                 case BUTTON_ICON -> transformButtonIconContainer(element, depth);
@@ -970,6 +991,60 @@ public class JsonMapper
             .src(src)
             .controls(controls)
             .autoplay(autoplay)
+            .build();
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link BurgerContainer}
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private BurgerContainer transfromBurgerContainer(PseudoElement element, int depth)
+    {
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
+        String              image      = getParameterValue(element, depth, IMAGE, String.class, "/images/burger-menu-icon.svg");
+
+        List<BurgerItem>    items      =
+            element
+                .getChildren()
+                .stream()
+                .map(chld -> transformEntry(chld, depth + 1))
+                .filter(Objects::nonNull)
+                .toList();
+
+        return BurgerContainer
+            .builder()
+            .uid(uid)
+            .classes(classes)
+            .dataAttributes(attributes)
+            .image(image)
+            .items(items)
+            .build();
+    }
+
+    private BurgerItem transformEntry(PseudoElement element, int depth)
+    {
+        String  uid            = element.getUid() == null ? "random uid" : element.getUid();
+        boolean processElement = shouldProcess(element, uid, depth);
+
+        if (!processElement && !element.getType().equalsIgnoreCase("item"))
+        {
+            return null;
+        }
+
+        String image = getParameterValue(element, depth, IMAGE, String.class, DEFAULT_VAL);
+        String url   = getParameterValue(element, depth, "url", String.class);
+        String text  = getParameterValue(element, depth, "text", String.class);
+
+        return BurgerItem
+            .builder()
+            .image(image)
+            .url(url)
+            .text(text)
             .build();
     }
 
@@ -1498,7 +1573,9 @@ public class JsonMapper
 
         LOG.trace("");
 
-        Boolean processElement = getParameterValue(element, depth, ACTIVE, Boolean.class, true);
+        String  uid            = element.getUid() == null ? "random uid" : element.getUid();
+
+        boolean processElement = shouldProcess(element, uid, depth);
 
         if (!processElement)
         {

@@ -40,12 +40,23 @@ public final class DynamicValueUtil
      */
     public <E extends Enum<E>> InputValueList mapSelectionValue(Class<E> enumClass, Locale locale)
     {
-        return mapSelectionValue(
-            Arrays
-                .stream(enumClass.getEnumConstants())
-                .map(e -> e.name())
-                .toList(),
-            locale);
+        InputValueList list          = new InputValueList();
+        String         enumClassName = enumClass.getSimpleName();
+
+        Arrays
+            .stream(enumClass.getEnumConstants())
+            .forEach(enu -> {
+                String text = translationProvider.getText(locale, enumClassName + "." + enu.name());
+
+                list.add(
+                    InputValue
+                        .builder()
+                        .text(text)
+                        .value(enu.name())
+                        .build());
+            });
+
+        return list;
     }
 
     /**

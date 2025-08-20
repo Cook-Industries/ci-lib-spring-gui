@@ -89,6 +89,19 @@ public final class GUIFactory
     }
 
     /**
+     * Create a {@link Locale} from a {@code lang_country} {@link String}.
+     * 
+     * @param language to transform
+     * @return a {@code Locale} object
+     */
+    public Locale createLocale(String language)
+    {
+        String langSplit[] = language.split("_");
+
+        return new Locale(langSplit[0], langSplit[1]);
+    }
+
+    /**
      * Get a translation to an id.
      * 
      * @param language to use

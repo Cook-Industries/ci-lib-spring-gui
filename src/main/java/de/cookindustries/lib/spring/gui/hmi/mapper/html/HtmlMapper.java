@@ -136,6 +136,7 @@ public final class HtmlMapper
         return switch (container.getType())
         {
             case AUDIO -> render((AudioContainer) container);
+            case BURGER -> render((BurgerContainer) container);
             case BUTTON -> render((Button) container);
             case BUTTON_BAR -> render((ButtonBarContainer) container);
             case BUTTON_ICON -> render((ButtonIcon) container);
@@ -159,6 +160,85 @@ public final class HtmlMapper
     {
         // TODO: implement
         return elementNotYetImplemented("audio");
+    }
+
+    private String render(BurgerContainer burger)
+    {
+        List<String> items         =
+            burger
+                .getItems()
+                .stream()
+                .map(item -> HtmlElement
+                    .builder()
+                    .tag(TAG_DIV)
+                    .clazz("burger-item")
+                    .dataAttribute("burger-url", item.getUrl())
+                    .content(
+                        HtmlElement
+                            .builder()
+                            .tag(TAG_DIV)
+                            .clazz("burger-icon-slot")
+                            .content(
+                                HtmlElement
+                                    .builder()
+                                    .tag("img")
+                                    .isSingleTag(true)
+                                    .clazz("burger-icon-slot")
+                                    .attribute(
+                                        Attribute
+                                            .builder()
+                                            .name(ATT_SRC)
+                                            .value(item.getImage())
+                                            .build())
+                                    .inactive(item.getImage() == null || item.getImage().isBlank())
+                                    .build()
+                                    .html())
+                            .build()
+                            .html())
+                    .content(
+                        HtmlElement
+                            .builder()
+                            .tag(TAG_DIV)
+                            .clazz("burger-text")
+                            .content(item.getText())
+                            .build()
+                            .html())
+                    .build()
+                    .html())
+                .toList();
+
+        HtmlElement  elementMapper =
+            HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .clazz("burger-menu")
+                .classes(burger.getClasses())
+                .dataAttributes(burger.getDataAttributes())
+                .content(
+                    HtmlElement
+                        .builder()
+                        .tag("img")
+                        .isSingleTag(true)
+                        .clazz("burger-icon")
+                        .attribute(
+                            Attribute
+                                .builder()
+                                .name(ATT_SRC)
+                                .value(burger.getImage())
+                                .build())
+                        .build()
+                        .html())
+                .content(
+                    HtmlElement
+                        .builder()
+                        .tag(TAG_DIV)
+                        .clazz("burger-dropdown")
+                        .contents(items)
+                        .build()
+                        .html())
+                .build();
+
+        return elementMapper.html();
     }
 
     private String render(Button button)
