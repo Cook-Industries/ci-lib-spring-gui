@@ -108,6 +108,7 @@ public class JsonMapper
         {
             ContainerType.AUDIO,
             ContainerType.BUTTON,
+            ContainerType.BURGER,
             ContainerType.BUTTON_BAR,
             ContainerType.BUTTON_ICON,
             ContainerType.CONTENT,
@@ -1547,7 +1548,7 @@ public class JsonMapper
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
         String              text       = getParameterValue(element, depth, TEXT, String.class);
-        Integer             size       = getParameterValue(element, depth, "level", Integer.class, Integer.valueOf(1));
+        Integer             size       = getParameterValue(element, depth, "size", Integer.class, Integer.valueOf(1));
 
         size = size < 0
             ? 1
