@@ -1533,6 +1533,7 @@ public final class HtmlMapper
                 .clazz("text-preserve-newline")
                 .classes(textbox.getClasses())
                 .dataAttributes(textbox.getDataAttributes())
+                .dataAttribute("tooltip", textbox.getTooltip().isBlank() ? null : textbox.getTooltip())
                 .content(textbox.getValue())
                 .build();
 

@@ -114,7 +114,7 @@
                 "justify-content": "center",
                 "align-items": "center",
                 "position": "fixed",
-                "z-index": "499",
+                "z-index": "2147000000",
                 "top": "0px",
                 "left": "0px",
                 "width": "100%",
@@ -308,7 +308,7 @@
                 "top": "0",
                 "bottom": "0",
                 "right": "0",
-                "z-index": "400",
+                "z-index": "2000000000",
                 "background": "var(--ci-bgc-overlay-backdrop)"
             }
         },
@@ -428,63 +428,16 @@
             }
         },
         {
-            "selector": ".input-tooltip",
+            "selector": ".on-hover-tooltip",
             "attributes": {
-                "position": "relative",
-                "display": "inline-block",
-                "cursor": "help"
-            }
-        },
-        {
-            "selector": ".input-tooltip span",
-            "attributes": {
-                "display": "none",
-                "position": "absolute",
-                "margin": "1rem",
-                "padding": "1rem",
+                "position": "fixed",
+                "padding": "6px 10px",
+                "background": "#333",
+                "color": "#fff",
+                "border-radius": "4px",
                 "white-space": "nowrap",
-                "background-color": "var(--ci-bgc-nightblue)",
-                "border": "solid .1rem black",
-                "border-radius": ".5rem",
-                "box-shadow": ".5rem .5rem 1rem var(--ci-bgc-overlay-backdrop)"
-            }
-        },
-        {
-            "selector": ".input-tooltip:hover span",
-            "attributes": {
-                "display": "block"
-            }
-        },
-        {
-            "selector": ".input-tooltip-top span",
-            "attributes": {
-                "bottom": "125%",
-                "left": "50%",
-                "transform": "translateX(-50%)"
-            }
-        },
-        {
-            "selector": ".input-tooltip-right span",
-            "attributes": {
-                "top": "50%",
-                "left": "125%",
-                "transform": "translateY(-50%)"
-            }
-        },
-        {
-            "selector": ".input-tooltip-bottom span",
-            "attributes": {
-                "top": "125%",
-                "left": "50%",
-                "transform": "translateX(-50%)"
-            }
-        },
-        {
-            "selector": ".input-tooltip-left span",
-            "attributes": {
-                "top": "50%",
-                "right": "125%",
-                "transform": "translateY(-50%)"
+                "z-index": "9999",
+                "display": "none"
             }
         },
         {

@@ -54,7 +54,7 @@ $(document).ready(function () {
     updateButton(btnId);
   });
 
-  // trigger hover on tooltips
+  // trigger hover on input field icons
   $(document).on('mouseenter mouseleave', '.tooltip-container', function (e) {
     const $tooltip = $(this).find('.tooltip-text');
 
@@ -81,6 +81,55 @@ $(document).ready(function () {
       GET(url);
     }
   });
+
+  $(document).on("mouseenter", "[data-tooltip]", function (e) {
+    const text = $(this).data("tooltip");
+    const tooltip = $("<div class='on-hover-tooltip'></div>").text(text);
+
+    $("body").append(tooltip);
+
+    console.log(tooltip);
+
+    tooltip.css({
+      "z-index": 1000 + 200 * openModals
+    });
+
+    const updatePosition = (ev) => {
+      const vw = $(window).width();
+      const vh = $(window).height();
+      const cx = vw / 2;
+      const cy = vh / 2;
+      const offset = 12;
+
+      let top, left;
+
+      // Horizontal: left or right of cursor based on viewport center
+      left = ev.clientX < cx
+        ? ev.clientX + offset
+        : ev.clientX - tooltip.outerWidth() - offset;
+
+      // Vertical: above or below cursor
+      top = ev.clientY < cy
+        ? ev.clientY + offset
+        : ev.clientY - tooltip.outerHeight() - offset;
+
+      // Clamp inside viewport
+      left = Math.max(5, Math.min(left, vw - tooltip.outerWidth() - 5));
+      top = Math.max(5, Math.min(top, vh - tooltip.outerHeight() - 5));
+
+      tooltip.css({ top, left });
+    };
+
+    updatePosition(e);
+    tooltip.fadeIn(150);
+
+    $(this).on("mousemove.on-hover-tooltip", updatePosition);
+
+  }).on("mouseleave", "[data-tooltip]", function () {
+    $(".on-hover-tooltip").remove();
+    $(this).off("mousemove.on-hover-tooltip");
+  });
+
 
   // close modal on esc button press
   $(document).on("keydown", function (e) {
