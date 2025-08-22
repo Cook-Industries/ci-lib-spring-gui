@@ -701,15 +701,24 @@
             "selector": ".burger-menu",
             "attributes": {
                 "position": "relative",
-                "display": "inline-block"
+                "display": "inline-block",
+                "margin": "0.5rem",
+                "border-radius": "0.5rem",
+                "max-width": "fit-content",
+                "max-height": "fit-content"
+            }
+        },
+        {
+            "selector": ".burger-menu:hover",
+            "attributes": {
+                "cursor": "pointer"
             }
         },
         {
             "selector": ".burger-icon",
             "attributes": {
-                "width": "2rem",
-                "height": "2rem",
-                "cursor": "pointer"
+                "width": "2.5rem",
+                "height": "2.5em"
             }
         },
         {
@@ -778,8 +787,7 @@
         {
             "selector": ".burger-text",
             "attributes": {
-                "font-size": "0.875rem",
-                "color": "#333"
+                "color": "black"
             }
         }
     ],

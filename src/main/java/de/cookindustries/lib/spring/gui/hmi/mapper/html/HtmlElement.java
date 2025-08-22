@@ -134,6 +134,7 @@ public final class HtmlElement
         return dataAttributes
             .entrySet()
             .stream()
+            .filter(da -> da.getValue() != null)
             .map(daa -> StringAdapter.prefixAndSuffix("data-", daa.getKey(), "=\"") + StringAdapter.suffix(daa.getValue(), QTM))
             .collect(Collectors.joining(SPACE));
     }

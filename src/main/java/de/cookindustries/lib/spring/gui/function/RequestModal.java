@@ -10,6 +10,10 @@ package de.cookindustries.lib.spring.gui.function;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+/**
+ * @since 3.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
 @Data
 @EqualsAndHashCode(callSuper = false)
 public final class RequestModal extends AbsFunctionCall

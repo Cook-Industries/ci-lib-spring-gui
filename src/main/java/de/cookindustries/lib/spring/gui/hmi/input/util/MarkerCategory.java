@@ -5,7 +5,7 @@
  * <p>
  * See LICENSE file in the project root for full license information.
  */
-package de.cookindustries.lib.spring.gui.hmi.input.marker;
+package de.cookindustries.lib.spring.gui.hmi.input.util;
 
 /**
  * Describes the category to which a marker is bound.

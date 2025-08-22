@@ -7,14 +7,9 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input;
 
-import java.util.List;
-
-import de.cookindustries.lib.spring.gui.hmi.Position;
 import de.cookindustries.lib.spring.gui.hmi.UiElement;
-import de.cookindustries.lib.spring.gui.hmi.input.marker.Marker;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Singular;
 import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 
@@ -29,26 +24,10 @@ public abstract class Input extends UiElement
 
     @NonNull
     @Default
-    private final String       onInput         = "";
-
-    @Singular("marker")
-    private final List<Marker> marker;
-
-    /**
-     * a text for a {@code tooltip} to show on this element triggerd by a onHover-event
-     */
-    @Default
-    private final String       tooltip         = null;
-
-    /**
-     * prefered position of {@code tooltip} in relation to the outer bounding of this {@code Container}
-     */
-    @NonNull
-    @Default
-    private final Position     tooltipPosition = Position.TOP;
+    private final String    onInput = "";
 
     @NonNull
-    private final InputType    type            = inferType();
+    private final InputType type    = inferType();
 
     protected abstract InputType inferType();
 }

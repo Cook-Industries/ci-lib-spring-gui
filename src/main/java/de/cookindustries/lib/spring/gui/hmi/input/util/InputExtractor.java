@@ -20,8 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import de.cookindustries.lib.spring.gui.hmi.container.FormContainer;
 import de.cookindustries.lib.spring.gui.hmi.input.File;
-import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerCategory;
-import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.NullIgnoreException;
 
 /**

@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 import de.cookindustries.lib.spring.gui.hmi.container.*;
 import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
-import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerCategory;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
+import de.cookindustries.lib.spring.gui.hmi.input.util.MarkerCategory;
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.Data;
@@ -211,6 +211,12 @@ public final class HtmlMapper
             HtmlElement
                 .builder()
                 .tag(TAG_DIV)
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ID)
+                        .value(burger.getUid())
+                        .build())
                 .clazz("burger-menu")
                 .classes(burger.getClasses())
                 .dataAttributes(burger.getDataAttributes())
@@ -344,6 +350,7 @@ public final class HtmlMapper
                 .clazz(buttonIcon.getBtnClass().getClassName())
                 .classes(buttonIcon.getClasses())
                 .dataAttributes(buttonIcon.getDataAttributes())
+                .dataAttribute("tooltip", buttonIcon.getTooltip().isBlank() ? null : buttonIcon.getTooltip())
                 .build();
 
         return elementMapper.html();
@@ -463,6 +470,7 @@ public final class HtmlMapper
                         .build())
                 .classes(imageContainer.getClasses())
                 .dataAttributes(imageContainer.getDataAttributes())
+                .dataAttribute("tooltip", imageContainer.getTooltip().isBlank() ? null : imageContainer.getTooltip())
                 .build();
 
         return elementMapper.html();
@@ -501,6 +509,7 @@ public final class HtmlMapper
                         .build())
                 .classes(linkContainer.getClasses())
                 .dataAttributes(linkContainer.getDataAttributes())
+                .dataAttribute("tooltip", linkContainer.getTooltip().isBlank() ? null : linkContainer.getTooltip())
                 .content(render(linkContainer.getContent()))
                 .build();
 
@@ -738,6 +747,7 @@ public final class HtmlMapper
                         .build())
                 .classes(textContainer.getClasses())
                 .dataAttributes(textContainer.getDataAttributes())
+                .dataAttribute("tooltip", textContainer.getTooltip().isBlank() ? null : textContainer.getTooltip())
                 .content(textContainer.getText())
                 .build();
 
@@ -765,6 +775,7 @@ public final class HtmlMapper
                         .build())
                 .classes(textHeaderContainer.getClasses())
                 .dataAttributes(textHeaderContainer.getDataAttributes())
+                .dataAttribute("tooltip", textHeaderContainer.getTooltip().isBlank() ? null : textHeaderContainer.getTooltip())
                 .content(textHeaderContainer.getText())
                 .build();
 
@@ -812,6 +823,7 @@ public final class HtmlMapper
                     .build())
             .clazz(formClass)
             .clazz(CLASS_USER_SELECT_NONE)
+            .dataAttribute("tooltip", input.getTooltip().isBlank() ? null : input.getTooltip())
             .content(input.getName())
             .build();
     }
@@ -1567,21 +1579,53 @@ public final class HtmlMapper
             input);
     }
 
+    /**
+     * Create {@code warning icon} for an input field.
+     * 
+     * @param formId to which this field belongs for identifiaction
+     * @param submitId of the field for identification
+     * @return the resolved icon
+     */
     private String resolveWarningIcon(String formId, String submitId)
     {
         return resolveIcon(formId, submitId, MarkerCategory.WARNING.name().toLowerCase(), "/images/alert-triangle-warning.svg", null, null);
     }
 
+    /**
+     * Create {@code error icon} for an input field.
+     * 
+     * @param formId to which this field belongs for identifiaction
+     * @param submitId of the field for identification
+     * @return the resolved icon
+     */
     private String resolveErrorIcon(String formId, String submitId)
     {
         return resolveIcon(formId, submitId, MarkerCategory.ERROR.name().toLowerCase(), "/images/alert-triangle-error.svg", null, null);
     }
 
+    /**
+     * Create {@code info icon} for an input field.
+     * 
+     * @param formId to which this field belongs for identifiaction
+     * @param submitId of the field for identification
+     * @return the resolved icon
+     */
     private String resolveInfoIcon(String formId, String submitId, String text, String url)
     {
         return resolveIcon(formId, submitId, "info", "/images/alert-circle.svg", text, url);
     }
 
+    /**
+     * Resolve a generic icon.
+     * 
+     * @param formId to which this field belongs for identifiaction
+     * @param submitId of the field for identification
+     * @param type of the icon
+     * @param image of the icon
+     * @param text of the tooltip
+     * @param url for info-fetch
+     * @return the resolved icon
+     */
     private String resolveIcon(String formId, String submitId, String type, String image, String text, String url)
     {
         String                         id       = "input-icon-" + formId + "-" + type + "-" + submitId;

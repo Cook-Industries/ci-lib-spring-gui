@@ -67,12 +67,6 @@ public class PseudoElement
     private final Map<String, String> parameters;
 
     /**
-     * Marker for interactive messaging
-     */
-    @Singular("mark")
-    private final List<PseudoMarker>  marker;
-
-    /**
      * Children of this element
      */
     @Singular

@@ -5,7 +5,7 @@
  * <p>
  * See LICENSE file in the project root for full license information.
  */
-package de.cookindustries.lib.spring.gui.hmi.input.marker;
+package de.cookindustries.lib.spring.gui.hmi.input.util;
 
 /**
  * Defines types of states in which a value can be

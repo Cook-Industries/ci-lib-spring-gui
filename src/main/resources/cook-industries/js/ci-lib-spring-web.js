@@ -634,9 +634,8 @@ function openModal(modalHtml) {
 
   $("#modal-container").removeClass(CLASS_HIDDEN);
   $(`#modal-overlay-${openModals}`).removeClass(CLASS_HIDDEN);
+  $(`#modal-overlay-${openModals}`).css("z-index", 1000 + 100 * openModals);
   $('#modal-container .modal-inlay').last().find('input:visible').first().focus();
-
-  console.log("input:", $('#modal-container .modal-inlay').last().find('input:visible').first())
 
   $("body").addClass("no-scroll");
 

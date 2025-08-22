@@ -21,7 +21,7 @@ import lombok.experimental.SuperBuilder;
  * This abstract class describes a {@code POJO} that can be mapped to key-value pairs in a {@link Map}.
  * <p>
  * Objects of this type should only have flat variable types, no {@code List} or {@code Array} structures. This limitation is based in the
- * fact that a transfomation in the {@link FlatMappableDissector} cannot resolve {@code List} or {@code Array} objects to a viable flattened
+ * fact that a transfomation by {@link FlatMappableDissector} cannot resolve {@code List} or {@code Array} objects to a viable flattened
  * structure which would be usable in a nested-loop.
  * <p>
  * {@code Map}s and nested {@code Object}s are allowed. Their variables will be constructed with a prefix of the variable name in this class

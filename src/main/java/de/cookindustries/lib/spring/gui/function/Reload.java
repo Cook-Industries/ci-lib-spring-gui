@@ -11,9 +11,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * Static base function to close the top most modal
- * 
- * @since 1.0.0
+ * @since 3.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Data

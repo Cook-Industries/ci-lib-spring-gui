@@ -23,9 +23,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
-import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerCategory;
-import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
-
 class InputExtractorTest
 {
 

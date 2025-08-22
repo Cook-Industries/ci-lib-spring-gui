@@ -12,6 +12,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.Data;
 
+/**
+ * @since 3.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
 @Data
 public abstract class AbsFunctionArgs
 {

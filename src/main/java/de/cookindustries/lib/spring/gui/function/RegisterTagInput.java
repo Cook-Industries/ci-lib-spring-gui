@@ -7,6 +7,10 @@
  */
 package de.cookindustries.lib.spring.gui.function;
 
+/**
+ * @since 3.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
 public class RegisterTagInput extends AbsFunctionCall
 {
 

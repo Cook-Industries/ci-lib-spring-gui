@@ -7,8 +7,6 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input.util;
 
-import de.cookindustries.lib.spring.gui.hmi.input.marker.MarkerType;
-
 /**
  * Type definition for {@link InputCheckResult}.
  * 

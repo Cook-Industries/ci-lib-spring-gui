@@ -12,6 +12,12 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * A simple object holding a translated link element {@link String}.
+ * 
+ * @since 3.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
 @SuperBuilder
 @Getter
 public final class TranslatedLinkElement extends FlatMappable
