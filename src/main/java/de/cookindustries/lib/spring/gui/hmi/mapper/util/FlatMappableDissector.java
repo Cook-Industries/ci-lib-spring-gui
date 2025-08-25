@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
+import jakarta.annotation.PostConstruct;
 
 /**
  * A {@code Service} to dissect {@link FlatMappable} objects to use them in a repetition instantiation of {@code Components}.
@@ -32,9 +33,11 @@ import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 public final class FlatMappableDissector
 {
 
+    private static final Logger          LOG                   = LoggerFactory.getLogger(FlatMappableDissector.class);
+
     private static final String          TRANSLATION_INDICATOR = "$$";
 
-    private static final Logger          LOG                   = LoggerFactory.getLogger(FlatMappableDissector.class);
+    private static FlatMappableDissector holder;
 
     private final ObjectMapper           objectMapper;
     private final AbsTranslationProvider translationProvider;
@@ -46,6 +49,17 @@ public final class FlatMappableDissector
     {
         this.objectMapper = new ObjectMapper();
         this.translationProvider = translationProvider;
+    }
+
+    @PostConstruct
+    public void init()
+    {
+        holder = this;
+    }
+
+    static FlatMappableDissector instance()
+    {
+        return holder;
     }
 
     /**

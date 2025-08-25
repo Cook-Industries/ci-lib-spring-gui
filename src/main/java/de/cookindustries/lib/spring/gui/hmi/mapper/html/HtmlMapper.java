@@ -646,7 +646,7 @@ public final class HtmlMapper
                                                return HtmlElement
                                                    .builder()
                                                    .tag(TAG_DIV)
-                                                   .clazz("table-head-cell")
+                                                   .clazz("table-cell")
                                                    .content(name)
                                                    .build()
                                                    .html();
@@ -687,7 +687,6 @@ public final class HtmlMapper
                         .name(ATT_ID)
                         .value(table.getUid())
                         .build())
-                .clazz("table")
                 .classes(table.getClasses())
                 .dataAttributes(table.getDataAttributes())
                 .content(tableHead.html())
@@ -703,7 +702,14 @@ public final class HtmlMapper
             row
                 .getCells()
                 .stream()
-                .map(tr -> render(tr))
+                .map(
+                    tr -> HtmlElement
+                        .builder()
+                        .tag(TAG_DIV)
+                        .clazz("table-cell")
+                        .content(render(tr))
+                        .build()
+                        .html())
                 .toList();
 
         HtmlElement  elementMapper =

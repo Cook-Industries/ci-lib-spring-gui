@@ -26,7 +26,6 @@ import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.MapperResult;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableDissector;
-import de.cookindustries.lib.spring.gui.hmi.mapper.util.TokenMap;
 import de.cookindustries.lib.spring.gui.html.CssClass;
 import de.cookindustries.lib.spring.gui.html.HeadTitle;
 import de.cookindustries.lib.spring.gui.html.CSSLink;
@@ -114,17 +113,62 @@ public final class GUIFactory
     }
 
     /**
-     * Create a HTML website based on the standard imports added with user imports
+     * Read a template and transform into a {@link Container}
+     * 
+     * @param compSrc aggregator for settings
+     * @return the parsed {@code Container}
+     */
+    private MapperResult readComponent(ComponentSources compSrc)
+    {
+        try
+        {
+            JsonMapper mapper =
+                JsonMapper
+                    .builder()
+                    .templateFileCache(templateFileCache)
+                    .translationProvider(translationProvider)
+                    .flatMappableDissector(flatMappableDissector)
+                    .path(compSrc.getSourcePath())
+                    .locale(compSrc.getLocale())
+                    .tokenMaps(compSrc.getTokenMaps())
+                    .build();
+
+            return mapper.map();
+        }
+        catch (Exception ex)
+        {
+            throw new JsonMapperException(String.format("error building gui component [%s]", compSrc.getSourcePath()), ex);
+        }
+    }
+
+    /**
+     * Create a HTML site from a content template.
      * 
      * @param title of the website
-     * @param imports defined by the user
-     * @param content to set
+     * @param compSrc aggregator for settings
      * @return a {@code HTML} {@code String} to render a website by a browser
      */
-    private String createHtmlSite(String title, SiteImports imports, Locale locale, List<Container> content,
-        List<AbsFunctionCall> initFunctions)
+    public String createHtmlSite(String title, ComponentSources compSrc)
     {
-        String resolvedTitle = translationProvider.getText(locale, title);
+        return createHtmlSite(title, EMPTY_IMPORTS, compSrc);
+    }
+
+    /**
+     * Create a HTML site from a content template.
+     * 
+     * @param title of the website
+     * @param imports to include
+     * @param compSrc aggregator for settings
+     * @return a {@code HTML} {@code String} to render a website by a browser
+     */
+    public String createHtmlSite(String title, SiteImports imports, ComponentSources compSrc)
+    {
+        MapperResult          result = readComponent(compSrc);
+        List<AbsFunctionCall> calls  = new ArrayList<>();
+        calls.addAll(result.getFunctions());
+        calls.addAll(compSrc.getFunctionCalls());
+
+        String resolvedTitle = translationProvider.getText(compSrc.getLocale(), title);
 
         return HtmlSite.builder()
             .header(new HeadTitle(resolvedTitle.startsWith("I18N") ? title : resolvedTitle))
@@ -199,142 +243,26 @@ public final class GUIFactory
                     .builder()
                     .uid("popup-holder")
                     .build())
-            .containers(content)
-            .functions(initFunctions)
+            .containers(result.getContainers())
+            .functions(calls)
             .build()
             .getHtmlRep();
     }
 
     /**
-     * Read a template and transform into a {@link Container}
+     * Create a {@link ContentResponse} from a template to append or replace existing content on a receiver.
      * 
-     * @param resourcePath to load template from
-     * @return the parsed {@code Container}
-     */
-    public MapperResult readComponent(String resourcePath)
-    {
-        return readComponent(resourcePath, Locale.ENGLISH, List.of());
-    }
-
-    /**
-     * Read a template and transform into a {@link Container}
-     * 
-     * @param resourcePath to load template from
-     * @param locale to fetch translated text with
-     * @return the parsed {@code Container}
-     */
-    public MapperResult readComponent(String resourcePath, Locale locale)
-    {
-        return readComponent(resourcePath, locale, List.of());
-    }
-
-    /**
-     * Read a template and transform into a {@link Container}
-     * 
-     * @param resourcePath to load template from
-     * @param locale to fetch translated text with
-     * @param valueMaps dynamic {@code valueMap}s
-     * @return the parsed {@code Container}
-     */
-    public MapperResult readComponent(String resourcePath, Locale locale, List<TokenMap> valueMaps)
-    {
-        try
-        {
-            JsonMapper mapper =
-                JsonMapper
-                    .builder()
-                    .templateFileCache(templateFileCache)
-                    .translationProvider(translationProvider)
-                    .flatMappableDissector(flatMappableDissector)
-                    .path(resourcePath)
-                    .locale(locale)
-                    .tokenMaps(valueMaps)
-                    .build();
-
-            return mapper.map();
-        }
-        catch (Exception ex)
-        {
-            throw new JsonMapperException(String.format("error building gui component [%s]", resourcePath), ex);
-        }
-    }
-
-    /**
-     * Create a HTML site from a content template.
-     * 
-     * @param title of the website
-     * @param resourcePath to the static component template
-     * @return a {@code HTML} {@code String} to render a website by a browser
-     */
-    public String createHtmlSite(String resourcePath, String title, AbsFunctionCall... initCalls)
-    {
-        return createHtmlSite(title, EMPTY_IMPORTS, resourcePath, Locale.ENGLISH, List.of(), initCalls);
-    }
-
-    /**
-     * Create a HTML site from a content template.
-     * 
-     * @param title of the website
-     * @param imports to include
-     * @param resourcePath to load template from
-     * @return a {@code HTML} {@code String} to render a website by a browser
-     */
-    public String createHtmlSite(String resourcePath, String title, SiteImports imports, AbsFunctionCall... initCalls)
-    {
-        return createHtmlSite(title, imports, resourcePath, Locale.ENGLISH, List.of(), initCalls);
-    }
-
-    /**
-     * Create a HTML site from a content template.
-     * 
-     * @param title of the website
-     * @param imports to include
-     * @param resourcePath to load template from
-     * @return a {@code HTML} {@code String} to render a website by a browser
-     */
-    public String createHtmlSite(String resourcePath, String title, SiteImports imports, Locale locale, AbsFunctionCall... initCalls)
-    {
-        return createHtmlSite(title, imports, resourcePath, locale, List.of(), initCalls);
-    }
-
-    /**
-     * Create a HTML site from a content template.
-     * 
-     * @param title of the website
-     * @param imports to include
-     * @param resourcePath to load template from
-     * @param locale to fetch translations with
-     * @param valueMaps to fetch dynamic values from
-     * @return a {@code HTML} {@code String} to render a website by a browser
-     */
-    public String createHtmlSite(String title, SiteImports imports, String resourcePath, Locale locale,
-        List<TokenMap> valueMaps, AbsFunctionCall... initCalls)
-    {
-        MapperResult          result = readComponent(resourcePath, locale, valueMaps);
-        List<AbsFunctionCall> calls  = new ArrayList<>();
-        calls.addAll(result.getFunctions());
-        calls.addAll(Arrays.asList(initCalls));
-
-        return createHtmlSite(title, imports, locale, result.getContainers(), calls);
-    }
-
-    /**
-     * Create a {@link ContentResponse} from a static template to append or replace existing content on a receiver and perform function
-     * calls.
-     * 
-     * @param resourcePath to load template from
      * @param elementId to append/replace content in
      * @param replace whether the content should be appende (false), or replaced (true)
-     * @param initCalls to perform on the receiver
+     * @param compSrc aggregator for settings
      * @return a response with the processed content
      */
-    public ContentResponse createComponentResponse(String resourcePath, String elementId, Boolean replace,
-        AbsFunctionCall... initCalls)
+    public ContentResponse createComponentResponse(String elementId, Boolean replace, ComponentSources compSrc)
     {
-        MapperResult          result = readComponent(resourcePath);
+        MapperResult          result = readComponent(compSrc);
         List<AbsFunctionCall> calls  = new ArrayList<>();
         calls.addAll(result.getFunctions());
-        calls.addAll(Arrays.asList(initCalls));
+        calls.addAll(compSrc.getFunctionCalls());
 
         return ContentResponse
             .builder()
@@ -346,76 +274,22 @@ public final class GUIFactory
                     .build())
             .calls(calls)
             .replace(replace)
-            .build();
-    }
-
-    /**
-     * Create a {@link ContentResponse} from a dynamic template to append or replace existing content on a receiver.
-     * 
-     * @param resourcePath to the dynamic component template
-     * @param locale to fetch translations with
-     * @param elementId to append/replace content in
-     * @param replace whether the content should be appende (false), or replaced (true)
-     * @param valueMaps to fetch dynamic values from
-     * @param initCalls to perform on the receiver
-     * @return a response with the processed content
-     */
-    public ContentResponse createComponentResponse(String resourcePath, Locale locale, String elementId, Boolean replace,
-        List<TokenMap> valueMaps, AbsFunctionCall... initCalls)
-    {
-        MapperResult          result = readComponent(resourcePath, locale, valueMaps);
-        List<AbsFunctionCall> calls  = new ArrayList<>();
-        calls.addAll(result.getFunctions());
-        calls.addAll(Arrays.asList(initCalls));
-
-        return ContentResponse
-            .builder()
-            .elementId(elementId)
-            .content(
-                ContentContainer
-                    .builder()
-                    .contents(result.getContainers())
-                    .build())
-            .calls(calls)
-            .replace(replace)
-            .build();
-    }
-
-    /**
-     * Create a {@link ModalResponse} from a static template.
-     * 
-     * @param resourcePath to load template from
-     * @return a response with the processed content
-     */
-    public ModalResponse createModalResponse(String resourcePath)
-    {
-        MapperResult   result  = readComponent(resourcePath);
-        ModalContainer content = (ModalContainer) result.getContainers().get(0);
-
-        return ModalResponse
-            .builder()
-            .modal(content)
-            .calls(result.getFunctions())
             .build();
     }
 
     /**
      * Create a {@link ModalResponse} from a dynamic template.
      * 
-     * @param resourcePath to the dynamic component template
-     * @param locale to fetch translations with
-     * @param valueMaps to fetch dynamic values from
-     * @param initCalls to perform on the receiver
+     * @param compSrc aggregator for settings
      * @return a response with the processed content
      */
-    public ModalResponse createModalResponse(String resourcePath, Locale locale, List<TokenMap> valueMaps,
-        AbsFunctionCall... initCalls)
+    public ModalResponse createModalResponse(ComponentSources compSrc)
     {
-        MapperResult          result  = readComponent(resourcePath, locale, valueMaps);
+        MapperResult          result  = readComponent(compSrc);
         ModalContainer        content = (ModalContainer) result.getContainers().get(0);
         List<AbsFunctionCall> calls   = new ArrayList<>();
         calls.addAll(result.getFunctions());
-        calls.addAll(Arrays.asList(initCalls));
+        calls.addAll(compSrc.getFunctionCalls());
 
         return ModalResponse
             .builder()

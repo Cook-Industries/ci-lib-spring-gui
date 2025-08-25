@@ -466,7 +466,7 @@
             }
         },
         {
-            "selector": ".table-head-cell",
+            "selector": ".table-cell",
             "attributes": {
                 "padding": "0.5rem"
             }
@@ -477,7 +477,7 @@
                 "display": "grid",
                 "grid-template-rows": "auto",
                 "grid-auto-flow": "row",
-                "grid-column-gap": "0.25rem",
+                "row-gap": "0.25rem",
                 "overflow-y": "scroll"
             }
         },

@@ -24,7 +24,7 @@ export {
  * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
-const version = "3.0.0";
+const version = "3.0.1";
 
 const CLASS_HIDDEN = "hidden";
 
@@ -82,13 +82,12 @@ $(document).ready(function () {
     }
   });
 
+  // trigger tooltip on hover
   $(document).on("mouseenter", "[data-tooltip]", function (e) {
     const text = $(this).data("tooltip");
     const tooltip = $("<div class='on-hover-tooltip'></div>").text(text);
 
     $("body").append(tooltip);
-
-    console.log(tooltip);
 
     tooltip.css({
       "z-index": 1000 + 200 * openModals
@@ -176,6 +175,7 @@ $(document).ready(function () {
   $(document).on("click", ".burger-item", function () {
     var url = $(this).data("burger-url");
     if (url) {
+      showGlobalLoader();
       POST(url);
     }
   });
@@ -388,7 +388,7 @@ function handleResponse(response) {
       break;
 
     case "MODAL":
-      openModal(response.contentHtml);
+      openModal(response);
       break;
 
     case "CONTENT":
@@ -674,12 +674,12 @@ function submitFromModal() {
  *
  * @returns {undefined}
  */
-function openModal(modalHtml) {
+function openModal(response) {
   openModals++;
 
-  $("#modal-container").append(`<div id="modal-overlay-${openModals}" class="modal-overlay"></div>`);
+  $("#modal-container").append(`<div id="modal-overlay-${openModals}" class="modal-overlay" data-extraction-id=${response.modal.uid} data-server-target=${response.modal.requestUrl}></div>`);
 
-  $(`#modal-overlay-${openModals}`).append(modalHtml);
+  $(`#modal-overlay-${openModals}`).append(response.contentHtml);
 
   $("#modal-container").removeClass(CLASS_HIDDEN);
   $(`#modal-overlay-${openModals}`).removeClass(CLASS_HIDDEN);

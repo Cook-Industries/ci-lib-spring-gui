@@ -12,6 +12,7 @@ import java.util.Map;
 
 import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
+import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Singular;
@@ -97,6 +98,50 @@ public final class TokenMap
     public boolean isUidActive(String uid)
     {
         return !deactivateUids.contains(uid);
+    }
+
+    @Override
+    public String toString()
+    {
+        StringConcat sc = new StringConcat();
+
+        sc
+            .appendnl("TokenMap")
+            .append("presedence:")
+            .appendnl(presedence)
+
+            .appendnl(!values.isEmpty(), "values:")
+            .appendnl(!values.isEmpty(), "-->")
+            .appendnl(!values.isEmpty(), values.entrySet(),
+                entry -> entry.getKey()
+                    + " : "
+                    + String.valueOf(entry.getValue()))
+            .appendnl(!values.isEmpty(), "<--")
+
+            .appendnl(!classes.isEmpty(), "classes:")
+            .appendnl(!classes.isEmpty(), "-->")
+            .appendnl(!classes.isEmpty(), classes.entrySet(),
+                entry -> entry.getKey()
+                    + " : "
+                    + String.valueOf(entry.getValue()))
+            .appendnl(!classes.isEmpty(), "<--")
+
+            .appendnl(!functions.isEmpty(), "functions:")
+            .appendnl(!functions.isEmpty(), "-->")
+            .appendnl(!functions.isEmpty(), functions.entrySet(),
+                entry -> entry.getKey()
+                    + " : "
+                    + entry.getValue().getClass().getSimpleName()
+                    + " > "
+                    + entry.getValue().parseAsJS())
+            .appendnl(!functions.isEmpty(), "<--")
+
+            .appendnl(!deactivateUids.isEmpty(), "deactivated uids:")
+            .appendnl(!deactivateUids.isEmpty(), "-->")
+            .appendnl(!deactivateUids.isEmpty(), deactivateUids, uid -> uid)
+            .appendnl(!deactivateUids.isEmpty(), "<--");
+
+        return sc.toString();
     }
 
 }

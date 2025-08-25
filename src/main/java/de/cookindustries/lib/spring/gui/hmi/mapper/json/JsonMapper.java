@@ -7,6 +7,7 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper.json;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -16,13 +17,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
+import de.cookindustries.lib.spring.gui.function.CloseModal;
 import de.cookindustries.lib.spring.gui.function.RegisterTagInput;
+import de.cookindustries.lib.spring.gui.function.SubmitFromModal;
 import de.cookindustries.lib.spring.gui.hmi.container.*;
 import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
@@ -142,7 +146,7 @@ public class JsonMapper
             ContainerType.LINK,
             ContainerType.TEXT,
             ContainerType.HEADING,
-            ContainerType.BURGER
+            ContainerType.TABLE
         };
 
     @NonNull
@@ -170,11 +174,14 @@ public class JsonMapper
 
     private final List<AbsFunctionCall>            functions                      = new ArrayList<>();
 
-    @Default
-    private final String                           uuid                           = Long.toString(System.currentTimeMillis(), 36);;
+    private final String                           uuid                           = nextId();
 
     @Default
     private Integer                                count                          = 0;
+
+    @NonNull
+    @Default
+    private final ContainerType[]                  globalAllowedTypes             = ContainerType.values();
 
     /**
      * Run the mapping process.
@@ -200,6 +207,15 @@ public class JsonMapper
                     .reversed())
             .toList();
 
+        if (LOG.isTraceEnabled())
+        {
+            tokenMaps
+                .stream()
+                .map(TokenMap::toString)
+                .map(String::lines)
+                .forEach(stream -> stream.forEach(line -> LOG.trace("[{}]: {}", uuid, line)));
+        }
+
         MapperResult result =
             MapperResult
                 .builder()
@@ -218,6 +234,18 @@ public class JsonMapper
     /*
      * --- > utility functions -------------------------------------------------------------------------------------------------------------
      */
+
+    private String nextId()
+    {
+        LocalDate now    = LocalDate.now();
+
+        int       d      = now.getDayOfMonth();
+        int       m      = now.getMonthValue();
+        int       mDigit = (m + 1) / 2;
+        int       rand   = ThreadLocalRandom.current().nextInt(0, 100_000);
+
+        return String.format("%s%s%05d", d, mDigit, rand);
+    }
 
     private Container throwNotSupported(PseudoElement element, int depth)
     {
@@ -625,7 +653,7 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private MapperResult transformInternalComponent(PseudoElement element, int depth)
+    private MapperResult transformInternalComponent(PseudoElement element, int depth, ContainerType... allowedTypes)
     {
         String       indent       = LOG_INDENT_STRING.repeat(depth + 1);
         String       path         = getParameterValue(element, depth, "path", String.class);
@@ -661,6 +689,7 @@ public class JsonMapper
                             .locale(locale)
                             .tokenMaps(tokenMaps)
                             .tokenMap(flatMappableDissector.dissect(src, depth, locale))
+                            .globalAllowedTypes(allowedTypes)
                             .build();
 
                     LOG.trace("[{}]:[{}]:{}map linked component list element [{}] @ [{}]", uuid, depth, indent, internalMapper.uuid, path);
@@ -697,6 +726,7 @@ public class JsonMapper
                         .locale(locale)
                         .tokenMaps(tokenMaps)
                         .tokenMap(flatMappableDissector.dissect(srcElement, depth, locale))
+                        .globalAllowedTypes(allowedTypes)
                         .build();
 
                 LOG.trace("[{}]:[{}]:{}map linked sourced component [{}] @ [{}]", uuid, depth, indent, internalMapper.uuid, path);
@@ -715,6 +745,7 @@ public class JsonMapper
                     .path(path)
                     .locale(locale)
                     .tokenMaps(tokenMaps)
+                    .globalAllowedTypes(allowedTypes)
                     .build();
 
             LOG.trace("[{}]:[{}]:{}map linked component with [{}] @ [{}]", uuid, depth, indent, internalMapper.uuid, path);
@@ -864,7 +895,7 @@ public class JsonMapper
                 switch (internalType)
                 {
                     case COMPONENT:
-                        MapperResult result = transformInternalComponent(element, depth);
+                        MapperResult result = transformInternalComponent(element, depth, allowedTypes);
 
                         functions.addAll(result.getFunctions());
 
@@ -874,7 +905,7 @@ public class JsonMapper
 
             ContainerType type = ContainerType.valueOf(element.getType().toUpperCase());
 
-            if (!Arrays.asList(allowedTypes).contains(type))
+            if (!Arrays.asList(allowedTypes).contains(type) || !Arrays.asList(globalAllowedTypes).contains(type))
             {
                 throw new JsonParsingException(uid, depth, this.count,
                     String.format("container type [%s] is not allowed here", element.getType()));
@@ -1264,7 +1295,7 @@ public class JsonMapper
         Boolean             closeOnOverlayClick     =
             getParameterValue(element, depth, "closeOnOverlayClick", Boolean.class, Boolean.FALSE);
 
-        String              btnNameLeft             = getParameterValue(element, depth, "btnNameLeft", String.class, "");
+        String              btnNameLeft             = getParameterValue(element, depth, "btnNameLeft", String.class, "cancel");
         ButtonClass         btnClassLeft            = ButtonClass.valueOf(
             getParameterValue(element, depth, "btnClassLeft", String.class, "DEFAULT").toUpperCase());
 
@@ -1274,7 +1305,7 @@ public class JsonMapper
         try
         {
             btnFunctionLeft =
-                getParameterValue(element, depth, "btnFunctionLeft", AbsFunctionCall.class);
+                getParameterValue(element, depth, "btnFunctionLeft", AbsFunctionCall.class, new CloseModal());
         }
         catch (JsonParsingException ex)
         {
@@ -1300,7 +1331,7 @@ public class JsonMapper
                 getParameterValue(element, depth, "btnFunctionCenter", String.class, "");
         }
 
-        String          btnNameRight             = getParameterValue(element, depth, "btnNameRight", String.class);
+        String          btnNameRight             = getParameterValue(element, depth, "btnNameRight", String.class, "submit");
         ButtonClass     btnClassRight            = ButtonClass.valueOf(
             getParameterValue(element, depth, "btnClassRight", String.class, "SUCCESS").toUpperCase());
 
@@ -1310,7 +1341,7 @@ public class JsonMapper
         try
         {
             btnFunctionRight =
-                getParameterValue(element, depth, "btnFunctionRight", AbsFunctionCall.class);
+                getParameterValue(element, depth, "btnFunctionRight", AbsFunctionCall.class, new SubmitFromModal());
         }
         catch (JsonParsingException ex)
         {
@@ -1427,7 +1458,7 @@ public class JsonMapper
 
         List<String>        columnNameList =
             Arrays
-                .stream(columnNames.split(" "))
+                .stream(columnNames.split("\\|\\|"))
                 .filter(Objects::nonNull)
                 .map(cn -> handlePossiblePlaceholder(cn, String.class, cn, depth))
                 .toList();
