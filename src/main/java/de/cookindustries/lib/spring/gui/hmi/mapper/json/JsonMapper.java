@@ -181,7 +181,7 @@ public class JsonMapper
 
     @NonNull
     @Default
-    private final ContainerType[]                  globalAllowedTypes             = ContainerType.values();
+    private final ContainerType[]                  depth0AllowedTypes             = ContainerType.values();
 
     /**
      * Run the mapping process.
@@ -689,7 +689,7 @@ public class JsonMapper
                             .locale(locale)
                             .tokenMaps(tokenMaps)
                             .tokenMap(flatMappableDissector.dissect(src, depth, locale))
-                            .globalAllowedTypes(allowedTypes)
+                            .depth0AllowedTypes(allowedTypes)
                             .build();
 
                     LOG.trace("[{}]:[{}]:{}map linked component list element [{}] @ [{}]", uuid, depth, indent, internalMapper.uuid, path);
@@ -726,7 +726,7 @@ public class JsonMapper
                         .locale(locale)
                         .tokenMaps(tokenMaps)
                         .tokenMap(flatMappableDissector.dissect(srcElement, depth, locale))
-                        .globalAllowedTypes(allowedTypes)
+                        .depth0AllowedTypes(allowedTypes)
                         .build();
 
                 LOG.trace("[{}]:[{}]:{}map linked sourced component [{}] @ [{}]", uuid, depth, indent, internalMapper.uuid, path);
@@ -745,7 +745,7 @@ public class JsonMapper
                     .path(path)
                     .locale(locale)
                     .tokenMaps(tokenMaps)
-                    .globalAllowedTypes(allowedTypes)
+                    .depth0AllowedTypes(allowedTypes)
                     .build();
 
             LOG.trace("[{}]:[{}]:{}map linked component with [{}] @ [{}]", uuid, depth, indent, internalMapper.uuid, path);
@@ -905,7 +905,7 @@ public class JsonMapper
 
             ContainerType type = ContainerType.valueOf(element.getType().toUpperCase());
 
-            if (!Arrays.asList(allowedTypes).contains(type) || !Arrays.asList(globalAllowedTypes).contains(type))
+            if (!Arrays.asList(allowedTypes).contains(type) || (depth == 0 && !Arrays.asList(depth0AllowedTypes).contains(type)))
             {
                 throw new JsonParsingException(uid, depth, this.count,
                     String.format("container type [%s] is not allowed here", element.getType()));
@@ -1502,7 +1502,7 @@ public class JsonMapper
 
         for (PseudoElement pe : element.getChildren())
         {
-            cells.addAll(transform(pe, depth, TABLE_ROW_CHILDREN));
+            cells.addAll(transform(pe, depth + 1, TABLE_ROW_CHILDREN));
         }
 
         return TableRowContainer

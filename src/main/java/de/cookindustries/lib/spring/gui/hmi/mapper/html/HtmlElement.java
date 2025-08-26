@@ -96,16 +96,28 @@ public final class HtmlElement
         StringConcat sc = new StringConcat();
 
         sc
-            .append(StringAdapter.prefixAndSuffix(LT, tag, SPACE))
-            .append(getAttributes())
-            .append(SPACE)
-            .append(StringAdapter.prefixAndSuffix("class=\"", StringAdapter.separate(classes, SPACE), QTM))
-            .append(SPACE)
-            .append(getDataAttributes())
-            .append(isSingleTag, GTS)
-            .append(!isSingleTag, GT)
-            .append(!isSingleTag, () -> StringAdapter.from(contents))
-            .append(!isSingleTag, () -> StringAdapter.prefixAndSuffix(LTS, tag, GT));
+            .append(StringAdapter.prefix(LT, tag))
+
+            .append(!attributes.isEmpty(), SPACE)
+            .append(!attributes.isEmpty(), getAttributes())
+
+            .append(!classes.isEmpty(), SPACE)
+            .append(!classes.isEmpty(), StringAdapter.prefixAndSuffix("class=\"", StringAdapter.separate(classes, SPACE), QTM))
+
+            .append(!dataAttributes.isEmpty(), SPACE)
+            .append(!dataAttributes.isEmpty(), getDataAttributes());
+
+        if (isSingleTag)
+        {
+            sc.append(GTS);
+        }
+        else
+        {
+            sc
+                .append(GT)
+                .append(!contents.isEmpty(), () -> StringAdapter.from(contents))
+                .append(StringAdapter.prefixAndSuffix(LTS, tag, GT));
+        }
 
         return sc.toString();
     }

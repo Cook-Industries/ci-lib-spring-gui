@@ -25,6 +25,7 @@ import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
+import de.cookindustries.lib.spring.gui.hmi.mapper.html.HtmlMapper;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableDissector;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.TokenMap;
 import de.cookindustries.lib.spring.gui.hmi.util.TemplateFileCache;
@@ -60,6 +61,25 @@ public class JsonMapperTest
 
         TextContainer text = (TextContainer) container;
         assertTrue(text.getText().startsWith("the creation of this element failed. please refer to the server log. mapper id: "));
+    }
+
+    private boolean countDivTags(String html)
+    {
+        return countTags("div", html);
+    }
+
+    private boolean countTags(String tag, String html)
+    {
+        int count = 0;
+        int index = 0;
+
+        while ((index = html.indexOf(tag, index)) != -1)
+        {
+            count++;
+            index += tag.length();
+        }
+
+        return count % 2 == 0;
     }
 
     @Test
@@ -220,6 +240,9 @@ public class JsonMapperTest
         assertEquals("path/to/resource", audioContainer.getSrc());
         assertEquals(false, audioContainer.getControls());
         assertEquals(true, audioContainer.getAutoplay());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -250,6 +273,9 @@ public class JsonMapperTest
         assertEquals("this is a button", button.getText());
         assertEquals("doShit()", button.getOnClick());
         assertEquals(ButtonClass.SUCCESS, button.getBtnClass());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     // @Test
@@ -317,6 +343,9 @@ public class JsonMapperTest
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
         assertEquals(1, container.getDataAttributes().size());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -342,6 +371,9 @@ public class JsonMapperTest
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
         assertEquals(1, container.getDataAttributes().size());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -367,6 +399,9 @@ public class JsonMapperTest
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
         assertEquals(1, container.getDataAttributes().size());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -395,6 +430,9 @@ public class JsonMapperTest
 
         ImageContainer imageContainer = (ImageContainer) container;
         assertEquals("path/to/resource", imageContainer.getSrc());
+
+        String html = HtmlMapper.map(container);
+        assertFalse(countTags("img", html));
     }
 
     @Test
@@ -424,6 +462,9 @@ public class JsonMapperTest
         LinkContainer linkContainer = (LinkContainer) container;
         assertEquals("link/to/somewhere", linkContainer.getHref());
         assertEquals("_self", linkContainer.getTarget());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -454,6 +495,9 @@ public class JsonMapperTest
         assertNotNull(splittedContainer.getHead());
         assertNotNull(splittedContainer.getTail());
         assertEquals(2, splittedContainer.getCenter().size());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     // @Test
@@ -503,6 +547,9 @@ public class JsonMapperTest
 
         TextContainer textContainer = (TextContainer) container;
         assertEquals("some text", textContainer.getText());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -531,6 +578,9 @@ public class JsonMapperTest
         Checkbox checkbox = (Checkbox) input;
         assertEquals("name", checkbox.getName());
         assertEquals("checkbox", checkbox.getSubmitAs());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -559,6 +609,9 @@ public class JsonMapperTest
         Currency currency = (Currency) input;
         assertEquals("name", currency.getName());
         assertEquals("currency", currency.getSubmitAs());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -587,6 +640,9 @@ public class JsonMapperTest
         Date date = (Date) input;
         assertEquals("name", date.getName());
         assertEquals("date", date.getSubmitAs());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -615,6 +671,9 @@ public class JsonMapperTest
         File file = (File) input;
         assertEquals("name", file.getName());
         assertEquals("file", file.getSubmitAs());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -642,6 +701,9 @@ public class JsonMapperTest
 
         Hidden hidden = (Hidden) input;
         assertEquals("hidden", hidden.getSubmitAs());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -670,6 +732,9 @@ public class JsonMapperTest
         Link link = (Link) input;
         assertEquals("link", link.getText());
         assertEquals("link/to/somewhere", link.getHref());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -698,6 +763,9 @@ public class JsonMapperTest
         Number number = (Number) input;
         assertEquals("name", number.getName());
         assertEquals("number", number.getSubmitAs());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -726,6 +794,9 @@ public class JsonMapperTest
         Password password = (Password) input;
         assertEquals("name", password.getName());
         assertEquals("password", password.getSubmitAs());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -755,6 +826,9 @@ public class JsonMapperTest
         assertEquals("name", radio.getName());
         assertEquals("radio", radio.getSubmitAs());
         assertEquals(2, radio.getValues().size());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -806,6 +880,9 @@ public class JsonMapperTest
         assertEquals("name", select2.getName());
         assertEquals("select2", select2.getSubmitAs());
         assertEquals(1, select2.getValues().size());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -834,6 +911,9 @@ public class JsonMapperTest
         Slider slider = (Slider) input;
         assertEquals("name", slider.getName());
         assertEquals("slider", slider.getSubmitAs());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -862,6 +942,9 @@ public class JsonMapperTest
         Switch switchi = (Switch) input;
         assertEquals("name", switchi.getName());
         assertEquals("switch", switchi.getSubmitAs());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -890,6 +973,9 @@ public class JsonMapperTest
         Textarea textarea = (Textarea) input;
         assertEquals("name", textarea.getName());
         assertEquals("textarea", textarea.getSubmitAs());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -914,6 +1000,9 @@ public class JsonMapperTest
         FormContainer form      = (FormContainer) container;
         Input         input     = form.getInputs().get(0);
         assertEquals(Textbox.class, input.getClass());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 
     @Test
@@ -942,5 +1031,8 @@ public class JsonMapperTest
         Textfield textfield = (Textfield) input;
         assertEquals("name", textfield.getName());
         assertEquals("textfield", textfield.getSubmitAs());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(countDivTags(html));
     }
 }

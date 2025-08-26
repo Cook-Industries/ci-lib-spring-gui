@@ -18,7 +18,6 @@ import de.cookindustries.lib.spring.gui.hmi.input.Number;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.MarkerCategory;
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
-import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.Data;
 
 /**
@@ -94,16 +93,15 @@ public final class HtmlMapper
      * @param containers to map
      * @return resulting HTML String, containing all mappings one after the other
      */
-    public static String map(List<Container> containers)
+    public static List<String> map(List<Container> containers)
     {
-        HtmlMapper   mapper = new HtmlMapper();
-        StringConcat sc     = new StringConcat();
+        HtmlMapper mapper = new HtmlMapper();
 
-        containers
+        return containers
             .stream()
-            .forEach(c -> sc.append(mapper.render(c)));
+            .map(mapper::render)
+            .toList();
 
-        return sc.toString();
     }
 
     /**
@@ -449,6 +447,7 @@ public final class HtmlMapper
             HtmlElement
                 .builder()
                 .tag("img")
+                .isSingleTag(true)
                 .attribute(
                     Attribute
                         .builder()
