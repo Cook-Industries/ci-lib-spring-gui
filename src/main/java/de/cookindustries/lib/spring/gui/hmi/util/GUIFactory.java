@@ -267,11 +267,7 @@ public final class GUIFactory
         return ContentResponse
             .builder()
             .elementId(elementId)
-            .content(
-                ContentContainer
-                    .builder()
-                    .contents(result.getContainers())
-                    .build())
+            .contents(result.getContainers())
             .calls(calls)
             .replace(replace)
             .build();

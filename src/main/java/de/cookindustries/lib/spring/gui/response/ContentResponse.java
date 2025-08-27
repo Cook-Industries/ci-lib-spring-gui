@@ -7,11 +7,14 @@
  */
 package de.cookindustries.lib.spring.gui.response;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
 import de.cookindustries.lib.spring.gui.hmi.mapper.html.HtmlMapper;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Singular;
 import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
@@ -26,28 +29,27 @@ import lombok.extern.jackson.Jacksonized;
 public class ContentResponse extends Response
 {
 
-    public static final String LOADABLE  = "loadable-content";
+    public static final String    LOADABLE  = "loadable-content";
 
     /**
      * Element id to place content in
      */
     @NonNull
     @Default
-    private final String       elementId = LOADABLE;
+    private final String          elementId = LOADABLE;
 
     /**
-     * {@link Container} to be sent
+     * {@link Container}s to be sent
      */
-    @NonNull
-    @Getter(value = AccessLevel.NONE)
-    private final Container    content;
+    @Singular
+    private final List<Container> contents;
 
     /**
      * Whether or not this content should be replace the old content or be appended to it
      */
     @NonNull
     @Default
-    private final Boolean      replace   = false;
+    private final Boolean         replace   = false;
 
     @Override
     protected ResponseAction inferType()
@@ -57,7 +59,7 @@ public class ContentResponse extends Response
 
     public String getContentHtml()
     {
-        return HtmlMapper.map(content);
+        return HtmlMapper.map(contents).stream().collect(Collectors.joining("\n"));
     }
 
 }

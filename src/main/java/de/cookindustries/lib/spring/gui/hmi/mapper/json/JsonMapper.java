@@ -1463,7 +1463,10 @@ public class JsonMapper
                 .map(cn -> handlePossiblePlaceholder(cn, String.class, cn, depth))
                 .toList();
 
-        LOG.warn("number of columns for table [{}] differ [{}/{}]", name, columnNameList.size(), numOfColumns);
+        if (!numOfColumns.equals(columnNameList.size()))
+        {
+            LOG.warn("number of columns for table [{}] differ [{}/{}]", name, columnNameList.size(), numOfColumns);
+        }
 
         List<Container> rows = new ArrayList<>();
 

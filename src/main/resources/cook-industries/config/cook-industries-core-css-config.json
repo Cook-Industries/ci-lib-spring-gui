@@ -27,9 +27,10 @@
                 "--ci-modal-inlay-border-color": "white",
                 "--ci-tooltip-bg": "#333",
                 "--ci-tooltip-color": "#fff",
-                "--ci-tooltip-padding": "6px 10px",
-                "--ci-tooltip-radius": "6px",
-                "--ci-tooltip-shadow": "0 2px 8px rgba(0, 0, 0, 0.2)"
+                "--ci-tooltip-padding": "0.5rem 10px",
+                "--ci-tooltip-radius": "0.5rem",
+                "--ci-tooltip-shadow": "0 0.25rem 0.5rem rgba(0, 0, 0, 0.2)",
+                "--ci-btn-bgc-default": "#0d6efd"
             }
         },
         {
@@ -485,8 +486,8 @@
             "selector": ".table-row",
             "attributes": {
                 "display": "grid",
-                "grid-template-rows": "1",
                 "grid-auto-flow": "column",
+                "align-items": "center",
                 "background-color": "rgba(128, 128, 128, 0.15)"
             }
         },
@@ -655,10 +656,11 @@
             "attributes": {
                 "position": "relative",
                 "display": "inline-block",
-                "margin": "0.5rem",
+                "padding": "0.3rem",
                 "border-radius": "0.5rem",
                 "max-width": "fit-content",
-                "max-height": "fit-content"
+                "max-height": "fit-content",
+                "background-color": "var(--ci-btn-bgc-default)"
             }
         },
         {

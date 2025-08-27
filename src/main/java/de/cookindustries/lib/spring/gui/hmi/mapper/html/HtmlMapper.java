@@ -673,6 +673,7 @@ public final class HtmlMapper
                 .builder()
                 .tag(TAG_DIV)
                 .clazz("table-body")
+                .clazz("table-" + table.getName() + "-body")
                 .contents(rows)
                 .build();
 

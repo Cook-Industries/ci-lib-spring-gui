@@ -30,10 +30,14 @@ public class BurgerContainer extends Container
 
     @NonNull
     @Default
-    private final String           image = "/images/burger-menu-icon.svg";
+    private final String           image    = "/images/burger-menu-icon.svg";
 
     @Singular
     private final List<BurgerItem> items;
+
+    @NonNull
+    @Default
+    private final ButtonClass      btnClass = ButtonClass.DEFAULT;
 
     @Override
     protected ContainerType inferType()
