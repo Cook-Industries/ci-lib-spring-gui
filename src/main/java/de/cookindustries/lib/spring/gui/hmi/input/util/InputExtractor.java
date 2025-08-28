@@ -167,16 +167,16 @@ public final class InputExtractor
             throw new IllegalArgumentException("key [__form_id] cannot be null/empty");
         }
 
-        LOG.debug("inputs given:");
         if (LOG.isDebugEnabled())
         {
+            LOG.debug("inputs given:");
             inputs
                 .entrySet()
                 .stream()
-                .forEach(ent -> LOG.debug("[{}]:[{}]", ent.getKey(), ent.getValue()));
-        }
+                .forEach(ent -> LOG.debug("{}:{}", String.format("%-20s", ent.getKey()), ent.getValue()));
 
-        LOG.debug("files given: [{}]", files != null ? files.length : "none");
+            LOG.debug("files given: [{}]", files != null ? files.length : "none");
+        }
     }
 
     /**

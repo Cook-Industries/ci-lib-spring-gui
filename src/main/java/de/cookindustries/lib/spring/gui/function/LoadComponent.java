@@ -1,10 +1,17 @@
+/**
+ * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
+ * <p>
+ * Licensed under the MIT License.
+ * <p>
+ * See LICENSE file in the project root for full license information.
+ */
 package de.cookindustries.lib.spring.gui.function;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * Static base function to close the top most modal
+ * Function to load a component from the Backend.
  * 
  * @since 3.2.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
@@ -13,6 +20,11 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class LoadComponent extends AbsFunctionCall
 {
+
+    public LoadComponent(String url)
+    {
+        this(url, null);
+    }
 
     public LoadComponent(String url, AbsFunctionArgs args)
     {

@@ -11,6 +11,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
+ * Function to send data from a Form.
+ * 
  * @since 3.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */

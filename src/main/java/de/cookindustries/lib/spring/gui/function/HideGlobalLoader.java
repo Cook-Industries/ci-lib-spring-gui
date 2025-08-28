@@ -11,7 +11,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * Static base function to hide the global loader
+ * Function to hide the global loader.
  * 
  * @since 3.2.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>

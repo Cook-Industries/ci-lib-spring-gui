@@ -13,6 +13,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
 import lombok.ToString;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * A implementation of a {@code List} holder class to ensure Immutability and safe class parsing.
@@ -23,6 +24,7 @@ import lombok.ToString;
 @Builder
 @Getter
 @ToString
+@Jacksonized
 public class FlatMappableList
 {
 

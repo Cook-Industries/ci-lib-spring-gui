@@ -11,6 +11,7 @@ export {
   dismissErrors,
   redirect,
   reload,
+  openSite,
   FunctionRegistry,
 };
 
@@ -129,7 +130,6 @@ $(document).ready(function () {
     $(this).off("mousemove.on-hover-tooltip");
   });
 
-
   // close modal on esc button press
   $(document).on("keydown", function (e) {
     if (e.key === "Escape") {
@@ -236,14 +236,18 @@ $(document).ready(function () {
     resetButton(id);
   });
 
+  FunctionRegistry._registerInternal("openSite", (url) => {
+    openSite(url);
+  });
+
   FunctionRegistry._registerInternal("noop", () => {
     console.log(
       "a call to the NoOp function occured. This is not normal and should be investigated."
     );
   });
 
-  FunctionRegistry._registerInternal("registerTagInput", (id, fetchUrl, searchUrl, enforceWhitelist) => {
-    registerTagInput(id, fetchUrl, searchUrl, enforceWhitelist);
+  FunctionRegistry._registerInternal("registerTagInput", (settings) => {
+    registerTagInput(settings);
   });
 
   hideGlobalLoader();
@@ -384,38 +388,50 @@ function handleResponse(response) {
   handleMessages(response.messages);
 
   switch (response.action) {
-    case "NOTIFICATION":
+    case "NOTIFICATION": {
       break;
+    }
 
-    case "MODAL":
+    case "MODAL": {
       openModal(response);
       break;
+    }
 
-    case "CONTENT":
+    case "CONTENT": {
       fillContent(response);
       break;
+    }
 
-    case "REMOVE":
+    case "REMOVE": {
       removeContent(response);
       break;
+    }
 
-    case "LOADING_PROGRESS":
+    case "LOADING_PROGRESS": {
       changeGlobalLoaderText(response.text);
       break;
+    }
 
-    case "COMPOUND":
+    case "COMPOUND": {
       for (let s in response.results.list) {
         let data = response.statements[s];
 
         handleResponse(data);
       }
       break;
+    }
 
-    case "FETCH_TAGS":
+    case "FETCH_TAGS": {
       tagifyWhitelists.set(response.inputId, response.results);
-      break;
 
-    case "FETCH_TAGS_RESULT":
+      let tagify = tagifyInstances.get(response.inputId);
+      if (tagify) {
+        tagify.whitelist = response.results;
+      }
+      break;
+    }
+
+    case "FETCH_TAGS_RESULT": {
       let tagInputId = response.inputId;
       let inputValue = response.originalInputValue;
       let result = response.results;
@@ -424,10 +440,12 @@ function handleResponse(response) {
       tagify.settings.whitelist = result.concat(tagify.value || []);
       tagify.loading(false).dropdown.show(inputValue);
       break;
+    }
 
-    case "REDIRECT":
+    case "REDIRECT": {
       redirect(response.url);
       break;
+    }
   }
 
   call(response.calls);
@@ -450,6 +468,11 @@ function redirect(url) {
 
 function reload() {
   location.reload();
+}
+
+function openSite(url) {
+  const fullUrl = new URL(url, window.location.href).href;
+  window.open(fullUrl, '_blank');
 }
 // === < global functions ==========================================================================
 // === > function register =========================================================================
@@ -659,8 +682,22 @@ function submitFromModal() {
   showGlobalLoader("collect data");
 
   const modal = $(`#modal-overlay-${openModals}`);
-  const formData = extractValuesToSubmit(modal.attr("data-extraction-id"));
+  const formId = modal.find('.form-container').first().attr('id');
   const url = modal.attr("data-server-target");
+
+  if (formId === undefined || formId === "") {
+    clientsideError("no target id found");
+
+    throw new Error("no target id found (no form defined?)");
+  }
+
+  if (url === undefined || url === "") {
+    clientsideError("no target id defined");
+
+    throw new Error("no target url defined");
+  }
+
+  const formData = extractValuesToSubmit(formId);
 
   resetMarker();
   changeGlobalLoaderText("send data");
@@ -671,13 +708,11 @@ function submitFromModal() {
  * Opens a modal and fills it with input fields specified by the jserver response object
  *
  * @param {object} obj - the response object from jserver
- *
- * @returns {undefined}
  */
 function openModal(response) {
   openModals++;
 
-  $("#modal-container").append(`<div id="modal-overlay-${openModals}" class="modal-overlay" data-extraction-id=${response.modal.uid} data-server-target=${response.modal.requestUrl}></div>`);
+  $("#modal-container").append(`<div id="modal-overlay-${openModals}" class="modal-overlay" data-server-target="${response.modal.requestUrl}"></div>`);
 
   $(`#modal-overlay-${openModals}`).append(response.contentHtml);
 
@@ -700,8 +735,6 @@ function radioClick(event) {
 
 /**
  * Hides the modal overlay and clears its remains
- *
- * @returns {undefined}
  */
 function closeModal() {
   if ($(`#modal-overlay-${openModals}`).attr("data-lock-set") === "1") {
@@ -746,7 +779,9 @@ function extractValuesToSubmit(target) {
 
   changeGlobalLoaderText(`extract: ${target}`);
 
-  for (const elem of $(`#${target} [data-submit-id="${target}"]`)) {
+  console.log($(`#${target}`).find(`[data-submit-id="${target}"]`));
+
+  for (const elem of $(`#${target}`).find(`[data-submit-id="${target}"]`)) {
     if ($(elem).attr("data-submit-as") === "") {
       // no submit id set so ignore input
     } else {
@@ -834,18 +869,19 @@ function resetButton(btnId) {
 const tagifyInstances = new Map();
 const tagifyWhitelists = new Map();
 
-function registerTagInput(id, fetchTagsUrl, searchTagsUrl, enforceWhitelist) {
-  const inputElm = document.querySelector(`#${id}`);
+function registerTagInput(settings) {
+  const inputElm = document.querySelector(`#${settings.id}`);
   const initialValues = inputElm.value.trim().split(/\s*,\s*/);
 
   const tagify = new Tagify(inputElm, {
-    enforceWhitelist: enforceWhitelist,
+    enforceWhitelist: settings.enforceWhitelist,
     whitelist: initialValues,
-    inputId: id,
-    searchTagsUrl: searchTagsUrl,
+    inputId: settings.id,
+    searchTagsUrl: settings.searchTagsUrl,
+    maxTags: settings.maxTags,
     dropdown: {
       classname: "color-blue",
-      enabled: 0,
+      enabled: 1,
       maxItems: 10
     }
   });
@@ -854,11 +890,10 @@ function registerTagInput(id, fetchTagsUrl, searchTagsUrl, enforceWhitelist) {
     .on("add", (e) => onAddTag(e, tagify))
     .on("input", (e) => onInput(e, tagify));
 
-  tagifyInstances.set(id, tagify);
-  tagifyWhitelists.set(id, initialValues);
+  tagifyInstances.set(settings.id, tagify);
 
-  if (fetchTagsUrl !== "") {
-    POST(fetchTagsUrl, { id: id });
+  if (settings.fetchWhitelistUrl !== "") {
+    POST(settings.fetchWhitelistUrl, { id: settings.id });
   }
 }
 

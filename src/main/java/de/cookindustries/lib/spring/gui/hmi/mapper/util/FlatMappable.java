@@ -11,8 +11,6 @@ import java.util.Map;
 
 import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
@@ -44,7 +42,6 @@ import lombok.experimental.SuperBuilder;
  */
 @SuperBuilder
 @Getter
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class FlatMappable
 {
 

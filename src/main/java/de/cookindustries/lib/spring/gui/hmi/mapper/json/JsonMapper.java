@@ -27,6 +27,7 @@ import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.function.CloseModal;
 import de.cookindustries.lib.spring.gui.function.RegisterTagInput;
 import de.cookindustries.lib.spring.gui.function.SubmitFromModal;
+import de.cookindustries.lib.spring.gui.function.TagInputSettings;
 import de.cookindustries.lib.spring.gui.hmi.container.*;
 import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
@@ -93,7 +94,7 @@ public class JsonMapper
     private static final String                    INFO_TEXT                      = "infoText";
     private static final String                    INFO_URL                       = "infoUrl";
 
-    private static final String                    RANDOM_ID                      = "random id";
+    private static final String                    RANDOM_ID                      = "randomid";
 
     private static final String                    BASE_INDICATOR_START           = "$$";
     private static final String                    INDICATOR_VALUE_PLACEHOLDER    = "$$value$";
@@ -266,7 +267,8 @@ public class JsonMapper
 
         if (uid == null)
         {
-            uid = UUID.randomUUID().toString();
+            String random = UUID.randomUUID().toString();
+            uid = RANDOM_ID + random.substring(8);
         }
         else if (uid.startsWith(INDICATOR_VALUE_PLACEHOLDER))
         {
@@ -1291,7 +1293,7 @@ public class JsonMapper
         List<String>        classes                 = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes              = resolveAttributes(element, depth);
         String              name                    = getParameterValue(element, depth, NAME, String.class);
-        String              requestUrl              = getParameterValue(element, depth, "requestUrl", String.class);
+        String              requestUrl              = getParameterValue(element, depth, "requestUrl", String.class, "");
         Boolean             closeOnOverlayClick     =
             getParameterValue(element, depth, "closeOnOverlayClick", Boolean.class, Boolean.FALSE);
 
@@ -2099,9 +2101,18 @@ public class JsonMapper
         String              pattern          = getParameterValue(element, depth, "pattern", String.class, DEFAULT_VAL);
         String              fetchUrl         = getParameterValue(element, depth, "fetchUrl", String.class, DEFAULT_VAL);
         String              searchUrl        = getParameterValue(element, depth, "searchUrl", String.class, DEFAULT_VAL);
-        Boolean             enforceWhitelist = getParameterValue(element, depth, "enforceWhitlist", Boolean.class, Boolean.FALSE);
+        Boolean             enforceWhitelist = getParameterValue(element, depth, "enforceWhitelist", Boolean.class, Boolean.FALSE);
+        Integer             maxTags          = getParameterValue(element, depth, "maxTags", Integer.class, Integer.MAX_VALUE);
 
-        functions.add(new RegisterTagInput(uid, fetchUrl, searchUrl, enforceWhitelist));
+        TagInputSettings    settings         = TagInputSettings.builder()
+            .id(uid)
+            .enforceWhitelist(enforceWhitelist)
+            .fetchWhitelistUrl(fetchUrl)
+            .searchTagsUrl(searchUrl)
+            .maxTags(maxTags)
+            .build();
+
+        functions.add(new RegisterTagInput(settings));
 
         return Tag
             .builder()

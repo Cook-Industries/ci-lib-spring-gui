@@ -30,7 +30,8 @@ public final class ModalContainer extends Container
     private final String          name;
 
     @NonNull
-    private final String          requestUrl;
+    @Default
+    private final String          requestUrl          = "";
 
     @Default
     private final String          btnNameLeft         = null;
