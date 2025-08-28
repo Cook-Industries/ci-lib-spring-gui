@@ -7,12 +7,17 @@
  */
 package de.cookindustries.lib.spring.gui.function;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 /**
  * Function to send form data from the top most open modal
  * 
  * @since 3.2.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
+@Data
+@EqualsAndHashCode(callSuper = false)
 public final class SubmitFromModal extends AbsFunctionCall
 {
 

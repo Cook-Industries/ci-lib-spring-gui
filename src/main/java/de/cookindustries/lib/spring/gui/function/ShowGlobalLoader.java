@@ -11,31 +11,33 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * @since 3.0.0
+ * Static base function to hide the global loader
+ * 
+ * @since 3.2.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public final class SendFromForm extends AbsFunctionCall
+public final class ShowGlobalLoader extends AbsFunctionCall
 {
 
-    public SendFromForm(String formId, String postUrl)
+    public ShowGlobalLoader(String text)
     {
         super();
 
-        setParam(formId);
-        setParam(postUrl);
+        setParam(text);
     }
 
     @Override
     protected String functionName()
     {
-        return "sendFromForm";
+        return "showGlobalLoader";
     }
 
     @Override
     protected Integer numberOfParameters()
     {
-        return 2;
+        return 1;
     }
+
 }

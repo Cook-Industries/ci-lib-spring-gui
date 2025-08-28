@@ -52,7 +52,7 @@ public class InputValue
      */
     @NonNull
     @Default
-    private Boolean            checked = false;
+    private final Boolean      checked = false;
 
     /**
      * styling classes for this input value
