@@ -42,7 +42,7 @@ public final class FlatMappableUtil
      * @param keys to lookup
      * @return a list of {@code TranslatedTextElement}s in order of {@code keys} provided
      */
-    public FlatMappableList createTranslatedTextElements(Locale locale, List<String> keys)
+    public FlatMappableList<TranslatedTextElement> createTranslatedTextElements(Locale locale, List<String> keys)
     {
         return createTranslatedTextElements(locale, keys, Map.of());
     }
@@ -55,9 +55,10 @@ public final class FlatMappableUtil
      * @param classes map of classes to replace
      * @return a list of {@code TranslatedTextElement}s in order of {@code keys} provided
      */
-    public FlatMappableList createTranslatedTextElements(Locale locale, List<String> keys, Map<String, String> classes)
+    public FlatMappableList<TranslatedTextElement> createTranslatedTextElements(Locale locale, List<String> keys,
+        Map<String, String> classes)
     {
-        List<FlatMappable> list = new ArrayList<>();
+        List<TranslatedTextElement> list = new ArrayList<>();
 
         Collections.unmodifiableList(keys).forEach(key -> {
             list.add(
@@ -69,7 +70,7 @@ public final class FlatMappableUtil
         });
 
         return FlatMappableList
-            .builder()
+            .<TranslatedTextElement>builder()
             .elements(list)
             .build();
     }

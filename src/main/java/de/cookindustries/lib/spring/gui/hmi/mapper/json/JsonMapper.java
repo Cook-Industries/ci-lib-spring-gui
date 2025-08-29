@@ -676,9 +676,9 @@ public class JsonMapper
         {
             if (isSourceList)
             {
-                FlatMappableList   srcList = extractFromTokenMapsAsValue(sourceKey, FlatMappableList.class);
+                FlatMappableList<?> srcList = extractFromTokenMapsAsValue(sourceKey, FlatMappableList.class);
 
-                List<MapperResult> results = new ArrayList<>();
+                List<MapperResult>  results = new ArrayList<>();
 
                 srcList.getElements().forEach(src -> {
                     JsonMapper internalMapper =

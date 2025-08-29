@@ -25,10 +25,10 @@ import lombok.extern.jackson.Jacksonized;
 @Getter
 @ToString
 @Jacksonized
-public class FlatMappableList
+public class FlatMappableList<T extends FlatMappable>
 {
 
     @Singular
-    private final List<FlatMappable> elements;
+    private final List<T> elements;
 
 }

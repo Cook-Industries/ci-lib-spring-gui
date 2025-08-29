@@ -70,7 +70,7 @@ public final class FlatMappableDissector
      * @param locale to use to translate
      * @return the filled unmodifiable {@code Map}, or {@code null} if the input was {@code null}
      */
-    public TokenMap dissect(FlatMappable obj, int presedence, Locale locale)
+    public <T extends FlatMappable> TokenMap dissect(T obj, int presedence, Locale locale)
     {
         if (obj == null)
         {
