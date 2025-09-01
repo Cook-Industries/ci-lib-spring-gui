@@ -7,10 +7,13 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper.util.elements;
 
+import java.util.Map;
+
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappable;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.experimental.SuperBuilder;
+import lombok.Singular;
 
 /**
  * A simple object holding a translated text {@link String}.
@@ -18,12 +21,15 @@ import lombok.experimental.SuperBuilder;
  * @since 3.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@SuperBuilder
+@Builder
 @Getter
-public final class TranslatedTextElement extends FlatMappable
+public final class TranslatedTextElement implements FlatMappable
 {
 
     @NonNull
-    private final String text;
+    private final String              text;
+
+    @Singular("clazz")
+    private final Map<String, String> classes;
 
 }

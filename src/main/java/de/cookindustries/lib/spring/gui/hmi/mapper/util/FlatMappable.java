@@ -7,16 +7,14 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper.util;
 
+import java.util.List;
 import java.util.Map;
 
 import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
-import lombok.Getter;
-import lombok.Singular;
-import lombok.experimental.SuperBuilder;
 
 /**
- * This abstract class describes a {@code POJO} that can be mapped to key-value pairs in a {@link Map}.
+ * This interface describes a {@code POJO} that can be mapped to key-value pairs in a {@link Map}.
  * <p>
  * Objects of this type should only have flat variable types, no {@code List} or {@code Array} structures. This limitation is based in the
  * fact that a transfomation by {@link FlatMappableDissector} cannot resolve {@code List} or {@code Array} objects to a viable flattened
@@ -40,15 +38,22 @@ import lombok.experimental.SuperBuilder;
  * @since 3.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@SuperBuilder
-@Getter
-public abstract class FlatMappable
+public interface FlatMappable
 {
 
-    @Singular("clazz")
-    private final Map<String, String>          classes;
+    public default Map<String, String> getClasses()
+    {
+        return Map.of();
+    }
 
-    @Singular
-    private final Map<String, AbsFunctionCall> calls;
+    public default Map<String, AbsFunctionCall> getFunctionCalls()
+    {
+        return Map.of();
+    }
+
+    public default List<String> includedMethods()
+    {
+        return List.of();
+    }
 
 }

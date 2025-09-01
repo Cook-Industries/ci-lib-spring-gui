@@ -883,7 +883,12 @@ function registerTagInput(settings) {
       classname: "color-blue",
       enabled: 1,
       maxItems: 10
+    },
+    templates: {
+      dropdownItemNoMatch: () =>
+        `<div class="tagify__dropdown__item no-match" tabindex="0" role="option">❌</div>`
     }
+
   });
 
   tagify

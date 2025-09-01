@@ -103,43 +103,39 @@ public final class TokenMap
     @Override
     public String toString()
     {
-        StringConcat sc = new StringConcat();
+        StringConcat sc           = new StringConcat();
+
+        int          valuesLen    = values.keySet().stream().mapToInt(String::length).max().orElse(0);
+        int          classesLen   = classes.keySet().stream().mapToInt(String::length).max().orElse(0);
+        int          functionsLen = functions.keySet().stream().mapToInt(String::length).max().orElse(0);
+        int          paramsLen    = functions.values().stream().mapToInt(e -> getClass().getSimpleName().length()).max().orElse(0);
 
         sc
             .appendnl("TokenMap")
-            .append("presedence:")
+            .append("presedence : ")
             .appendnl(presedence)
 
             .appendnl(!values.isEmpty(), "values:")
-            .appendnl(!values.isEmpty(), "-->")
             .appendnl(!values.isEmpty(), values.entrySet(),
-                entry -> entry.getKey()
-                    + " : "
-                    + String.valueOf(entry.getValue()))
-            .appendnl(!values.isEmpty(), "<--")
+                entry -> String.format("> %-" + valuesLen + "s : %s",
+                    entry.getKey(),
+                    String.valueOf(entry.getValue())))
 
             .appendnl(!classes.isEmpty(), "classes:")
-            .appendnl(!classes.isEmpty(), "-->")
             .appendnl(!classes.isEmpty(), classes.entrySet(),
-                entry -> entry.getKey()
-                    + " : "
-                    + String.valueOf(entry.getValue()))
-            .appendnl(!classes.isEmpty(), "<--")
+                entry -> String.format("> %-" + classesLen + "s : %s",
+                    entry.getKey(),
+                    String.valueOf(entry.getValue())))
 
             .appendnl(!functions.isEmpty(), "functions:")
-            .appendnl(!functions.isEmpty(), "-->")
             .appendnl(!functions.isEmpty(), functions.entrySet(),
-                entry -> entry.getKey()
-                    + " : "
-                    + entry.getValue().getClass().getSimpleName()
-                    + " > "
-                    + entry.getValue().parseAsJS())
-            .appendnl(!functions.isEmpty(), "<--")
+                entry -> String.format("> %-" + functionsLen + "s : %-" + paramsLen + "s > %s",
+                    entry.getKey(),
+                    entry.getValue().getClass().getSimpleName(),
+                    entry.getValue().parseAsJS()))
 
             .appendnl(!deactivateUids.isEmpty(), "deactivated uids:")
-            .appendnl(!deactivateUids.isEmpty(), "-->")
-            .appendnl(!deactivateUids.isEmpty(), deactivateUids, uid -> uid)
-            .appendnl(!deactivateUids.isEmpty(), "<--");
+            .appendnl(!deactivateUids.isEmpty(), deactivateUids, uid -> "> " + uid);
 
         return sc.toString();
     }

@@ -8,9 +8,9 @@
 package de.cookindustries.lib.spring.gui.hmi.mapper.util.elements;
 
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappable;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.experimental.SuperBuilder;
 
 /**
  * A simple object holding a translated link element {@link String}.
@@ -18,9 +18,9 @@ import lombok.experimental.SuperBuilder;
  * @since 3.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@SuperBuilder
+@Builder
 @Getter
-public final class TranslatedLinkElement extends FlatMappable
+public final class TranslatedLinkElement implements FlatMappable
 {
 
     @NonNull
