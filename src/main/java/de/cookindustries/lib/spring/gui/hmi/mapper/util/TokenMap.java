@@ -14,17 +14,22 @@ import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Singular;
 import lombok.Builder.Default;
+import lombok.EqualsAndHashCode.CacheStrategy;
 
 /**
  * Key/Value map to use by the {@link JsonMapper} to replace {@code token}s.
+ * <p>
+ * This map expects all elements to be immutable.
  * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Builder
+@EqualsAndHashCode(cacheStrategy = CacheStrategy.LAZY)
 public final class TokenMap
 {
 
@@ -112,6 +117,7 @@ public final class TokenMap
 
         sc
             .appendnl("TokenMap")
+            .appendnl(hashCode())
             .append("presedence : ")
             .appendnl(presedence)
 

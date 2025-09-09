@@ -156,7 +156,7 @@ public class CiLibStaticResourceConfig implements WebMvcConfigurer
         String location        = resourcePath.toUri().toString();
         String staticClasspath = "classpath:/static/";
 
-        LOG.debug("register [{}] and [{}] as static file paths", location, staticClasspath);
+        LOG.info("register [{}] and [{}] as static file paths", location, staticClasspath);
 
         registry
             .addResourceHandler("/**")

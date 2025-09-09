@@ -10,7 +10,6 @@ package de.cookindustries.lib.spring.gui.hmi.mapper.util;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,9 +34,9 @@ import jakarta.annotation.PostConstruct;
 public final class FlatMappableDissector
 {
 
-    private static final String          INDENT                = "  ";
-
     private static final Logger          LOG                   = LoggerFactory.getLogger(FlatMappableDissector.class);
+
+    private static final String          INDENT                = "  ";
 
     private static final String          TRANSLATION_INDICATOR = "$$text$";
 
@@ -170,7 +169,7 @@ public final class FlatMappableDissector
                         .stream()
                         .anyMatch(p -> p.matcher(stripped).matches()))
                     {
-                        LOG.trace("{} - ignore it since on blacklist", indent);
+                        LOG.trace("{}ignore [{}] due to blacklisted", indent, stripped);
 
                         continue;
                     }

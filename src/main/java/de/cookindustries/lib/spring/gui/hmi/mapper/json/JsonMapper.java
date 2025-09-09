@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -172,6 +173,8 @@ public class JsonMapper
     /** A list of {@link TokenMap}s sorted by {@link TokenMap#getPresedence()} desc */
     @Singular
     private List<TokenMap>                         tokenMaps;
+
+    private final Map<Integer, TokenMap>           tempTokenMaps                  = new HashMap<>();
 
     private final List<AbsFunctionCall>            functions                      = new ArrayList<>();
 
@@ -422,32 +425,43 @@ public class JsonMapper
      * Extract a value from {@link JsonMapper#tokenMaps}
      *
      * @param <I> expected type of value
-     * @param paramName name of parameter
+     * @param objName name of parameter
      * @param expectedType class of value
      * @return the value associated with {@code paramName}
      * @throws JsonMapperException if value is not of type {@code expectedType}
      */
     private <I> I extractFromTokenMapsAsValue(String objName, Class<I> expectedType) throws JsonMapperException
     {
-        Optional<Object> result =
+        Optional<Object> tempResult =
+            tempTokenMaps.values()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(m -> m.getValue(objName))
+                .filter(Objects::nonNull)
+                .findFirst();
+
+        Optional<Object> result     =
             tokenMaps.stream()
                 .filter(Objects::nonNull)
                 .map(m -> m.getValue(objName))
                 .filter(Objects::nonNull)
                 .findFirst();
 
-        if (result.isEmpty())
+        if (tempResult.isEmpty() && result.isEmpty())
         {
             return null;
         }
 
-        Object o = result.get();
+        Object obj =
+            tempResult.isEmpty()
+                ? result.get()
+                : tempResult.get();
 
-        if (expectedType.isInstance(o))
+        if (expectedType.isInstance(obj))
         {
-            return expectedType.cast(o);
+            return expectedType.cast(obj);
         }
-        else if (o instanceof String s)
+        else if (obj instanceof String s)
         {
             return transformRawValue(objName, 0, s, expectedType);
         }
@@ -455,7 +469,7 @@ public class JsonMapper
         throw new JsonMapperException(String
             .format("object [%s] could not be extracted due to expected class is [%s] but got [%s]", objName,
                 expectedType.getSimpleName(),
-                o.getClass().getSimpleName()));
+                obj.getClass().getSimpleName()));
     }
 
     /**
@@ -469,12 +483,26 @@ public class JsonMapper
      */
     private String extractFromTokenMapsAsClass(String objName) throws JsonMapperException
     {
-        return tokenMaps.stream()
-            .filter(Objects::nonNull)
-            .map(m -> m.getClazz(objName))
-            .filter(Objects::nonNull)
-            .findFirst()
-            .orElse(null);
+        Optional<String> tempResult =
+            tempTokenMaps.values()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(m -> m.getClazz(objName))
+                .filter(Objects::nonNull)
+                .findFirst();
+
+        Optional<String> result     =
+            tokenMaps.stream()
+                .filter(Objects::nonNull)
+                .map(m -> m.getClazz(objName))
+                .filter(Objects::nonNull)
+                .findFirst();
+
+        return tempResult.isEmpty()
+            ? result.isEmpty()
+                ? null
+                : result.get()
+            : tempResult.get();
     }
 
     /**
@@ -488,12 +516,26 @@ public class JsonMapper
      */
     private AbsFunctionCall extractFromTokenMapsAsFunction(String objName) throws JsonMapperException
     {
-        return tokenMaps.stream()
-            .filter(Objects::nonNull)
-            .map(m -> m.getFunction(objName))
-            .filter(Objects::nonNull)
-            .findFirst()
-            .orElse(null);
+        Optional<AbsFunctionCall> tempResult =
+            tempTokenMaps.values()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(m -> m.getFunction(objName))
+                .filter(Objects::nonNull)
+                .findFirst();
+
+        Optional<AbsFunctionCall> result     =
+            tokenMaps.stream()
+                .filter(Objects::nonNull)
+                .map(m -> m.getFunction(objName))
+                .filter(Objects::nonNull)
+                .findFirst();
+
+        return tempResult.isEmpty()
+            ? result.isEmpty()
+                ? null
+                : result.get()
+            : tempResult.get();
     }
 
     /**
@@ -505,14 +547,22 @@ public class JsonMapper
      */
     private boolean checkActiveStateFromTokenMaps(String uid) throws JsonMapperException
     {
+        boolean tempResult =
+            tempTokenMaps.values()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(m -> m.isUidActive(uid))
+                .filter(Objects::nonNull)
+                .allMatch(b -> b);;
 
-        return uid == null
-            ? true
-            : tokenMaps.stream()
+        boolean result =
+            tokenMaps.stream()
                 .filter(Objects::nonNull)
                 .map(m -> m.isUidActive(uid))
                 .filter(Objects::nonNull)
                 .allMatch(b -> b);
+
+        return uid == null || (tempResult && result);
     }
 
     /**
@@ -694,7 +744,10 @@ public class JsonMapper
                             .depth0AllowedTypes(allowedTypes)
                             .build();
 
-                    LOG.trace("[{}]:[{}]:{}map linked component list element [{}] @ [{}]", uuid, depth, indent, internalMapper.uuid, path);
+                    LOG.trace("[{}]:[{}]:{}map linked component list element [{}] @ mapper [{}]", uuid, depth, indent, path,
+                        internalMapper.uuid);
+
+                    internalMapper.tempTokenMaps.putAll(tempTokenMaps);
 
                     results.add(internalMapper.map());
                 });
@@ -731,7 +784,9 @@ public class JsonMapper
                         .depth0AllowedTypes(allowedTypes)
                         .build();
 
-                LOG.trace("[{}]:[{}]:{}map linked sourced component [{}] @ [{}]", uuid, depth, indent, internalMapper.uuid, path);
+                LOG.trace("[{}]:[{}]:{}map linked sourced component [{}] @ mapper [{}]", uuid, depth, indent, path, internalMapper.uuid);
+
+                internalMapper.tempTokenMaps.putAll(tempTokenMaps);
 
                 result = internalMapper.map();
             }
@@ -750,7 +805,9 @@ public class JsonMapper
                     .depth0AllowedTypes(allowedTypes)
                     .build();
 
-            LOG.trace("[{}]:[{}]:{}map linked component with [{}] @ [{}]", uuid, depth, indent, internalMapper.uuid, path);
+            LOG.trace("[{}]:[{}]:{}map linked component [{}] @ mapper [{}]", uuid, depth, indent, path, internalMapper.uuid);
+
+            internalMapper.tempTokenMaps.putAll(tempTokenMaps);
 
             result = internalMapper.map();
         }
@@ -861,22 +918,22 @@ public class JsonMapper
     {
         this.count++;
 
-        String indent = LOG_INDENT_STRING.repeat(depth + 1);
+        List<Container> resultList     = new ArrayList<>();
+        String          indent         = LOG_INDENT_STRING.repeat(depth + 1);
 
-        LOG.trace("");
+        String          uid            = element.getUid() == null ? "random uid" : element.getUid();
 
-        String  uid            = element.getUid() == null ? "random uid" : element.getUid();
-
-        boolean processElement = shouldProcess(element, uid, depth);
+        boolean         processElement = shouldProcess(element, uid, depth);
 
         if (!processElement)
         {
-            LOG.debug("[{}]:[{}]:{} skip CONTAINER [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth, indent,
+            LOG.debug("[{}]:[{}]:{}skip CONTAINER [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth, indent,
                 uid);
 
             return List.of(EmptyContainer.builder().build());
         }
 
+        LOG.debug("[{}]:[{}]:{}start transform >", uuid, depth, indent);
         LOG.trace("[{}]:[{}]:{}map [{}] with allowed types [{}]", uuid, depth, indent, uid, allowedTypes);
 
         InternalElementType internalType = null;
@@ -886,14 +943,7 @@ public class JsonMapper
             try
             {
                 internalType = InternalElementType.valueOf(element.getType().toUpperCase());
-            }
-            catch (Exception ex)
-            {
-                // do nothing since it is not a internal type
-            }
 
-            if (internalType != null)
-            {
                 switch (internalType)
                 {
                     case COMPONENT:
@@ -903,6 +953,11 @@ public class JsonMapper
 
                         return result.getContainers();
                 }
+
+            }
+            catch (Exception ex)
+            {
+                // do nothing since it is not a internal type
             }
 
             ContainerType type = ContainerType.valueOf(element.getType().toUpperCase());
@@ -915,29 +970,102 @@ public class JsonMapper
 
             LOG.debug("[{}]:[{}]:{}map CONTAINER [{}] as [{}]", uuid, depth, indent, uid, type);
 
-            Container result = switch (type)
-            {
-                case AUDIO -> transfromAudioContainer(element, depth);
-                case BURGER -> transfromBurgerContainer(element, depth);
-                case BUTTON -> transfromButtonContainer(element, depth);
-                case BUTTON_BAR -> transformButtonBarContainer(element, depth);
-                case BUTTON_ICON -> transformButtonIconContainer(element, depth);
-                case CONTENT -> transformContentContainer(element, depth);
-                case EMPTY -> EmptyContainer.builder().build();
-                case FORM -> transformFormContainer(element, depth);
-                case HEADING -> transformHeadingContainer(element, depth);
-                case HIDDEN -> transformHiddenContainer(element, depth);
-                case IMAGE -> transformImageContainer(element, depth);
-                case LINK -> transformLinkContainer(element, depth);
-                case MODAL -> transformModal(element, depth);
-                case SPLITTED -> transformSplittedContainer(element, depth);
-                case TAB -> transformTabbedContainer(element, depth);
-                case TABLE -> transformTableContainer(element, depth);
-                case TABLE_ROW -> transformTableRowContainer(element, depth);
-                case TEXT -> transformTextContainer(element, depth);
-            };
+            int                 numberOfRepetitions = 1;
+            FlatMappableList<?> targetList          = null;
+            FlatMappable        target              = null;
 
-            return List.of(result);
+            try
+            {
+                String targetListName = getParameterValue(element, depth, "repetitionSource", String.class);
+                targetList = extractFromTokenMapsAsValue(targetListName, FlatMappableList.class);
+
+                numberOfRepetitions = targetList.size();
+
+                LOG.debug("[{}]:[{}]:{}repeat container [{}] times", uuid, depth, indent, numberOfRepetitions);
+            }
+            catch (JsonParsingException ex)
+            {
+                LOG.trace("[{}]:[{}]:{}repetitionSource not set", uuid, depth, indent);
+
+                try
+                {
+                    String targetName = getParameterValue(element, depth, "elementSource", String.class);
+                    target = extractFromTokenMapsAsValue(targetName, FlatMappable.class);
+
+                    LOG.debug("[{}]:[{}]:{}source element found", uuid, depth, indent);
+                }
+                catch (JsonParsingException exInner)
+                {
+                    LOG.trace("[{}]:[{}]:{}elementSource not set", uuid, depth, indent);
+                }
+            }
+            catch (JsonMapperException ex)
+            {
+                LOG.error("elementSource/repetitionSource expected but not found", ex);
+
+                resultList.add(failureContainer());
+
+                return resultList;
+            }
+
+            for (int i = 0; i < numberOfRepetitions; i++)
+            {
+                TokenMap tempTokenMap = null;
+
+                if (targetList != null)
+                {
+                    tempTokenMap = flatMappableDissector.dissect(targetList.get(i), depth, locale);
+
+                    tempTokenMaps.put(tempTokenMap.hashCode(), tempTokenMap);
+                }
+
+                if (target != null)
+                {
+                    tempTokenMap = flatMappableDissector.dissect(target, depth, locale);
+
+                    tempTokenMaps.put(tempTokenMap.hashCode(), tempTokenMap);
+                }
+
+                if (LOG.isTraceEnabled() && !tempTokenMaps.isEmpty())
+                {
+                    LOG.trace("[{}]:[{}]:{}with following temp token maps", uuid, depth, indent);
+
+                    tempTokenMaps.values()
+                        .stream()
+                        .map(TokenMap::toString)
+                        .map(String::lines)
+                        .forEach(stream -> stream.forEach(line -> LOG.trace("[{}]: {}", uuid, line)));
+                }
+
+                Container result = switch (type)
+                {
+                    case AUDIO -> transfromAudioContainer(element, depth);
+                    case BURGER -> transfromBurgerContainer(element, depth);
+                    case BUTTON -> transfromButtonContainer(element, depth);
+                    case BUTTON_BAR -> transformButtonBarContainer(element, depth);
+                    case BUTTON_ICON -> transformButtonIconContainer(element, depth);
+                    case CONTENT -> transformContentContainer(element, depth);
+                    case EMPTY -> EmptyContainer.builder().build();
+                    case FORM -> transformFormContainer(element, depth);
+                    case HEADING -> transformHeadingContainer(element, depth);
+                    case HIDDEN -> transformHiddenContainer(element, depth);
+                    case IMAGE -> transformImageContainer(element, depth);
+                    case LINK -> transformLinkContainer(element, depth);
+                    case MODAL -> transformModal(element, depth);
+                    case SPLITTED -> transformSplittedContainer(element, depth);
+                    case TAB -> transformTabbedContainer(element, depth);
+                    case TABLE -> transformTableContainer(element, depth);
+                    case TABLE_ROW -> transformTableRowContainer(element, depth);
+                    case TEXT -> transformTextContainer(element, depth);
+                };
+
+                resultList.add(result);
+
+                if (tempTokenMap != null)
+                {
+                    tempTokenMaps.remove(tempTokenMap.hashCode());
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -945,6 +1073,8 @@ public class JsonMapper
 
             return List.of(failureContainer());
         }
+
+        return resultList;
     }
 
     /**

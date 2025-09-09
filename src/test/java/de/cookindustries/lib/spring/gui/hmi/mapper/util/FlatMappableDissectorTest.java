@@ -30,9 +30,10 @@ class FlatMappableDissectorTest
     private class TestObject implements FlatMappable
     {
 
+        @SuppressWarnings("unused")
         public String getClassLoader()
         {
-            return "should not be read";
+            throw new IllegalAccessError();
         }
     }
 
