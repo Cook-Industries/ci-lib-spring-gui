@@ -15,6 +15,7 @@ import de.cookindustries.lib.spring.gui.hmi.mapper.html.HtmlMapper;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
+import lombok.ToString;
 import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
@@ -26,7 +27,8 @@ import lombok.extern.jackson.Jacksonized;
 @SuperBuilder
 @Getter
 @Jacksonized
-public class ContentResponse extends Response
+@ToString
+public final class ContentResponse extends Response
 {
 
     public static final String    LOADABLE  = "loadable-content";

@@ -25,7 +25,7 @@ export {
  * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
-const version = "3.0.1";
+const version = "3.3.2";
 
 const CLASS_HIDDEN = "hidden";
 
@@ -35,6 +35,15 @@ function init() {
 
 $(document).ready(function () {
   console.log("ci-lib-js: ", version);
+
+  // load properties if neccessary
+  var propertiesUrl = $('#ui-properties-url').html().trim();
+  if (propertiesUrl) {
+    console.log("properties are requested from ", propertiesUrl);
+    GET(propertiesUrl);
+  } else {
+    console.log("no properties fetch url present, skip.");
+  }
 
   // close modal on overlay click
   $(document).on("click", ".modal-overlay", function (event) {
@@ -388,6 +397,12 @@ function handleResponse(response) {
   handleMessages(response.messages);
 
   switch (response.action) {
+    case "PROPERTIES": {
+      registerProperties(response.properties);
+      initWebSocketsFromConfig(response.properties);
+      break;
+    }
+
     case "NOTIFICATION": {
       break;
     }
@@ -473,6 +488,10 @@ function reload() {
 function openSite(url) {
   const fullUrl = new URL(url, window.location.href).href;
   window.open(fullUrl, '_blank');
+}
+
+function registerProperties(properties) {
+  console.log("properties received", properties)
 }
 // === < global functions ==========================================================================
 // === > function register =========================================================================
@@ -676,7 +695,7 @@ function requestModal(url, args = {}) {
 }
 
 /**
- * Function to submit directly from a modal if no other function is specified
+ * Function to submit directly from a modal
  */
 function submitFromModal() {
   showGlobalLoader("collect data");
@@ -686,15 +705,15 @@ function submitFromModal() {
   const url = modal.attr("data-server-target");
 
   if (formId === undefined || formId === "") {
-    clientsideError("no target id found");
+    clientsideError("modal: no target id found");
 
-    throw new Error("no target id found (no form defined?)");
+    throw new Error("modal: no target id found (no form defined?)");
   }
 
   if (url === undefined || url === "") {
-    clientsideError("no target id defined");
+    clientsideError("modal: no target url defined");
 
-    throw new Error("no target url defined");
+    throw new Error("modal: no target url defined");
   }
 
   const formData = extractValuesToSubmit(formId);
@@ -923,5 +942,96 @@ function toggleBodyScroll() {
     $("body").addClass("no-scroll");
   } else {
     $("body").removeClass("no-scroll");
+  }
+}
+// === > websocket =================================================================================
+const WebSocketManager = (function () {
+  const connections = new Map();
+
+  function createConnection({
+    name,
+    endpoint,
+    headers = {},
+    subscriptions = [],
+    onConnect,
+    onError
+  }) {
+    if (!name) throw new Error('WS Connection name is required');
+    if (connections.has(name)) throw new Error(`WS Connection ${name} already exists`);
+    if (!endpoint) throw new Error('WS Connection endpoint is required');
+
+    const socket = new SockJS(endpoint);
+    const client = Stomp.over(socket);
+
+    client.debug = () => { };
+
+    client.connect(headers, frame => {
+      console.log(`Connected [${name}]`);
+      connections.set(name, client);
+
+      // use static handleResponse instead of custom callbacks
+      for (const { destination } of subscriptions) {
+        client.subscribe(destination, msg => handleResponse(JSON.parse(msg.body)));
+      }
+
+      if (onConnect) onConnect(frame);
+    }, error => {
+      console.error(`Connection error [${name}]`, error);
+      if (onError) onError(error);
+    });
+
+    return client;
+  }
+
+  function get(name) {
+    return connections.get(name);
+  }
+
+  function subscribe(name, destination, callback) {
+    const c = connections.get(name);
+    if (!c) throw new Error(`No connection named ${name}`);
+    return c.subscribe(destination, msg => callback(data));
+  }
+
+  function send(name, destination, body) {
+    const c = connections.get(name);
+    if (!c) throw new Error(`No connection named ${name}`);
+    c.send(destination, {}, body);
+  }
+
+  function disconnect(name) {
+    const c = connections.get(name);
+    if (c) {
+      c.disconnect(() => console.log(`Disconnected [${name}]`));
+      connections.delete(name);
+    }
+  }
+
+  return { createConnection, get, subscribe, send, disconnect, handleResponse };
+})();
+
+/**
+ * Initializes all WebSocket connections from a JSON object
+ * shaped like: { properties: { websockets: [ { name, url, destinations } ] } }
+ * Each connection is registered in WebSocketManager.
+ */
+function initWebSocketsFromConfig(config) {
+  if (!config || !config.websockets || !Array.isArray(config.websockets)) {
+    throw new Error('Invalid config structure for WS creation');
+  }
+
+  for (const wsDef of config.websockets) {
+    const { name, url, destinations } = wsDef;
+    if (!name || !url || !Array.isArray(destinations)) {
+      console.warn('Invalid websocket entry, skipping:', wsDef);
+      continue;
+    }
+
+    WebSocketManager.createConnection({
+      name,
+      endpoint: url,
+      subscriptions: destinations.map(d => ({ destination: d })),
+      onConnect: () => console.log(`Connected via config [${name}]`)
+    });
   }
 }

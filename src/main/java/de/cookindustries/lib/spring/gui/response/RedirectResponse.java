@@ -9,13 +9,15 @@ package de.cookindustries.lib.spring.gui.response;
 
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 @SuperBuilder
 @Getter
 @Jacksonized
-public class RedirectResponse extends Response
+@ToString
+public final class RedirectResponse extends Response
 {
 
     @NonNull

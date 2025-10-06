@@ -80,6 +80,8 @@ public final class GUIFactory
                 .jsScript(new JsPlainLink("/webjars/jquery/jquery.min.js"))
                 .jsScript(new JsPlainLink("/webjars/bootstrap/js/bootstrap.min.js"))
                 .jsScript(new JsPlainLink("/webjars/yaireo__tagify/dist/tagify.js"))
+                .jsScript(new JsPlainLink("/webjars/sockjs-client/sockjs.min.js"))
+                .jsScript(new JsPlainLink("/webjars/stomp-websocket/stomp.min.js"))
                 .cssLink(new CSSLink("/webjars/bootstrap/css/bootstrap.min.css"))
                 .cssLink(new CSSLink("/webjars/yaireo__tagify/dist/tagify.css"))
                 .cssLink(new CSSLink("/css/cook-industries-core.css"))
@@ -180,6 +182,13 @@ public final class GUIFactory
             .jsScripts(basicImports.getJsScripts())
             .cssLinks(basicImports.getCssLinks())
             .cssEntities(basicImports.getCssEntities())
+            .container(
+                TextContainer
+                    .builder()
+                    .uid("ui-properties-url")
+                    .clazz("hidden")
+                    .text(imports.getJsPropertiesUrl())
+                    .build())
             .container(
                 ContentContainer
                     .builder()

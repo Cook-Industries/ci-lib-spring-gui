@@ -11,6 +11,7 @@ import java.util.List;
 
 import lombok.Getter;
 import lombok.Singular;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -21,7 +22,8 @@ import lombok.extern.jackson.Jacksonized;
 @SuperBuilder
 @Getter
 @Jacksonized
-public class CompoundResponse extends Response
+@ToString
+public final class CompoundResponse extends Response
 {
 
     @Singular

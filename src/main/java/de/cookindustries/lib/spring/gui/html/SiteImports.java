@@ -12,6 +12,7 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
+import lombok.Builder.Default;
 
 @Builder
 @Getter
@@ -32,5 +33,8 @@ public class SiteImports
 
     @Singular
     private final List<JsImport>      jsImports;
+
+    @Default
+    private final String              jsPropertiesUrl = "";
 
 }

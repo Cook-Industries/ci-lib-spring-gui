@@ -45,4 +45,7 @@ public enum ResponseAction {
 
     /** initiate a redirect on the client */
     REDIRECT,
+
+    /** send dynamic properties to the ui */
+    PROPERTIES;
 }
