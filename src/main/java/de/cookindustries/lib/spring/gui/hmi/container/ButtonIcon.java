@@ -7,9 +7,9 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.container;
 
-import de.cookindustries.lib.spring.gui.hmi.input.ButtonClass;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -24,10 +24,14 @@ public final class ButtonIcon extends Container
 {
 
     @NonNull
-    private String      image;
+    private final String      image;
+
+    @Default
+    private final String      title    = null;
 
     @NonNull
-    private ButtonClass btnClass;
+    @Default
+    private final ButtonClass btnClass = ButtonClass.DEFAULT;
 
     @Override
     protected ContainerType inferType()

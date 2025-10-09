@@ -7,13 +7,9 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input;
 
-import java.util.List;
-
 import de.cookindustries.lib.spring.gui.hmi.UiElement;
-import de.cookindustries.lib.spring.gui.hmi.input.marker.Marker;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Singular;
 import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 
@@ -28,13 +24,10 @@ public abstract class Input extends UiElement
 
     @NonNull
     @Default
-    private String             onInput = "";
-
-    @Singular("marker")
-    private final List<Marker> marker;
+    private final String    onInput = "";
 
     @NonNull
-    private final InputType    type    = inferType();
+    private final InputType type    = inferType();
 
     protected abstract InputType inferType();
 }

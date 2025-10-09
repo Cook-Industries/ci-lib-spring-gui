@@ -7,17 +7,27 @@
  */
 package de.cookindustries.lib.spring.gui.function;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+/**
+ * Function to register a Tag-input.
+ * <p>
+ * This function gets assigned automatic when a Tag-input gets created.
+ * 
+ * @since 3.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
+@Data
+@EqualsAndHashCode(callSuper = false)
 public class RegisterTagInput extends AbsFunctionCall
 {
 
-    public RegisterTagInput(String uid, String fetchUrl, String searchUrl, boolean enforceWhitelist)
+    public RegisterTagInput(TagInputSettings settings)
     {
         super();
 
-        setParam(uid);
-        setParam(fetchUrl);
-        setParam(searchUrl);
-        setParam(enforceWhitelist);
+        setParam(settings);
     }
 
     @Override
@@ -29,6 +39,6 @@ public class RegisterTagInput extends AbsFunctionCall
     @Override
     protected Integer numberOfParameters()
     {
-        return 4;
+        return 1;
     }
 }

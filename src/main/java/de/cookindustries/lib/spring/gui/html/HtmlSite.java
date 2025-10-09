@@ -11,12 +11,11 @@ import java.util.List;
 
 import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
-import de.cookindustries.lib.spring.gui.hmi.mapper.ContainerHtmlMapper;
+import de.cookindustries.lib.spring.gui.hmi.mapper.html.HtmlMapper;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Singular;
 
 /**
@@ -28,9 +27,6 @@ import lombok.Singular;
 public class HtmlSite implements HtmlExportable
 {
 
-    @NonNull
-    private final String                title;
-
     @Singular
     private final List<HtmlHeadValue>   headers;
 
@@ -38,7 +34,7 @@ public class HtmlSite implements HtmlExportable
     private final List<CSSLink>         cssLinks;
 
     @Singular
-    private final List<CSSEntity>       cssEntities;
+    private final List<CssEntity>       cssEntities;
 
     @Singular
     private final List<AbsJsLink>       jsScripts;
@@ -64,7 +60,7 @@ public class HtmlSite implements HtmlExportable
             .appendnl(headers, HtmlHeadValue::getHtmlRep)
             .appendnl(cssLinks, CSSLink::getHtmlRep)
             .appendnl("<style>")
-            .appendnl(cssEntities, CSSEntity::getHtmlRep)
+            .appendnl(cssEntities, CssEntity::toCssString)
             .appendnl("</style>")
             .appendnl(
                 JsImportMap
@@ -75,11 +71,11 @@ public class HtmlSite implements HtmlExportable
             .appendnl(jsScripts, AbsJsLink::getHtmlRep)
             .appendnl("</head>")
             .appendnl("<body>")
-            .appendnl(containers, c -> ContainerHtmlMapper.map(c))
+            .appendnl(containers, HtmlMapper::map)
             .appendnl("<script>")
-            .appendnl("document.addEventListener(\"DOMContentLoaded\", () => setTimeout(__onPageLoad, 1000));")
+            .appendnl("document.addEventListener(\"DOMContentLoaded\", () => setTimeout(__onPageLoad, 100));")
             .appendnl("function __onPageLoad() {")
-            .append(functions, AbsFunctionCall::parseAsJS, title)
+            .appendnl(functions, AbsFunctionCall::parseAsJS)
             .appendnl("}")
             .appendnl("</script>")
             .appendnl("</body>")

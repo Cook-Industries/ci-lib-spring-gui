@@ -21,7 +21,10 @@ public final class Tag extends SubmittableInput
 
     @NonNull
     @Default
-    private String value = "";
+    private final String value   = "";
+
+    @Default
+    private final String pattern = null;
 
     @Override
     protected InputType inferType()

@@ -32,6 +32,13 @@ public class InputValue
      * the text to this input value
      */
     @NonNull
+    @Default
+    private final String       id      = "";
+
+    /**
+     * the text to this input value
+     */
+    @NonNull
     private final String       text;
 
     /**
@@ -45,7 +52,7 @@ public class InputValue
      */
     @NonNull
     @Default
-    private Boolean            checked = false;
+    private final Boolean      checked = false;
 
     /**
      * styling classes for this input value

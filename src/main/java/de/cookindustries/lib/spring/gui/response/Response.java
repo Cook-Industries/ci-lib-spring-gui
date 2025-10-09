@@ -14,6 +14,7 @@ import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -22,6 +23,7 @@ import lombok.experimental.SuperBuilder;
  */
 @SuperBuilder
 @Getter
+@ToString
 public abstract class Response
 {
 

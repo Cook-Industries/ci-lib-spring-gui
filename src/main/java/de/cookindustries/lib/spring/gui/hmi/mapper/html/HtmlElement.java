@@ -1,0 +1,154 @@
+/**
+ * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
+ * <p>
+ * Licensed under the MIT License.
+ * <p>
+ * See LICENSE file in the project root for full license information.
+ */
+package de.cookindustries.lib.spring.gui.hmi.mapper.html;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import de.cookindustries.lib.spring.gui.util.StringAdapter;
+import de.cookindustries.lib.spring.gui.util.StringConcat;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Singular;
+import lombok.Builder.Default;
+
+/**
+ * Object to build a HTML representation.
+ * 
+ * @since 1.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
+@Builder(toBuilder = true)
+@Getter
+public final class HtmlElement
+{
+
+    private static final String       LT          = "<";
+    private static final String       LTS         = "</";
+    private static final String       GT          = ">";
+    private static final String       GTS         = "/>";
+    private static final String       SPACE       = " ";
+    private static final String       QTM         = "\"";
+
+    /**
+     * The HTML tag of this element
+     */
+    @NonNull
+    private final String              tag;
+
+    /**
+     * A list of HTML attributes, except the 'class' attribute.
+     * <p>
+     * To set 'class' values use {@link HtmlElementBuilder#clazz(String)} or {@link HtmlElementBuilder#classes(java.util.Collection)}
+     */
+    @Singular
+    private final List<Attribute>     attributes;
+
+    /**
+     * A list of classes for this element
+     */
+    @Singular("clazz")
+    private final Set<String>         classes;
+
+    /**
+     * A map of HTML 'data-' attributes
+     */
+    @Singular
+    private final Map<String, String> dataAttributes;
+
+    /**
+     * Whether this element is a single tag and has no closing '</tag>'
+     */
+    @Default
+    private final boolean             isSingleTag = false;
+
+    /**
+     * A list of {@code String}s between the opening and closing tag. They get appened one after another
+     * <p>
+     * Is only used if {@link HtmlElementBuilder#isSingleTag(Boolean)} is {@code true}.
+     */
+    @Singular
+    private final List<String>        contents;
+
+    @Default
+    private final boolean             inactive    = false;
+
+    /**
+     * Generate a HTML string from this object
+     * 
+     * @return a HTML string of this object
+     */
+    public String html()
+    {
+        if (inactive)
+        {
+            return "";
+        }
+
+        StringConcat sc = new StringConcat();
+
+        sc
+            .append(StringAdapter.prefix(LT, tag))
+
+            .append(!attributes.isEmpty(), SPACE)
+            .append(!attributes.isEmpty(), getAttributes())
+
+            .append(!classes.isEmpty(), SPACE)
+            .append(!classes.isEmpty(), StringAdapter.prefixAndSuffix("class=\"", StringAdapter.separate(classes, SPACE), QTM))
+
+            .append(!dataAttributes.isEmpty(), SPACE)
+            .append(!dataAttributes.isEmpty(), getDataAttributes());
+
+        if (isSingleTag)
+        {
+            sc.append(GTS);
+        }
+        else
+        {
+            sc
+                .append(GT)
+                .append(!contents.isEmpty(), () -> StringAdapter.from(contents))
+                .append(StringAdapter.prefixAndSuffix(LTS, tag, GT));
+        }
+
+        return sc.toString();
+    }
+
+    /**
+     * Get the attributes as a {@code String}
+     * 
+     * @return a {@code String} representation of the attributes
+     */
+    private String getAttributes()
+    {
+        return attributes
+            .stream()
+            .map(att -> att.getHtmlRep())
+            .filter(str -> !str.isBlank())
+            .collect(Collectors.joining(SPACE));
+    }
+
+    /**
+     * Get the data-attributes as a {@code String}
+     * 
+     * @return a {@code String} representation of the data-attributes
+     */
+    private String getDataAttributes()
+    {
+        return dataAttributes
+            .entrySet()
+            .stream()
+            .filter(da -> da.getValue() != null)
+            .map(daa -> StringAdapter.prefixAndSuffix("data-", daa.getKey(), "=\"") + StringAdapter.suffix(daa.getValue(), QTM))
+            .collect(Collectors.joining(SPACE));
+    }
+
+}

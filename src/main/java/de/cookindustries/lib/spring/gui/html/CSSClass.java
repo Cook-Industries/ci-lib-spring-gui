@@ -7,23 +7,18 @@
  */
 package de.cookindustries.lib.spring.gui.html;
 
+import lombok.Data;
+
 /**
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-public enum CSSClass {
+@Data
+public final class CssClass
+{
 
-    HIDDEN("hidden");
+    public static final String HIDDEN = "hidden";
 
-    private final String className;
+    private final String       name;
 
-    private CSSClass(String className)
-    {
-        this.className = className;
-    }
-
-    public String getClassName()
-    {
-        return className;
-    }
 }

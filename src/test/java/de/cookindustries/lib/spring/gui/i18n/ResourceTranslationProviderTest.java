@@ -21,7 +21,6 @@ class ResourceTranslationProviderTest
     void test_initMaps()
     {
         // setup
-        @SuppressWarnings("deprecation")
         Locale                      locale                      = new Locale("de", "DE");
         ResourceTranslationProvider resourceTranslationProvider =
             new ResourceTranslationProvider(

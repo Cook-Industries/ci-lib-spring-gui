@@ -11,7 +11,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.lang.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for creation of {@link Locale} based translations.
@@ -22,10 +23,14 @@ import org.springframework.lang.NonNull;
 public abstract class AbsTranslationProvider
 {
 
-    private Map<Locale, Map<String, String>> translations = new ConcurrentHashMap<>();
+    private static final Logger                    LOG = LoggerFactory.getLogger(AbsTranslationProvider.class);
+
+    private final Map<Locale, Map<String, String>> translations;
 
     protected AbsTranslationProvider()
-    {}
+    {
+        translations = new ConcurrentHashMap<>();
+    }
 
     /**
      * Method to be implemented by concrete class to fill the {@code Translations}.
@@ -76,7 +81,7 @@ public abstract class AbsTranslationProvider
      * @return either the associated text, or "I18N [{@code key}] not set." if no associate exists
      * @throws IllegalArgumentException if {@code locale} is null, or if {@code key} is null or empty
      */
-    public final String getText(Locale locale, @NonNull String key)
+    public final String getText(Locale locale, String key)
     {
         if (locale == null)
         {
@@ -89,7 +94,18 @@ public abstract class AbsTranslationProvider
         }
 
         Map<String, String> map = translations.get(locale);
+        String              translation;
 
-        return map != null && map.get(key) != null ? map.get(key) : String.format("I18N [%s] not set.", key);
+        if (map != null && map.get(key) != null)
+        {
+            translation = map.get(key);
+        }
+        else
+        {
+            translation = String.format("I18N [%s] not set.", key);
+            LOG.warn("no translation defined for [{}]", key);
+        }
+
+        return translation;
     }
 }

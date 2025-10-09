@@ -14,24 +14,12 @@ import org.junit.jupiter.api.Test;
 class OpenSiteTest
 {
 
-    private class TestObject extends AbsFunctionArgs
-    {
-
-        private final int uid = 2;
-
-        @SuppressWarnings("unused")
-        public int getUid()
-        {
-            return uid;
-        }
-    }
-
     @Test
     void test_constructor()
     {
         // setup
         String   requestUrl = "/test";
-        OpenSite call       = new OpenSite(requestUrl, new TestObject());
+        OpenSite call       = new OpenSite(requestUrl, TestObject.builder().uid(2).build());
 
         // run
         String   result     = call.parseAsJS();

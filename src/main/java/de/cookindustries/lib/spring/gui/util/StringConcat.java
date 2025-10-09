@@ -36,9 +36,19 @@ public final class StringConcat
     /**
      * Append a {@code new-line}.
      */
-    public void nl()
+    public StringConcat nl()
     {
-        stb.append(System.lineSeparator());
+        return nl(true);
+    }
+
+    /**
+     * Append a {@code new-line}.
+     * 
+     * @param apply whether {@code string} should be appended
+     */
+    public StringConcat nl(boolean apply)
+    {
+        return append(apply, System.lineSeparator());
     }
 
     /**
@@ -63,9 +73,8 @@ public final class StringConcat
     public StringConcat appendnl(String string)
     {
         append(string);
-        nl();
 
-        return this;
+        return nl();
     }
 
     /**
@@ -167,9 +176,7 @@ public final class StringConcat
     {
         append(element.name());
 
-        nl();
-
-        return this;
+        return nl();
     }
 
     /**
@@ -194,9 +201,7 @@ public final class StringConcat
     public StringConcat appendnl(Character character)
     {
         append(character);
-        nl();
-
-        return this;
+        return nl();
     }
 
     /**
@@ -221,9 +226,7 @@ public final class StringConcat
     public StringConcat appendnl(Integer integer)
     {
         append(integer);
-        nl();
-
-        return this;
+        return nl();
     }
 
     /**
@@ -237,7 +240,22 @@ public final class StringConcat
      */
     public <T> StringConcat append(Collection<T> items, String separator)
     {
-        if (Objects.nonNull(items) && Objects.nonNull(separator))
+        return append(true, items, separator);
+    }
+
+    /**
+     * Append a single line containing all elements from {@code items}, sepearated each by {@code separator}.
+     * <p>
+     * If either of the parameters is {@code null} this method does nothing and just returns.
+     * 
+     * @param apply whether {@code items} should be appended
+     * @param items {@code non-null} collection to append (items themselves can be {@code null})
+     * @param separator {@code non-null} {@code separator} to insert between each {@code item}
+     * @return this object for chaining
+     */
+    public <T> StringConcat append(boolean apply, Collection<T> items, String separator)
+    {
+        if (apply && Objects.nonNull(items) && Objects.nonNull(separator))
         {
             append(
                 items
@@ -247,6 +265,37 @@ public final class StringConcat
         }
 
         return this;
+    }
+
+    /**
+     * Append all elements from {@code items} with the content derived by {@code function}, each on a new line.
+     * <p>
+     * If either of the parameters is {@code null} this method does nothing and just returns.
+     * 
+     * @param items {@code non-null} collection to append (items themselves can be {@code null})
+     * @param function to retrive a {@code String} from each {@code item}
+     * @return this object for chaining
+     */
+    public <T> StringConcat appendnl(Collection<T> items, Function<T, String> function)
+    {
+        return append(items, function, "\n");
+    }
+
+    /**
+     * Append all elements from {@code items} with the content derived by {@code function}, each on a new line.
+     * <p>
+     * If either of the parameters is {@code null} this method does nothing and just returns.
+     * 
+     * @param apply whether {@code items} should be appended
+     * @param items {@code non-null} collection to append (items themselves can be {@code null})
+     * @param function to retrive a {@code String} from each {@code item}
+     * @return this object for chaining
+     */
+    public <T> StringConcat appendnl(boolean apply, Collection<T> items, Function<T, String> function)
+    {
+        append(apply, items, function, "\n");
+
+        return nl(apply);
     }
 
     /**
@@ -274,17 +323,28 @@ public final class StringConcat
     }
 
     /**
-     * Append all elements from {@code items} with the content derived by {@code function}, each on a new line.
+     * Append all elements from {@code items} with the content derived by {@code function}, joined by {@code separator}.
      * <p>
      * If either of the parameters is {@code null} this method does nothing and just returns.
      * 
+     * @param apply whether {@code items} should be appended
      * @param items {@code non-null} collection to append (items themselves can be {@code null})
      * @param function to retrive a {@code String} from each {@code item}
+     * @param separator {@code non-null} {@code separator} to insert between each {@code item}
      * @return this object for chaining
      */
-    public <T> StringConcat appendnl(Collection<T> items, Function<T, String> function)
+    public <T> StringConcat append(boolean apply, Collection<T> items, Function<T, String> function, String separator)
     {
-        return append(items, function, "\n");
+        if (apply && Objects.nonNull(items) && Objects.nonNull(separator))
+        {
+            append(
+                items
+                    .stream()
+                    .map(function)
+                    .collect(Collectors.joining(separator)));
+        }
+
+        return this;
     }
 
     /**

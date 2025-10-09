@@ -9,21 +9,29 @@ package de.cookindustries.lib.spring.gui.i18n;
 
 import java.util.List;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Singular;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@Data
-@NoArgsConstructor
-public class TranslationMapping
+@Builder
+@Getter
+@Jacksonized
+public final class TranslationMapping
 {
 
-    private String                       language;
+    @NonNull
+    private final String                 language;
 
-    private String                       country;
+    @NonNull
+    private final String                 country;
 
+    @Singular
     private List<TranslationMappingText> texts;
+
 }

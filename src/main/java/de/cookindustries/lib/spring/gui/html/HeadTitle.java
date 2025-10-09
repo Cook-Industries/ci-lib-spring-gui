@@ -11,7 +11,7 @@ package de.cookindustries.lib.spring.gui.html;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-class HeadTitle extends HtmlHeadValue
+public class HeadTitle extends HtmlHeadValue
 {
 
     public HeadTitle(String value)

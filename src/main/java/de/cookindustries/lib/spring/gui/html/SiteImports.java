@@ -12,6 +12,7 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
+import lombok.Builder.Default;
 
 @Builder
 @Getter
@@ -25,12 +26,15 @@ public class SiteImports
     private final List<CSSLink>       cssLinks;
 
     @Singular
-    private final List<CSSEntity>     cssEntities;
+    private final List<CssEntity>     cssEntities;
 
     @Singular
     private final List<AbsJsLink>     jsScripts;
 
     @Singular
     private final List<JsImport>      jsImports;
+
+    @Default
+    private final String              jsPropertiesUrl = "";
 
 }

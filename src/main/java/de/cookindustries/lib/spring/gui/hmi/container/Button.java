@@ -7,7 +7,6 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.container;
 
-import de.cookindustries.lib.spring.gui.hmi.input.ButtonClass;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Builder.Default;
@@ -25,10 +24,14 @@ public final class Button extends Container
 {
 
     @NonNull
-    private String      text;
+    private final String      text;
 
     @Default
-    private ButtonClass btnClass = ButtonClass.DEFAULT;
+    private final String      title    = null;
+
+    @NonNull
+    @Default
+    private final ButtonClass btnClass = ButtonClass.DEFAULT;
 
     @Override
     protected ContainerType inferType()

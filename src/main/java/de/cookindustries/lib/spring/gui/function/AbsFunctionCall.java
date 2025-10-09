@@ -16,7 +16,7 @@ import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.Getter;
 
 /**
- * A generic function definition to send to a receiver
+ * A generic function definition to send to a receiver.
  * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>

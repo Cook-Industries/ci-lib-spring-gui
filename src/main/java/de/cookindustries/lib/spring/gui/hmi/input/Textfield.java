@@ -28,23 +28,23 @@ public final class Textfield extends SubmittableInput
 
     @NonNull
     @Default
-    private String value         = "";
+    private final String  value         = "";
 
     @NonNull
     @Default
-    private String placeholder   = "";
+    private final String  placeholder   = "";
 
     @Default
-    private String prefix        = "";
+    private final String  prefix        = "";
 
     @Default
-    private String suffix        = "";
+    private final String  suffix        = "";
 
     @Default
-    private int    maxCharacters = Integer.MAX_VALUE;
+    private final Integer maxCharacters = Integer.MAX_VALUE;
 
     @Default
-    private String onKeydown     = "";
+    private final String  onKeydown     = "";
 
     @Override
     protected InputType inferType()

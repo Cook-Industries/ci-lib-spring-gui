@@ -10,16 +10,27 @@ package de.cookindustries.lib.spring.gui.function;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+/**
+ * Function to request a Modal from the backend.
+ * 
+ * @since 3.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
 @Data
 @EqualsAndHashCode(callSuper = false)
 public final class RequestModal extends AbsFunctionCall
 {
 
-    public RequestModal(String requestUrl, AbsFunctionArgs args)
+    public RequestModal(String url)
+    {
+        this(url, null);
+    }
+
+    public RequestModal(String url, AbsFunctionArgs args)
     {
         super();
 
-        setParam(requestUrl);
+        setParam(url);
         setParam(args);
     }
 

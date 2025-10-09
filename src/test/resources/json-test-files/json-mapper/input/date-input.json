@@ -1,22 +1,19 @@
 {
-    "handling": "static",
-    "root": {
-        "uid": "uid",
-        "type": "FORM",
-        "classes": [],
-        "attributes": {},
-        "parameters": {},
-        "children": [
-            {
-                "uid": "uid",
-                "type": "DATE",
-                "classes": [],
-                "attributes": {},
-                "parameters": {
-                    "name": "name",
-                    "submitAs": "date"
-                }
+    "uid": "uid",
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "DATE",
+            "classes": [],
+            "attributes": {},
+            "parameters": {
+                "name": "name",
+                "submitAs": "date"
             }
-        ]
-    }
+        }
+    ]
 }

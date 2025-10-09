@@ -1,17 +1,14 @@
 {
-    "handling": "static",
-    "root": {
-        "uid": "uid",
-        "type": "LINK",
-        "classes": [
-            "class1"
-        ],
-        "attributes": {
-            "key1": "value1"
-        },
-        "parameters": {
-            "href": "link/to/somewhere"
-        },
-        "children": []
-    }
+    "uid": "uid",
+    "type": "LINK",
+    "classes": [
+        "class1"
+    ],
+    "attributes": {
+        "key1": "value1"
+    },
+    "parameters": {
+        "href": "link/to/somewhere"
+    },
+    "children": []
 }

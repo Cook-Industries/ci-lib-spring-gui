@@ -10,7 +10,7 @@ package de.cookindustries.lib.spring.gui.hmi.container;
 import java.util.List;
 
 import de.cookindustries.lib.spring.gui.function.CloseModal;
-import de.cookindustries.lib.spring.gui.hmi.input.ButtonClass;
+import de.cookindustries.lib.spring.gui.function.SubmitFromModal;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
@@ -27,47 +27,49 @@ public final class ModalContainer extends Container
 {
 
     @NonNull
-    private String          name;
+    private final String          name;
 
     @NonNull
-    private String          requestUrl;
+    @Default
+    private final String          requestUrl          = "";
 
     @Default
-    private String          btnNameLeft         = null;
-
-    @Default
-    @NonNull
-    private ButtonClass     btnClassLeft        = ButtonClass.DEFAULT;
-
-    @Default
-    private String          btnFunctionLeft     = null;
-
-    @Default
-    private String          btnNameCenter       = null;
-
-    @Default
-    @NonNull
-    private ButtonClass     btnClassCenter      = ButtonClass.DEFAULT;
-
-    @Default
-    private String          btnFunctionCenter   = null;
+    private final String          btnNameLeft         = null;
 
     @NonNull
-    private String          btnNameRight;
+    @Default
+    private final ButtonClass     btnClassLeft        = ButtonClass.DEFAULT;
 
     @Default
+    private final String          btnFunctionLeft     = new CloseModal().parseAsJS();
+
+    @Default
+    private final String          btnNameCenter       = null;
+
     @NonNull
-    private ButtonClass     btnClassRight       = ButtonClass.DEFAULT;
+    @Default
+    private final ButtonClass     btnClassCenter      = ButtonClass.DEFAULT;
 
     @Default
-    private String          btnFunctionRight    = new CloseModal().parseAsJS();
+    private final String          btnFunctionCenter   = null;
+
+    @NonNull
+    private final String          btnNameRight;
+
+    @NonNull
+    @Default
+    private final ButtonClass     btnClassRight       = ButtonClass.DEFAULT;
+
+    @Default
+    private final String          btnFunctionRight    = new SubmitFromModal().parseAsJS();
 
     @NonNull
     @Singular
-    private List<Container> contents;
+    private final List<Container> contents;
 
+    @NonNull
     @Default
-    private boolean         closeOnOverlayClick = false;
+    private final Boolean         closeOnOverlayClick = Boolean.FALSE;
 
     @Override
     protected ContainerType inferType()

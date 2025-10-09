@@ -10,9 +10,17 @@ package de.cookindustries.lib.spring.gui.function;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
-@Data
+/**
+ * Arguments that should be transmitted with a {@link AbsFunctionCall}.
+ * 
+ * @since 3.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
+@SuperBuilder
+@Getter
 public abstract class AbsFunctionArgs
 {
 

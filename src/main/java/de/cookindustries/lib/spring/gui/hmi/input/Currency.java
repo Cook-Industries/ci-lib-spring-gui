@@ -9,6 +9,7 @@ package de.cookindustries.lib.spring.gui.hmi.input;
 
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -22,19 +23,26 @@ import lombok.extern.jackson.Jacksonized;
 public final class Currency extends SubmittableInput
 {
 
-    private int    valueF;
-
-    private int    valueB;
+    @NonNull
+    private final Integer valueF;
 
     @NonNull
-    private String symbol;
-
-    private int    min;
-
-    private int    max;
+    private final Integer valueB;
 
     @NonNull
-    private String placeholder;
+    private final String  symbol;
+
+    @NonNull
+    @Default
+    private final Integer min         = Integer.MIN_VALUE;
+
+    @NonNull
+    @Default
+    private final Integer max         = Integer.MAX_VALUE;
+
+    @NonNull
+    @Default
+    private String        placeholder = "0.0";
 
     @Override
     protected InputType inferType()

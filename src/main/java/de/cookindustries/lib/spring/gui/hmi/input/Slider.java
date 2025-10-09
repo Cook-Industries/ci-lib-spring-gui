@@ -8,6 +8,7 @@
 package de.cookindustries.lib.spring.gui.hmi.input;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -21,11 +22,14 @@ import lombok.extern.jackson.Jacksonized;
 public final class Slider extends SubmittableInput
 {
 
-    private final int value;
+    @NonNull
+    private final Integer value;
 
-    private final int min;
+    @NonNull
+    private final Integer min;
 
-    private final int max;
+    @NonNull
+    private final Integer max;
 
     @Override
     protected InputType inferType()

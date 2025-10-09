@@ -12,13 +12,15 @@ import java.util.List;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 @SuperBuilder
 @Getter
 @Jacksonized
-public class FetchTagsResponse extends Response
+@ToString
+public final class FetchTagsResponse extends Response
 {
 
     @NonNull

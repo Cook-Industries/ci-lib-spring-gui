@@ -16,11 +16,4 @@ package de.cookindustries.lib.spring.gui.hmi.input.util.exception;
 public final class ValueNotPresentException extends RuntimeException
 {
 
-    /**
-     * @param key used to lookup
-     */
-    public ValueNotPresentException(String key)
-    {
-        super(String.format("key [%s] was expected but was null", key));
-    }
 }

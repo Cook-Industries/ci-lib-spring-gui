@@ -8,6 +8,7 @@
 package de.cookindustries.lib.spring.gui.hmi.input;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -21,7 +22,8 @@ import lombok.extern.jackson.Jacksonized;
 public final class Switch extends SubmittableInput
 {
 
-    private final boolean checked;
+    @NonNull
+    private final Boolean checked;
 
     @Override
     protected InputType inferType()

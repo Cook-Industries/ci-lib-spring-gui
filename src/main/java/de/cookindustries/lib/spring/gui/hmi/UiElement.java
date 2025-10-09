@@ -11,10 +11,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import io.micrometer.common.lang.NonNull;
 import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Singular;
 
 /**
@@ -33,18 +33,25 @@ public abstract class UiElement
      */
     @NonNull
     @Default
-    private String              uid = UUID.randomUUID().toString();
+    private final String              uid     = UUID.randomUUID().toString();
 
     /**
      * a list of styling classes
      */
     @Singular("clazz")
-    private Set<String>         classes;
+    private final Set<String>         classes;
+
+    /**
+     * a text for a {@code tooltip} to show on this element triggerd by a onHover-event
+     */
+    @NonNull
+    @Default
+    private final String              tooltip = "";
 
     /**
      * a map of attributes for this element
      */
     @Singular
-    private Map<String, String> dataAttributes;
+    private final Map<String, String> dataAttributes;
 
 }

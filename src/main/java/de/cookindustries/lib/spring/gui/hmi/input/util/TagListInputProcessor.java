@@ -1,0 +1,98 @@
+/**
+ * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
+ * <p>
+ * Licensed under the MIT License.
+ * <p>
+ * See LICENSE file in the project root for full license information.
+ */
+package de.cookindustries.lib.spring.gui.hmi.input.util;
+
+import java.util.List;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Singular;
+import lombok.experimental.SuperBuilder;
+import lombok.Builder.Default;
+
+/**
+ * A processor to parse and check a {@code input} as {@link Boolean}.
+ * 
+ * @since 2.4.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
+@SuperBuilder
+@Getter
+public final class TagListInputProcessor extends AbsInputProcessor<TagList>
+{
+
+    private static final ObjectMapper TAG_LIST_MAPPER = new ObjectMapper();
+
+    /** Whether or not an empty {@code input} is allowed */
+    @Default
+    @NonNull
+    private final Boolean             allowEmpty      = true;
+
+    /** Default value if the {@code input} is empty */
+    @Default
+    private final TagList             fallback        = new TagList();
+
+    /** Whitelist value if the {@code input} is empty */
+    @Singular("whitelist")
+    private final List<Tag>           whitelist;
+
+    @Override
+    protected TagList parseRaw(String input)
+    {
+        if (input.isEmpty() || input.equals("[]"))
+        {
+            return new TagList();
+        }
+
+        try
+        {
+            return TAG_LIST_MAPPER.readValue(input, TagList.class);
+        }
+        catch (Exception ex)
+        {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    @Override
+    protected InputCheckResult<TagList> check(TagList input)
+    {
+        if (input.isEmpty())
+        {
+            if (allowEmpty)
+            {
+                if (fallback != null)
+                {
+                    return createResult(InputCheckResultType.PASS, fallback);
+                }
+
+                return createResult(InputCheckResultType.PASS, new TagList());
+            }
+
+            return createEmptyResult(InputCheckResultType.EMPTY_BUT_EXPECTED);
+        }
+
+        TagList tagList = new TagList();
+
+        if (!whitelist.isEmpty())
+        {
+            List<Tag> tags = input.stream().filter(whitelist::contains).toList();
+
+            tagList.addAll(tags);
+        }
+        else
+        {
+            tagList.addAll(input);
+        }
+
+        return createResult(InputCheckResultType.PASS, tagList);
+    }
+
+}

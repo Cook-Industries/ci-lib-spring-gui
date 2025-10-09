@@ -1,15 +1,12 @@
 {
-    "handling": "static",
-    "root": {
-        "uid": "uid",
-        "type": "TAB",
-        "classes": [
-            "class1"
-        ],
-        "attributes": {
-            "key1": "value1"
-        },
-        "parameters": {},
-        "children": []
-    }
+    "uid": "uid",
+    "type": "TAB",
+    "classes": [
+        "class1"
+    ],
+    "attributes": {
+        "key1": "value1"
+    },
+    "parameters": {},
+    "children": []
 }

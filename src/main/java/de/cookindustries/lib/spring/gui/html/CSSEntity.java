@@ -7,13 +7,17 @@
  */
 package de.cookindustries.lib.spring.gui.html;
 
-import java.util.List;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * @since 1.0.0
@@ -21,33 +25,89 @@ import lombok.Singular;
  */
 @Builder
 @Getter
-public class CSSEntity implements HtmlExportable
+@EqualsAndHashCode
+@Jacksonized
+public final class CssEntity
 {
 
-    @NonNull
-    private final String             name;
+    private static final String       INDENT = "    ";
 
     @NonNull
-    private final CSSEntityType      type;
+    private final String              selector;
 
     @Singular
-    private final List<CSSAttribute> attributes;
+    private final Map<String, String> attributes;
 
-    @Override
-    public String getHtmlRep()
+    /**
+     * Create a css object representation of this instance
+     * 
+     * @return this instance as a css string
+     */
+    public String toCssString()
     {
         StringConcat sc = new StringConcat();
 
-        sc.appendnl("");
-        sc.append(type.getPrefix());
-        sc.append(name);
-        sc.appendnl(" {");
+        sc.appendnl();
+        sc.appendnl(selector);
+        sc.appendnl("{");
 
-        attributes.forEach(h -> sc.appendnl(h.getHtmlRep()));
+        attributes
+            .entrySet()
+            .stream()
+            .sorted(Entry.comparingByKey())
+            .forEach(a -> sc.appendnl(String.format("%s%s: %s;", INDENT, a.getKey(), a.getValue())));
 
         sc.appendnl("}");
 
         return sc.toString();
+    }
+
+    /**
+     * Get a {@link Comparator} for these entities which first orders them by:
+     * <ul>
+     * <li>:</li>
+     * <li>.</li>
+     * <li>#</li>
+     * </ul>
+     * and then by {@code name}.
+     * 
+     * @return the setup {@code Comparator}
+     */
+    public static Comparator<CssEntity> compareByFirstChar()
+    {
+        return Comparator
+            .comparingInt(CssEntity::getNamePriority)
+            .thenComparing(CssEntity::getSelector);
+    }
+
+    /**
+     * Determines the priority group based on the first character of the name.
+     */
+    private int getNamePriority()
+    {
+        char firstChar = selector.charAt(0);
+
+        if (firstChar == ':')
+        {
+            return 0;
+        }
+
+        if (Character.isLetter(firstChar))
+        {
+            return 1;
+        }
+
+        if (firstChar == '.')
+        {
+            return 2;
+        }
+
+        if (firstChar == '#')
+        {
+            return 3;
+        }
+
+        return 4;
     }
 
 }

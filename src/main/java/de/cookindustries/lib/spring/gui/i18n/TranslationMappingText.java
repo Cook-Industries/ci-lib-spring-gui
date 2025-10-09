@@ -7,22 +7,27 @@
  */
 package de.cookindustries.lib.spring.gui.i18n;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@Data
-@NoArgsConstructor
+@Builder
+@Getter
+@Jacksonized
 public class TranslationMappingText
 {
 
     /** key for the translation */
-    private String key;
+    @NonNull
+    private final String key;
 
     /** the translated text */
-    private String text;
+    @NonNull
+    private final String text;
 
 }

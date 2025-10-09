@@ -7,7 +7,6 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.container;
 
-import de.cookindustries.lib.spring.gui.hmi.Position;
 import de.cookindustries.lib.spring.gui.hmi.UiElement;
 import lombok.Getter;
 import lombok.NonNull;
@@ -30,31 +29,16 @@ public abstract class Container extends UiElement
      */
     @NonNull
     @Default
-    private Direction           direction       = Direction.NONE;
+    private final Direction     direction = Direction.NONE;
 
     /**
      * a function to call when this {@code Container} is triggerd by a onClick-event
      */
-    @NonNull
     @Default
-    private String              onClick         = "";
-
-    /**
-     * a text for a {@code tooltip} to show on this element triggerd by a onHover-event
-     */
-    @NonNull
-    @Default
-    private String              tooltip         = "";
-
-    /**
-     * prefered position of {@code tooltip} in relation to the outer bounding of this {@code Container}
-     */
-    @NonNull
-    @Default
-    private Position            tooltipPosition = Position.BOTTOM;
+    private final String        onClick   = null;
 
     @NonNull
-    private final ContainerType type            = inferType();
+    private final ContainerType type      = inferType();
 
     /**
      * Protected function to define the {@link ContainerType} of this class for the internal builder
