@@ -7,6 +7,7 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input;
 
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
@@ -24,6 +25,10 @@ public final class Password extends SubmittableInput
 
     @NonNull
     private final String placeholder;
+
+    @NonNull
+    @Default
+    private final String onEnterPress = "";
 
     @Override
     protected InputType inferType()

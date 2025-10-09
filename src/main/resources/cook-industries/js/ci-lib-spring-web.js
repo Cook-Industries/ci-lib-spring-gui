@@ -1,3 +1,5 @@
+import { Client } from '/webjars/stomp__stompjs/esm6/index.js';
+
 export {
   init,
   GET,
@@ -25,9 +27,11 @@ export {
  * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
-const version = "3.3.2";
+const version = "3.3.3";
 
 const CLASS_HIDDEN = "hidden";
+
+const StompJs = { Client };
 
 function init() {
   window.CILIB = this;
@@ -52,6 +56,22 @@ $(document).ready(function () {
     if (event.target === this) {
       if ($(`#modal-overlay-${openModals} .modal-body`).attr("data-close-on-overlay") === "true") {
         closeModal();
+      }
+    }
+  });
+
+  // trigger button on enter in input with data-on-enter-press attribute
+  $(document).on('keydown', function (event) {
+    if (event.key === 'Enter') {
+      const $active = $(document.activeElement);
+
+      const buttonId = $active.data('on-enter-press');
+      if (buttonId && buttonId !== "") {
+        const $button = $('#' + buttonId);
+        if ($button.length) {
+          event.preventDefault();
+          $button.click();
+        }
       }
     }
   });
@@ -517,6 +537,12 @@ const FunctionRegistry = (function () {
       externalFunctions.set(name, fn);
     },
 
+    hasFunction(name) {
+      const fn = internalFunctions.get(name) || externalFunctions.get(name);
+
+      return typeof fn === "function";
+    },
+
     // Public function caller (calls either internal or user function)
     call(name, ...args) {
       const fn = internalFunctions.get(name) || externalFunctions.get(name);
@@ -798,8 +824,6 @@ function extractValuesToSubmit(target) {
 
   changeGlobalLoaderText(`extract: ${target}`);
 
-  console.log($(`#${target}`).find(`[data-submit-id="${target}"]`));
-
   for (const elem of $(`#${target}`).find(`[data-submit-id="${target}"]`)) {
     if ($(elem).attr("data-submit-as") === "") {
       // no submit id set so ignore input
@@ -953,85 +977,89 @@ const WebSocketManager = (function () {
     endpoint,
     headers = {},
     subscriptions = [],
-    onConnect,
-    onError
+    reconnectInterval = 5000
   }) {
     if (!name) throw new Error('WS Connection name is required');
     if (connections.has(name)) throw new Error(`WS Connection ${name} already exists`);
     if (!endpoint) throw new Error('WS Connection endpoint is required');
 
-    const socket = new SockJS(endpoint);
-    const client = Stomp.over(socket);
+    const client = new StompJs.Client({
+      brokerURL: endpoint,
+      reconnectDelay: reconnectInterval,
+      connectHeaders: headers,
+      debug: () => { },
 
-    client.debug = () => { };
+      onConnect: frame => {
+        console.log(`Connected [${name}]`);
 
-    client.connect(headers, frame => {
-      console.log(`Connected [${name}]`);
-      connections.set(name, client);
+        connections.set(name, client);
 
-      // use static handleResponse instead of custom callbacks
-      for (const { destination } of subscriptions) {
-        client.subscribe(destination, msg => handleResponse(JSON.parse(msg.body)));
+        for (const { destination } of subscriptions) {
+          client.subscribe(destination, msg => handleResponse(JSON.parse(msg.body)));
+        }
+
+        if (FunctionRegistry.hasFunction('onWSConnect')) {
+          FunctionRegistry.call('onWSConnect', name);
+        }
+      },
+
+      onStompError: error => {
+        console.error(`Broker error [${name}]`, error);
+
+        if (FunctionRegistry.hasFunction('onWSError')) {
+          FunctionRegistry.call('onWSError', name, error);
+        }
+      },
+
+      onWebSocketError: error => {
+        console.error(`WebSocket error [${name}]`, error);
       }
-
-      if (onConnect) onConnect(frame);
-    }, error => {
-      console.error(`Connection error [${name}]`, error);
-      if (onError) onError(error);
     });
+
+    client.activate();
 
     return client;
   }
 
-  function get(name) {
-    return connections.get(name);
-  }
-
-  function subscribe(name, destination, callback) {
-    const c = connections.get(name);
-    if (!c) throw new Error(`No connection named ${name}`);
-    return c.subscribe(destination, msg => callback(data));
-  }
-
   function send(name, destination, body) {
     const c = connections.get(name);
+
     if (!c) throw new Error(`No connection named ${name}`);
-    c.send(destination, {}, body);
+
+    c.publish({ destination, body: JSON.stringify(body) });
   }
 
   function disconnect(name) {
     const c = connections.get(name);
+
     if (c) {
-      c.disconnect(() => console.log(`Disconnected [${name}]`));
+      c.deactivate();
       connections.delete(name);
+
+      console.log(`Disconnected [${name}]`);
     }
   }
 
-  return { createConnection, get, subscribe, send, disconnect, handleResponse };
+  return { createConnection, send, disconnect };
 })();
 
-/**
- * Initializes all WebSocket connections from a JSON object
- * shaped like: { properties: { websockets: [ { name, url, destinations } ] } }
- * Each connection is registered in WebSocketManager.
- */
 function initWebSocketsFromConfig(config) {
   if (!config || !config.websockets || !Array.isArray(config.websockets)) {
     throw new Error('Invalid config structure for WS creation');
   }
 
   for (const wsDef of config.websockets) {
-    const { name, url, destinations } = wsDef;
+    const { name, url, destinations, reconnectInterval } = wsDef;
     if (!name || !url || !Array.isArray(destinations)) {
       console.warn('Invalid websocket entry, skipping:', wsDef);
       continue;
     }
 
     WebSocketManager.createConnection({
-      name,
+      name: name,
       endpoint: url,
       subscriptions: destinations.map(d => ({ destination: d })),
-      onConnect: () => console.log(`Connected via config [${name}]`)
+      reconnectInterval: reconnectInterval
     });
   }
 }

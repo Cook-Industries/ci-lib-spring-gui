@@ -417,8 +417,22 @@
         {
             "selector": ".form-container",
             "attributes": {
+                "display": "flex",
                 "margin": "0.5rem",
                 "padding": "0.5rem"
+            }
+        },
+        {
+            "selector": ".form-container-column",
+            "attributes": {
+                "flex-direction": "column"
+            }
+        },
+        {
+            "selector": ".form-container-row",
+            "attributes": {
+                "flex-direction": "row",
+                "gap": "1rem"
             }
         },
         {

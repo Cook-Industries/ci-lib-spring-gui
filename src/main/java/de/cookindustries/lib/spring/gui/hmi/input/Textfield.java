@@ -46,6 +46,10 @@ public final class Textfield extends SubmittableInput
     @Default
     private final String  onKeydown     = "";
 
+    @NonNull
+    @Default
+    private final String  onEnterPress  = "";
+
     @Override
     protected InputType inferType()
     {

@@ -30,4 +30,5 @@ public abstract class Input extends UiElement
     private final InputType type    = inferType();
 
     protected abstract InputType inferType();
+
 }

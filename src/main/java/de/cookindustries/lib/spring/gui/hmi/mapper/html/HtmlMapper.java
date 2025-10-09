@@ -59,12 +59,14 @@ public final class HtmlMapper
     private static final String CLASS_FORM_CHECK_INPUT  = "form-checkbox-input";
     private static final String CLASS_FORM_CHECK_LABEL  = "form-checkbox-label";
     private static final String CLASS_FORM_SELECT       = "form-select";
+
     private static final String INPUT_CONTAINER         = "input-container";
 
     private static final String DATA_ATT_SUBMIT_ID      = "submit-id";
     private static final String DATA_ATT_SUBMIT_AS      = "submit-as";
     private static final String DATA_ATT_VALUE_TYPE     = "value-type";
     private static final String DATA_ATT_MAX_CHARACTERS = "max-characters";
+    private static final String DATA_ATT_ON_ENTER_PRESS = "on-enter-press";
 
     /**
      * Internal constructor
@@ -412,6 +414,7 @@ public final class HtmlMapper
                     .value(formContainer.getOnClick())
                     .build())
                 .clazz("form-container")
+                .clazz(formContainer.getDirection() == Direction.HORIZONTAL ? "form-container-row" : "form-container-column")
                 .classes(formContainer.getClasses())
                 .dataAttributes(formContainer.getDataAttributes())
                 .content(content)
@@ -524,6 +527,7 @@ public final class HtmlMapper
         buttons.add(
             Button
                 .builder()
+                .uid(modalContainer.getUid() + "-right-btn")
                 .btnClass(modalContainer.getBtnClassRight())
                 .text(modalContainer.getBtnNameRight())
                 .onClick(modalContainer.getBtnFunctionRight())
@@ -534,6 +538,7 @@ public final class HtmlMapper
             buttons.add(
                 Button
                     .builder()
+                    .uid(modalContainer.getUid() + "-center-btn")
                     .btnClass(modalContainer.getBtnClassCenter())
                     .text(modalContainer.getBtnNameCenter())
                     .onClick(modalContainer.getBtnFunctionCenter())
@@ -545,6 +550,7 @@ public final class HtmlMapper
             buttons.add(
                 Button
                     .builder()
+                    .uid(modalContainer.getUid() + "-left-btn")
                     .btnClass(modalContainer.getBtnClassLeft())
                     .text(modalContainer.getBtnNameLeft())
                     .onClick(modalContainer.getBtnFunctionLeft())
@@ -1120,6 +1126,7 @@ public final class HtmlMapper
                         .name(ATT_PLACEHOLDER)
                         .value(number.getPlaceholder())
                         .build())
+                .dataAttribute(DATA_ATT_ON_ENTER_PRESS, number.getOnEnterPress())
                 .build()
                 .html();
 
@@ -1152,6 +1159,7 @@ public final class HtmlMapper
                         .name(ATT_PLACEHOLDER)
                         .value(password.getPlaceholder())
                         .build())
+                .dataAttribute(DATA_ATT_ON_ENTER_PRESS, password.getOnEnterPress())
                 .build()
                 .html();
 
@@ -1575,6 +1583,7 @@ public final class HtmlMapper
                         .build())
                 .clazz(CLASS_FORM_CONTROL)
                 .dataAttribute(DATA_ATT_MAX_CHARACTERS, String.valueOf(textfield.getMaxCharacters()))
+                .dataAttribute(DATA_ATT_ON_ENTER_PRESS, textfield.getOnEnterPress())
                 .build()
                 .html();
 

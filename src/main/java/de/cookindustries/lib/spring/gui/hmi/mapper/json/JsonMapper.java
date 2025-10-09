@@ -94,6 +94,8 @@ public class JsonMapper
     private static final String                    ACTIVE                         = "active";
     private static final String                    INFO_TEXT                      = "infoText";
     private static final String                    INFO_URL                       = "infoUrl";
+    private static final String                    DIRECTION                      = "direction";
+    private static final String                    ON_ENTER_PRESS                 = "onEnterPress";
 
     private static final String                    RANDOM_ID                      = "randomid";
 
@@ -1302,6 +1304,8 @@ public class JsonMapper
     private FormContainer transformFormContainer(PseudoElement element, int depth)
     {
         String              uid          = resolveUid(element, depth);
+        Direction           direction    =
+            Direction.valueOf(getParameterValue(element, depth, DIRECTION, String.class, "NONE").toUpperCase());
         List<String>        classes      = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes   = resolveAttributes(element, depth);
         String              connectedBtn = getParameterValue(element, depth, "connectedBtn", String.class, "");
@@ -1321,6 +1325,7 @@ public class JsonMapper
 
         return builder
             .uid(uid)
+            .direction(direction)
             .classes(classes)
             .dataAttributes(attributes)
             .inputs(inputs)
@@ -1988,21 +1993,22 @@ public class JsonMapper
      */
     private Number transformNumberInput(PseudoElement element, int depth)
     {
-        String              uid         = resolveUid(element, depth);
-        List<String>        classes     = resolveClasses(element.getClasses(), depth);
-        Map<String, String> attributes  = resolveAttributes(element, depth);
-        String              tooltip     = getParameterValue(element, depth, TOOLTIP, String.class, "");
-        String              name        = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
-        String              infoText    = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
-        String              infoUrl     = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
-        Integer             value       = getParameterValue(element, depth, VALUE, Integer.class, 0);
-        Integer             min         = getParameterValue(element, depth, MIN, Integer.class, Integer.MIN_VALUE);
-        Integer             max         = getParameterValue(element, depth, MAX, Integer.class, Integer.MAX_VALUE);
-        String              placeholder = getParameterValue(element, depth, PLACEHOLDER, String.class, DEFAULT_VAL);
-        String              prefix      = getParameterValue(element, depth, PREFIX, String.class, DEFAULT_VAL);
-        String              suffix      = getParameterValue(element, depth, SUFFIX, String.class, DEFAULT_VAL);
+        String              uid          = resolveUid(element, depth);
+        List<String>        classes      = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes   = resolveAttributes(element, depth);
+        String              tooltip      = getParameterValue(element, depth, TOOLTIP, String.class, "");
+        String              name         = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs     = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput      = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              infoText     = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
+        String              infoUrl      = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
+        Integer             value        = getParameterValue(element, depth, VALUE, Integer.class, 0);
+        Integer             min          = getParameterValue(element, depth, MIN, Integer.class, Integer.MIN_VALUE);
+        Integer             max          = getParameterValue(element, depth, MAX, Integer.class, Integer.MAX_VALUE);
+        String              placeholder  = getParameterValue(element, depth, PLACEHOLDER, String.class, DEFAULT_VAL);
+        String              prefix       = getParameterValue(element, depth, PREFIX, String.class, DEFAULT_VAL);
+        String              suffix       = getParameterValue(element, depth, SUFFIX, String.class, DEFAULT_VAL);
+        String              onEnterPress = getParameterValue(element, depth, ON_ENTER_PRESS, String.class, "");
 
         return Number
             .builder()
@@ -2021,6 +2027,7 @@ public class JsonMapper
             .placeholder(placeholder)
             .prefix(prefix)
             .suffix(suffix)
+            .onEnterPress(onEnterPress)
             .build();
     }
 
@@ -2033,16 +2040,17 @@ public class JsonMapper
      */
     private Password transformPasswordInput(PseudoElement element, int depth)
     {
-        String              uid         = resolveUid(element, depth);
-        List<String>        classes     = resolveClasses(element.getClasses(), depth);
-        Map<String, String> attributes  = resolveAttributes(element, depth);
-        String              tooltip     = getParameterValue(element, depth, TOOLTIP, String.class, "");
-        String              name        = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
-        String              infoText    = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
-        String              infoUrl     = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
-        String              placeholder = getParameterValue(element, depth, PLACEHOLDER, String.class, "***");
+        String              uid          = resolveUid(element, depth);
+        List<String>        classes      = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes   = resolveAttributes(element, depth);
+        String              tooltip      = getParameterValue(element, depth, TOOLTIP, String.class, "");
+        String              name         = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs     = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput      = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              infoText     = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
+        String              infoUrl      = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
+        String              placeholder  = getParameterValue(element, depth, PLACEHOLDER, String.class, "***");
+        String              onEnterPress = getParameterValue(element, depth, ON_ENTER_PRESS, String.class, "");
 
         return Password
             .builder()
@@ -2056,6 +2064,7 @@ public class JsonMapper
             .infoText(infoText)
             .infoUrl(infoUrl)
             .placeholder(placeholder)
+            .onEnterPress(onEnterPress)
             .build();
     }
 
@@ -2210,7 +2219,7 @@ public class JsonMapper
     }
 
     /**
-     * Transform a {@link PseudoElement} to an {@link Textfield} input.
+     * Transform a {@link PseudoElement} to an {@link TagInput} input.
      *
      * @param element to transfrom
      * @param depth of the recursive operation
@@ -2326,20 +2335,21 @@ public class JsonMapper
      */
     private Textfield transformTextfieldInput(PseudoElement element, int depth)
     {
-        String              uid         = resolveUid(element, depth);
-        List<String>        classes     = resolveClasses(element.getClasses(), depth);
-        Map<String, String> attributes  = resolveAttributes(element, depth);
-        String              tooltip     = getParameterValue(element, depth, TOOLTIP, String.class, "");
-        String              name        = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
-        String              infoText    = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
-        String              infoUrl     = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
-        String              value       = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
-        String              placeholder = getParameterValue(element, depth, PLACEHOLDER, String.class, DEFAULT_VAL);
-        String              prefix      = getParameterValue(element, depth, PREFIX, String.class, DEFAULT_VAL);
-        String              suffix      = getParameterValue(element, depth, SUFFIX, String.class, DEFAULT_VAL);
-        Integer             maxChars    = getParameterValue(element, depth, MAX_CHARS, Integer.class, 150);
+        String              uid          = resolveUid(element, depth);
+        List<String>        classes      = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes   = resolveAttributes(element, depth);
+        String              tooltip      = getParameterValue(element, depth, TOOLTIP, String.class, "");
+        String              name         = getParameterValue(element, depth, NAME, String.class);
+        String              submitAs     = getParameterValue(element, depth, SUBMIT_AS, String.class);
+        String              onInput      = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
+        String              infoText     = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
+        String              infoUrl      = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
+        String              value        = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
+        String              placeholder  = getParameterValue(element, depth, PLACEHOLDER, String.class, DEFAULT_VAL);
+        String              prefix       = getParameterValue(element, depth, PREFIX, String.class, DEFAULT_VAL);
+        String              suffix       = getParameterValue(element, depth, SUFFIX, String.class, DEFAULT_VAL);
+        Integer             maxChars     = getParameterValue(element, depth, MAX_CHARS, Integer.class, 150);
+        String              onEnterPress = getParameterValue(element, depth, ON_ENTER_PRESS, String.class, "");
 
         return Textfield
             .builder()
@@ -2357,6 +2367,7 @@ public class JsonMapper
             .prefix(prefix)
             .suffix(suffix)
             .maxCharacters(maxChars)
+            .onEnterPress(onEnterPress)
             .build();
     }
 }
