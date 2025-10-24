@@ -69,7 +69,7 @@ final class CiLibStaticFileCreator implements ApplicationRunner
         }
         catch (Exception ex)
         {
-            LOG.warn("could not load/find css-config", ex);
+            LOG.warn("could not load/find css-config");
         }
 
         if (userConfig == null)

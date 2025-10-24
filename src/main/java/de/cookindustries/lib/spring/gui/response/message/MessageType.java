@@ -13,5 +13,18 @@ package de.cookindustries.lib.spring.gui.response.message;
  */
 public enum MessageType {
 
-    SUCCESS, ERROR, WARNING, NOTICE;
+    SUCCESS("bi-check-circle"), ERROR("bi-x-circle"), WARNING("bi-exclamation-circle"), NOTIFICATION("bi-question-circle");
+
+    private final String icon;
+
+    private MessageType(String icon)
+    {
+        this.icon = icon;
+    }
+
+    public String getIcon()
+    {
+        return icon;
+    }
+
 }

@@ -27,9 +27,6 @@ public enum ResponseAction {
     /** parse and either replace/append a {@link Container} */
     CONTENT,
 
-    /** remove a {@link Container} */
-    REMOVE,
-
     /** a compund set of several {@link ResponseAction}s */
     COMPOUND,
 

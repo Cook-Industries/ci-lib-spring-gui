@@ -31,19 +31,19 @@ public abstract class Response
      * the action associated with this response
      */
     @NonNull
-    private final ResponseAction  action = inferType();
+    private final ResponseAction        action = inferType();
 
     /**
      * a list of {@link ResponseMessage}s to show in the GUI
      */
     @Singular
-    private List<ResponseMessage> messages;
+    private final List<ResponseMessage> messages;
 
     /**
      * a list of {@link AbsFunctionCall}s to perform on the GUI
      */
     @Singular
-    private List<AbsFunctionCall> calls;
+    private final List<AbsFunctionCall> calls;
 
     /**
      * Infer the concrete type of action for the implementing class

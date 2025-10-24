@@ -24,7 +24,7 @@ public final class Number extends SubmittableInput
 {
 
     @NonNull
-    private final Integer value;
+    private final String  value;
 
     @NonNull
     private final Integer min;

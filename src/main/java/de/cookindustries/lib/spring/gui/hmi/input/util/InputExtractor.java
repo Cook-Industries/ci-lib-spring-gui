@@ -11,6 +11,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
@@ -18,9 +19,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
+import de.cookindustries.lib.spring.gui.config.CiLibInputExtractionExceptionHandler;
 import de.cookindustries.lib.spring.gui.hmi.container.FormContainer;
 import de.cookindustries.lib.spring.gui.hmi.input.File;
+import de.cookindustries.lib.spring.gui.hmi.input.util.exception.InputExtractionException;
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.NullIgnoreException;
+import de.cookindustries.lib.spring.gui.response.NotificationResponse;
 
 /**
  * Utility to extract information from {@code Form} data into data objects.
@@ -128,13 +132,14 @@ public final class InputExtractor
             .allowEmpty(false)
             .build();
 
+    private final Locale                        locale;
     private final String                        formId;
     private final MultiValueMap<String, String> inputs;
     private final MultipartFile[]               files;
     private final List<InputCheckMarker>        marker                              = new ArrayList<>();
 
     /**
-     * Create a extractor for a {@link FormContainer} result
+     * Create a extractor for a inputs from a {@link FormContainer} request
      * <p>
      * It is assumed that the {@code key} <b>__form_id</b> exists inside {@code inputs} and is non-null.
      * 
@@ -143,13 +148,27 @@ public final class InputExtractor
      */
     public InputExtractor(MultiValueMap<String, String> inputs)
     {
-        this(inputs, null);
+        this(inputs, null, Locale.ENGLISH);
     }
 
     /**
-     * Create a extractor for a {@link FormContainer} result
+     * Create a extractor for a inputs from a {@link FormContainer} request
      * <p>
-     * This object expects that the {@code key} <b>__form_id</b> exists inside {@code inputs} and is non-null.
+     * It is assumed that the {@code key} <b>__form_id</b> exists inside {@code inputs} and is non-null.
+     * 
+     * @param inputs from the {@code Form}
+     * @param locale to fetch error messages with
+     * @throws IllegalArgumentException if {@code key} <b>__form_id</b> is {@code null} or empty
+     */
+    public InputExtractor(MultiValueMap<String, String> inputs, Locale locale)
+    {
+        this(inputs, null, locale);
+    }
+
+    /**
+     * Create a extractor for a inputs from a {@link FormContainer} request
+     * <p>
+     * It is assumed that the {@code key} <b>__form_id</b> exists inside {@code inputs} and is non-null.
      * 
      * @param inputs from the {@code Form}
      * @param files from the {@code Form}
@@ -157,8 +176,24 @@ public final class InputExtractor
      */
     public InputExtractor(MultiValueMap<String, String> inputs, MultipartFile[] files)
     {
+        this(inputs, files, Locale.ENGLISH);
+    }
+
+    /**
+     * Create a extractor for a inputs from a {@link FormContainer} request
+     * <p>
+     * This object expects that the {@code key} <b>__form_id</b> exists inside {@code inputs} and is non-null.
+     * 
+     * @param inputs from the {@code Form}
+     * @param files from the {@code Form}
+     * @param locale to fetch error messages with
+     * @throws IllegalArgumentException if {@code key} <b>__form_id</b> is {@code null} or empty
+     */
+    public InputExtractor(MultiValueMap<String, String> inputs, MultipartFile[] files, Locale locale)
+    {
         this.inputs = inputs;
         this.files = files;
+        this.locale = locale;
 
         formId = (String) inputs.getFirst("__form_id");
 
@@ -170,6 +205,7 @@ public final class InputExtractor
         if (LOG.isDebugEnabled())
         {
             LOG.debug("inputs given:");
+
             inputs
                 .entrySet()
                 .stream()
@@ -177,6 +213,11 @@ public final class InputExtractor
 
             LOG.debug("files given: [{}]", files != null ? files.length : "none");
         }
+    }
+
+    public Locale getLocale()
+    {
+        return locale;
     }
 
     /**
@@ -236,6 +277,22 @@ public final class InputExtractor
                 .category(category)
                 .type(type)
                 .build());
+    }
+
+    /**
+     * Final check for this {@code InputExtractor}. If {@code markers} where raised it throws an {@link InputExtractionException}.
+     * <p>
+     * Under normal conditions this should be captured by {@link CiLibInputExtractionExceptionHandler} and implicitly create a
+     * {@link NotificationResponse} which will trigger the highlight markers in the UI.
+     * 
+     * @throws InputExtractionException if {@code this} extractor has raised any markers
+     */
+    public void approve()
+    {
+        if (hasMarker())
+        {
+            throw new InputExtractionException(this);
+        }
     }
 
     /**

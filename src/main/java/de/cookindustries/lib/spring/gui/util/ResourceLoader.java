@@ -47,7 +47,7 @@ public final class ResourceLoader
         }
         catch (Exception ex)
         {
-            throw new ResourceLoaderException(path, null);
+            throw new ResourceLoaderException(path, ex);
         }
     }
 

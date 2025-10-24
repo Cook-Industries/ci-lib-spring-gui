@@ -27,7 +27,7 @@ public final class ModalResponse extends Response
 {
 
     @NonNull
-    private ModalContainer modal;
+    private final ModalContainer modal;
 
     @Override
     protected ResponseAction inferType()

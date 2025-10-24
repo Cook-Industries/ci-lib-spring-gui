@@ -27,7 +27,7 @@ export {
  * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
-const version = "3.3.3";
+const version = "3.4.0";
 
 const CLASS_HIDDEN = "hidden";
 
@@ -51,8 +51,6 @@ $(document).ready(function () {
 
   // close modal on overlay click
   $(document).on("click", ".modal-overlay", function (event) {
-    event.stopPropagation();
-
     if (event.target === this) {
       if ($(`#modal-overlay-${openModals} .modal-body`).attr("data-close-on-overlay") === "true") {
         closeModal();
@@ -60,7 +58,7 @@ $(document).ready(function () {
     }
   });
 
-  // trigger button on enter in input with data-on-enter-press attribute
+  // trigger button on enter key on input with data-on-enter-press attribute
   $(document).on('keydown', function (event) {
     if (event.key === 'Enter') {
       const $active = $(document.activeElement);
@@ -73,6 +71,14 @@ $(document).ready(function () {
           $button.click();
         }
       }
+    }
+  });
+
+  // prevent tab selection when loader overlay is shown
+  $(document).on('keydown', function (event) {
+    const $overlay = $("#global-loader-overlay");
+    if ($overlay.length && !$overlay.hasClass("hidden") && e.key === "Tab") {
+      e.preventDefault();
     }
   });
 
@@ -167,10 +173,12 @@ $(document).ready(function () {
   });
 
   // Toggle dropdown on burger click (delegated)
-  $(document).on("click", ".burger-icon", function (e) {
+  $(document).on("click", ".burger-menu", function (e) {
     e.stopPropagation();
 
-    const $dropdown = $(this).siblings(".burger-dropdown");
+    $(".burger-dropdown").removeClass("show");
+
+    const $dropdown = $(this).children(".burger-dropdown");
     const rect = this.getBoundingClientRect();
     const dropdownWidth = $dropdown.outerWidth();
     const dropdownHeight = $dropdown.outerHeight();
@@ -204,16 +212,15 @@ $(document).ready(function () {
   $(document).on("click", ".burger-item", function () {
     var url = $(this).data("burger-url");
     if (url) {
+      $(".burger-dropdown").removeClass("show");
       showGlobalLoader();
-      POST(url);
+      GET(url);
     }
   });
 
   // Close dropdown when clicking outside
   $(document).on("click", function (e) {
-    if (!$(e.target).closest(".burger-menu").length) {
-      $(".burger-dropdown").removeClass("show");
-    }
+    $(".burger-dropdown").removeClass("show");
   });
 
   // --> register functions
@@ -270,9 +277,7 @@ $(document).ready(function () {
   });
 
   FunctionRegistry._registerInternal("noop", () => {
-    console.log(
-      "a call to the NoOp function occured. This is not normal and should be investigated."
-    );
+    console.log("a call to the NoOp function occured. This is not normal and should be investigated.");
   });
 
   FunctionRegistry._registerInternal("registerTagInput", (settings) => {
@@ -417,13 +422,14 @@ function handleResponse(response) {
   handleMessages(response.messages);
 
   switch (response.action) {
-    case "PROPERTIES": {
-      registerProperties(response.properties);
-      initWebSocketsFromConfig(response.properties);
+    case "NOTIFICATION": {
+      // do nothing since this is handled by handleMessages()
       break;
     }
 
-    case "NOTIFICATION": {
+    case "PROPERTIES": {
+      registerProperties(response.properties);
+      initWebSocketsFromConfig(response.properties);
       break;
     }
 
@@ -433,17 +439,12 @@ function handleResponse(response) {
     }
 
     case "CONTENT": {
-      fillContent(response);
+      contentResponse(response);
       break;
     }
 
-    case "REMOVE": {
-      removeContent(response);
-      break;
-    }
-
-    case "LOADING_PROGRESS": {
-      changeGlobalLoaderText(response.text);
+    case "PROGRESS": {
+      updateProgress(response);
       break;
     }
 
@@ -608,14 +609,8 @@ var errorOverlayVisible = false;
 /**
  * @param {type} messages
  * @param {type} btnName - label for the "ok" btn
- *
- * @returns {undefined}
  */
 function handleMessages(messages, btnName = "ok") {
-  hideGlobalLoader();
-
-  $(".error-marker").addClass(CLASS_HIDDEN);
-
   for (let m in messages) {
     let msg = messages[m];
 
@@ -646,36 +641,12 @@ function handleMessages(messages, btnName = "ok") {
   }
 }
 
-function getMsgClass(type) {
-  let c;
-
-  switch (type) {
-    case "SUCCESS":
-      c = "success";
-      break;
-
-    case "ERROR":
-      c = "error";
-      break;
-
-    case "WARNING":
-      c = "warning";
-      break;
-
-    default:
-      c = "";
-  }
-
-  return c;
-}
-
 function handleModalMsg(msg) {
-  let msgClass = getMsgClass(msg.type);
-  $("#error-holder").append(`<div class="message-container alert ${msgClass}"><i class="material-icons">${msgClass}</i><div>${msg.msg}</div></div>`);
+  $("#error-holder").append(`<div class="message-container alert ${msg.type.toLowerCase()}"><i class="bi ${msg.icon}"></i><div>${msg.msg}</div></div>`);
 }
 
 function handlePopupMsg(msg) {
-  $("#popup-holder").append(`<div class="pop-up pop-up-fade-out"><div class="${getMsgClass(msg.type)}">${msg.msg}</div></div>`);
+  $("#popup-holder").append(`<div class="pop-up pop-up-fade-out"><div class="${msg.type.toLowerCase()}">${msg.msg}</div></div>`);
 }
 
 function handleMarkerMsg(msg) {
@@ -794,19 +765,47 @@ function closeModal() {
 }
 // === < modal =====================================================================================
 // === > form ======================================================================================
-function fillContent(content) {
-  const elementId = `#${content.elementId}`;
-  if ($(content).length) {
-    if (content.replace) {
-      $(elementId).html("");
-    }
+function contentResponse(response) {
+  const elementId = `#${response.elementId}`;
 
-    $(elementId).append(content.contentHtml);
+  if ($(response).length) {
+    switch (response.handling) {
+      case "APPEND":
+        $(elementId).append(content.contentHtml);
+        break;
+
+      case "PREPEND":
+        $(elementId).prepend(content.contentHtml);
+        break;
+
+      case "REPLACE":
+        $(elementId).replace(content.contentHtml);
+        break;
+
+      case "DELETE":
+        $(elementId).remove();
+        break;
+
+      default:
+        console.log(`"unrecognized content response type [${response.handling}]`);
+    }
   }
 }
 
-function removeContent(obj) {
-  $(`#${obj.context}`).remove();
+function updateProgress(response) {
+  const $elem = $(`#${response.elementId}`);
+  const $bar = $elem.children(".loadbar");
+  const $text = $elem.children(".loader-text");
+
+  if (!$bar.length) return; // no direct .loadbar child → stop
+
+  // update progress
+  $bar
+    .data("progress", response.progress)
+    .css("--v", response.progress);
+
+  // update text
+  $text.html(response.text);
 }
 
 /**

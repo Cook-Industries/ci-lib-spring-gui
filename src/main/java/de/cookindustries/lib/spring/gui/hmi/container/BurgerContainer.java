@@ -30,7 +30,7 @@ public class BurgerContainer extends Container
 
     @NonNull
     @Default
-    private final String           image    = "/images/burger-menu-icon.svg";
+    private final String           icon     = "bi-three-dots-vertical";
 
     @Singular
     private final List<BurgerItem> items;

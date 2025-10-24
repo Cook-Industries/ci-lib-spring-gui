@@ -15,6 +15,7 @@ import java.util.Locale;
 import org.springframework.stereotype.Component;
 
 import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
+import de.cookindustries.lib.spring.gui.function.HideGlobalLoader;
 import de.cookindustries.lib.spring.gui.hmi.container.Button;
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
 import de.cookindustries.lib.spring.gui.hmi.container.ContentContainer;
@@ -34,6 +35,7 @@ import de.cookindustries.lib.spring.gui.html.JsImport;
 import de.cookindustries.lib.spring.gui.html.JsPlainLink;
 import de.cookindustries.lib.spring.gui.html.SiteImports;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
+import de.cookindustries.lib.spring.gui.response.ContentHandling;
 import de.cookindustries.lib.spring.gui.response.ContentResponse;
 import de.cookindustries.lib.spring.gui.response.ModalResponse;
 import de.cookindustries.lib.spring.gui.response.NotificationResponse;
@@ -82,6 +84,7 @@ public final class GUIFactory
                 .jsScript(new JsPlainLink("/webjars/yaireo__tagify/dist/tagify.js"))
                 .jsScript(new JsPlainLink("/webjars/stomp__stompjs/esm6/index.js"))
                 .cssLink(new CSSLink("/webjars/bootstrap/css/bootstrap.min.css"))
+                .cssLink(new CSSLink("/webjars/bootstrap-icons/font/bootstrap-icons.css"))
                 .cssLink(new CSSLink("/webjars/yaireo__tagify/dist/tagify.css"))
                 .cssLink(new CSSLink("/css/cook-industries-core.css"))
                 .cssLinks(cssLinks)
@@ -213,6 +216,7 @@ public final class GUIFactory
                             .content(
                                 ContentContainer
                                     .builder()
+                                    .clazz("loader-circle")
                                     .clazz("spinner-border")
                                     .clazz("text-primary")
                                     .build())
@@ -220,8 +224,14 @@ public final class GUIFactory
                                 TextContainer
                                     .builder()
                                     .uid("global-loader-text")
-                                    .clazz("sr-only")
+                                    .clazz("loader-text")
                                     .text("loading...")
+                                    .build())
+                            .content(
+                                ContentContainer
+                                    .builder()
+                                    .uid("global-loader-bar")
+                                    .clazz("loadbar")
                                     .build())
                             .build())
                     .build())
@@ -261,11 +271,11 @@ public final class GUIFactory
      * Create a {@link ContentResponse} from a template to append or replace existing content on a receiver.
      * 
      * @param elementId to append/replace content in
-     * @param replace whether the content should be appende (false), or replaced (true)
+     * @param handling how existing content should be handled
      * @param compSrc aggregator for settings
      * @return a response with the processed content
      */
-    public ContentResponse createComponentResponse(String elementId, Boolean replace, ComponentSources compSrc)
+    public ContentResponse createComponentResponse(String elementId, ContentHandling handling, ComponentSources compSrc)
     {
         MapperResult          result = readComponent(compSrc);
         List<AbsFunctionCall> calls  = new ArrayList<>();
@@ -277,7 +287,7 @@ public final class GUIFactory
             .elementId(elementId)
             .contents(result.getContainers())
             .calls(calls)
-            .replace(replace)
+            .handling(handling)
             .build();
     }
 
@@ -308,7 +318,7 @@ public final class GUIFactory
      * @param inputExtractor to extract messages from
      * @return a response containing the marker raised by {@code inputExtractor}
      */
-    public NotificationResponse createActiveMarkerResponseFrom(InputExtractor inputExtractor, Locale locale)
+    public NotificationResponse createActiveMarkerResponseFrom(InputExtractor inputExtractor)
     {
         List<ActivateMarkerMessage> messages = new ArrayList<>();
 
@@ -317,7 +327,7 @@ public final class GUIFactory
             .forEach(m -> messages.add(
                 ActivateMarkerMessage
                     .builder()
-                    .text(translationProvider.getText(locale, MarkerType.typeTranslationKey(m.getType())))
+                    .text(translationProvider.getText(inputExtractor.getLocale(), MarkerType.typeTranslationKey(m.getType())))
                     .uid(String.format("input-icon-%s-%s-%s", m.getFormId(), m.getCategory().name().toLowerCase(), m.getTransferId()))
                     .type(MessageType.ERROR)
                     .build()));
@@ -325,6 +335,7 @@ public final class GUIFactory
         return NotificationResponse
             .builder()
             .messages(messages)
+            .call(new HideGlobalLoader())
             .build();
     }
 

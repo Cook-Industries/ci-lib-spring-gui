@@ -26,6 +26,11 @@ public abstract class ResponseMessage
     @NonNull
     private final MessageType   type;
 
+    public final String getIcon()
+    {
+        return type.getIcon();
+    }
+
     protected abstract MessageTarget inferTarget();
 
 }

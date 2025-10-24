@@ -27,7 +27,7 @@ public final class CompoundResponse extends Response
 {
 
     @Singular
-    private List<Response> responses;
+    private final List<Response> responses;
 
     @Override
     protected ResponseAction inferType()

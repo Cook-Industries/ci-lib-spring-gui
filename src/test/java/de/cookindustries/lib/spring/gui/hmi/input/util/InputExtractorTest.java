@@ -23,6 +23,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
+import de.cookindustries.lib.spring.gui.hmi.input.util.exception.InputExtractionException;
+
 class InputExtractorTest
 {
 
@@ -70,6 +72,21 @@ class InputExtractorTest
         // run & verify
         assertThrows(IllegalArgumentException.class, () -> extractor.checkAndConsumeAsString(null, result::add));
         assertThrows(IllegalArgumentException.class, () -> extractor.checkAndConsumeAsString("", result::add));
+    }
+
+    @Test
+    void test_approve()
+    {
+        // setup
+        inputs.add("testKey", "");
+        List<String>   result    = new ArrayList<>();
+        InputExtractor extractor = new InputExtractor(inputs);
+
+        // run
+        extractor.checkAndConsumeAsNotEmptyString("testKey", result::add);
+
+        // verify
+        assertThrows(InputExtractionException.class, () -> extractor.approve());
     }
 
     @Test
@@ -520,7 +537,7 @@ class InputExtractorTest
     void test_checkFiles_invalidKey()
     {
         // setup
-        InputExtractor extractor = new InputExtractor(inputs, null);
+        InputExtractor extractor = new InputExtractor(inputs);
 
         // run & verify
         assertThrows(IllegalArgumentException.class, () -> extractor.checkFiles(null, false, false));
@@ -531,7 +548,7 @@ class InputExtractorTest
     void test_checkFiles_nullArray()
     {
         // setup
-        InputExtractor extractor = new InputExtractor(inputs, null);
+        InputExtractor extractor = new InputExtractor(inputs);
 
         // run & verify
         extractor.checkFiles("files", true, false);

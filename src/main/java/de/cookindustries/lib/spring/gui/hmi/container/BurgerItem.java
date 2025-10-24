@@ -8,6 +8,7 @@
 package de.cookindustries.lib.spring.gui.hmi.container;
 
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -17,12 +18,16 @@ public final class BurgerItem
 {
 
     @NonNull
-    private final String text;
+    private final String  text;
 
     @NonNull
-    private final String image;
+    private final String  icon;
 
     @NonNull
-    private final String url;
+    @Default
+    private final Integer iconSize = 2;
+
+    @NonNull
+    private final String  url;
 
 }

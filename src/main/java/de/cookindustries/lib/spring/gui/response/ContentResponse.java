@@ -47,11 +47,11 @@ public final class ContentResponse extends Response
     private final List<Container> contents;
 
     /**
-     * Whether or not this content should be replace the old content or be appended to it
+     * How this content should interact with existing content
      */
     @NonNull
     @Default
-    private final Boolean         replace   = false;
+    private final ContentHandling handling  = ContentHandling.APPEND;
 
     @Override
     protected ResponseAction inferType()
@@ -61,7 +61,10 @@ public final class ContentResponse extends Response
 
     public String getContentHtml()
     {
-        return HtmlMapper.map(contents).stream().collect(Collectors.joining("\n"));
+        return HtmlMapper
+            .map(contents)
+            .stream()
+            .collect(Collectors.joining("\n"));
     }
 
 }

@@ -177,20 +177,14 @@ public final class HtmlMapper
                         HtmlElement
                             .builder()
                             .tag(TAG_DIV)
-                            .clazz("burger-icon-slot")
+                            .clazz("burger-item-icon")
                             .content(
                                 HtmlElement
                                     .builder()
-                                    .tag("img")
-                                    .isSingleTag(true)
-                                    .clazz("burger-icon-slot")
-                                    .attribute(
-                                        Attribute
-                                            .builder()
-                                            .name(ATT_SRC)
-                                            .value(item.getImage())
-                                            .build())
-                                    .inactive(item.getImage() == null || item.getImage().isBlank())
+                                    .tag("i")
+                                    .clazz("bi")
+                                    .clazz(item.getIcon())
+                                    .inactive(item.getIcon().isBlank())
                                     .build()
                                     .html())
                             .build()
@@ -223,15 +217,10 @@ public final class HtmlMapper
                 .content(
                     HtmlElement
                         .builder()
-                        .tag("img")
-                        .isSingleTag(true)
+                        .tag("i")
                         .clazz("burger-icon")
-                        .attribute(
-                            Attribute
-                                .builder()
-                                .name(ATT_SRC)
-                                .value(burger.getImage())
-                                .build())
+                        .clazz("bi")
+                        .clazz("bi-list")
                         .build()
                         .html())
                 .content(
@@ -1118,7 +1107,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_VALUE)
-                        .value(String.valueOf(number.getValue()))
+                        .value(number.getValue())
                         .build())
                 .attribute(
                     Attribute
@@ -1604,7 +1593,7 @@ public final class HtmlMapper
      */
     private String resolveWarningIcon(String formId, String submitId)
     {
-        return resolveIcon(formId, submitId, MarkerCategory.WARNING.name().toLowerCase(), "/images/alert-triangle-warning.svg", null, null);
+        return resolveIcon(formId, submitId, MarkerCategory.WARNING.name().toLowerCase(), "bi-exclamation-triangle", null, null);
     }
 
     /**
@@ -1616,7 +1605,7 @@ public final class HtmlMapper
      */
     private String resolveErrorIcon(String formId, String submitId)
     {
-        return resolveIcon(formId, submitId, MarkerCategory.ERROR.name().toLowerCase(), "/images/alert-triangle-error.svg", null, null);
+        return resolveIcon(formId, submitId, MarkerCategory.ERROR.name().toLowerCase(), "bi-exclamation-triangle", null, null);
     }
 
     /**
@@ -1628,7 +1617,7 @@ public final class HtmlMapper
      */
     private String resolveInfoIcon(String formId, String submitId, String text, String url)
     {
-        return resolveIcon(formId, submitId, "info", "/images/alert-circle.svg", text, url);
+        return resolveIcon(formId, submitId, "info", "bi-exclamation-circle", text, url);
     }
 
     /**
@@ -1668,16 +1657,10 @@ public final class HtmlMapper
             .content(
                 HtmlElement
                     .builder()
-                    .tag("image")
-                    .isSingleTag(true)
-                    .clazz("input-icon")
+                    .tag("i")
+                    .clazz("bi")
+                    .clazz(image)
                     .clazz(type + "-icon")
-                    .attribute(
-                        Attribute
-                            .builder()
-                            .name(ATT_SRC)
-                            .value(image)
-                            .build())
                     .build()
                     .html())
             .content(

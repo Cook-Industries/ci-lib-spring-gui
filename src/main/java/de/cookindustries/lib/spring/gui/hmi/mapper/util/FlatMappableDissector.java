@@ -34,13 +34,17 @@ import jakarta.annotation.PostConstruct;
 public final class FlatMappableDissector
 {
 
-    private static final Logger          LOG                   = LoggerFactory.getLogger(FlatMappableDissector.class);
+    private static final Logger          LOG                           = LoggerFactory.getLogger(FlatMappableDissector.class);
 
-    private static final String          INDENT                = "  ";
+    private static final int             UNHEALTHY_DEPTH               = 25;
+    private static final String          RECURSION_UNHEALTHY_DEPTH_MSG =
+        "recursion in FlatMappable object has reached an unhealthy depth >" + UNHEALTHY_DEPTH;
 
-    private static final String          TRANSLATION_INDICATOR = "$$text$";
+    private static final String          INDENT                        = "  ";
 
-    private static final List<String>    RAW_BLACKLIST         = List.of(
+    private static final String          TRANSLATION_INDICATOR         = "$$text$";
+
+    private static final List<String>    RAW_BLACKLIST                 = List.of(
         "^notifyAll$",
         "^notify$",
         "^clone$",
@@ -53,7 +57,7 @@ public final class FlatMappableDissector
         "^classes$",
         "^FunctionCalls$");
 
-    private static final List<Pattern>   BLACKLIST_PATTERNS    =
+    private static final List<Pattern>   BLACKLIST_PATTERNS            =
         RAW_BLACKLIST
             .stream()
             .map(pat -> Pattern.compile(pat, Pattern.CASE_INSENSITIVE))
@@ -295,9 +299,27 @@ public final class FlatMappableDissector
         }
     }
 
+    /**
+     * Go deeper into this nested object.
+     * <p>
+     * If the depth reaches a {@link #UNHEALTHY_DEPTH} the return value will be {@link #RECURSION_UNHEALTHY_DEPTH_MSG} and the digging will
+     * stop. This is to prevent death-loops of endless recursion until a stackoverflow occurs.
+     * 
+     * @param key of the field/method
+     * @param imp object to dig into
+     * @param result map to store within
+     * @param locale to fetch a translation if necessary
+     * @param depth of the recursion
+     */
     private void goDeeper(String key, Object imp, Map<String, Object> result, Locale locale, int depth)
     {
         String indent = INDENT.repeat(depth);
+
+        if (depth > UNHEALTHY_DEPTH)
+        {
+            LOG.error(RECURSION_UNHEALTHY_DEPTH_MSG);
+            handleSimple(key, RECURSION_UNHEALTHY_DEPTH_MSG, result, locale, depth);
+        }
 
         LOG.trace("{} - field is nested go deeper", indent);
 

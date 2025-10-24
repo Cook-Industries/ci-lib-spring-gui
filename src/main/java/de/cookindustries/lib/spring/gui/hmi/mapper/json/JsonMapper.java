@@ -841,7 +841,7 @@ public class JsonMapper
 
             if (!processElement)
             {
-                LOG.debug("[{}]:[{}]:{} skip InputValue [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth,
+                LOG.trace("[{}]:[{}]:{} skip InputValue [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth,
                     indent, uid);
 
                 continue;
@@ -935,7 +935,7 @@ public class JsonMapper
             return List.of(EmptyContainer.builder().build());
         }
 
-        LOG.debug("[{}]:[{}]:{}start transform >", uuid, depth, indent);
+        LOG.trace("[{}]:[{}]:{}start transform >", uuid, depth, indent);
         LOG.trace("[{}]:[{}]:{}map [{}] with allowed types [{}]", uuid, depth, indent, uid, allowedTypes);
 
         InternalElementType internalType = null;
@@ -1030,7 +1030,7 @@ public class JsonMapper
 
                 if (LOG.isTraceEnabled() && !tempTokenMaps.isEmpty())
                 {
-                    LOG.trace("[{}]:[{}]:{}with following temp token maps", uuid, depth, indent);
+                    LOG.debug("[{}]:[{}]:{}with following temp token maps", uuid, depth, indent);
 
                     tempTokenMaps.values()
                         .stream()
@@ -1133,7 +1133,7 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              image      = getParameterValue(element, depth, IMAGE, String.class, "/images/burger-menu-icon.svg");
+        String              icon       = getParameterValue(element, depth, "icon", String.class, "bi-caret-right-fill");
 
         List<BurgerItem>    items      =
             element
@@ -1148,7 +1148,7 @@ public class JsonMapper
             .uid(uid)
             .classes(classes)
             .dataAttributes(attributes)
-            .image(image)
+            .icon(icon)
             .items(items)
             .build();
     }
@@ -1170,13 +1170,13 @@ public class JsonMapper
             return null;
         }
 
-        String image = getParameterValue(element, depth, IMAGE, String.class, DEFAULT_VAL);
-        String url   = getParameterValue(element, depth, "url", String.class);
-        String text  = getParameterValue(element, depth, "text", String.class);
+        String icon = getParameterValue(element, depth, "icon", String.class, DEFAULT_VAL);
+        String url  = getParameterValue(element, depth, "url", String.class);
+        String text = getParameterValue(element, depth, "text", String.class);
 
         return BurgerItem
             .builder()
-            .image(image)
+            .icon(icon)
             .url(url)
             .text(text)
             .build();
@@ -2002,7 +2002,7 @@ public class JsonMapper
         String              onInput      = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_VAL);
         String              infoText     = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_VAL);
         String              infoUrl      = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_VAL);
-        Integer             value        = getParameterValue(element, depth, VALUE, Integer.class, 0);
+        String              value        = getParameterValue(element, depth, VALUE, String.class, DEFAULT_VAL);
         Integer             min          = getParameterValue(element, depth, MIN, Integer.class, Integer.MIN_VALUE);
         Integer             max          = getParameterValue(element, depth, MAX, Integer.class, Integer.MAX_VALUE);
         String              placeholder  = getParameterValue(element, depth, PLACEHOLDER, String.class, DEFAULT_VAL);
