@@ -7,10 +7,10 @@
  */
 package de.cookindustries.lib.spring.gui.function;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Builder.Default;
-import lombok.experimental.SuperBuilder;
 
 /**
  * Settings to submit for a {@link RegisterTagInput} function.
@@ -18,9 +18,9 @@ import lombok.experimental.SuperBuilder;
  * @since 3.2.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@SuperBuilder
+@Builder
 @Getter
-public class TagInputSettings extends AbsFunctionArgs
+public class TagInputSettings implements AbsFunctionArgs
 {
 
     @NonNull

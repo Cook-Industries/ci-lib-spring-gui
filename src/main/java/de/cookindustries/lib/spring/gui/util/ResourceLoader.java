@@ -43,7 +43,9 @@ public final class ResourceLoader
     {
         try
         {
-            return loader.getResource(path).getInputStream();
+            return loader
+                .getResource(path)
+                .getInputStream();
         }
         catch (Exception ex)
         {
@@ -87,9 +89,10 @@ public final class ResourceLoader
         {
             InputStream    inputStream = load(path);
 
-            CollectionType listType    = mapper
-                .getTypeFactory()
-                .constructCollectionType(List.class, targetClass);
+            CollectionType listType    =
+                mapper
+                    .getTypeFactory()
+                    .constructCollectionType(List.class, targetClass);
 
             return mapper.readValue(inputStream, listType);
         }

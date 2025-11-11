@@ -28,9 +28,8 @@ public class JsonParsingException extends RuntimeException
 
     private static String buildMsg(String uid, Integer depth, Integer element, String msg, Throwable t)
     {
-        return String
-            .format("uid [%s] pos: [%3d:%3d] - [%s] [%s]", uid, depth, element, msg,
-                t == null ? "no further error msg" : t.getMessage());
+        return String.format("uid [%s] pos: [%3d:%3d] - [%s] [%s]", uid, depth, element, msg,
+            t == null ? "no further error msg" : t.getMessage());
     }
 
 }

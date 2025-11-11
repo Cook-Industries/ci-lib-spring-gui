@@ -10,7 +10,7 @@ package de.cookindustries.lib.spring.gui.function;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
-public class TestObject extends AbsFunctionArgs
+public class TestObject implements AbsFunctionArgs
 {
 
     private final int uid;

@@ -29,13 +29,15 @@ import de.cookindustries.lib.spring.gui.hmi.mapper.html.HtmlMapper;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableDissector;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.TokenMap;
 import de.cookindustries.lib.spring.gui.hmi.util.TemplateFileCache;
+import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
 
 public class JsonMapperTest
 {
 
-    private TemplateFileCache     TEMPLATE_FILE_CACHE;
-    private FlatMappableDissector flatMappableDissector;
+    private TemplateFileCache      templateFileCache;
+    private FlatMappableDissector  flatMappableDissector;
+    private AbsTranslationProvider translationProvider;
 
     @BeforeEach
     public void init()
@@ -49,10 +51,12 @@ public class JsonMapperTest
         CiLibProperties properties = new CiLibProperties();
         properties.setResources(res);
 
-        TEMPLATE_FILE_CACHE = new TemplateFileCache(properties);
-        TEMPLATE_FILE_CACHE.init();
+        templateFileCache = new TemplateFileCache(properties);
+        templateFileCache.init();
 
         flatMappableDissector = new FlatMappableDissector(new StaticTranslationProvider());
+
+        translationProvider = new StaticTranslationProvider();
     }
 
     private void checkAgainstErrorContainer(Container container)
@@ -63,12 +67,12 @@ public class JsonMapperTest
         assertTrue(text.getText().startsWith("the creation of this element failed. please refer to the server log. mapper id: "));
     }
 
-    private boolean countDivTags(String html)
+    private boolean checkDivTags(String html)
     {
-        return countTags("div", html);
+        return checkTags("div", html);
     }
 
-    private boolean countTags(String tag, String html)
+    private boolean checkTags(String tag, String html)
     {
         int count = 0;
         int index = 0;
@@ -89,10 +93,10 @@ public class JsonMapperTest
         JsonMapper mapper =
             JsonMapper
                 .builder()
-                .path("json-mapper/root-with-component.json")
+                .rscPath("json-mapper/root-component.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -116,10 +120,10 @@ public class JsonMapperTest
         JsonMapper   mapper   =
             JsonMapper
                 .builder()
-                .path("json-mapper/replace-class.json")
+                .rscPath("json-mapper/replace-class.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .tokenMap(valueMap)
                 .build();
@@ -147,10 +151,10 @@ public class JsonMapperTest
         JsonMapper   mapper   =
             JsonMapper
                 .builder()
-                .path("json-mapper/replace-class.json")
+                .rscPath("json-mapper/replace-class.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .tokenMap(valueMap)
                 .build();
@@ -170,10 +174,10 @@ public class JsonMapperTest
         JsonMapper mapper =
             JsonMapper
                 .builder()
-                .path("json-mapper/map-attributes.json")
+                .rscPath("json-mapper/map-attributes.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -197,10 +201,10 @@ public class JsonMapperTest
         JsonMapper   mapper   =
             JsonMapper
                 .builder()
-                .path("json-mapper/replace-parameter.json")
+                .rscPath("json-mapper/replace-parameter.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .tokenMap(valueMap)
                 .build();
@@ -219,10 +223,10 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/container/audio-container.json")
+                .rscPath("json-mapper/container/audio-container.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -242,7 +246,7 @@ public class JsonMapperTest
         assertEquals(true, audioContainer.getAutoplay());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -252,10 +256,10 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/container/button-container.json")
+                .rscPath("json-mapper/container/button-container.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -275,7 +279,7 @@ public class JsonMapperTest
         assertEquals(ButtonClass.SUCCESS, button.getBtnClass());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     // @Test
@@ -285,10 +289,10 @@ public class JsonMapperTest
         JsonMapper mapper =
             JsonMapper
                 .builder()
-                .path("json-mapper/container/button-bar-container.json")
+                .rscPath("json-mapper/container/button-bar-container.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -306,10 +310,10 @@ public class JsonMapperTest
         JsonMapper mapper =
             JsonMapper
                 .builder()
-                .path("json-mapper/container/button-icon-container.json")
+                .rscPath("json-mapper/container/button-icon-container.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -327,10 +331,10 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/container/content-container.json")
+                .rscPath("json-mapper/container/content-container.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -345,7 +349,7 @@ public class JsonMapperTest
         assertEquals(1, container.getDataAttributes().size());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -355,10 +359,10 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/container/form-container.json")
+                .rscPath("json-mapper/container/form-container.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -373,7 +377,7 @@ public class JsonMapperTest
         assertEquals(1, container.getDataAttributes().size());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -383,10 +387,10 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/container/hidden-container.json")
+                .rscPath("json-mapper/container/hidden-container.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -401,7 +405,7 @@ public class JsonMapperTest
         assertEquals(1, container.getDataAttributes().size());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -411,10 +415,10 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/container/image-container.json")
+                .rscPath("json-mapper/container/image-container.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -432,7 +436,7 @@ public class JsonMapperTest
         assertEquals("path/to/resource", imageContainer.getSrc());
 
         String html = HtmlMapper.map(container);
-        assertFalse(countTags("img", html));
+        assertFalse(checkTags("img", html));
     }
 
     @Test
@@ -442,10 +446,10 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/container/link-container.json")
+                .rscPath("json-mapper/container/link-container.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -464,7 +468,7 @@ public class JsonMapperTest
         assertEquals("_self", linkContainer.getTarget());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -474,10 +478,10 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/container/splitted-container.json")
+                .rscPath("json-mapper/container/splitted-container.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -497,7 +501,7 @@ public class JsonMapperTest
         assertEquals(2, splittedContainer.getCenter().size());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     // @Test
@@ -507,10 +511,10 @@ public class JsonMapperTest
         JsonMapper mapper =
             JsonMapper
                 .builder()
-                .path("json-mapper/container/tabbed-container.json")
+                .rscPath("json-mapper/container/tabbed-container.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -528,10 +532,10 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/container/text-container.json")
+                .rscPath("json-mapper/container/text-container.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -549,7 +553,7 @@ public class JsonMapperTest
         assertEquals("some text", textContainer.getText());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -559,10 +563,10 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/input/checkbox-input.json")
+                .rscPath("json-mapper/input/checkbox-input.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -580,7 +584,7 @@ public class JsonMapperTest
         assertEquals("checkbox", checkbox.getSubmitAs());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -590,10 +594,10 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/input/currency-input.json")
+                .rscPath("json-mapper/input/currency-input.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -611,7 +615,7 @@ public class JsonMapperTest
         assertEquals("currency", currency.getSubmitAs());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -621,10 +625,10 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/input/date-input.json")
+                .rscPath("json-mapper/input/date-input.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -642,7 +646,7 @@ public class JsonMapperTest
         assertEquals("date", date.getSubmitAs());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -652,10 +656,10 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/input/file-input.json")
+                .rscPath("json-mapper/input/file-input.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -673,7 +677,7 @@ public class JsonMapperTest
         assertEquals("file", file.getSubmitAs());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -683,10 +687,10 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/input/hidden-input.json")
+                .rscPath("json-mapper/input/hidden-input.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -703,7 +707,7 @@ public class JsonMapperTest
         assertEquals("hidden", hidden.getSubmitAs());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -713,10 +717,10 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/input/link-input.json")
+                .rscPath("json-mapper/input/link-input.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -734,7 +738,7 @@ public class JsonMapperTest
         assertEquals("link/to/somewhere", link.getHref());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -744,10 +748,10 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/input/number-input.json")
+                .rscPath("json-mapper/input/number-input.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -765,7 +769,7 @@ public class JsonMapperTest
         assertEquals("number", number.getSubmitAs());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -775,10 +779,10 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/input/password-input.json")
+                .rscPath("json-mapper/input/password-input.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -796,7 +800,7 @@ public class JsonMapperTest
         assertEquals("password", password.getSubmitAs());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -806,10 +810,10 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/input/radio-input.json")
+                .rscPath("json-mapper/input/radio-input.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -828,7 +832,7 @@ public class JsonMapperTest
         assertEquals(2, radio.getValues().size());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -851,10 +855,10 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/input/select-input.json")
+                .rscPath("json-mapper/input/select-input.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .tokenMap(map)
                 .build();
@@ -882,7 +886,7 @@ public class JsonMapperTest
         assertEquals(1, select2.getValues().size());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -892,10 +896,10 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/input/slider-input.json")
+                .rscPath("json-mapper/input/slider-input.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -913,7 +917,7 @@ public class JsonMapperTest
         assertEquals("slider", slider.getSubmitAs());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -923,10 +927,10 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/input/switch-input.json")
+                .rscPath("json-mapper/input/switch-input.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -944,7 +948,7 @@ public class JsonMapperTest
         assertEquals("switch", switchi.getSubmitAs());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -954,10 +958,10 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/input/textarea-input.json")
+                .rscPath("json-mapper/input/textarea-input.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -975,7 +979,7 @@ public class JsonMapperTest
         assertEquals("textarea", textarea.getSubmitAs());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -985,10 +989,10 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/input/textbox-input.json")
+                .rscPath("json-mapper/input/textbox-input.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -1002,7 +1006,7 @@ public class JsonMapperTest
         assertEquals(Textbox.class, input.getClass());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 
     @Test
@@ -1012,10 +1016,10 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .path("json-mapper/input/textfield-input.json")
+                .rscPath("json-mapper/input/textfield-input.json")
                 .locale(Locale.ENGLISH)
-                .templateFileCache(TEMPLATE_FILE_CACHE)
-                .translationProvider(new StaticTranslationProvider())
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
@@ -1033,6 +1037,6 @@ public class JsonMapperTest
         assertEquals("textfield", textfield.getSubmitAs());
 
         String html = HtmlMapper.map(container);
-        assertTrue(countDivTags(html));
+        assertTrue(checkDivTags(html));
     }
 }

@@ -30,7 +30,7 @@ class JsImportMap implements HtmlExportable
         StringConcat sc = new StringConcat();
 
         sc.append("<script type=\"importmap\">");
-        sc.append("{ \"imports\": {");
+        sc.append("{\"imports\": {");
 
         Boolean addComma = false;
 

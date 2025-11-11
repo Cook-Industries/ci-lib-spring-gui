@@ -73,7 +73,12 @@ public final class GUIFactory
         this.translationProvider = translationProvider;
         this.flatMappableDissector = flatMappableDissector;
 
-        List<CSSLink> cssLinks = properties.getCssPaths().stream().map(CSSLink::new).toList();
+        List<CSSLink> cssLinks =
+            properties
+                .getCssPaths()
+                .stream()
+                .map(CSSLink::new)
+                .toList();
 
         basicImports =
             SiteImports
@@ -92,16 +97,31 @@ public final class GUIFactory
     }
 
     /**
-     * Create a {@link Locale} from a {@code lang_country} {@link String}.
+     * Create a {@link Locale} from a ISO 639 alpha-2 or alpha-3 language code {@code language} or an additional uppercase two-letter
+     * ISO-3166 country code {@code language_country} {@link String}.
+     * <p>
+     * Example:
+     * <ol>
+     * <li>{@code de}</li>
+     * <li>{@code de_DE}</li>
+     * </ol>
      * 
      * @param language to transform
      * @return a {@code Locale} object
+     * @see Locale#Locale(String)
+     * @see Locale#Locale(String, String)
      */
     public Locale createLocale(String language)
     {
         String langSplit[] = language.split("_");
 
-        return new Locale(langSplit[0], langSplit[1]);
+        if (langSplit.length == 2)
+        {
+
+            return new Locale(langSplit[0], langSplit[1]);
+        }
+
+        return new Locale(langSplit[0]);
     }
 
     /**
@@ -132,7 +152,7 @@ public final class GUIFactory
                     .templateFileCache(templateFileCache)
                     .translationProvider(translationProvider)
                     .flatMappableDissector(flatMappableDissector)
-                    .path(compSrc.getSourcePath())
+                    .rscPath(compSrc.getSourcePath())
                     .locale(compSrc.getLocale())
                     .tokenMaps(compSrc.getTokenMaps())
                     .build();
@@ -172,10 +192,14 @@ public final class GUIFactory
         calls.addAll(result.getFunctions());
         calls.addAll(compSrc.getFunctionCalls());
 
-        String resolvedTitle = translationProvider.getText(compSrc.getLocale(), title);
+        String resolvedTitle =
+            title.startsWith("$$")
+                ? translationProvider.getText(compSrc.getLocale(), title)
+                : title;
 
-        return HtmlSite.builder()
-            .header(new HeadTitle(resolvedTitle.startsWith("I18N") ? title : resolvedTitle))
+        return HtmlSite
+            .builder()
+            .header(new HeadTitle(resolvedTitle))
             .jsImports(imports.getJsImports())
             .jsScripts(imports.getJsScripts())
             .cssLinks(imports.getCssLinks())
@@ -216,6 +240,7 @@ public final class GUIFactory
                             .content(
                                 ContentContainer
                                     .builder()
+                                    .uid("_lcsptp")
                                     .clazz("loader-circle")
                                     .clazz("spinner-border")
                                     .clazz("text-primary")
@@ -251,6 +276,7 @@ public final class GUIFactory
                         .content(
                             Button
                                 .builder()
+                                .uid("_eob")
                                 .text("OK")
                                 .onClick("CILIB.FunctionRegistry.call('dismissErrors');")
                                 .build())

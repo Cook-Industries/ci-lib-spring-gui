@@ -29,9 +29,6 @@ public final class TableContainer extends Container
     @NonNull
     private final String          name;
 
-    @NonNull
-    private final Integer         numOfColumns;
-
     @Singular
     private final List<String>    columnNames;
 

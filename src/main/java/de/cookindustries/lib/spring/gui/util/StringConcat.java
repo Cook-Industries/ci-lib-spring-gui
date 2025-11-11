@@ -278,7 +278,9 @@ public final class StringConcat
      */
     public <T> StringConcat appendnl(Collection<T> items, Function<T, String> function)
     {
-        return append(items, function, "\n");
+        append(items, function, "\n");
+
+        return nl();
     }
 
     /**

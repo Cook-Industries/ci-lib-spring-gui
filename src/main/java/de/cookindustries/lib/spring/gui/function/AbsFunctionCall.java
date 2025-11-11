@@ -151,7 +151,11 @@ public abstract class AbsFunctionCall
                     .map(a -> {
                         if (a instanceof String s)
                         {
-                            return StringAdapter.prefixAndSuffix("'", s, "'");
+                            return StringAdapter.prefixAndSuffix("'", s.replace("'", "\'"), "'");
+                        }
+                        else if (a instanceof AbsFunctionArgs args)
+                        {
+                            return args.toHtmlString();
                         }
                         else
                         {
