@@ -67,6 +67,9 @@ public enum ContainerType {
     TABLE_ROW,
 
     /** Type for a empty (no) container */
-    EMPTY;
+    EMPTY,
+
+    /** Type for a svg container */
+    SVG;
 
 }

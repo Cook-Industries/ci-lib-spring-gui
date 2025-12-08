@@ -5,7 +5,7 @@
  * <p>
  * See LICENSE file in the project root for full license information.
  */
-package de.cookindustries.lib.spring.gui.hmi.container;
+package de.cookindustries.lib.spring.gui.hmi.svg;
 
 import de.cookindustries.lib.spring.gui.hmi.UiElement;
 import lombok.Getter;
@@ -14,30 +14,28 @@ import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 
 /**
- * This is the base class for Container elements
+ * This is the base class for SVG elements
  * 
- * @since 1.0.0
+ * @since 3.5.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @SuperBuilder
 @Getter
-public abstract class Container extends UiElement
+public abstract class SVGElement extends UiElement
 {
 
-    /**
-     * the direction of this {@code Container}, if applicable
-     */
     @NonNull
     @Default
-    private final Direction     direction = Direction.NONE;
+    private final String  style = "";
 
     @NonNull
-    private final ContainerType type      = inferType();
+    private final SVGType type  = inferType();
 
     /**
-     * Protected function to define the {@link ContainerType} of this class for the internal builder
+     * Protected function to define the {@link SVGType} of this class for the internal builder
      * 
      * @return the fix {@code type} of the definitive class implementation
      */
-    protected abstract ContainerType inferType();
+    protected abstract SVGType inferType();
+
 }

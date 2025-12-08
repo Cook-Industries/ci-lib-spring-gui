@@ -290,7 +290,8 @@ public final class GUIFactory
             .containers(result.getContainers())
             .functions(calls)
             .build()
-            .getHtmlRep();
+            .getHtmlRep()
+            .replace("@@time", "" + result.getTime());
     }
 
     /**

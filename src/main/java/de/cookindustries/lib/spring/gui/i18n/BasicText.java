@@ -28,7 +28,13 @@ public enum BasicText {
     HELP("help"),
 
     /** Text for 'close' button */
-    CLOSE("close");
+    CLOSE("close"),
+
+    /** Text for 'close' button */
+    NO_VALUE_SET("no value set"),
+
+    /** Text for 'close' button */
+    NO_TEXT_SET("no text set");
 
     private final String text;
 

@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.Builder;
@@ -147,7 +149,8 @@ public final class HtmlElement
             .entrySet()
             .stream()
             .filter(da -> da.getValue() != null)
-            .map(daa -> StringAdapter.prefixAndSuffix("data-", daa.getKey(), "=\"") + StringAdapter.suffix(daa.getValue(), QTM))
+            .map(daa -> StringAdapter.prefixAndSuffix("data-", daa.getKey(), "=\"")
+                + StringAdapter.suffix(StringEscapeUtils.escapeHtml4(daa.getValue()), QTM))
             .collect(Collectors.joining(SPACE));
     }
 

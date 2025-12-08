@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
 import de.cookindustries.lib.spring.gui.hmi.container.ContainerType;
 import de.cookindustries.lib.spring.gui.hmi.input.InputType;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -29,7 +30,7 @@ import lombok.extern.jackson.Jacksonized;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@Builder
+@Builder(toBuilder = true, access = AccessLevel.PACKAGE)
 @Getter
 @Jacksonized
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -64,7 +65,7 @@ public class PseudoElement
      * Parameters of this element
      */
     @Singular
-    private final Map<String, String> parameters;
+    private final Map<String, Object> parameters;
 
     /**
      * Children of this element

@@ -7,6 +7,8 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper.html;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 import de.cookindustries.lib.spring.gui.html.HtmlExportable;
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
 import lombok.Builder;
@@ -51,6 +53,6 @@ public final class Attribute implements HtmlExportable
 
         return value == null
             ? StringAdapter.from(name, "=\"", name, "\"")
-            : StringAdapter.from(name, "=\"", value, "\"");
+            : StringAdapter.from(name, "=\"", StringEscapeUtils.escapeHtml4(value), "\"");
     }
 }

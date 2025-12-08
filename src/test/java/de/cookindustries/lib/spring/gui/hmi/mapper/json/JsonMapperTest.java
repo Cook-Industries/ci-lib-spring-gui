@@ -216,8 +216,8 @@ public class JsonMapperTest
         assertEquals("testText", ((TextContainer) result.getContainers().get(0)).getText());
     }
 
-    // @Test
-    void test_map_audioContainer()
+    @Test
+    void test_map_AudioContainer()
     {
         // setup
         JsonMapper   mapper    =

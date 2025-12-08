@@ -40,9 +40,12 @@ import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappable;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableDissector;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableList;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.TokenMap;
+import de.cookindustries.lib.spring.gui.hmi.svg.*;
 import de.cookindustries.lib.spring.gui.hmi.util.TemplateFileCache;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
+import de.cookindustries.lib.spring.gui.i18n.BasicText;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
+
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Singular;
@@ -70,34 +73,76 @@ public class JsonMapper
 
     private static final Logger                    LOG                            = LoggerFactory.getLogger(JsonMapper.class);
 
-    private static final String                    SRC                            = "src";
-    private static final String                    SUFFIX                         = "suffix";
-    private static final String                    PREFIX                         = "prefix";
-    private static final String                    MAX_CHARS                      = "maxChars";
-    private static final String                    TARGET                         = "target";
-    private static final String                    HREF                           = "href";
-    private static final String                    MAX                            = "max";
-    private static final String                    MIN                            = "min";
-    private static final String                    CHECKED                        = "checked";
-    private static final String                    IMAGE                          = "image";
-    private static final String                    ON_CLICK                       = "onClick";
-    private static final String                    BTN_CLASS                      = "btnClass";
-    private static final String                    TEXT                           = "text";
-    private static final String                    DEFAULT_DATE                   = "0000-00-00";
-    private static final String                    PLACEHOLDER                    = "placeholder";
-    private static final String                    DEFAULT_EMPTY_VAL              = "";
-    private static final String                    NAME                           = "name";
-    private static final String                    VALUE                          = "value";
-    private static final String                    SUBMIT_AS                      = "submitAs";
-    private static final String                    ON_INPUT                       = "onInput";
-    private static final String                    TOOLTIP                        = "tooltip";
-    private static final String                    ACTIVE                         = "active";
-    private static final String                    INFO_TEXT                      = "infoText";
-    private static final String                    INFO_URL                       = "infoUrl";
-    private static final String                    DIRECTION                      = "direction";
-    private static final String                    ON_ENTER_PRESS                 = "onEnterPress";
+    private static final String                    PARAM_ACTIVE                   = "active";
+    private static final String                    PARAM_AUTOPLAY                 = "autoplay";
+    private static final String                    PARAM_BTN_CLASS                = "btnClass";
+    private static final String                    PARAM_BTN_CLASS_CENTER         = "btnClassCenter";
+    private static final String                    PARAM_BTN_CLASS_LEFT           = "btnClassLeft";
+    private static final String                    PARAM_BTN_CLASS_RIGHT          = "btnClassRight";
+    private static final String                    PARAM_BTN_FUNCTION_CENTER      = "btnFunctionCenter";
+    private static final String                    PARAM_BTN_FUNCTION_LEFT        = "btnFunctionLeft";
+    private static final String                    PARAM_BTN_FUNCTION_RIGHT       = "btnFunctionRight";
+    private static final String                    PARAM_BTN_NAME_CENTER          = "btnNameCenter";
+    private static final String                    PARAM_BTN_NAME_LEFT            = "btnNameLeft";
+    private static final String                    PARAM_BTN_NAME_RIGHT           = "btnNameRight";
+    private static final String                    PARAM_CHECKED                  = "checked";
+    private static final String                    PARAM_CLOSE_ON_OVERLAY_CLICK   = "closeOnOverlayClick";
+    private static final String                    PARAM_CONNECTED_BTN            = "connectedBtn";
+    private static final String                    PARAM_CONTROLS                 = "controls";
+    private static final String                    PARAM_DIRECTION                = "direction";
+    private static final String                    PARAM_ELEMENT_SOURCE           = "elementSource";
+    private static final String                    PARAM_HREF                     = "href";
+    private static final String                    PARAM_ICON                     = "icon";
+    private static final String                    PARAM_ID                       = "id";
+    private static final String                    PARAM_IMAGE                    = "image";
+    private static final String                    PARAM_INFO_TEXT                = "infoText";
+    private static final String                    PARAM_INFO_URL                 = "infoUrl";
+    private static final String                    PARAM_IS_SOURCE_LIST           = "isSourceList";
+    private static final String                    PARAM_MAX                      = "max";
+    private static final String                    PARAM_MAX_CHARS                = "maxChars";
+    private static final String                    PARAM_MIN                      = "min";
+    private static final String                    PARAM_NAME                     = "name";
+    private static final String                    PARAM_ON_CLICK                 = "onClick";
+    private static final String                    PARAM_ON_ENTER_PRESS           = "onEnterPress";
+    private static final String                    PARAM_ON_INPUT                 = "onInput";
+    private static final String                    PARAM_PATH                     = "path";
+    private static final String                    PARAM_PLACEHOLDER              = "placeholder";
+    private static final String                    PARAM_PREFIX                   = "prefix";
+    private static final String                    PARAM_REPETITION_SOURCE        = "repetitionSource";
+    private static final String                    PARAM_REQUEST_URL              = "requestUrl";
+    private static final String                    PARAM_SIZE                     = "size";
+    private static final String                    PARAM_SOURCE_KEY               = "sourceKey";
+    private static final String                    PARAM_SRC                      = "src";
+    private static final String                    PARAM_SUBMIT_AS                = "submitAs";
+    private static final String                    PARAM_SUFFIX                   = "suffix";
+    private static final String                    PARAM_TARGET                   = "target";
+    private static final String                    PARAM_TEXT                     = "text";
+    private static final String                    PARAM_TITLE                    = "title";
+    private static final String                    PARAM_TOOLTIP                  = "tooltip";
+    private static final String                    PARAM_URL                      = "url";
+    private static final String                    PARAM_VALUE                    = "value";
+    private static final String                    PARAM_X                        = "x";
+    private static final String                    PARAM_Y                        = "y";
+    private static final String                    PARAM_DX                       = "dx";
+    private static final String                    PARAM_DY                       = "dy";
+    private static final String                    PARAM_X1                       = "x1";
+    private static final String                    PARAM_X2                       = "x2";
+    private static final String                    PARAM_Y1                       = "y1";
+    private static final String                    PARAM_Y2                       = "y2";
+    private static final String                    PARAM_ROTATE                   = "rotate";
+    private static final String                    PARAM_TEXT_LENGTH              = "textLength";
+    private static final String                    PARAM_WIDTH                    = "width";
+    private static final String                    PARAM_HEIGHT                   = "height";
+    private static final String                    PARAM_STYLE                    = "style";
 
     private static final String                    RANDOM_ID                      = "randomid";
+    private static final String                    CONNECTED_BTN                  = "connected-btn";
+    private static final String                    TYPE_ITEM                      = "item";
+
+    private static final String                    DEFAULT_DATE                   = "0000-00-00";
+    private static final String                    DEFAULT_EMPTY_VAL              = "";
+    private static final String                    DEFAULT_TARGET_SELF            = "_self";
+    private static final String                    DEFAULT_BURGER_ICON            = "bi-caret-right-fill";
 
     private static final String                    BASE_INDICATOR_START           = "$$";
     private static final String                    INDICATOR_VALUE_PLACEHOLDER    = "$$value$";
@@ -105,11 +150,9 @@ public class JsonMapper
     private static final String                    INDICATOR_CLASS_PLACEHOLDER    = "$$class$";
     private static final String                    INDICATOR_FUNCTION_PLACEHOLDER = "$$function$";
 
-    private static final String                    LOG_INDENT_STRING              = "- ";
-
     private static final StaticTranslationProvider NOOP_TRANSLATION_PROVIDER      = new StaticTranslationProvider();
 
-    private static final ContainerType[]           CONTAINER_CHILDREN             =
+    private static final ContainerType[]           CONTENT_CONTAINER_CHILDREN     =
         {
             ContainerType.AUDIO,
             ContainerType.BUTTON,
@@ -122,28 +165,34 @@ public class JsonMapper
             ContainerType.IMAGE,
             ContainerType.LINK,
             ContainerType.SPLITTED,
+            ContainerType.SVG,
             ContainerType.TAB,
             ContainerType.TABLE,
             ContainerType.TEXT,
-            ContainerType.HEADING
+            ContainerType.HEADING,
+            ContainerType.EMPTY
         };
 
-    private static final ContainerType[]           LINK_CHILDREN                  = {ContainerType.TEXT};
+    private static final ContainerType[]           LINK_CONTAINER_CHILDREN        = {ContainerType.TEXT};
 
-    private static final ContainerType[]           TABLE_ROW_CHILDREN             =
-        Arrays
-            .stream(ContainerType.values())
-            .filter(ct -> !List.of(
-                ContainerType.MODAL,
-                ContainerType.TABLE,
-                ContainerType.TABLE_ROW,
-                ContainerType.TAB,
-                ContainerType.FORM)
-                .contains(ct))
-            .toList()
-            .toArray(new ContainerType[0]);
+    private static final ContainerType[]           TABLE_ROW_CONTAINER_CHILDREN   =
+        {
+            ContainerType.AUDIO,
+            ContainerType.BUTTON,
+            ContainerType.BURGER,
+            ContainerType.BUTTON_BAR,
+            ContainerType.BUTTON_ICON,
+            ContainerType.CONTENT,
+            ContainerType.HIDDEN,
+            ContainerType.IMAGE,
+            ContainerType.LINK,
+            ContainerType.SPLITTED,
+            ContainerType.SVG,
+            ContainerType.TEXT,
+            ContainerType.EMPTY
+        };
 
-    private static final ContainerType[]           MODAL_CHILDREN                 =
+    private static final ContainerType[]           MODAL_CONTAINER_CHILDREN       =
         {
             ContainerType.FORM,
             ContainerType.IMAGE,
@@ -158,8 +207,6 @@ public class JsonMapper
 
     @NonNull
     private final String                           rscPath;
-
-    private PseudoElement                          root;
 
     @NonNull
     @Default
@@ -196,12 +243,12 @@ public class JsonMapper
      */
     public MapperResult map()
     {
-        long start = System.nanoTime();
+        long          start = System.nanoTime();
 
-        this.root = templateFileCache.getTemplateTo(rscPath);
+        PseudoElement root  = templateFileCache.getTemplateTo(rscPath);
 
         LOG.debug("[{}]: ### start ###", uuid);
-        LOG.trace("[{}]: map content for [{}] from [{}] with [{}] value maps", uuid, locale.toLanguageTag(),
+        LOG.trace("[{}]: map content in [{}] from [{}] with [{}] token maps", uuid, locale.toLanguageTag(),
             translationProvider.getClass().getSimpleName(), tokenMaps.size());
 
         tokenMaps = tokenMaps
@@ -222,17 +269,19 @@ public class JsonMapper
                 .forEach(stream -> stream.forEach(line -> LOG.trace("[{}]: {}", uuid, line)));
         }
 
+        long end    = System.nanoTime();
+        long time   = end - start;
+        long timeMs = time / 1000000L;
+
+        LOG.debug("[{}]: ### done ### ... mapping took [{}]ms", uuid, timeMs);
+
         MapperResult result =
             MapperResult
                 .builder()
                 .containers(transform(root))
                 .functions(functions)
+                .time(timeMs)
                 .build();
-
-        long         end    = System.nanoTime();
-        long         time   = end - start;
-
-        LOG.debug("[{}]: ### done ### ... mapping took [{}]ms", uuid, time / 1000000L);
 
         return result;
     }
@@ -241,6 +290,11 @@ public class JsonMapper
      * --- > utility functions -------------------------------------------------------------------------------------------------------------
      */
 
+    /**
+     * Create a new id for this mapper.
+     * 
+     * @return a id build from {@code day-of-month} {@code month-value / 2} {@code 5-digit random number}
+     */
     private String nextId()
     {
         LocalDate now    = LocalDate.now();
@@ -248,9 +302,12 @@ public class JsonMapper
         int       d      = now.getDayOfMonth();
         int       m      = now.getMonthValue();
         int       mDigit = (m + 1) / 2;
-        int       rand   = ThreadLocalRandom.current().nextInt(0, 100_000);
+        int       rand   =
+            ThreadLocalRandom
+                .current()
+                .nextInt(0, 100_000);
 
-        return String.format("%s%s%05d", d, mDigit, rand);
+        return String.format("%02d%d%05d", d, mDigit, rand);
     }
 
     private Container throwNotSupported(PseudoElement element, int depth)
@@ -264,7 +321,8 @@ public class JsonMapper
      * 
      * @param element to resolve
      * @param depth the current depth in the tree
-     * @return the resolved {@code uid}
+     * @return the resolved {@code uid} or a {@code uuid} in the form {@code randomid-xxxx-xxxx-xxxx-xxxxxxxxxxxx}, if {@code uid} is
+     *         {@code null}
      */
     private String resolveUid(PseudoElement element, int depth)
     {
@@ -280,9 +338,7 @@ public class JsonMapper
             uid = resolveUid(element, depth);
         }
 
-        String indent = LOG_INDENT_STRING.repeat(depth + 1);
-
-        LOG.trace("[{}]:[{}]:{}resolve uid to [{}]", uuid, depth, indent, uid);
+        LOG.trace("[{}]:[{}]: resolve uid to [{}]", uuid, depth, uid);
 
         return uid;
     }
@@ -293,13 +349,12 @@ public class JsonMapper
      * Not found {@code class}es will be ignored.
      * 
      * @param classes {@code List} of all classes {@code String}s to traverse
+     * @param depth the recursive depth count
      * @return a {@code List} of {@code String}s containing the non-altered and the replaced classes
      */
     private List<String> resolveClasses(List<String> classes, int depth)
     {
-        String indent = LOG_INDENT_STRING.repeat(depth + 1);
-
-        LOG.trace("[{}]:[{}]:{}resolve classes {}", uuid, depth, indent, classes);
+        LOG.trace("[{}]:[{}]: resolve classes {}", uuid, depth, classes);
 
         return classes
             .stream()
@@ -334,9 +389,7 @@ public class JsonMapper
     {
         Map<String, String> attributes = element.getAttributes();
 
-        String              indent     = LOG_INDENT_STRING.repeat(depth + 1);
-
-        LOG.trace("[{}]:[{}]:{}resolve attributes {}", uuid, depth, indent, attributes);
+        LOG.trace("[{}]:[{}]: resolve attributes {}", uuid, depth, attributes);
 
         return attributes;
     }
@@ -371,11 +424,9 @@ public class JsonMapper
      */
     private <I> I handlePossiblePlaceholder(String key, Class<I> expectedType, I defaultValue, int depth)
     {
-        I      value  = null;
+        I value = null;
 
-        String indent = LOG_INDENT_STRING.repeat(depth + 1);
-
-        LOG.trace("[{}]:[{}]:{}try resolving placeholder [{}] as [{}]", uuid, depth, indent, key, expectedType.getSimpleName());
+        LOG.trace("[{}]:[{}]: try resolving placeholder [{}] as [{}]", uuid, depth, key, expectedType.getSimpleName());
 
         if (key == null)
         {
@@ -385,28 +436,28 @@ public class JsonMapper
         {
             if (key.startsWith(INDICATOR_TEXT_PLACEHOLDER) && expectedType.equals(String.class))
             {
-                LOG.trace("[{}]:[{}]:{}resolve as [TEXT]", uuid, depth, indent);
+                LOG.trace("[{}]:[{}]: resolve as [TEXT]", uuid, depth);
 
                 String keyName = key.substring(INDICATOR_TEXT_PLACEHOLDER.length());
                 value = expectedType.cast(translationProvider.getText(locale, keyName));
             }
             else if (key.startsWith(INDICATOR_VALUE_PLACEHOLDER))
             {
-                LOG.trace("[{}]:[{}]:{}resolve as [VALUE]", uuid, depth, indent);
+                LOG.trace("[{}]:[{}]: resolve as [VALUE]", uuid, depth);
 
-                String keyName = key.substring(INDICATOR_VALUE_PLACEHOLDER.length()).replaceFirst("[?]", "[]");
+                String keyName = key.substring(INDICATOR_VALUE_PLACEHOLDER.length());
                 value = extractFromTokenMapsAsValue(keyName, expectedType);
             }
             else if (key.startsWith(INDICATOR_CLASS_PLACEHOLDER))
             {
-                LOG.trace("[{}]:[{}]:{}resolve as [CLASS]", uuid, depth, indent);
+                LOG.trace("[{}]:[{}]: resolve as [CLASS]", uuid, depth);
 
                 String keyName = key.substring(INDICATOR_CLASS_PLACEHOLDER.length());
                 value = expectedType.cast(extractFromTokenMapsAsClass(keyName));
             }
             else if (key.startsWith(INDICATOR_FUNCTION_PLACEHOLDER))
             {
-                LOG.trace("[{}]:[{}]:{}resolve as [FUNCTION]", uuid, depth, indent);
+                LOG.trace("[{}]:[{}]: resolve as [FUNCTION]", uuid, depth);
 
                 String keyName = key.substring(INDICATOR_FUNCTION_PLACEHOLDER.length());
                 value = expectedType.cast(extractFromTokenMapsAsFunction(keyName));
@@ -418,7 +469,7 @@ public class JsonMapper
             value = defaultValue;
         }
 
-        LOG.trace("[{}]:[{}]:{}resolved to [{}]", uuid, depth, indent, String.valueOf(value));
+        LOG.trace("[{}]:[{}]: resolved to [{}]", uuid, depth, String.valueOf(value));
 
         return value;
     }
@@ -463,15 +514,18 @@ public class JsonMapper
         {
             return expectedType.cast(obj);
         }
+        else if (obj instanceof Enum e && expectedType.equals(String.class))
+        {
+            return expectedType.cast(e.name());
+        }
         else if (obj instanceof String s)
         {
             return transformRawValue(objName, 0, s, expectedType);
         }
 
-        throw new JsonMapperException(String
-            .format("object [%s] could not be extracted due to expected class is [%s] but got [%s]", objName,
-                expectedType.getSimpleName(),
-                obj.getClass().getSimpleName()));
+        throw new JsonMapperException(
+            String.format("object [%s] could not be extracted due to expected class is [%s] but got [%s]", objName,
+                expectedType.getSimpleName(), obj.getClass().getSimpleName()));
     }
 
     /**
@@ -493,18 +547,21 @@ public class JsonMapper
                 .filter(Objects::nonNull)
                 .findFirst();
 
-        Optional<String> result     =
+        if (tempResult.isPresent())
+        {
+            return tempResult.get();
+        }
+
+        Optional<String> result =
             tokenMaps.stream()
                 .filter(Objects::nonNull)
                 .map(m -> m.getClazz(objName))
                 .filter(Objects::nonNull)
                 .findFirst();
 
-        return tempResult.isEmpty()
-            ? result.isEmpty()
-                ? null
-                : result.get()
-            : tempResult.get();
+        return result.isEmpty()
+            ? null
+            : result.get();
     }
 
     /**
@@ -526,22 +583,25 @@ public class JsonMapper
                 .filter(Objects::nonNull)
                 .findFirst();
 
-        Optional<AbsFunctionCall> result     =
+        if (tempResult.isPresent())
+        {
+            return tempResult.get();
+        }
+
+        Optional<AbsFunctionCall> result =
             tokenMaps.stream()
                 .filter(Objects::nonNull)
                 .map(m -> m.getFunction(objName))
                 .filter(Objects::nonNull)
                 .findFirst();
 
-        return tempResult.isEmpty()
-            ? result.isEmpty()
-                ? null
-                : result.get()
-            : tempResult.get();
+        return result.isEmpty()
+            ? null
+            : result.get();
     }
 
     /**
-     * Check if a {@code uid} is disabled {@link JsonMapper#tokenMaps}
+     * Check if a {@code uid} is disabled in {@link JsonMapper#tokenMaps}
      *
      * @param uid of the element to check
      * @return {@code false}, if the element is marked as inactive, {@code true} otherwise
@@ -625,47 +685,61 @@ public class JsonMapper
     private <T> T getParameterValue(PseudoElement element, int depth, String key, Class<T> expectedType, T fallback,
         boolean processPlaceholder)
     {
-        String rawValue = element.getParameters().get(key);
-        T      value    = null;
-
-        String indent   = LOG_INDENT_STRING.repeat(depth + 1);
+        Object rawValue = element.getParameters().get(key);
 
         String uid      = element.getUid() == null ? RANDOM_ID : element.getUid();
 
-        LOG.trace("[{}]:[{}]:{}get parameter [{}] from [{}] as [{}]", uuid, depth, indent, key, uid,
+        LOG.trace("[{}]:[{}]: get parameter [{}] from [{}] as [{}]", uuid, depth, key, uid,
             expectedType.getSimpleName());
 
-        if (rawValue == null || rawValue.isBlank())
+        if (rawValue == null)
         {
             if (fallback == null)
             {
-                throw new JsonParsingException(uid, 0, this.count,
-                    String.format("parameter [%s] is expected but not set", key));
+                throw new JsonParsingException(uid, 0, this.count, String.format("parameter [%s] is expected but not set", key));
             }
 
-            LOG.trace("[{}]:[{}]:{}parameter is [{}]", uuid, depth, indent, String.valueOf(fallback));
+            LOG.trace("[{}]:[{}]: parameter is [{}]", uuid, depth, String.valueOf(fallback));
 
             return fallback;
         }
 
-        if (rawValue.startsWith(BASE_INDICATOR_START) && processPlaceholder)
+        LOG.trace("[{}]:[{}]: parameter is [{}]:[{}]", uuid, depth, rawValue.getClass().getSimpleName(), String.valueOf(rawValue));
+
+        // ---> DO NOT CHANGE ORDER BETWEEN HERE...
+        if (rawValue instanceof String enumVal && expectedType.isEnum())
         {
-            value = handlePossiblePlaceholder(rawValue, expectedType, fallback, depth);
-        }
-        else
-        {
-            value = transformRawValue(uid, depth, rawValue, expectedType);
+            @SuppressWarnings({"unchecked", "rawtypes"})
+            Enum<?> temp = Enum.valueOf((Class) expectedType, enumVal.toUpperCase());
+
+            return expectedType.cast(temp);
         }
 
-        LOG.trace("[{}]:[{}]:{}parameter is [{}]", uuid, depth, indent, String.valueOf(value));
+        if (rawValue instanceof String strVal)
+        {
+            if (strVal.startsWith(BASE_INDICATOR_START) && processPlaceholder)
+            {
+                return handlePossiblePlaceholder(strVal, expectedType, fallback, depth);
+            }
+            else
+            {
+                return transformRawValue(uid, depth, strVal, expectedType);
+            }
+        }
 
-        return value;
+        if (expectedType.isInstance(rawValue))
+        {
+            return expectedType.cast(rawValue);
+        }
+        // ---> ... AND HERE.
+
+        throw new JsonParsingException(uid, 0, this.count,
+            String.format("parameter [%s] parsing inconclusive for value [%s] expected type [%s]", key, rawValue,
+                expectedType.getSimpleName()));
     }
 
     /**
      * Transform the raw value of a parameter.
-     * <p>
-     * 'true' gets cast to a boolean value
      * 
      * @param <T> the expected result type
      * @param uid of the element to transform for error logging
@@ -691,6 +765,13 @@ public class JsonMapper
             return expectedType.cast(i);
         }
 
+        if (expectedType.equals(Double.class))
+        {
+            Double i = Double.valueOf(value);
+
+            return expectedType.cast(i);
+        }
+
         if (expectedType.equals(String.class))
         {
             return expectedType.cast(value);
@@ -709,15 +790,14 @@ public class JsonMapper
      */
     private MapperResult transformInternalComponent(PseudoElement element, int depth, ContainerType... allowedTypes)
     {
-        String       indent       = LOG_INDENT_STRING.repeat(depth + 1);
-        String       path         = getParameterValue(element, depth, "path", String.class);
-        Boolean      isSourceList = getParameterValue(element, depth, "isSourceList", Boolean.class, false);
+        String       path         = getParameterValue(element, depth, PARAM_PATH, String.class);
+        Boolean      isSourceList = getParameterValue(element, depth, PARAM_IS_SOURCE_LIST, Boolean.class, false);
         String       sourceKey    = null;
         MapperResult result       = null;
 
         try
         {
-            sourceKey = getParameterValue(element, depth, "sourceKey", String.class);
+            sourceKey = getParameterValue(element, depth, PARAM_SOURCE_KEY, String.class);
         }
         catch (Exception ex)
         {
@@ -746,8 +826,7 @@ public class JsonMapper
                             .depth0AllowedTypes(allowedTypes)
                             .build();
 
-                    LOG.trace("[{}]:[{}]:{}map linked component list element [{}] @ mapper [{}]", uuid, depth, indent, path,
-                        internalMapper.uuid);
+                    LOG.trace("[{}]:[{}]: map linked component list element [{}] @ mapper [{}]", uuid, depth, path, internalMapper.uuid);
 
                     internalMapper.tempTokenMaps.putAll(tempTokenMaps);
 
@@ -786,7 +865,7 @@ public class JsonMapper
                         .depth0AllowedTypes(allowedTypes)
                         .build();
 
-                LOG.trace("[{}]:[{}]:{}map linked sourced component [{}] @ mapper [{}]", uuid, depth, indent, path, internalMapper.uuid);
+                LOG.trace("[{}]:[{}]: map linked sourced component [{}] @ mapper [{}]", uuid, depth, path, internalMapper.uuid);
 
                 internalMapper.tempTokenMaps.putAll(tempTokenMaps);
 
@@ -807,7 +886,7 @@ public class JsonMapper
                     .depth0AllowedTypes(allowedTypes)
                     .build();
 
-            LOG.trace("[{}]:[{}]:{}map linked component [{}] @ mapper [{}]", uuid, depth, indent, path, internalMapper.uuid);
+            LOG.trace("[{}]:[{}]: map linked component [{}] @ mapper [{}]", uuid, depth, path, internalMapper.uuid);
 
             internalMapper.tempTokenMaps.putAll(tempTokenMaps);
 
@@ -827,22 +906,19 @@ public class JsonMapper
      */
     private InputValueList handleInputValueChildren(PseudoElement element, int depth, boolean throwWhenEmpty)
     {
-        String indent = LOG_INDENT_STRING.repeat(depth + 1);
-
-        LOG.trace("[{}]:[{}]:{}map input children", uuid, depth, indent);
+        LOG.trace("[{}]:[{}]: map input children", uuid, depth);
 
         InputValueList values = new InputValueList();
 
         for (PseudoElement pe : element.getChildren())
         {
-            String  uid            = element.getUid() == null ? "random uid" : element.getUid();
+            String  uid            = element.getUid() == null ? RANDOM_ID : element.getUid();
 
             boolean processElement = shouldProcess(element, uid, depth);
 
             if (!processElement)
             {
-                LOG.trace("[{}]:[{}]:{} skip InputValue [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth,
-                    indent, uid);
+                LOG.trace("[{}]:[{}]: skip InputValue [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth, uid);
 
                 continue;
             }
@@ -871,10 +947,10 @@ public class JsonMapper
     private InputValue transformInputValue(PseudoElement element, int depth)
     {
         List<String> classes = resolveClasses(element.getClasses(), depth);
-        String       id      = getParameterValue(element, depth, "id", String.class, DEFAULT_EMPTY_VAL);
-        String       text    = getParameterValue(element, depth, TEXT, String.class, "no text set");
-        String       value   = getParameterValue(element, depth, VALUE, String.class, "no value set");
-        Boolean      checked = getParameterValue(element, depth, CHECKED, Boolean.class, Boolean.FALSE);
+        String       id      = getParameterValue(element, depth, PARAM_ID, String.class, DEFAULT_EMPTY_VAL);
+        String       text    = getParameterValue(element, depth, PARAM_TEXT, String.class, BasicText.NO_TEXT_SET.getText());
+        String       value   = getParameterValue(element, depth, PARAM_VALUE, String.class, BasicText.NO_VALUE_SET.getText());
+        Boolean      checked = getParameterValue(element, depth, PARAM_CHECKED, Boolean.class, Boolean.FALSE);
 
         return InputValue
             .builder()
@@ -899,7 +975,7 @@ public class JsonMapper
 
     private boolean shouldProcess(PseudoElement element, String uid, int depth)
     {
-        return getParameterValue(element, depth, ACTIVE, Boolean.class, true)
+        return getParameterValue(element, depth, PARAM_ACTIVE, Boolean.class, true)
             && checkActiveStateFromTokenMaps(uid);
     }
 
@@ -921,22 +997,20 @@ public class JsonMapper
         this.count++;
 
         List<Container> resultList     = new ArrayList<>();
-        String          indent         = LOG_INDENT_STRING.repeat(depth + 1);
 
-        String          uid            = element.getUid() == null ? "random uid" : element.getUid();
+        String          uid            = element.getUid() == null ? RANDOM_ID : element.getUid();
 
         boolean         processElement = shouldProcess(element, uid, depth);
 
         if (!processElement)
         {
-            LOG.debug("[{}]:[{}]:{}skip CONTAINER [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth, indent,
-                uid);
+            LOG.debug("[{}]:[{}]: skip CONTAINER [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth, uid);
 
             return List.of(EmptyContainer.builder().build());
         }
 
-        LOG.trace("[{}]:[{}]:{}start transform >", uuid, depth, indent);
-        LOG.trace("[{}]:[{}]:{}map [{}] with allowed types [{}]", uuid, depth, indent, uid, allowedTypes);
+        LOG.trace("[{}]:[{}]: start transform >", uuid, depth);
+        LOG.trace("[{}]:[{}]: map [{}] with allowed types [{}]", uuid, depth, uid, allowedTypes);
 
         InternalElementType internalType = null;
 
@@ -955,9 +1029,8 @@ public class JsonMapper
 
                         return result.getContainers();
                 }
-
             }
-            catch (Exception ex)
+            catch (IllegalArgumentException | NullPointerException ex)
             {
                 // do nothing since it is not a internal type
             }
@@ -970,7 +1043,7 @@ public class JsonMapper
                     String.format("container type [%s] is not allowed here", element.getType()));
             }
 
-            LOG.debug("[{}]:[{}]:{}map CONTAINER [{}] as [{}]", uuid, depth, indent, uid, type);
+            LOG.debug("[{}]:[{}]: map CONTAINER [{}] as [{}]", uuid, depth, uid, type);
 
             int                 numberOfRepetitions = 1;
             FlatMappableList<?> targetList          = null;
@@ -978,27 +1051,27 @@ public class JsonMapper
 
             try
             {
-                String targetListName = getParameterValue(element, depth, "repetitionSource", String.class);
+                String targetListName = getParameterValue(element, depth, PARAM_REPETITION_SOURCE, String.class);
                 targetList = extractFromTokenMapsAsValue(targetListName, FlatMappableList.class);
 
                 numberOfRepetitions = targetList.size();
 
-                LOG.debug("[{}]:[{}]:{}repeat container [{}] times", uuid, depth, indent, numberOfRepetitions);
+                LOG.debug("[{}]:[{}]: repeat container [{}] times", uuid, depth, numberOfRepetitions);
             }
             catch (JsonParsingException ex)
             {
-                LOG.trace("[{}]:[{}]:{}repetitionSource not set", uuid, depth, indent);
+                LOG.trace("[{}]:[{}]: repetitionSource not set", uuid, depth);
 
                 try
                 {
-                    String targetName = getParameterValue(element, depth, "elementSource", String.class);
+                    String targetName = getParameterValue(element, depth, PARAM_ELEMENT_SOURCE, String.class);
                     target = extractFromTokenMapsAsValue(targetName, FlatMappable.class);
 
-                    LOG.debug("[{}]:[{}]:{}source element found", uuid, depth, indent);
+                    LOG.debug("[{}]:[{}]: source element found", uuid, depth);
                 }
                 catch (JsonParsingException exInner)
                 {
-                    LOG.trace("[{}]:[{}]:{}elementSource not set", uuid, depth, indent);
+                    LOG.trace("[{}]:[{}]: elementSource not set", uuid, depth);
                 }
             }
             catch (JsonMapperException ex)
@@ -1030,13 +1103,22 @@ public class JsonMapper
 
                 if (LOG.isTraceEnabled() && !tempTokenMaps.isEmpty())
                 {
-                    LOG.debug("[{}]:[{}]:{}with following temp token maps", uuid, depth, indent);
+                    LOG.debug("[{}]:[{}]: with following temp token maps", uuid, depth);
 
                     tempTokenMaps.values()
                         .stream()
                         .map(TokenMap::toString)
                         .map(String::lines)
                         .forEach(stream -> stream.forEach(line -> LOG.trace("[{}]: {}", uuid, line)));
+                }
+
+                if (i > 0)
+                {
+                    element =
+                        element
+                            .toBuilder()
+                            .uid(element.getUid() + "-" + i)
+                            .build();
                 }
 
                 Container result = switch (type)
@@ -1055,6 +1137,7 @@ public class JsonMapper
                     case LINK -> transformLinkContainer(element, depth);
                     case MODAL -> transformModal(element, depth);
                     case SPLITTED -> transformSplittedContainer(element, depth);
+                    case SVG -> transformSVGContainer(element, depth);
                     case TAB -> transformTabbedContainer(element, depth);
                     case TABLE -> transformTableContainer(element, depth);
                     case TABLE_ROW -> transformTableRowContainer(element, depth);
@@ -1090,7 +1173,7 @@ public class JsonMapper
             .builder()
             .clazz("alert")
             .clazz("error")
-            .text(String.format("the creation of this element failed. please rever to the server log. mapper id: [%s]", uuid))
+            .text(String.format("the creation of this element failed. please refer to the server log. mapper id: [%s]", uuid))
             .build();
     }
 
@@ -1106,9 +1189,9 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              src        = getParameterValue(element, depth, SRC, String.class);
-        Boolean             controls   = getParameterValue(element, depth, "controls", Boolean.class, Boolean.FALSE);
-        Boolean             autoplay   = getParameterValue(element, depth, "autoplay", Boolean.class, Boolean.FALSE);
+        String              src        = getParameterValue(element, depth, PARAM_SRC, String.class);
+        Boolean             controls   = getParameterValue(element, depth, PARAM_CONTROLS, Boolean.class, Boolean.FALSE);
+        Boolean             autoplay   = getParameterValue(element, depth, PARAM_AUTOPLAY, Boolean.class, Boolean.FALSE);
 
         return AudioContainer
             .builder()
@@ -1133,7 +1216,7 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              icon       = getParameterValue(element, depth, "icon", String.class, "bi-caret-right-fill");
+        String              icon       = getParameterValue(element, depth, PARAM_ICON, String.class, DEFAULT_BURGER_ICON);
 
         List<BurgerItem>    items      =
             element
@@ -1162,17 +1245,17 @@ public class JsonMapper
      */
     private BurgerItem transformEntry(PseudoElement element, int depth)
     {
-        String  uid            = element.getUid() == null ? "random uid" : element.getUid();
+        String  uid            = element.getUid() == null ? RANDOM_ID : element.getUid();
         boolean processElement = shouldProcess(element, uid, depth);
 
-        if (!processElement && !element.getType().equalsIgnoreCase("item"))
+        if (!processElement && !element.getType().equalsIgnoreCase(TYPE_ITEM))
         {
             return null;
         }
 
-        String icon = getParameterValue(element, depth, "icon", String.class, DEFAULT_EMPTY_VAL);
-        String url  = getParameterValue(element, depth, "url", String.class);
-        String text = getParameterValue(element, depth, "text", String.class);
+        String icon = getParameterValue(element, depth, PARAM_ICON, String.class, DEFAULT_EMPTY_VAL);
+        String url  = getParameterValue(element, depth, PARAM_URL, String.class);
+        String text = getParameterValue(element, depth, PARAM_TEXT, String.class);
 
         return BurgerItem
             .builder()
@@ -1194,22 +1277,19 @@ public class JsonMapper
         String              uid                 = resolveUid(element, depth);
         List<String>        classes             = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes          = resolveAttributes(element, depth);
-        String              text                = getParameterValue(element, depth, TEXT, String.class);
+        String              text                = getParameterValue(element, depth, PARAM_TEXT, String.class);
         ButtonClass         btnClass            =
-            ButtonClass.valueOf(getParameterValue(element, depth, BTN_CLASS, String.class, "DEFAULT").toUpperCase());
-
+            getParameterValue(element, depth, PARAM_BTN_CLASS, ButtonClass.class, ButtonClass.DEFAULT);
         AbsFunctionCall     btnFunction         = null;
         String              fallbackBtnFunction = DEFAULT_EMPTY_VAL;
 
         try
         {
-            btnFunction =
-                getParameterValue(element, depth, ON_CLICK, AbsFunctionCall.class);
+            btnFunction = getParameterValue(element, depth, PARAM_ON_CLICK, AbsFunctionCall.class);
         }
         catch (JsonParsingException ex)
         {
-            fallbackBtnFunction =
-                getParameterValue(element, depth, ON_CLICK, String.class, DEFAULT_EMPTY_VAL);
+            fallbackBtnFunction = getParameterValue(element, depth, PARAM_ON_CLICK, String.class, DEFAULT_EMPTY_VAL);
         }
 
         return Button
@@ -1247,12 +1327,11 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              tooltip    = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              image      = getParameterValue(element, depth, IMAGE, String.class);
-        ButtonClass         btnClass   =
-            ButtonClass.valueOf(getParameterValue(element, depth, BTN_CLASS, String.class, ButtonClass.DEFAULT.name()));
-        String              onClick    = getParameterValue(element, depth, ON_CLICK, String.class);
-        String              title      = getParameterValue(element, depth, "title", String.class, DEFAULT_EMPTY_VAL);
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              image      = getParameterValue(element, depth, PARAM_IMAGE, String.class);
+        ButtonClass         btnClass   = getParameterValue(element, depth, PARAM_BTN_CLASS, ButtonClass.class, ButtonClass.DEFAULT);
+        String              onClick    = getParameterValue(element, depth, PARAM_ON_CLICK, String.class);
+        String              title      = getParameterValue(element, depth, PARAM_TITLE, String.class, DEFAULT_EMPTY_VAL);
 
         return ButtonIcon
             .builder()
@@ -1284,7 +1363,7 @@ public class JsonMapper
         element
             .getChildren()
             .stream()
-            .forEach(c -> contents.addAll(transform(c, depth + 1, CONTAINER_CHILDREN)));
+            .forEach(c -> contents.addAll(transform(c, depth + 1, CONTENT_CONTAINER_CHILDREN)));
 
         return ContentContainer
             .builder()
@@ -1305,11 +1384,10 @@ public class JsonMapper
     private FormContainer transformFormContainer(PseudoElement element, int depth)
     {
         String              uid          = resolveUid(element, depth);
-        Direction           direction    =
-            Direction.valueOf(getParameterValue(element, depth, DIRECTION, String.class, "NONE").toUpperCase());
+        Direction           direction    = getParameterValue(element, depth, PARAM_DIRECTION, Direction.class, Direction.NONE);
         List<String>        classes      = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes   = resolveAttributes(element, depth);
-        String              connectedBtn = getParameterValue(element, depth, "connectedBtn", String.class, DEFAULT_EMPTY_VAL);
+        String              connectedBtn = getParameterValue(element, depth, PARAM_CONNECTED_BTN, String.class, DEFAULT_EMPTY_VAL);
         List<Input>         inputs       = new ArrayList<>();
 
         element
@@ -1321,7 +1399,7 @@ public class JsonMapper
 
         if (!connectedBtn.isBlank())
         {
-            builder.dataAttribute("connected-btn", connectedBtn);
+            builder.dataAttribute(CONNECTED_BTN, connectedBtn);
         }
 
         return builder
@@ -1348,7 +1426,7 @@ public class JsonMapper
         Container           child      =
             element
                 .getChildren()
-                .isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, CONTAINER_CHILDREN).get(0);
+                .isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, CONTENT_CONTAINER_CHILDREN).get(0);
 
         return HiddenContainer
             .builder()
@@ -1371,8 +1449,8 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              tooltip    = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              src        = getParameterValue(element, depth, SRC, String.class);
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              src        = getParameterValue(element, depth, PARAM_SRC, String.class);
 
         return ImageContainer
             .builder()
@@ -1396,13 +1474,15 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              tooltip    = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              href       = getParameterValue(element, depth, HREF, String.class);
-        String              target     = getParameterValue(element, depth, TARGET, String.class, "_self");
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              href       = getParameterValue(element, depth, PARAM_HREF, String.class);
+        String              target     = getParameterValue(element, depth, PARAM_TARGET, String.class, DEFAULT_TARGET_SELF);
         Container           content    =
             element
                 .getChildren()
-                .isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, LINK_CHILDREN).get(0);
+                .isEmpty()
+                    ? null
+                    : transform(element.getChildren().get(0), depth + 1, LINK_CONTAINER_CHILDREN).get(0);
 
         return LinkContainer
             .builder()
@@ -1428,14 +1508,15 @@ public class JsonMapper
         String              uid                     = resolveUid(element, depth);
         List<String>        classes                 = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes              = resolveAttributes(element, depth);
-        String              name                    = getParameterValue(element, depth, NAME, String.class);
-        String              requestUrl              = getParameterValue(element, depth, "requestUrl", String.class, DEFAULT_EMPTY_VAL);
+        String              name                    = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String              requestUrl              = getParameterValue(element, depth, PARAM_REQUEST_URL, String.class, DEFAULT_EMPTY_VAL);
         Boolean             closeOnOverlayClick     =
-            getParameterValue(element, depth, "closeOnOverlayClick", Boolean.class, Boolean.FALSE);
+            getParameterValue(element, depth, PARAM_CLOSE_ON_OVERLAY_CLICK, Boolean.class, Boolean.FALSE);
 
-        String              btnNameLeft             = getParameterValue(element, depth, "btnNameLeft", String.class, "cancel");
-        ButtonClass         btnClassLeft            = ButtonClass.valueOf(
-            getParameterValue(element, depth, "btnClassLeft", String.class, ButtonClass.DEFAULT.name()).toUpperCase());
+        String              btnNameLeft             =
+            getParameterValue(element, depth, PARAM_BTN_NAME_LEFT, String.class, BasicText.CANCEL.getText());
+        ButtonClass         btnClassLeft            =
+            getParameterValue(element, depth, PARAM_BTN_CLASS_LEFT, ButtonClass.class, ButtonClass.DEFAULT);
 
         AbsFunctionCall     btnFunctionLeft         = null;
         String              fallbackBtnFunctionLeft = DEFAULT_EMPTY_VAL;
@@ -1443,17 +1524,18 @@ public class JsonMapper
         try
         {
             btnFunctionLeft =
-                getParameterValue(element, depth, "btnFunctionLeft", AbsFunctionCall.class, new CloseModal());
+                getParameterValue(element, depth, PARAM_BTN_FUNCTION_LEFT, AbsFunctionCall.class, new CloseModal());
         }
         catch (JsonParsingException ex)
         {
             fallbackBtnFunctionLeft =
-                getParameterValue(element, depth, "btnFunctionLeft", String.class, DEFAULT_EMPTY_VAL);
+                getParameterValue(element, depth, PARAM_BTN_FUNCTION_LEFT, String.class, DEFAULT_EMPTY_VAL);
         }
 
-        String          btnNameCenter             = getParameterValue(element, depth, "btnNameCenter", String.class, DEFAULT_EMPTY_VAL);
-        ButtonClass     btnClassCenter            = ButtonClass.valueOf(
-            getParameterValue(element, depth, "btnClassCenter", String.class, ButtonClass.DEFAULT.name()).toUpperCase());
+        String          btnNameCenter             =
+            getParameterValue(element, depth, PARAM_BTN_NAME_CENTER, String.class, DEFAULT_EMPTY_VAL);
+        ButtonClass     btnClassCenter            =
+            getParameterValue(element, depth, PARAM_BTN_CLASS_CENTER, ButtonClass.class, ButtonClass.DEFAULT);
 
         AbsFunctionCall btnFunctionCenter         = null;
         String          fallbackBtnFunctionCenter = DEFAULT_EMPTY_VAL;
@@ -1461,17 +1543,17 @@ public class JsonMapper
         try
         {
             btnFunctionCenter =
-                getParameterValue(element, depth, "btnFunctionCenter", AbsFunctionCall.class);
+                getParameterValue(element, depth, PARAM_BTN_FUNCTION_CENTER, AbsFunctionCall.class);
         }
         catch (JsonParsingException ex)
         {
             fallbackBtnFunctionCenter =
-                getParameterValue(element, depth, "btnFunctionCenter", String.class, DEFAULT_EMPTY_VAL);
+                getParameterValue(element, depth, PARAM_BTN_FUNCTION_CENTER, String.class, DEFAULT_EMPTY_VAL);
         }
 
-        String          btnNameRight             = getParameterValue(element, depth, "btnNameRight", String.class, "submit");
-        ButtonClass     btnClassRight            = ButtonClass.valueOf(
-            getParameterValue(element, depth, "btnClassRight", String.class, ButtonClass.SUCCESS.name()).toUpperCase());
+        String          btnNameRight             = getParameterValue(element, depth, PARAM_BTN_NAME_RIGHT, String.class, "submit");
+        ButtonClass     btnClassRight            =
+            getParameterValue(element, depth, PARAM_BTN_CLASS_RIGHT, ButtonClass.class, ButtonClass.DEFAULT);
 
         AbsFunctionCall btnFunctionRight         = null;
         String          fallbackBtnFunctionRight = DEFAULT_EMPTY_VAL;
@@ -1479,19 +1561,18 @@ public class JsonMapper
         try
         {
             btnFunctionRight =
-                getParameterValue(element, depth, "btnFunctionRight", AbsFunctionCall.class, new SubmitFromModal());
+                getParameterValue(element, depth, PARAM_BTN_FUNCTION_RIGHT, AbsFunctionCall.class, new SubmitFromModal());
         }
         catch (JsonParsingException ex)
         {
-            fallbackBtnFunctionRight =
-                getParameterValue(element, depth, "btnFunctionRight", String.class);
+            fallbackBtnFunctionRight = getParameterValue(element, depth, PARAM_BTN_FUNCTION_RIGHT, String.class);
         }
 
         List<Container> children = new ArrayList<>();
 
         for (PseudoElement pe : element.getChildren())
         {
-            children.addAll(transform(pe, depth + 1, MODAL_CHILDREN));
+            children.addAll(transform(pe, depth + 1, MODAL_CONTAINER_CHILDREN));
         }
 
         return ModalContainer
@@ -1566,6 +1647,39 @@ public class JsonMapper
     }
 
     /**
+     * Transform a {@link PseudoElement} to an {@link SVGContainer}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private SVGContainer transformSVGContainer(PseudoElement element, int depth)
+    {
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
+        Integer             width      = getParameterValue(element, depth, PARAM_WIDTH, Integer.class);
+        Integer             height     = getParameterValue(element, depth, PARAM_HEIGHT, Integer.class);
+
+        List<SVGElement>    elements   = new ArrayList<>();
+
+        for (PseudoElement pe : element.getChildren())
+        {
+            elements.addAll(transformSVGElement(pe, depth));
+        }
+
+        return SVGContainer
+            .builder()
+            .uid(uid)
+            .classes(classes)
+            .dataAttributes(attributes)
+            .elements(elements)
+            .width(width)
+            .height(height)
+            .build();
+    }
+
+    /**
      * Transform a {@link PseudoElement} to an {@link TabContainer}.
      *
      * @param element to transfrom
@@ -1589,7 +1703,7 @@ public class JsonMapper
         String              uid            = resolveUid(element, depth);
         List<String>        classes        = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes     = resolveAttributes(element, depth);
-        String              name           = getParameterValue(element, depth, NAME, String.class);
+        String              name           = getParameterValue(element, depth, PARAM_NAME, String.class);
         String              columnNames    = getParameterValue(element, depth, "columnNames", String.class, null, false);
         Boolean             sortable       = getParameterValue(element, depth, "sortable", Boolean.class, false);
 
@@ -1636,7 +1750,7 @@ public class JsonMapper
 
         for (PseudoElement pe : element.getChildren())
         {
-            cells.addAll(transform(pe, depth + 1, TABLE_ROW_CHILDREN));
+            cells.addAll(transform(pe, depth + 1, TABLE_ROW_CONTAINER_CHILDREN));
         }
 
         return TableRowContainer
@@ -1661,8 +1775,8 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              tooltip    = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              text       = getParameterValue(element, depth, TEXT, String.class);
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              text       = getParameterValue(element, depth, PARAM_TEXT, String.class);
         Boolean             inline     = getParameterValue(element, depth, "inline", Boolean.class, false);
 
         return TextContainer
@@ -1688,9 +1802,9 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              tooltip    = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              text       = getParameterValue(element, depth, TEXT, String.class);
-        Integer             size       = getParameterValue(element, depth, "size", Integer.class, 1);
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              text       = getParameterValue(element, depth, PARAM_TEXT, String.class);
+        Integer             size       = getParameterValue(element, depth, PARAM_SIZE, Integer.class, 1);
 
         size = size < 0
             ? 1
@@ -1719,9 +1833,7 @@ public class JsonMapper
      */
     private Input transformInput(PseudoElement element, int depth)
     {
-        String    indent = LOG_INDENT_STRING.repeat(depth + 1);
-
-        InputType type   = InputType.valueOf(element.getType().toUpperCase());
+        InputType type = InputType.valueOf(element.getType().toUpperCase());
 
         LOG.trace(DEFAULT_EMPTY_VAL);
 
@@ -1731,7 +1843,7 @@ public class JsonMapper
 
         if (!processElement)
         {
-            LOG.debug("[{}]:[{}]:{} skip INPUT [{}] due to eval processElement is [false]", uuid, depth, indent, element.getUid());
+            LOG.debug("[{}]:[{}]: skip INPUT [{}] due to eval processElement is [false]", uuid, depth, element.getUid());
 
             return Hidden
                 .builder()
@@ -1742,7 +1854,7 @@ public class JsonMapper
                 .build();
         }
 
-        LOG.debug("[{}]:[{}]:{}map INPUT [{}] as [{}]", uuid, depth, indent, element.getUid(), type);
+        LOG.debug("[{}]:[{}]: map INPUT [{}] as [{}]", uuid, depth, element.getUid(), type);
 
         try
         {
@@ -1785,12 +1897,12 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              tooltip    = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              name       = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class, DEFAULT_EMPTY_VAL);
-        String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoText   = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoUrl    = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_EMPTY_VAL);
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              name       = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String              submitAs   = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class, DEFAULT_EMPTY_VAL);
+        String              onInput    = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoText   = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoUrl    = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
         String              boxesSrc   = getParameterValue(element, depth, "boxes", String.class, DEFAULT_EMPTY_VAL);
         InputValueList      boxes      =
             boxesSrc.isBlank()
@@ -1824,18 +1936,18 @@ public class JsonMapper
         String              uid         = resolveUid(element, depth);
         List<String>        classes     = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes  = resolveAttributes(element, depth);
-        String              tooltip     = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              name        = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoText    = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoUrl     = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_EMPTY_VAL);
+        String              tooltip     = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              name        = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String              submitAs    = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
+        String              onInput     = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoText    = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoUrl     = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
         Integer             valueF      = getParameterValue(element, depth, "valueF", Integer.class, 0);
         Integer             valueB      = getParameterValue(element, depth, "valueB", Integer.class, 0);
         String              symbol      = getParameterValue(element, depth, "symbol", String.class, DEFAULT_EMPTY_VAL);
-        Integer             min         = getParameterValue(element, depth, MIN, Integer.class, Integer.MIN_VALUE);
-        Integer             max         = getParameterValue(element, depth, MAX, Integer.class, Integer.MAX_VALUE);
-        String              placeholder = getParameterValue(element, depth, PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
+        Integer             min         = getParameterValue(element, depth, PARAM_MIN, Integer.class, Integer.MIN_VALUE);
+        Integer             max         = getParameterValue(element, depth, PARAM_MAX, Integer.class, Integer.MAX_VALUE);
+        String              placeholder = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
 
         return Currency
             .builder()
@@ -1869,13 +1981,13 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              tooltip    = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              name       = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoText   = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoUrl    = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_EMPTY_VAL);
-        String              value      = getParameterValue(element, depth, VALUE, String.class, DEFAULT_DATE);
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              name       = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String              submitAs   = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
+        String              onInput    = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoText   = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoUrl    = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
+        String              value      = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_DATE);
 
         return Date
             .builder()
@@ -1904,12 +2016,12 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              tooltip    = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              name       = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoText   = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoUrl    = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_EMPTY_VAL);
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              name       = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String              submitAs   = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
+        String              onInput    = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoText   = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoUrl    = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
         Boolean             multiple   = getParameterValue(element, depth, "multiple", Boolean.class, Boolean.FALSE);
         String              accept     = getParameterValue(element, depth, "accept", String.class, "*");
 
@@ -1941,8 +2053,8 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              value      = getParameterValue(element, depth, VALUE, String.class, DEFAULT_EMPTY_VAL);
+        String              submitAs   = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
+        String              value      = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
 
         return Hidden
             .builder()
@@ -1967,10 +2079,10 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              tooltip    = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              text       = getParameterValue(element, depth, TEXT, String.class);
-        String              href       = getParameterValue(element, depth, HREF, String.class);
-        String              target     = getParameterValue(element, depth, TARGET, String.class, "_self");
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              text       = getParameterValue(element, depth, PARAM_TEXT, String.class);
+        String              href       = getParameterValue(element, depth, PARAM_HREF, String.class);
+        String              target     = getParameterValue(element, depth, PARAM_TARGET, String.class, DEFAULT_TARGET_SELF);
 
         return Link
             .builder()
@@ -1996,19 +2108,19 @@ public class JsonMapper
         String              uid          = resolveUid(element, depth);
         List<String>        classes      = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes   = resolveAttributes(element, depth);
-        String              tooltip      = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              name         = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs     = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput      = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoText     = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoUrl      = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_EMPTY_VAL);
-        String              value        = getParameterValue(element, depth, VALUE, String.class, DEFAULT_EMPTY_VAL);
-        Integer             min          = getParameterValue(element, depth, MIN, Integer.class, Integer.MIN_VALUE);
-        Integer             max          = getParameterValue(element, depth, MAX, Integer.class, Integer.MAX_VALUE);
-        String              placeholder  = getParameterValue(element, depth, PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
-        String              prefix       = getParameterValue(element, depth, PREFIX, String.class, DEFAULT_EMPTY_VAL);
-        String              suffix       = getParameterValue(element, depth, SUFFIX, String.class, DEFAULT_EMPTY_VAL);
-        String              onEnterPress = getParameterValue(element, depth, ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
+        String              tooltip      = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              name         = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String              submitAs     = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
+        String              onInput      = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoText     = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoUrl      = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
+        String              value        = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
+        Integer             min          = getParameterValue(element, depth, PARAM_MIN, Integer.class, Integer.MIN_VALUE);
+        Integer             max          = getParameterValue(element, depth, PARAM_MAX, Integer.class, Integer.MAX_VALUE);
+        String              placeholder  = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
+        String              prefix       = getParameterValue(element, depth, PARAM_PREFIX, String.class, DEFAULT_EMPTY_VAL);
+        String              suffix       = getParameterValue(element, depth, PARAM_SUFFIX, String.class, DEFAULT_EMPTY_VAL);
+        String              onEnterPress = getParameterValue(element, depth, PARAM_ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
 
         return Number
             .builder()
@@ -2043,14 +2155,14 @@ public class JsonMapper
         String              uid          = resolveUid(element, depth);
         List<String>        classes      = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes   = resolveAttributes(element, depth);
-        String              tooltip      = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              name         = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs     = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput      = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoText     = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoUrl      = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_EMPTY_VAL);
-        String              placeholder  = getParameterValue(element, depth, PLACEHOLDER, String.class, "***");
-        String              onEnterPress = getParameterValue(element, depth, ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
+        String              tooltip      = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              name         = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String              submitAs     = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
+        String              onInput      = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoText     = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoUrl      = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
+        String              placeholder  = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, "***");
+        String              onEnterPress = getParameterValue(element, depth, PARAM_ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
 
         return Password
             .builder()
@@ -2080,12 +2192,12 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              tooltip    = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              name       = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoText   = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoUrl    = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_EMPTY_VAL);
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              name       = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String              submitAs   = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
+        String              onInput    = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoText   = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoUrl    = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
         List<InputValue>    values     = handleInputValueChildren(element, depth, true);
 
         return Radio
@@ -2115,13 +2227,13 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              tooltip    = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              name       = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoText   = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoUrl    = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_EMPTY_VAL);
-        String              value      = getParameterValue(element, depth, VALUE, String.class, "NOT_SELECTED");
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              name       = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String              submitAs   = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
+        String              onInput    = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoText   = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoUrl    = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
+        String              value      = getParameterValue(element, depth, PARAM_VALUE, String.class, "NOT_SELECTED");
         String              valueSrc   = getParameterValue(element, depth, "values", String.class, DEFAULT_EMPTY_VAL);
         InputValueList      values     =
             valueSrc.isBlank()
@@ -2156,15 +2268,15 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              tooltip    = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              name       = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoText   = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoUrl    = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_EMPTY_VAL);
-        Integer             value      = getParameterValue(element, depth, VALUE, Integer.class, 0);
-        Integer             min        = getParameterValue(element, depth, MIN, Integer.class, Integer.MIN_VALUE);
-        Integer             max        = getParameterValue(element, depth, MAX, Integer.class, Integer.MAX_VALUE);
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              name       = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String              submitAs   = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
+        String              onInput    = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoText   = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoUrl    = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
+        Integer             value      = getParameterValue(element, depth, PARAM_VALUE, Integer.class, 0);
+        Integer             min        = getParameterValue(element, depth, PARAM_MIN, Integer.class, Integer.MIN_VALUE);
+        Integer             max        = getParameterValue(element, depth, PARAM_MAX, Integer.class, Integer.MAX_VALUE);
 
         return Slider
             .builder()
@@ -2195,13 +2307,13 @@ public class JsonMapper
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
-        String              tooltip    = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              name       = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs   = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput    = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoText   = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoUrl    = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_EMPTY_VAL);
-        Boolean             checked    = getParameterValue(element, depth, CHECKED, Boolean.class, Boolean.FALSE);
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              name       = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String              submitAs   = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
+        String              onInput    = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoText   = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoUrl    = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
+        Boolean             checked    = getParameterValue(element, depth, PARAM_CHECKED, Boolean.class, Boolean.FALSE);
 
         return Switch
             .builder()
@@ -2230,13 +2342,13 @@ public class JsonMapper
         String              uid              = resolveUid(element, depth);
         List<String>        classes          = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes       = resolveAttributes(element, depth);
-        String              tooltip          = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              name             = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs         = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput          = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoText         = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoUrl          = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_EMPTY_VAL);
-        String              value            = getParameterValue(element, depth, VALUE, String.class, DEFAULT_EMPTY_VAL);
+        String              tooltip          = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              name             = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String              submitAs         = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
+        String              onInput          = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoText         = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoUrl          = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
+        String              value            = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
         String              pattern          = getParameterValue(element, depth, "pattern", String.class, DEFAULT_EMPTY_VAL);
         String              fetchUrl         = getParameterValue(element, depth, "fetchUrl", String.class, DEFAULT_EMPTY_VAL);
         String              searchUrl        = getParameterValue(element, depth, "searchUrl", String.class, DEFAULT_EMPTY_VAL);
@@ -2281,15 +2393,15 @@ public class JsonMapper
         String              uid         = resolveUid(element, depth);
         List<String>        classes     = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes  = resolveAttributes(element, depth);
-        String              tooltip     = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              name        = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs    = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput     = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoText    = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoUrl     = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_EMPTY_VAL);
-        String              value       = getParameterValue(element, depth, VALUE, String.class, DEFAULT_EMPTY_VAL);
-        Integer             maxChars    = getParameterValue(element, depth, MAX_CHARS, Integer.class, 32000);
-        String              placeholder = getParameterValue(element, depth, PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
+        String              tooltip     = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              name        = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String              submitAs    = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
+        String              onInput     = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoText    = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoUrl     = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
+        String              value       = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
+        Integer             maxChars    = getParameterValue(element, depth, PARAM_MAX_CHARS, Integer.class, 32000);
+        String              placeholder = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
 
         return Textarea
             .builder()
@@ -2317,7 +2429,7 @@ public class JsonMapper
      */
     private Textbox transformTextboxInput(PseudoElement element, int depth)
     {
-        String value = getParameterValue(element, depth, VALUE, String.class, DEFAULT_EMPTY_VAL);
+        String value = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
 
         return Textbox
             .builder()
@@ -2338,18 +2450,18 @@ public class JsonMapper
         String              uid          = resolveUid(element, depth);
         List<String>        classes      = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes   = resolveAttributes(element, depth);
-        String              tooltip      = getParameterValue(element, depth, TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              name         = getParameterValue(element, depth, NAME, String.class);
-        String              submitAs     = getParameterValue(element, depth, SUBMIT_AS, String.class);
-        String              onInput      = getParameterValue(element, depth, ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoText     = getParameterValue(element, depth, INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
-        String              infoUrl      = getParameterValue(element, depth, INFO_URL, String.class, DEFAULT_EMPTY_VAL);
-        String              value        = getParameterValue(element, depth, VALUE, String.class, DEFAULT_EMPTY_VAL);
-        String              placeholder  = getParameterValue(element, depth, PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
-        String              prefix       = getParameterValue(element, depth, PREFIX, String.class, DEFAULT_EMPTY_VAL);
-        String              suffix       = getParameterValue(element, depth, SUFFIX, String.class, DEFAULT_EMPTY_VAL);
-        Integer             maxChars     = getParameterValue(element, depth, MAX_CHARS, Integer.class, 150);
-        String              onEnterPress = getParameterValue(element, depth, ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
+        String              tooltip      = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              name         = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String              submitAs     = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
+        String              onInput      = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoText     = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
+        String              infoUrl      = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
+        String              value        = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
+        String              placeholder  = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
+        String              prefix       = getParameterValue(element, depth, PARAM_PREFIX, String.class, DEFAULT_EMPTY_VAL);
+        String              suffix       = getParameterValue(element, depth, PARAM_SUFFIX, String.class, DEFAULT_EMPTY_VAL);
+        Integer             maxChars     = getParameterValue(element, depth, PARAM_MAX_CHARS, Integer.class, 150);
+        String              onEnterPress = getParameterValue(element, depth, PARAM_ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
 
         return Textfield
             .builder()
@@ -2370,4 +2482,216 @@ public class JsonMapper
             .onEnterPress(onEnterPress)
             .build();
     }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link SVGContainer}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private List<SVGElement> transformSVGElement(PseudoElement element, int depth)
+    {
+        this.count++;
+
+        List<SVGElement> resultList     = new ArrayList<>();
+
+        String           uid            = element.getUid() == null ? RANDOM_ID : element.getUid();
+
+        boolean          processElement = shouldProcess(element, uid, depth);
+
+        if (!processElement)
+        {
+            LOG.debug("[{}]:[{}]: skip svg element [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth, uid);
+
+            return resultList;
+        }
+
+        try
+        {
+            SVGType type = SVGType.valueOf(element.getType().toUpperCase());
+
+            LOG.debug("[{}]:[{}]: map svg element [{}] as [{}]", uuid, depth, uid, type);
+
+            int                 numberOfRepetitions = 1;
+            FlatMappableList<?> targetList          = null;
+            FlatMappable        target              = null;
+
+            try
+            {
+                String targetListName = getParameterValue(element, depth, PARAM_REPETITION_SOURCE, String.class);
+                targetList = extractFromTokenMapsAsValue(targetListName, FlatMappableList.class);
+
+                numberOfRepetitions = targetList.size();
+
+                LOG.debug("[{}]:[{}]: repeat svg element [{}] times", uuid, depth, numberOfRepetitions);
+            }
+            catch (JsonParsingException ex)
+            {
+                LOG.trace("[{}]:[{}]: repetitionSource not set", uuid, depth);
+
+                try
+                {
+                    String targetName = getParameterValue(element, depth, PARAM_ELEMENT_SOURCE, String.class);
+                    target = extractFromTokenMapsAsValue(targetName, FlatMappable.class);
+
+                    LOG.debug("[{}]:[{}]: source element found", uuid, depth);
+                }
+                catch (JsonParsingException exInner)
+                {
+                    LOG.trace("[{}]:[{}]: elementSource not set", uuid, depth);
+                }
+            }
+            catch (JsonMapperException ex)
+            {
+                LOG.error("elementSource/repetitionSource expected but not found", ex);
+
+                resultList.add(failureSVGElement());
+
+                return resultList;
+            }
+
+            for (int i = 0; i < numberOfRepetitions; i++)
+            {
+                TokenMap tempTokenMap = null;
+
+                if (targetList != null)
+                {
+                    tempTokenMap = flatMappableDissector.dissect(targetList.get(i), depth, locale);
+
+                    tempTokenMaps.put(tempTokenMap.hashCode(), tempTokenMap);
+                }
+
+                if (target != null)
+                {
+                    tempTokenMap = flatMappableDissector.dissect(target, depth, locale);
+
+                    tempTokenMaps.put(tempTokenMap.hashCode(), tempTokenMap);
+                }
+
+                if (LOG.isTraceEnabled() && !tempTokenMaps.isEmpty())
+                {
+                    LOG.debug("[{}]:[{}]: with following temp token maps", uuid, depth);
+
+                    tempTokenMaps.values()
+                        .stream()
+                        .map(TokenMap::toString)
+                        .map(String::lines)
+                        .forEach(stream -> stream.forEach(line -> LOG.trace("[{}]: {}", uuid, line)));
+                }
+
+                if (i > 0)
+                {
+                    element =
+                        element
+                            .toBuilder()
+                            .uid(element.getUid() + "-" + i)
+                            .build();
+                }
+
+                SVGElement result = switch (type)
+                {
+                    case LINE -> transformSVGLine(element, depth);
+                    case TEXT -> transformSVGText(element, depth);
+                };
+
+                resultList.add(result);
+
+                if (tempTokenMap != null)
+                {
+                    tempTokenMaps.remove(tempTokenMap.hashCode());
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            LOG.error("error parsing svg element", ex);
+
+            return List.of(failureSVGElement());
+        }
+
+        return resultList;
+    }
+
+    private SVGElement failureSVGElement()
+    {
+        return SVGText
+            .builder()
+            .clazz("svg-text-warn")
+            .text(String.format("the creation of this svg element failed. please rever to the server log. mapper id: [%s]", uuid))
+            .build();
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link SVGLine}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private SVGLine transformSVGLine(PseudoElement element, int depth)
+    {
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              style      = getParameterValue(element, depth, PARAM_STYLE, String.class, DEFAULT_EMPTY_VAL);
+        Double              x1         = getParameterValue(element, depth, PARAM_X1, Double.class);
+        Double              x2         = getParameterValue(element, depth, PARAM_X2, Double.class);
+        Double              y1         = getParameterValue(element, depth, PARAM_Y1, Double.class);
+        Double              y2         = getParameterValue(element, depth, PARAM_Y2, Double.class);
+
+        return SVGLine
+            .builder()
+            .uid(uid)
+            .classes(classes)
+            .dataAttributes(attributes)
+            .tooltip(tooltip)
+            .style(style)
+            .x1(x1)
+            .x2(x2)
+            .y1(y1)
+            .y2(y2)
+            .build();
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link SVGText}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private SVGText transformSVGText(PseudoElement element, int depth)
+    {
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              style      = getParameterValue(element, depth, PARAM_STYLE, String.class, DEFAULT_EMPTY_VAL);
+        String              text       = getParameterValue(element, depth, PARAM_TEXT, String.class);
+        Double              x          = getParameterValue(element, depth, PARAM_X, Double.class, 0d);
+        Double              y          = getParameterValue(element, depth, PARAM_Y, Double.class, 0d);
+        Double              dx         = getParameterValue(element, depth, PARAM_DX, Double.class, 0d);
+        Double              dy         = getParameterValue(element, depth, PARAM_DY, Double.class, 0d);
+        Double              rotate     = getParameterValue(element, depth, PARAM_ROTATE, Double.class, 0d);
+        Double              textLength = getParameterValue(element, depth, PARAM_TEXT_LENGTH, Double.class, -1d);
+
+        return SVGText
+            .builder()
+            .uid(uid)
+            .classes(classes)
+            .dataAttributes(attributes)
+            .tooltip(tooltip)
+            .style(style)
+            .text(text)
+            .x(x)
+            .y(y)
+            .dx(dx)
+            .dy(dy)
+            .rotate(rotate)
+            .textLength(textLength)
+            .build();
+    }
+
 }

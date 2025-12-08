@@ -12,11 +12,16 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 import de.cookindustries.lib.spring.gui.hmi.container.*;
 import de.cookindustries.lib.spring.gui.hmi.input.*;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.MarkerCategory;
+import de.cookindustries.lib.spring.gui.hmi.svg.SVGElement;
+import de.cookindustries.lib.spring.gui.hmi.svg.SVGLine;
+import de.cookindustries.lib.spring.gui.hmi.svg.SVGText;
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
 import lombok.Data;
 
@@ -33,6 +38,9 @@ public final class HtmlMapper
     private static final String TAG_INPUT               = "input";
     private static final String TAG_SELECT              = "select";
     private static final String TAG_OPTION              = "option";
+    private static final String TAG_SVG                 = "svg";
+    private static final String TAG_LINE                = "line";
+    private static final String TAG_TEXT                = "text";
 
     private static final String ATT_ID                  = "id";
     private static final String ATT_NAME                = "name";
@@ -50,6 +58,9 @@ public final class HtmlMapper
     private static final String ATT_SRC                 = "src";
     private static final String ATT_VALUE               = "value";
     private static final String ATT_ON_KEY_DOWN         = "onkeydown";
+    private static final String ATT_STYLE               = "style";
+    private static final String ATT_WIDTH               = "width";
+    private static final String ATT_HEIGHT              = "height";
 
     private static final String CLASS_INPUT_LEGEND      = "input-legend";
     private static final String CLASS_FORM_CONTROL      = "form-control";
@@ -67,6 +78,7 @@ public final class HtmlMapper
     private static final String DATA_ATT_VALUE_TYPE     = "value-type";
     private static final String DATA_ATT_MAX_CHARACTERS = "max-characters";
     private static final String DATA_ATT_ON_ENTER_PRESS = "on-enter-press";
+    private static final String DATA_ATT_TOOLTIP        = "tooltip";
 
     /**
      * Internal constructor
@@ -103,11 +115,11 @@ public final class HtmlMapper
             .stream()
             .map(mapper::render)
             .toList();
-
     }
 
     /**
-     * A temporary result for not yet implemented objects<br>
+     * A temporary result for not yet implemented objects.
+     * <p>
      * TODO: remove
      * 
      * @param name of the element
@@ -118,6 +130,17 @@ public final class HtmlMapper
         String s = name + " element not supported yet.";
 
         return StringAdapter.prefixAndSuffix("<div>", s, "</div>");
+    }
+
+    /**
+     * Escape HTML keys.
+     * 
+     * @param text to escape
+     * @return {@code text} with escaped entities or {@code null} if {@code text} was {@code null}
+     */
+    private String htmlEscape(String text)
+    {
+        return StringEscapeUtils.escapeHtml4(text);
     }
 
     /**
@@ -149,6 +172,7 @@ public final class HtmlMapper
             case LINK -> render((LinkContainer) container);
             case MODAL -> render((ModalContainer) container);
             case SPLITTED -> render((SplittedContainer) container);
+            case SVG -> render((SVGContainer) container);
             case TAB -> render((TabContainer) container);
             case TABLE -> render((TableContainer) container);
             case TABLE_ROW -> render((TableRowContainer) container);
@@ -172,7 +196,7 @@ public final class HtmlMapper
                     .builder()
                     .tag(TAG_DIV)
                     .clazz("burger-item")
-                    .dataAttribute("burger-url", item.getUrl())
+                    .dataAttribute("burger-url", htmlEscape(item.getUrl()))
                     .content(
                         HtmlElement
                             .builder()
@@ -194,7 +218,7 @@ public final class HtmlMapper
                             .builder()
                             .tag(TAG_DIV)
                             .clazz("burger-text")
-                            .content(item.getText())
+                            .content(htmlEscape(item.getText()))
                             .build()
                             .html())
                     .build()
@@ -252,7 +276,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_ON_CLICK)
-                        .active(button.getOnClick() != null)
+                        .active(!button.getOnClick().isBlank())
                         .value(button.getOnClick())
                         .build())
                 .attribute(
@@ -260,13 +284,13 @@ public final class HtmlMapper
                         .builder()
                         .name("title")
                         .active(button.getTitle() != null && !button.getTitle().isBlank())
-                        .value(button.getTitle())
+                        .value(htmlEscape(button.getTitle()))
                         .build())
                 .clazz("btn")
                 .clazz(button.getBtnClass().getClassName())
                 .classes(button.getClasses())
                 .dataAttributes(button.getDataAttributes())
-                .content(button.getText())
+                .content(htmlEscape(button.getText()))
                 .build();
 
         return elementMapper.html();
@@ -318,7 +342,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_ON_CLICK)
-                        .active(buttonIcon.getOnClick() != null)
+                        .active(!buttonIcon.getOnClick().isBlank())
                         .value(buttonIcon.getOnClick())
                         .build())
                 .attribute(
@@ -326,7 +350,7 @@ public final class HtmlMapper
                         .builder()
                         .name("title")
                         .active(buttonIcon.getTitle() != null && !buttonIcon.getTitle().isBlank())
-                        .value(buttonIcon.getTitle())
+                        .value(htmlEscape(buttonIcon.getTitle()))
                         .build())
                 .attribute(
                     Attribute
@@ -339,7 +363,7 @@ public final class HtmlMapper
                 .clazz(buttonIcon.getBtnClass().getClassName())
                 .classes(buttonIcon.getClasses())
                 .dataAttributes(buttonIcon.getDataAttributes())
-                .dataAttribute("tooltip", buttonIcon.getTooltip().isBlank() ? null : buttonIcon.getTooltip())
+                .dataAttribute(DATA_ATT_TOOLTIP, buttonIcon.getTooltip().isBlank() ? null : htmlEscape(buttonIcon.getTooltip()))
                 .build();
 
         return elementMapper.html();
@@ -364,13 +388,6 @@ public final class HtmlMapper
                         .name(ATT_ID)
                         .value(contentContainer.getUid())
                         .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ON_CLICK)
-                        .active(contentContainer.getOnClick() != null)
-                        .value(contentContainer.getOnClick())
-                        .build())
                 .classes(contentContainer.getClasses())
                 .dataAttributes(contentContainer.getDataAttributes())
                 .content(content)
@@ -392,16 +409,12 @@ public final class HtmlMapper
             HtmlElement
                 .builder()
                 .tag(TAG_DIV)
-                .attribute(Attribute
-                    .builder()
-                    .name(ATT_ID)
-                    .value(formContainer.getUid())
-                    .build())
-                .attribute(Attribute
-                    .builder()
-                    .name(ATT_ON_CLICK)
-                    .value(formContainer.getOnClick())
-                    .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ID)
+                        .value(formContainer.getUid())
+                        .build())
                 .clazz("form-container")
                 .clazz(formContainer.getDirection() == Direction.HORIZONTAL ? "form-container-row" : "form-container-column")
                 .classes(formContainer.getClasses())
@@ -449,19 +462,12 @@ public final class HtmlMapper
                 .attribute(
                     Attribute
                         .builder()
-                        .name(ATT_ON_CLICK)
-                        .active(imageContainer.getOnClick() != null)
-                        .value(imageContainer.getOnClick())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
                         .name(ATT_SRC)
                         .value(imageContainer.getSrc())
                         .build())
                 .classes(imageContainer.getClasses())
                 .dataAttributes(imageContainer.getDataAttributes())
-                .dataAttribute("tooltip", imageContainer.getTooltip().isBlank() ? null : imageContainer.getTooltip())
+                .dataAttribute(DATA_ATT_TOOLTIP, imageContainer.getTooltip().isBlank() ? null : htmlEscape(imageContainer.getTooltip()))
                 .build();
 
         return elementMapper.html();
@@ -482,13 +488,6 @@ public final class HtmlMapper
                 .attribute(
                     Attribute
                         .builder()
-                        .name(ATT_ON_CLICK)
-                        .active(linkContainer.getOnClick() != null)
-                        .value(linkContainer.getOnClick())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
                         .name(ATT_HREF)
                         .value(linkContainer.getHref())
                         .build())
@@ -500,7 +499,7 @@ public final class HtmlMapper
                         .build())
                 .classes(linkContainer.getClasses())
                 .dataAttributes(linkContainer.getDataAttributes())
-                .dataAttribute("tooltip", linkContainer.getTooltip().isBlank() ? null : linkContainer.getTooltip())
+                .dataAttribute(DATA_ATT_TOOLTIP, linkContainer.getTooltip().isBlank() ? null : htmlEscape(linkContainer.getTooltip()))
                 .content(render(linkContainer.getContent()))
                 .build();
 
@@ -518,7 +517,7 @@ public final class HtmlMapper
                 .builder()
                 .uid(modalContainer.getUid() + "-right-btn")
                 .btnClass(modalContainer.getBtnClassRight())
-                .text(modalContainer.getBtnNameRight())
+                .text(htmlEscape(modalContainer.getBtnNameRight()))
                 .onClick(modalContainer.getBtnFunctionRight())
                 .build());
 
@@ -529,7 +528,7 @@ public final class HtmlMapper
                     .builder()
                     .uid(modalContainer.getUid() + "-center-btn")
                     .btnClass(modalContainer.getBtnClassCenter())
-                    .text(modalContainer.getBtnNameCenter())
+                    .text(htmlEscape(modalContainer.getBtnNameCenter()))
                     .onClick(modalContainer.getBtnFunctionCenter())
                     .build());
         }
@@ -541,7 +540,7 @@ public final class HtmlMapper
                     .builder()
                     .uid(modalContainer.getUid() + "-left-btn")
                     .btnClass(modalContainer.getBtnClassLeft())
-                    .text(modalContainer.getBtnNameLeft())
+                    .text(htmlEscape(modalContainer.getBtnNameLeft()))
                     .onClick(modalContainer.getBtnFunctionLeft())
                     .build());
         }
@@ -561,7 +560,7 @@ public final class HtmlMapper
                         .builder()
                         .clazz("modal-name")
                         .clazz("text-bold")
-                        .text(modalContainer.getName())
+                        .text(htmlEscape(modalContainer.getName()))
                         .build())
                 .content(
                     ContentContainer
@@ -608,17 +607,51 @@ public final class HtmlMapper
                         .name(ATT_ID)
                         .value(splittedContainer.getUid())
                         .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ID)
-                        .value(splittedContainer.getOnClick())
-                        .build())
                 .clazz("d-flex")
                 .clazz("justify-content-between")
                 .classes(splittedContainer.getClasses())
                 .dataAttributes(splittedContainer.getDataAttributes())
-                .content(StringAdapter.from(head, tail))
+                .content(head)
+                .content(tail)
+                .build();
+
+        return elementMapper.html();
+    }
+
+    private String render(SVGContainer svgContainer)
+    {
+        List<String> elements      =
+            svgContainer
+                .getElements()
+                .stream()
+                .map(elem -> render(elem, svgContainer.getUid()))
+                .toList();
+
+        HtmlElement  elementMapper =
+            HtmlElement
+                .builder()
+                .tag(TAG_SVG)
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ID)
+                        .value(svgContainer.getUid())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_WIDTH)
+                        .value(svgContainer.getWidth().toString())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_HEIGHT)
+                        .value(svgContainer.getHeight().toString())
+                        .build())
+                .classes(svgContainer.getClasses())
+                .dataAttributes(svgContainer.getDataAttributes())
+                .contents(elements)
                 .build();
 
         return elementMapper.html();
@@ -636,15 +669,13 @@ public final class HtmlMapper
             table
                 .getColumnNames()
                 .stream()
-                .map(name -> {
-                                               return HtmlElement
-                                                   .builder()
-                                                   .tag(TAG_DIV)
-                                                   .clazz("table-cell")
-                                                   .content(name)
-                                                   .build()
-                                                   .html();
-                                           })
+                .map(name -> HtmlElement
+                    .builder()
+                    .tag(TAG_DIV)
+                    .clazz("table-cell")
+                    .content(htmlEscape(name))
+                    .build()
+                    .html())
                 .toList();
 
         List<String> rows          =
@@ -697,14 +728,13 @@ public final class HtmlMapper
             row
                 .getCells()
                 .stream()
-                .map(
-                    tr -> HtmlElement
-                        .builder()
-                        .tag(TAG_DIV)
-                        .clazz("table-cell")
-                        .content(render(tr))
-                        .build()
-                        .html())
+                .map(tr -> HtmlElement
+                    .builder()
+                    .tag(TAG_DIV)
+                    .clazz("table-cell")
+                    .content(render(tr))
+                    .build()
+                    .html())
                 .toList();
 
         HtmlElement  elementMapper =
@@ -739,17 +769,10 @@ public final class HtmlMapper
                         .name(ATT_ID)
                         .value(textContainer.getUid())
                         .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ON_CLICK)
-                        .active(textContainer.getOnClick() != null)
-                        .value(textContainer.getOnClick())
-                        .build())
                 .classes(textContainer.getClasses())
                 .dataAttributes(textContainer.getDataAttributes())
-                .dataAttribute("tooltip", textContainer.getTooltip().isBlank() ? null : textContainer.getTooltip())
-                .content(textContainer.getText())
+                .dataAttribute(DATA_ATT_TOOLTIP, textContainer.getTooltip().isBlank() ? null : htmlEscape(textContainer.getTooltip()))
+                .content(htmlEscape(textContainer.getText()))
                 .build();
 
         return elementMapper.html();
@@ -767,17 +790,11 @@ public final class HtmlMapper
                         .name(ATT_ID)
                         .value(textHeaderContainer.getUid())
                         .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ON_CLICK)
-                        .active(textHeaderContainer.getOnClick() != null)
-                        .value(textHeaderContainer.getOnClick())
-                        .build())
                 .classes(textHeaderContainer.getClasses())
                 .dataAttributes(textHeaderContainer.getDataAttributes())
-                .dataAttribute("tooltip", textHeaderContainer.getTooltip().isBlank() ? null : textHeaderContainer.getTooltip())
-                .content(textHeaderContainer.getText())
+                .dataAttribute(DATA_ATT_TOOLTIP,
+                    textHeaderContainer.getTooltip().isBlank() ? null : htmlEscape(textHeaderContainer.getTooltip()))
+                .content(htmlEscape(textHeaderContainer.getText()))
                 .build();
 
         return elementMapper.html();
@@ -824,8 +841,8 @@ public final class HtmlMapper
                     .build())
             .clazz(formClass)
             .clazz(CLASS_USER_SELECT_NONE)
-            .dataAttribute("tooltip", input.getTooltip().isBlank() ? null : input.getTooltip())
-            .content(input.getName())
+            .dataAttribute(DATA_ATT_TOOLTIP, input.getTooltip().isBlank() ? null : htmlEscape(input.getTooltip()))
+            .content(htmlEscape(input.getName()))
             .build();
     }
 
@@ -883,77 +900,79 @@ public final class HtmlMapper
 
         AtomicInteger cnt   = new AtomicInteger();
 
-        checkbox.getBoxes().stream().forEach(box -> {
+        checkbox
+            .getBoxes()
+            .stream()
+            .forEach(box -> {
+                String  boxId   = box.getId().isBlank() ? "" + cnt.getAndIncrement() : box.getId();
+                String  id      = checkbox.getSubmitAs().isBlank() ? boxId : checkbox.getSubmitAs() + "-" + boxId;
 
-            String      boxId   = box.getId().isBlank() ? "" + (cnt.getAndIncrement()) : box.getId();
-            String      id      = checkbox.getSubmitAs().isBlank() ? boxId : checkbox.getSubmitAs() + "-" + boxId;
+                String  input   =
+                    HtmlElement
+                        .builder()
+                        .isSingleTag(true)
+                        .tag(TAG_INPUT)
+                        .attribute(
+                            Attribute
+                                .builder()
+                                .name(ATT_ID)
+                                .value(id)
+                                .build())
+                        .attribute(
+                            Attribute
+                                .builder()
+                                .name(ATT_TYPE)
+                                .value(checkbox.getType().name().toLowerCase())
+                                .build())
+                        .attribute(
+                            Attribute
+                                .builder()
+                                .name(ATT_ON_INPUT)
+                                .value(checkbox.getOnInput())
+                                .build())
+                        .attribute(
+                            Attribute
+                                .builder()
+                                .name(ATT_CHECKED)
+                                .active(box.getChecked())
+                                .build())
+                        .clazz(CLASS_FORM_CHECK_INPUT)
+                        .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
+                        .dataAttribute(DATA_ATT_SUBMIT_AS, id)
+                        .dataAttribute(DATA_ATT_VALUE_TYPE, checkbox.getType().name())
+                        .dataAttributes(checkbox.getDataAttributes())
+                        .build()
+                        .html();
 
-            String      input   =
-                HtmlElement
-                    .builder()
-                    .isSingleTag(true)
-                    .tag(TAG_INPUT)
-                    .attribute(
-                        Attribute
-                            .builder()
-                            .name(ATT_ID)
-                            .value(id)
-                            .build())
-                    .attribute(
-                        Attribute
-                            .builder()
-                            .name(ATT_TYPE)
-                            .value(checkbox.getType().name().toLowerCase())
-                            .build())
-                    .attribute(
-                        Attribute
-                            .builder()
-                            .name(ATT_ON_INPUT)
-                            .value(checkbox.getOnInput())
-                            .build())
-                    .attribute(
-                        Attribute
-                            .builder()
-                            .name(ATT_CHECKED)
-                            .active(box.getChecked())
-                            .build())
-                    .clazz(CLASS_FORM_CHECK_INPUT)
-                    .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
-                    .dataAttribute(DATA_ATT_SUBMIT_AS, id)
-                    .dataAttribute(DATA_ATT_VALUE_TYPE, checkbox.getType().name())
-                    .dataAttributes(checkbox.getDataAttributes())
-                    .build()
-                    .html();
+                String  label   =
+                    HtmlElement
+                        .builder()
+                        .tag(TAG_LABEL)
+                        .attribute(
+                            Attribute
+                                .builder()
+                                .name(ATT_FOR)
+                                .value(id)
+                                .build())
+                        .clazz("checkbox-label")
+                        .clazz(CLASS_USER_SELECT_NONE)
+                        .content(htmlEscape(box.getText()))
+                        .build()
+                        .html();
 
-            String      label   =
-                HtmlElement
-                    .builder()
-                    .tag(TAG_LABEL)
-                    .attribute(
-                        Attribute
-                            .builder()
-                            .name(ATT_FOR)
-                            .value(id)
-                            .build())
-                    .clazz("checkbox-label")
-                    .clazz(CLASS_USER_SELECT_NONE)
-                    .content(box.getText())
-                    .build()
-                    .html();
+                HtmlElement wrapper =
+                    HtmlElement
+                        .builder()
+                        .tag(TAG_DIV)
+                        .clazz("input-checkbox-wrapper")
+                        .content(input)
+                        .content(label)
+                        .content(resolveWarningIcon(formId, id))
+                        .content(resolveErrorIcon(formId, id))
+                        .build();
 
-            HtmlElement wrapper =
-                HtmlElement
-                    .builder()
-                    .tag(TAG_DIV)
-                    .clazz("input-checkbox-wrapper")
-                    .content(input)
-                    .content(label)
-                    .content(resolveWarningIcon(formId, id))
-                    .content(resolveErrorIcon(formId, id))
-                    .build();
-
-            boxes.add(wrapper.html());
-        });
+                boxes.add(wrapper.html());
+            });
 
         String      legend        =
             createLegend(checkbox)
@@ -1068,7 +1087,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_VALUE)
-                        .value(hidden.getValue())
+                        .value(htmlEscape(hidden.getValue()))
                         .build())
                 .clazz(CLASS_HIDDEN)
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
@@ -1107,13 +1126,13 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_VALUE)
-                        .value(number.getValue())
+                        .value(htmlEscape(number.getValue()))
                         .build())
                 .attribute(
                     Attribute
                         .builder()
                         .name(ATT_PLACEHOLDER)
-                        .value(number.getPlaceholder())
+                        .value(htmlEscape(number.getPlaceholder()))
                         .build())
                 .dataAttribute(DATA_ATT_ON_ENTER_PRESS, number.getOnEnterPress())
                 .build()
@@ -1146,7 +1165,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_PLACEHOLDER)
-                        .value(password.getPlaceholder())
+                        .value(htmlEscape(password.getPlaceholder()))
                         .build())
                 .dataAttribute(DATA_ATT_ON_ENTER_PRESS, password.getOnEnterPress())
                 .build()
@@ -1193,7 +1212,7 @@ public final class HtmlMapper
                         Attribute
                             .builder()
                             .name(ATT_VALUE)
-                            .value(btn.getValue())
+                            .value(htmlEscape(btn.getValue()))
                             .build())
                     .attribute(
                         Attribute
@@ -1244,7 +1263,8 @@ public final class HtmlMapper
                             .value(radio.getUid())
                             .build())
                     .clazz(CLASS_FORM_CHECK)
-                    .content(StringAdapter.from(input, btnLabel))
+                    .content(input)
+                    .content(btnLabel)
                     .build();
 
             i++;
@@ -1265,7 +1285,8 @@ public final class HtmlMapper
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
                 .dataAttribute(DATA_ATT_SUBMIT_AS, radio.getSubmitAs())
                 .dataAttribute(DATA_ATT_VALUE_TYPE, radio.getType().name())
-                .content(StringAdapter.from(legend, StringAdapter.from(buttons)))
+                .content(legend)
+                .contents(buttons)
                 .build();
 
         return outerDiv.html();
@@ -1285,7 +1306,7 @@ public final class HtmlMapper
                         Attribute
                             .builder()
                             .name(ATT_VALUE)
-                            .value(selection.getValue())
+                            .value(htmlEscape(selection.getValue()))
                             .build())
                     .attribute(
                         Attribute
@@ -1309,7 +1330,7 @@ public final class HtmlMapper
                 .toBuilder()
                 .tag(TAG_SELECT)
                 .isSingleTag(false)
-                .content(StringAdapter.from(selections))
+                .contents(selections)
                 .build()
                 .html();
 
@@ -1433,7 +1454,8 @@ public final class HtmlMapper
                 .tag(TAG_DIV)
                 .clazz(CLASS_FORM_CHECK)
                 .clazz("form-switch")
-                .content(StringAdapter.from(input, legend))
+                .content(input)
+                .content(legend)
                 .build();
 
         return elementMapper.html();
@@ -1452,7 +1474,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_VALUE)
-                        .value(tag.getValue())
+                        .value(htmlEscape(tag.getValue()))
                         .build())
                 .attribute(
                     Attribute
@@ -1487,7 +1509,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_PLACEHOLDER)
-                        .value(textarea.getPlaceholder())
+                        .value(htmlEscape(textarea.getPlaceholder()))
                         .build())
                 .attribute(
                     Attribute
@@ -1509,7 +1531,7 @@ public final class HtmlMapper
                         .active(textarea.getCols() != null)
                         .build())
                 .dataAttribute(DATA_ATT_MAX_CHARACTERS, String.valueOf(textarea.getMaxCharacters()))
-                .content(textarea.getValue())
+                .content(htmlEscape(textarea.getValue()))
                 .build()
                 .html();
 
@@ -1536,8 +1558,8 @@ public final class HtmlMapper
                 .clazz("text-preserve-newline")
                 .classes(textbox.getClasses())
                 .dataAttributes(textbox.getDataAttributes())
-                .dataAttribute("tooltip", textbox.getTooltip().isBlank() ? null : textbox.getTooltip())
-                .content(textbox.getValue())
+                .dataAttribute(DATA_ATT_TOOLTIP, textbox.getTooltip().isBlank() ? null : textbox.getTooltip())
+                .content(htmlEscape(textbox.getValue()))
                 .build();
 
         return elementMapper.html();
@@ -1556,13 +1578,13 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_VALUE)
-                        .value(textfield.getValue())
+                        .value(htmlEscape(textfield.getValue()))
                         .build())
                 .attribute(
                     Attribute
                         .builder()
                         .name(ATT_PLACEHOLDER)
-                        .value(textfield.getPlaceholder())
+                        .value(htmlEscape(textfield.getPlaceholder()))
                         .build())
                 .attribute(
                     Attribute
@@ -1640,44 +1662,45 @@ public final class HtmlMapper
             List.of(MarkerCategory.WARNING.name().toLowerCase(), MarkerCategory.ERROR.name().toLowerCase()).contains(type)
                 || (text == null || text.isBlank());
 
-        HtmlElement.HtmlElementBuilder icon     = HtmlElement
-            .builder()
-            .tag(TAG_DIV)
-            .attribute(
-                Attribute
-                    .builder()
-                    .name(ATT_ID)
-                    .value(id)
-                    .build())
-            .clazz("input-icon-container")
-            .clazz("input-icon-" + type)
-            .clazz("tooltip-container")
-            .clazz(MarkerCategory.ERROR.name().equalsIgnoreCase(type) ? "error-marker" : "")
-            .clazz(isHidden ? CLASS_HIDDEN : "")
-            .content(
-                HtmlElement
-                    .builder()
-                    .tag("i")
-                    .clazz("bi")
-                    .clazz(image)
-                    .clazz(type + "-icon")
-                    .build()
-                    .html())
-            .content(
-                HtmlElement
-                    .builder()
-                    .tag(TAG_DIV)
-                    .clazz("input-icon-text")
-                    .clazz("tooltip-text")
-                    .attribute(
-                        Attribute
-                            .builder()
-                            .name(ATT_ID)
-                            .value(id + "-text")
-                            .build())
-                    .content(text == null ? "" : text)
-                    .build()
-                    .html());
+        HtmlElement.HtmlElementBuilder icon     =
+            HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ID)
+                        .value(id)
+                        .build())
+                .clazz("input-icon-container")
+                .clazz("input-icon-" + type)
+                .clazz("tooltip-container")
+                .clazz(MarkerCategory.ERROR.name().equalsIgnoreCase(type) ? "error-marker" : "")
+                .clazz(isHidden ? CLASS_HIDDEN : "")
+                .content(
+                    HtmlElement
+                        .builder()
+                        .tag("i")
+                        .clazz("bi")
+                        .clazz(image)
+                        .clazz(type + "-icon")
+                        .build()
+                        .html())
+                .content(
+                    HtmlElement
+                        .builder()
+                        .tag(TAG_DIV)
+                        .clazz("input-icon-text")
+                        .clazz("tooltip-text")
+                        .attribute(
+                            Attribute
+                                .builder()
+                                .name(ATT_ID)
+                                .value(id + "-text")
+                                .build())
+                        .content(text == null ? "" : htmlEscape(text))
+                        .build()
+                        .html());
 
         if (hasUrl)
         {
@@ -1687,5 +1710,131 @@ public final class HtmlMapper
         return icon
             .build()
             .html();
+    }
+
+    private String render(SVGElement element, String svgId)
+    {
+        return switch (element.getType())
+        {
+            case LINE -> render((SVGLine) element, svgId);
+            case TEXT -> render((SVGText) element, svgId);
+        };
+    }
+
+    private String render(SVGLine line, String svgId)
+    {
+        HtmlElement elementMapper =
+            HtmlElement
+                .builder()
+                .tag(TAG_LINE)
+                .isSingleTag(true)
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ID)
+                        .value(line.getUid())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_STYLE)
+                        .active(!line.getStyle().isBlank())
+                        .value(line.getStyle())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name("x1")
+                        .value(line.getX1().toString())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name("x2")
+                        .value(line.getX2().toString())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name("y1")
+                        .value(line.getY1().toString())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name("y2")
+                        .value(line.getY2().toString())
+                        .build())
+                .classes(line.getClasses())
+                .dataAttributes(line.getDataAttributes())
+                .dataAttribute(DATA_ATT_TOOLTIP, line.getTooltip().isBlank() ? null : line.getTooltip())
+                .build();
+
+        return elementMapper.html();
+    }
+
+    private String render(SVGText line, String svgId)
+    {
+        HtmlElement elementMapper =
+            HtmlElement
+                .builder()
+                .tag(TAG_TEXT)
+                .isSingleTag(true)
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ID)
+                        .value(line.getUid())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_STYLE)
+                        .active(!line.getStyle().isBlank())
+                        .value(line.getStyle())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name("x")
+                        .value(line.getX().toString())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name("y")
+                        .value(line.getY().toString())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name("dx")
+                        .value(line.getDx().toString())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name("y2")
+                        .value(line.getDy().toString())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name("rotate")
+                        .value(line.getRotate().toString())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name("y2")
+                        .active(line.getTextLength() > 0d)
+                        .value(line.getTextLength().toString())
+                        .build())
+                .classes(line.getClasses())
+                .dataAttributes(line.getDataAttributes())
+                .dataAttribute(DATA_ATT_TOOLTIP, line.getTooltip().isBlank() ? null : line.getTooltip())
+                .build();
+
+        return elementMapper.html();
     }
 }

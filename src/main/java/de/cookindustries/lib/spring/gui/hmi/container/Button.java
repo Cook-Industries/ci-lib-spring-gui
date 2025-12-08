@@ -30,6 +30,9 @@ public final class Button extends Container
     private final String      title    = null;
 
     @NonNull
+    private final String      onClick;
+
+    @NonNull
     @Default
     private final ButtonClass btnClass = ButtonClass.DEFAULT;
 

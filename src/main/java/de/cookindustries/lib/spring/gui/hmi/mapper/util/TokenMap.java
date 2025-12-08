@@ -33,6 +33,10 @@ import lombok.EqualsAndHashCode.CacheStrategy;
 public final class TokenMap
 {
 
+    private static final String                PREFIX     = "> %-";
+    private static final String                FILL       = "s : %-";
+    private static final String                SUFFIX     = "s : %s";
+
     @NonNull
     @Default
     private final Integer                      presedence = 0;
@@ -108,37 +112,65 @@ public final class TokenMap
     @Override
     public String toString()
     {
-        StringConcat sc           = new StringConcat();
+        StringConcat sc                    = new StringConcat();
 
-        int          valuesLen    = values.keySet().stream().mapToInt(String::length).max().orElse(0);
-        int          classesLen   = classes.keySet().stream().mapToInt(String::length).max().orElse(0);
-        int          functionsLen = functions.keySet().stream().mapToInt(String::length).max().orElse(0);
-        int          paramsLen    = functions.values().stream().mapToInt(e -> getClass().getSimpleName().length()).max().orElse(0);
+        int          valuesStringLength    =
+            values
+                .keySet()
+                .stream()
+                .mapToInt(String::length)
+                .max()
+                .orElse(0);
+
+        String       formatStringValues    = PREFIX + valuesStringLength + SUFFIX;
+
+        int          classesStringLength   =
+            classes
+                .keySet()
+                .stream()
+                .mapToInt(String::length)
+                .max()
+                .orElse(0);
+
+        String       formatStringClasses   = PREFIX + classesStringLength + SUFFIX;
+
+        int          functionsStringLength =
+            functions
+                .keySet()
+                .stream()
+                .mapToInt(String::length)
+                .max()
+                .orElse(0);
+
+        int          paramsStringLength    =
+            functions
+                .values()
+                .stream()
+                .mapToInt(e -> getClass().getSimpleName().length())
+                .max()
+                .orElse(0);
+
+        String       formatStringFunctions = PREFIX + functionsStringLength + FILL + paramsStringLength + SUFFIX;
 
         sc
             .appendnl("TokenMap")
+            .append("hash: ")
             .appendnl(hashCode())
-            .append("presedence : ")
+            .append("presedence: ")
             .appendnl(presedence)
 
             .appendnl(!values.isEmpty(), "values:")
             .appendnl(!values.isEmpty(), values.entrySet(),
-                entry -> String.format("> %-" + valuesLen + "s : %s",
-                    entry.getKey(),
-                    String.valueOf(entry.getValue())))
+                entry -> String.format(formatStringValues, entry.getKey(), String.valueOf(entry.getValue())))
 
             .appendnl(!classes.isEmpty(), "classes:")
             .appendnl(!classes.isEmpty(), classes.entrySet(),
-                entry -> String.format("> %-" + classesLen + "s : %s",
-                    entry.getKey(),
-                    String.valueOf(entry.getValue())))
+                entry -> String.format(formatStringClasses, entry.getKey(), String.valueOf(entry.getValue())))
 
             .appendnl(!functions.isEmpty(), "functions:")
             .appendnl(!functions.isEmpty(), functions.entrySet(),
-                entry -> String.format("> %-" + functionsLen + "s : %-" + paramsLen + "s > %s",
-                    entry.getKey(),
-                    entry.getValue().getClass().getSimpleName(),
-                    entry.getValue().parseAsJS()))
+                entry -> String.format(formatStringFunctions, entry.getKey(),
+                    entry.getValue().getClass().getSimpleName(), entry.getValue().parseAsJS()))
 
             .appendnl(!deactivateUids.isEmpty(), "deactivated uids:")
             .appendnl(!deactivateUids.isEmpty(), deactivateUids, uid -> "> " + uid);

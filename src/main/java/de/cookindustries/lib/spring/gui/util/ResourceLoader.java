@@ -9,6 +9,7 @@ package de.cookindustries.lib.spring.gui.util;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.core.io.DefaultResourceLoader;
 
@@ -41,6 +42,8 @@ public final class ResourceLoader
      */
     public static InputStream load(String path)
     {
+        Objects.requireNonNull(path);
+
         try
         {
             return loader
@@ -63,6 +66,8 @@ public final class ResourceLoader
      */
     public static <T> T loadJsonFrom(String path, Class<T> targetClass)
     {
+        Objects.requireNonNull(path);
+
         try
         {
             InputStream inputStream = load(path);
@@ -85,6 +90,8 @@ public final class ResourceLoader
      */
     public static <T> List<T> loadJsonListFrom(String path, Class<T> targetClass)
     {
+        Objects.requireNonNull(path);
+
         try
         {
             InputStream    inputStream = load(path);

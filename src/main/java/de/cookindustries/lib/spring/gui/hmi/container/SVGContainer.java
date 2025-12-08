@@ -7,39 +7,48 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.container;
 
+import java.util.List;
+
+import de.cookindustries.lib.spring.gui.hmi.svg.SVGElement;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Builder.Default;
+import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
 /**
+ * A {@link Container} representing a {@code SVG} element
+ * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @SuperBuilder
 @Getter
 @Jacksonized
-public final class ButtonIcon extends Container
+public final class SVGContainer extends Container
 {
 
-    @NonNull
-    private final String      image;
+    private final String           xmlns = "http://www.w3.org/2000/svg";
 
-    @Default
-    private final String      title    = null;
-
+    /**
+     * {@code height} of the svg
+     */
     @NonNull
-    private final String      onClick;
+    private final Integer          height;
 
+    /**
+     * {@code width} of the svg
+     */
     @NonNull
-    @Default
-    private final ButtonClass btnClass = ButtonClass.DEFAULT;
+    private final Integer          width;
+
+    @Singular
+    private final List<SVGElement> elements;
 
     @Override
     protected ContainerType inferType()
     {
-        return ContainerType.BUTTON_ICON;
+        return ContainerType.SVG;
     }
 
 }
