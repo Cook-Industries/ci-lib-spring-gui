@@ -15,6 +15,16 @@ package de.cookindustries.lib.spring.gui.response;
  */
 public enum ContentHandling {
 
-    APPEND, PREPEND, REPLACE, DELETE;
+    /** Append the content inside the target id */
+    APPEND,
+
+    /** Prepend the content inside the target id */
+    PREPEND,
+
+    /** Replace the complete id target */
+    REPLACE,
+
+    /** Delete the complete id target */
+    DELETE;
 
 }
