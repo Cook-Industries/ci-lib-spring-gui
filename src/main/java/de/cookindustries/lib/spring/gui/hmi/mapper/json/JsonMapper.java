@@ -689,8 +689,7 @@ public class JsonMapper
 
         String uid      = element.getUid() == null ? RANDOM_ID : element.getUid();
 
-        LOG.trace("[{}]:[{}]: get parameter [{}] from [{}] as [{}]", uuid, depth, key, uid,
-            expectedType.getSimpleName());
+        LOG.trace("[{}]:[{}]: get parameter [{}] from [{}] as [{}]", uuid, depth, key, uid, expectedType.getSimpleName());
 
         if (rawValue == null)
         {
@@ -1085,7 +1084,14 @@ public class JsonMapper
 
             for (int i = 0; i < numberOfRepetitions; i++)
             {
-                TokenMap tempTokenMap = null;
+                TokenMap      tempTokenMap  = null;
+                PseudoElement repeatElement =
+                    numberOfRepetitions > 1 && element.getUid() != null
+                        ? element
+                            .toBuilder()
+                            .uid(uid + "-" + i)
+                            .build()
+                        : element;
 
                 if (targetList != null)
                 {
@@ -1112,36 +1118,27 @@ public class JsonMapper
                         .forEach(stream -> stream.forEach(line -> LOG.trace("[{}]: {}", uuid, line)));
                 }
 
-                if (i > 0)
-                {
-                    element =
-                        element
-                            .toBuilder()
-                            .uid(element.getUid() + "-" + i)
-                            .build();
-                }
-
                 Container result = switch (type)
                 {
-                    case AUDIO -> transfromAudioContainer(element, depth);
-                    case BURGER -> transfromBurgerContainer(element, depth);
-                    case BUTTON -> transfromButtonContainer(element, depth);
-                    case BUTTON_BAR -> transformButtonBarContainer(element, depth);
-                    case BUTTON_ICON -> transformButtonIconContainer(element, depth);
-                    case CONTENT -> transformContentContainer(element, depth);
+                    case AUDIO -> transfromAudioContainer(repeatElement, depth);
+                    case BURGER -> transfromBurgerContainer(repeatElement, depth);
+                    case BUTTON -> transfromButtonContainer(repeatElement, depth);
+                    case BUTTON_BAR -> transformButtonBarContainer(repeatElement, depth);
+                    case BUTTON_ICON -> transformButtonIconContainer(repeatElement, depth);
+                    case CONTENT -> transformContentContainer(repeatElement, depth);
                     case EMPTY -> EmptyContainer.builder().build();
-                    case FORM -> transformFormContainer(element, depth);
-                    case HEADING -> transformHeadingContainer(element, depth);
-                    case HIDDEN -> transformHiddenContainer(element, depth);
-                    case IMAGE -> transformImageContainer(element, depth);
-                    case LINK -> transformLinkContainer(element, depth);
-                    case MODAL -> transformModal(element, depth);
-                    case SPLITTED -> transformSplittedContainer(element, depth);
-                    case SVG -> transformSVGContainer(element, depth);
-                    case TAB -> transformTabbedContainer(element, depth);
-                    case TABLE -> transformTableContainer(element, depth);
-                    case TABLE_ROW -> transformTableRowContainer(element, depth);
-                    case TEXT -> transformTextContainer(element, depth);
+                    case FORM -> transformFormContainer(repeatElement, depth);
+                    case HEADING -> transformHeadingContainer(repeatElement, depth);
+                    case HIDDEN -> transformHiddenContainer(repeatElement, depth);
+                    case IMAGE -> transformImageContainer(repeatElement, depth);
+                    case LINK -> transformLinkContainer(repeatElement, depth);
+                    case MODAL -> transformModal(repeatElement, depth);
+                    case SPLITTED -> transformSplittedContainer(repeatElement, depth);
+                    case SVG -> transformSVGContainer(repeatElement, depth);
+                    case TAB -> transformTabbedContainer(repeatElement, depth);
+                    case TABLE -> transformTableContainer(repeatElement, depth);
+                    case TABLE_ROW -> transformTableRowContainer(repeatElement, depth);
+                    case TEXT -> transformTextContainer(repeatElement, depth);
                 };
 
                 resultList.add(result);
@@ -1665,7 +1662,7 @@ public class JsonMapper
 
         for (PseudoElement pe : element.getChildren())
         {
-            elements.addAll(transformSVGElement(pe, depth));
+            elements.addAll(transformSVGElement(pe, depth, SVGType.ALLOWED_BASE_TYPES));
         }
 
         return SVGContainer
@@ -2490,7 +2487,7 @@ public class JsonMapper
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private List<SVGElement> transformSVGElement(PseudoElement element, int depth)
+    private List<SVGElement> transformSVGElement(PseudoElement element, int depth, List<SVGType> allowedTypes)
     {
         this.count++;
 
@@ -2510,6 +2507,11 @@ public class JsonMapper
         try
         {
             SVGType type = SVGType.valueOf(element.getType().toUpperCase());
+
+            if (!allowedTypes.contains(type))
+            {
+                return List.of(notAllowedSVGElement());
+            }
 
             LOG.debug("[{}]:[{}]: map svg element [{}] as [{}]", uuid, depth, uid, type);
 
@@ -2553,7 +2555,14 @@ public class JsonMapper
 
             for (int i = 0; i < numberOfRepetitions; i++)
             {
-                TokenMap tempTokenMap = null;
+                TokenMap      tempTokenMap  = null;
+                PseudoElement repeatElement =
+                    numberOfRepetitions > 1 && element.getUid() != null
+                        ? element
+                            .toBuilder()
+                            .uid(uid + "-" + i)
+                            .build()
+                        : element;
 
                 if (targetList != null)
                 {
@@ -2580,19 +2589,11 @@ public class JsonMapper
                         .forEach(stream -> stream.forEach(line -> LOG.trace("[{}]: {}", uuid, line)));
                 }
 
-                if (i > 0)
-                {
-                    element =
-                        element
-                            .toBuilder()
-                            .uid(element.getUid() + "-" + i)
-                            .build();
-                }
-
                 SVGElement result = switch (type)
                 {
-                    case LINE -> transformSVGLine(element, depth);
-                    case TEXT -> transformSVGText(element, depth);
+                    case GROUP -> transformSVGGroup(repeatElement, depth);
+                    case LINE -> transformSVGLine(repeatElement, depth);
+                    case TEXT -> transformSVGText(repeatElement, depth);
                 };
 
                 resultList.add(result);
@@ -2613,12 +2614,54 @@ public class JsonMapper
         return resultList;
     }
 
+    private SVGElement notAllowedSVGElement()
+    {
+        return SVGText
+            .builder()
+            .clazz("svg-text-warn")
+            .text(String.format("the creation of this svg element is not allowed here."))
+            .build();
+    }
+
     private SVGElement failureSVGElement()
     {
         return SVGText
             .builder()
             .clazz("svg-text-warn")
             .text(String.format("the creation of this svg element failed. please rever to the server log. mapper id: [%s]", uuid))
+            .build();
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link SVGLine}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private SVGGroup transformSVGGroup(PseudoElement element, int depth)
+    {
+        String              uid        = resolveUid(element, depth);
+        List<String>        classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String> attributes = resolveAttributes(element, depth);
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              style      = getParameterValue(element, depth, PARAM_STYLE, String.class, DEFAULT_EMPTY_VAL);
+
+        List<SVGElement>    children   = new ArrayList<>();
+
+        for (PseudoElement pe : element.getChildren())
+        {
+            children.addAll(transformSVGElement(pe, depth, SVGType.ALLOWED_BASE_TYPES));
+        }
+
+        return SVGGroup
+            .builder()
+            .uid(uid)
+            .classes(classes)
+            .dataAttributes(attributes)
+            .tooltip(tooltip)
+            .style(style)
+            .children(children)
             .build();
     }
 

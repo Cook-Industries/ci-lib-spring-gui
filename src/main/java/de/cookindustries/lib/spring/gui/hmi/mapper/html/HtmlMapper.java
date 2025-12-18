@@ -20,6 +20,7 @@ import de.cookindustries.lib.spring.gui.hmi.input.Number;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.MarkerCategory;
 import de.cookindustries.lib.spring.gui.hmi.svg.SVGElement;
+import de.cookindustries.lib.spring.gui.hmi.svg.SVGGroup;
 import de.cookindustries.lib.spring.gui.hmi.svg.SVGLine;
 import de.cookindustries.lib.spring.gui.hmi.svg.SVGText;
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
@@ -41,6 +42,7 @@ public final class HtmlMapper
     private static final String TAG_SVG                 = "svg";
     private static final String TAG_LINE                = "line";
     private static final String TAG_TEXT                = "text";
+    private static final String TAG_GROUP               = "g";
 
     private static final String ATT_ID                  = "id";
     private static final String ATT_NAME                = "name";
@@ -1716,9 +1718,46 @@ public final class HtmlMapper
     {
         return switch (element.getType())
         {
+            case GROUP -> render((SVGGroup) element, svgId);
             case LINE -> render((SVGLine) element, svgId);
             case TEXT -> render((SVGText) element, svgId);
         };
+    }
+
+    private String render(SVGGroup group, String svgId)
+    {
+        List<String> contents = new ArrayList<>();
+
+        for (SVGElement element : group.getChildren())
+        {
+            contents.add(render(element, svgId));
+        }
+
+        HtmlElement elementMapper =
+            HtmlElement
+                .builder()
+                .tag(TAG_GROUP)
+                .isSingleTag(false)
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ID)
+                        .value(group.getUid())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_STYLE)
+                        .active(!group.getStyle().isBlank())
+                        .value(group.getStyle())
+                        .build())
+                .classes(group.getClasses())
+                .dataAttributes(group.getDataAttributes())
+                .dataAttribute(DATA_ATT_TOOLTIP, group.getTooltip().isBlank() ? null : group.getTooltip())
+                .contents(null)
+                .build();
+
+        return elementMapper.html();
     }
 
     private String render(SVGLine line, String svgId)
