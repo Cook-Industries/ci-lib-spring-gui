@@ -74,11 +74,11 @@ $(document).ready(function () {
     }
   });
 
-  // prevent tab selection when loader overlay is shown
+  // prevent key presses when loader overlay is shown
   $(document).on('keydown', function (event) {
     const $overlay = $("#global-loader-overlay");
-    if ($overlay.length && !$overlay.hasClass("hidden") && e.key === "Tab") {
-      e.preventDefault();
+    if ($overlay.length && !$overlay.hasClass("hidden")) {
+      event.preventDefault();
     }
   });
 
@@ -771,15 +771,15 @@ function contentResponse(response) {
   if ($(response).length) {
     switch (response.handling) {
       case "APPEND":
-        $(elementId).append(content.contentHtml);
+        $(elementId).append(response.contentHtml);
         break;
 
       case "PREPEND":
-        $(elementId).prepend(content.contentHtml);
+        $(elementId).prepend(response.contentHtml);
         break;
 
       case "REPLACE":
-        $(elementId).replace(content.contentHtml);
+        $(elementId).replaceWith(response.contentHtml);
         break;
 
       case "DELETE":
