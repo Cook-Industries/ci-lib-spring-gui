@@ -326,21 +326,26 @@ public class JsonMapper
      */
     private String resolveUid(PseudoElement element, int depth)
     {
-        String uid = element.getUid();
+        String sourceUid = element.getUid();
+        String resultUid;
 
-        if (uid == null)
+        if (sourceUid == null)
         {
             String random = UUID.randomUUID().toString();
-            uid = RANDOM_ID + random.substring(8);
+            resultUid = RANDOM_ID + random.substring(8);
         }
-        else if (uid.startsWith(INDICATOR_VALUE_PLACEHOLDER))
+        else if (sourceUid.startsWith(INDICATOR_VALUE_PLACEHOLDER))
         {
-            uid = resolveUid(element, depth);
+            resultUid = handlePossiblePlaceholder(sourceUid, String.class, depth);
+        }
+        else
+        {
+            resultUid = sourceUid;
         }
 
-        LOG.trace("[{}]:[{}]: resolve uid to [{}]", uuid, depth, uid);
+        LOG.trace("[{}]:[{}]: resolve uid to [{}]", uuid, depth, resultUid);
 
-        return uid;
+        return resultUid;
     }
 
     /**
@@ -439,6 +444,7 @@ public class JsonMapper
                 LOG.trace("[{}]:[{}]: resolve as [TEXT]", uuid, depth);
 
                 String keyName = key.substring(INDICATOR_TEXT_PLACEHOLDER.length());
+
                 value = expectedType.cast(translationProvider.getText(locale, keyName));
             }
             else if (key.startsWith(INDICATOR_VALUE_PLACEHOLDER))
@@ -446,6 +452,7 @@ public class JsonMapper
                 LOG.trace("[{}]:[{}]: resolve as [VALUE]", uuid, depth);
 
                 String keyName = key.substring(INDICATOR_VALUE_PLACEHOLDER.length());
+
                 value = extractFromTokenMapsAsValue(keyName, expectedType);
             }
             else if (key.startsWith(INDICATOR_CLASS_PLACEHOLDER))
@@ -453,6 +460,7 @@ public class JsonMapper
                 LOG.trace("[{}]:[{}]: resolve as [CLASS]", uuid, depth);
 
                 String keyName = key.substring(INDICATOR_CLASS_PLACEHOLDER.length());
+
                 value = expectedType.cast(extractFromTokenMapsAsClass(keyName));
             }
             else if (key.startsWith(INDICATOR_FUNCTION_PLACEHOLDER))
@@ -460,6 +468,7 @@ public class JsonMapper
                 LOG.trace("[{}]:[{}]: resolve as [FUNCTION]", uuid, depth);
 
                 String keyName = key.substring(INDICATOR_FUNCTION_PLACEHOLDER.length());
+
                 value = expectedType.cast(extractFromTokenMapsAsFunction(keyName));
             }
         }
