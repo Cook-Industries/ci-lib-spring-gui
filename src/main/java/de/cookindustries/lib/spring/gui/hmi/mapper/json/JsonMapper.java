@@ -10,6 +10,7 @@ package de.cookindustries.lib.spring.gui.hmi.mapper.json;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -97,6 +98,7 @@ public class JsonMapper
     private static final String                    PARAM_IMAGE                    = "image";
     private static final String                    PARAM_INFO_TEXT                = "infoText";
     private static final String                    PARAM_INFO_URL                 = "infoUrl";
+    private static final String                    PARAM_INLINE                   = "inline";
     private static final String                    PARAM_IS_SOURCE_LIST           = "isSourceList";
     private static final String                    PARAM_MAX                      = "max";
     private static final String                    PARAM_MAX_CHARS                = "maxChars";
@@ -318,6 +320,8 @@ public class JsonMapper
 
     /**
      * Resolve the {@code uid} on a {@link PseudoElement}.
+     * <p>
+     * {@code Uid}s can only contain letters, numbers, '-' and '_'.
      * 
      * @param element to resolve
      * @param depth the current depth in the tree
@@ -345,7 +349,20 @@ public class JsonMapper
 
         LOG.trace("[{}]:[{}]: resolve uid to [{}]", uuid, depth, resultUid);
 
-        return resultUid;
+        return sanitizeUid(resultUid);
+    }
+
+    /**
+     * Sanitize a uid to only have numbers, letters or '-' and '_'.
+     * 
+     * @param input to sanitize
+     * @return the sanitized input
+     */
+    private String sanitizeUid(String input)
+    {
+        return input
+            .replaceAll("[\s.]", "-")
+            .replaceAll("[^a-zA-Z0-9_-]", DEFAULT_EMPTY_VAL);
     }
 
     /**
@@ -392,11 +409,30 @@ public class JsonMapper
      */
     private Map<String, String> resolveAttributes(PseudoElement element, int depth)
     {
-        Map<String, String> attributes = element.getAttributes();
+        Map<String, String> sourceAttributes   = element.getAttributes();
+        Map<String, String> resolvedAttributes = new HashMap<>();
 
-        LOG.trace("[{}]:[{}]: resolve attributes {}", uuid, depth, attributes);
+        sourceAttributes
+            .forEach((key, value) -> {
+                String resolvedKey = key;
+                String resolvedValue = value.replace("\"", DEFAULT_EMPTY_VAL);
 
-        return attributes;
+                if (key.startsWith(INDICATOR_VALUE_PLACEHOLDER))
+                {
+                    resolvedKey = handlePossiblePlaceholder(key, String.class, depth);
+                }
+
+                if (value.startsWith(INDICATOR_VALUE_PLACEHOLDER))
+                {
+                    resolvedValue = handlePossiblePlaceholder(value, String.class, depth);
+                }
+
+                resolvedAttributes.put(sanitizeUid(resolvedKey), resolvedValue);
+            });
+
+        LOG.trace("[{}]:[{}]: resolve attributes {}", uuid, depth, resolvedAttributes);
+
+        return Collections.unmodifiableMap(resolvedAttributes);
     }
 
     /**
@@ -1783,7 +1819,7 @@ public class JsonMapper
         Map<String, String> attributes = resolveAttributes(element, depth);
         String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
         String              text       = getParameterValue(element, depth, PARAM_TEXT, String.class);
-        Boolean             inline     = getParameterValue(element, depth, "inline", Boolean.class, false);
+        Boolean             inline     = getParameterValue(element, depth, PARAM_INLINE, Boolean.class, false);
 
         return TextContainer
             .builder()

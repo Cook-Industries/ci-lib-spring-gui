@@ -108,10 +108,41 @@ public class JsonMapperTest
     }
 
     @Test
+    void test_map_resolveUid()
+    {
+        // setup
+        TokenMap     tokenMap =
+            TokenMap
+                .builder()
+                .value("changeIt", "changed-uid without-forbidden%$§$§\"-chars")
+                .build();
+
+        JsonMapper   mapper   =
+            JsonMapper
+                .builder()
+                .rscPath("json-mapper/replace-uid.json")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
+                .flatMappableDissector(flatMappableDissector)
+                .tokenMap(tokenMap)
+                .build();
+
+        // run
+        MapperResult result   = mapper.map();
+
+        // verify
+        assertNotNull(result);
+
+        // verify
+        assertEquals("changed-uid-without-forbidden-chars", result.getContainers().get(0).getUid());
+    }
+
+    @Test
     void test_map_replaceClass_withExisting()
     {
         // setup
-        TokenMap     valueMap =
+        TokenMap     tokenMap =
             TokenMap
                 .builder()
                 .clazz("class1", "testClass")
@@ -125,7 +156,7 @@ public class JsonMapperTest
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
-                .tokenMap(valueMap)
+                .tokenMap(tokenMap)
                 .build();
 
         // run
@@ -143,7 +174,7 @@ public class JsonMapperTest
     void test_map_replaceClass_notExisting()
     {
         // setup
-        TokenMap     valueMap =
+        TokenMap     tokenMap =
             TokenMap
                 .builder()
                 .build();
@@ -156,22 +187,38 @@ public class JsonMapperTest
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
-                .tokenMap(valueMap)
+                .tokenMap(tokenMap)
                 .build();
 
         // run
         MapperResult result   = mapper.map();
 
         // verify
-        assertFalse(result.getContainers().get(0).getClasses().contains("testClass"));
-        assertTrue(result.getContainers().get(0).getClasses().contains("class2"));
+        assertFalse(
+            result
+                .getContainers()
+                .get(0)
+                .getClasses()
+                .contains("testClass"));
+        assertTrue(
+            result
+                .getContainers()
+                .get(0)
+                .getClasses()
+                .contains("class2"));
     }
 
     @Test
     void test_map_attributes()
     {
+        TokenMap     tokenMap  =
+            TokenMap
+                .builder()
+                .value("test", "replaced-key")
+                .build();
+
         // setup
-        JsonMapper mapper =
+        JsonMapper   mapper    =
             JsonMapper
                 .builder()
                 .rscPath("json-mapper/map-attributes.json")
@@ -179,20 +226,27 @@ public class JsonMapperTest
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
+                .tokenMap(tokenMap)
                 .build();
 
         // run
-        MapperResult result = mapper.map();
+        MapperResult result    = mapper.map();
 
         // verify
-        assertNotNull(result.getContainers().get(0).getDataAttributes().get("key1"));
+        Container    container = result.getContainers().get(0);
+        assertNotNull(container);
+        assertEquals(4, container.getDataAttributes().size());
+        assertNotNull(container.getDataAttributes().get("key1"));
+        assertNotNull(container.getDataAttributes().get("key2"));
+        assertNotNull(container.getDataAttributes().get("replaced-key"));
+        assertNotNull(container.getDataAttributes().get("_forbidden-chars-2"));
     }
 
     @Test
     void test_map_parameter()
     {
         // setup
-        TokenMap     valueMap =
+        TokenMap     tokenMap =
             TokenMap
                 .builder()
                 .value("param", "testText")
@@ -206,7 +260,7 @@ public class JsonMapperTest
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
                 .flatMappableDissector(flatMappableDissector)
-                .tokenMap(valueMap)
+                .tokenMap(tokenMap)
                 .build();
 
         // run

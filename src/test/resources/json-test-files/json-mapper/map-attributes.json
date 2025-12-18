@@ -4,7 +4,9 @@
     "classes": [],
     "attributes": {
         "key1": "value1",
-        "key2": "value2"
+        "key2": "value2",
+        "$$value$test": "test value",
+        "/_forbidden chars!?=.&/{\"[]}`2": "forbidden chars"
     },
     "parameters": {
         "text": "string : any"

@@ -1,0 +1,7 @@
+{
+    "uid": "$$value$changeIt",
+    "type": "TEXT",
+    "parameters": {
+        "text": "text"
+    }
+}
