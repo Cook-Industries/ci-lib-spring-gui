@@ -53,6 +53,9 @@ public final class TokenMap
     @Singular
     private final List<String>                 deactivateUids;
 
+    @Singular("dissect")
+    private final List<FlatMappable>           dissect;
+
     /**
      * Get the presedence for this map
      * 
@@ -109,6 +112,16 @@ public final class TokenMap
         return !deactivateUids.contains(uid);
     }
 
+    /**
+     * Get the objects to dissect.
+     * 
+     * @return objects to dissect
+     */
+    public List<FlatMappable> getObjectsToDissect()
+    {
+        return dissect;
+    }
+
     @Override
     public String toString()
     {
@@ -158,6 +171,8 @@ public final class TokenMap
             .appendnl(hashCode())
             .append("presedence: ")
             .appendnl(presedence)
+            .append("# of elements to dissect: ")
+            .appendnl(dissect.size())
 
             .appendnl(!values.isEmpty(), "values:")
             .appendnl(!values.isEmpty(), values.entrySet(),

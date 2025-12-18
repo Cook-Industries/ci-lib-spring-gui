@@ -13,11 +13,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -221,9 +223,10 @@ public class JsonMapper
     @NonNull
     private final FlatMappableDissector            flatMappableDissector;
 
-    /** A list of {@link TokenMap}s sorted by {@link TokenMap#getPresedence()} desc */
     @Singular
-    private List<TokenMap>                         tokenMaps;
+    private final List<TokenMap>                   tokenMaps;
+
+    private final Set<TokenMap>                    finalizedTokenMaps             = new HashSet<>();
 
     private final Map<Integer, TokenMap>           tempTokenMaps                  = new HashMap<>();
 
@@ -250,21 +253,28 @@ public class JsonMapper
         PseudoElement root  = templateFileCache.getTemplateTo(rscPath);
 
         LOG.debug("[{}]: ### start ###", uuid);
-        LOG.trace("[{}]: map content in [{}] from [{}] with [{}] token maps", uuid, locale.toLanguageTag(),
-            translationProvider.getClass().getSimpleName(), tokenMaps.size());
 
-        tokenMaps = tokenMaps
+        tokenMaps
             .stream()
             .filter(Objects::nonNull)
             .sorted(
                 Comparator
                     .comparing(TokenMap::getPresedence)
                     .reversed())
-            .toList();
+            .forEach(tm -> {
+                tm
+                    .getObjectsToDissect()
+                    .forEach(etd -> finalizedTokenMaps.add(flatMappableDissector.dissect(etd, tm.getPresedence(), locale)));
+
+                finalizedTokenMaps.add(tm);
+            });
+
+        LOG.trace("[{}]: map content in [{}] from [{}] with [{}] token maps", uuid, locale.toLanguageTag(),
+            translationProvider.getClass().getSimpleName(), finalizedTokenMaps.size() + tempTokenMaps.size());
 
         if (LOG.isTraceEnabled())
         {
-            tokenMaps
+            finalizedTokenMaps
                 .stream()
                 .map(TokenMap::toString)
                 .map(String::lines)
@@ -325,8 +335,8 @@ public class JsonMapper
      * 
      * @param element to resolve
      * @param depth the current depth in the tree
-     * @return the resolved {@code uid} or a {@code uuid} in the form {@code randomid-xxxx-xxxx-xxxx-xxxxxxxxxxxx}, if {@code uid} is
-     *         {@code null}
+     * @return the resolved {@code uid} or 'unresolvable-uid-xxx' when no value replacement could be performed or a {@code uuid} in the form
+     *         {@code randomid-xxxx-xxxx-xxxx-xxxxxxxxxxxx}, if {@code uid} is {@code null}
      */
     private String resolveUid(PseudoElement element, int depth)
     {
@@ -340,7 +350,8 @@ public class JsonMapper
         }
         else if (sourceUid.startsWith(INDICATOR_VALUE_PLACEHOLDER))
         {
-            resultUid = handlePossiblePlaceholder(sourceUid, String.class, depth);
+            resultUid = handlePossiblePlaceholder(sourceUid, String.class,
+                "unresolvable-uid-" + sourceUid.substring(INDICATOR_VALUE_PLACEHOLDER.length()), depth);
         }
         else
         {
@@ -366,7 +377,7 @@ public class JsonMapper
     }
 
     /**
-     * Traverse the css classes and replace {@code $$class$} parameters from {@link #tokenMaps}.
+     * Traverse the css classes and replace {@code $$class$} parameters from {@link #finalizedTokenMaps}.
      * <p>
      * Not found {@code class}es will be ignored.
      * 
@@ -422,9 +433,23 @@ public class JsonMapper
                     resolvedKey = handlePossiblePlaceholder(key, String.class, depth);
                 }
 
+                if (Objects.isNull(resolvedKey))
+                {
+                    LOG.warn("could not resolve attribute key [{}] in [{}]", key, rscPath);
+
+                    resolvedKey = "unresolveable-key-" + key.substring(INDICATOR_VALUE_PLACEHOLDER.length());
+                }
+
                 if (value.startsWith(INDICATOR_VALUE_PLACEHOLDER))
                 {
                     resolvedValue = handlePossiblePlaceholder(value, String.class, depth);
+                }
+
+                if (Objects.isNull(resolvedValue))
+                {
+                    LOG.warn("could not resolve attribute value [{}] in [{}]", key, rscPath);
+
+                    resolvedValue = "unresolveable-value-" + value.substring(INDICATOR_VALUE_PLACEHOLDER.length());
                 }
 
                 resolvedAttributes.put(sanitizeUid(resolvedKey), resolvedValue);
@@ -436,7 +461,7 @@ public class JsonMapper
     }
 
     /**
-     * Try to handle a placeholder by fetching from {@code #tokenMaps} based on {@code key} and {@code expectedType}.
+     * Try to handle a placeholder by fetching from {@code #finalizedTokenMaps} based on {@code key} and {@code expectedType}.
      * <p>
      * If no value is found, the {@code null} is returned.
      * 
@@ -452,7 +477,7 @@ public class JsonMapper
     }
 
     /**
-     * Tries to handle a placeholder by fetching from {@code tokenMaps} based on {@code key} and {@code expectedType}.
+     * Tries to handle a placeholder by fetching from {@code finalizedTokenMaps} based on {@code key} and {@code expectedType}.
      * <p>
      * If no value is found, the {@code defaultValue} is returned.
      *
@@ -520,7 +545,7 @@ public class JsonMapper
     }
 
     /**
-     * Extract a value from {@link JsonMapper#tokenMaps}
+     * Extract a value from {@link JsonMapper#finalizedTokenMaps}
      *
      * @param <I> expected type of value
      * @param objName name of parameter
@@ -531,7 +556,8 @@ public class JsonMapper
     private <I> I extractFromTokenMapsAsValue(String objName, Class<I> expectedType) throws JsonMapperException
     {
         Optional<Object> tempResult =
-            tempTokenMaps.values()
+            tempTokenMaps
+                .values()
                 .stream()
                 .filter(Objects::nonNull)
                 .map(m -> m.getValue(objName))
@@ -539,7 +565,8 @@ public class JsonMapper
                 .findFirst();
 
         Optional<Object> result     =
-            tokenMaps.stream()
+            finalizedTokenMaps
+                .stream()
                 .filter(Objects::nonNull)
                 .map(m -> m.getValue(objName))
                 .filter(Objects::nonNull)
@@ -574,7 +601,7 @@ public class JsonMapper
     }
 
     /**
-     * Extract a class from {@link JsonMapper#tokenMaps}
+     * Extract a class from {@link JsonMapper#finalizedTokenMaps}
      *
      * @param <I> expected type of value
      * @param paramName name of parameter
@@ -585,7 +612,8 @@ public class JsonMapper
     private String extractFromTokenMapsAsClass(String objName) throws JsonMapperException
     {
         Optional<String> tempResult =
-            tempTokenMaps.values()
+            tempTokenMaps
+                .values()
                 .stream()
                 .filter(Objects::nonNull)
                 .map(m -> m.getClazz(objName))
@@ -598,7 +626,8 @@ public class JsonMapper
         }
 
         Optional<String> result =
-            tokenMaps.stream()
+            finalizedTokenMaps
+                .stream()
                 .filter(Objects::nonNull)
                 .map(m -> m.getClazz(objName))
                 .filter(Objects::nonNull)
@@ -610,7 +639,7 @@ public class JsonMapper
     }
 
     /**
-     * Extract a function from {@link JsonMapper#tokenMaps}
+     * Extract a function from {@link JsonMapper#finalizedTokenMaps}
      *
      * @param <I> expected type of value
      * @param paramName name of parameter
@@ -621,7 +650,8 @@ public class JsonMapper
     private AbsFunctionCall extractFromTokenMapsAsFunction(String objName) throws JsonMapperException
     {
         Optional<AbsFunctionCall> tempResult =
-            tempTokenMaps.values()
+            tempTokenMaps
+                .values()
                 .stream()
                 .filter(Objects::nonNull)
                 .map(m -> m.getFunction(objName))
@@ -634,7 +664,8 @@ public class JsonMapper
         }
 
         Optional<AbsFunctionCall> result =
-            tokenMaps.stream()
+            finalizedTokenMaps
+                .stream()
                 .filter(Objects::nonNull)
                 .map(m -> m.getFunction(objName))
                 .filter(Objects::nonNull)
@@ -646,7 +677,7 @@ public class JsonMapper
     }
 
     /**
-     * Check if a {@code uid} is disabled in {@link JsonMapper#tokenMaps}
+     * Check if a {@code uid} is disabled in {@link JsonMapper#finalizedTokenMaps}
      *
      * @param uid of the element to check
      * @return {@code false}, if the element is marked as inactive, {@code true} otherwise
@@ -655,7 +686,8 @@ public class JsonMapper
     private boolean checkActiveStateFromTokenMaps(String uid) throws JsonMapperException
     {
         boolean tempResult =
-            tempTokenMaps.values()
+            tempTokenMaps
+                .values()
                 .stream()
                 .filter(Objects::nonNull)
                 .map(m -> m.isUidActive(uid))
@@ -663,7 +695,8 @@ public class JsonMapper
                 .allMatch(b -> b);;
 
         boolean result =
-            tokenMaps.stream()
+            finalizedTokenMaps
+                .stream()
                 .filter(Objects::nonNull)
                 .map(m -> m.isUidActive(uid))
                 .filter(Objects::nonNull)
@@ -675,8 +708,8 @@ public class JsonMapper
     /**
      * Extract a paramater from the {@code element}.
      * <p>
-     * Replaces the content of the result with a value fetched from {@link #tokenMaps} or {@link #translationProvider} if the {@code key}
-     * starts with '$$'
+     * Replaces the content of the result with a value fetched from {@link #finalizedTokenMaps} or {@link #translationProvider} if the
+     * {@code key} starts with '$$'
      * 
      * @param <T> the expected result type
      * @param element the element to extract from
@@ -694,8 +727,8 @@ public class JsonMapper
     /**
      * Extract a paramater from the {@code element}.
      * <p>
-     * Replaces the content of the result with a value fetched from {@link #tokenMaps} or {@link #translationProvider} if the {@code key}
-     * starts with '$$'
+     * Replaces the content of the result with a value fetched from {@link #finalizedTokenMaps} or {@link #translationProvider} if the
+     * {@code key} starts with '$$'
      * 
      * @param <T> the expected result type
      * @param element the element to extract from
@@ -714,8 +747,8 @@ public class JsonMapper
     /**
      * Extract a paramater from the {@code element}.
      * <p>
-     * Replaces the content of the result with a value fetched from {@link #tokenMaps} or {@link #translationProvider} if the {@code key}
-     * starts with '$$'
+     * Replaces the content of the result with a value fetched from {@link #finalizedTokenMaps} or {@link #translationProvider} if the
+     * {@code key} starts with '$$'
      * 
      * @param <T> the expected result type
      * @param element the element to extract from

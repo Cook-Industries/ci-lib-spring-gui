@@ -108,7 +108,7 @@ public final class FlatMappableDissector
 
         return TokenMap
             .builder()
-            .presedence(10 + 2 * presedence)
+            .presedence(2 * presedence + 10)
             .values(flatMap)
             .classes(obj.getClasses())
             .functions(obj.getFunctionCalls())

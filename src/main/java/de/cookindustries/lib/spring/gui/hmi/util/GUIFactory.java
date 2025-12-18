@@ -117,7 +117,6 @@ public final class GUIFactory
 
         if (langSplit.length == 2)
         {
-
             return new Locale(langSplit[0], langSplit[1]);
         }
 
