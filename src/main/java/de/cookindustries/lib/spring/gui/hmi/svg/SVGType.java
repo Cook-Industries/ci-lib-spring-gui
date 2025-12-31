@@ -12,7 +12,7 @@ import java.util.List;
 
 public enum SVGType {
 
-    LINE, TEXT, GROUP;
+    LINE, TEXT, GROUP, PATH;
 
     public static final List<SVGType> ALLOWED_BASE_TYPES = Arrays.asList(SVGType.values());
 

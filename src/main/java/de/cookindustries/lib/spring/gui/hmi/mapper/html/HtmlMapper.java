@@ -7,8 +7,11 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper.html;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -22,6 +25,8 @@ import de.cookindustries.lib.spring.gui.hmi.input.util.MarkerCategory;
 import de.cookindustries.lib.spring.gui.hmi.svg.SVGElement;
 import de.cookindustries.lib.spring.gui.hmi.svg.SVGGroup;
 import de.cookindustries.lib.spring.gui.hmi.svg.SVGLine;
+import de.cookindustries.lib.spring.gui.hmi.svg.SVGPath;
+import de.cookindustries.lib.spring.gui.hmi.svg.SVGPathCommand;
 import de.cookindustries.lib.spring.gui.hmi.svg.SVGText;
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
 import lombok.Data;
@@ -34,53 +39,57 @@ import lombok.Data;
 public final class HtmlMapper
 {
 
-    private static final String TAG_DIV                 = "div";
-    private static final String TAG_LABEL               = "label";
-    private static final String TAG_INPUT               = "input";
-    private static final String TAG_SELECT              = "select";
-    private static final String TAG_OPTION              = "option";
-    private static final String TAG_SVG                 = "svg";
-    private static final String TAG_LINE                = "line";
-    private static final String TAG_TEXT                = "text";
-    private static final String TAG_GROUP               = "g";
+    private static final String        TAG_DIV                 = "div";
+    private static final String        TAG_LABEL               = "label";
+    private static final String        TAG_INPUT               = "input";
+    private static final String        TAG_SELECT              = "select";
+    private static final String        TAG_OPTION              = "option";
+    private static final String        TAG_SVG                 = "svg";
+    private static final String        TAG_LINE                = "line";
+    private static final String        TAG_TEXT                = "text";
+    private static final String        TAG_GROUP               = "g";
+    private static final String        TAG_PATH                = "path";
 
-    private static final String ATT_ID                  = "id";
-    private static final String ATT_NAME                = "name";
-    private static final String ATT_TYPE                = "type";
-    private static final String ATT_FOR                 = "for";
-    private static final String ATT_ON_INPUT            = "oninput";
-    private static final String ATT_ON_CLICK            = "onclick";
-    private static final String ATT_CHECKED             = "checked";
-    private static final String ATT_SELECTED            = "selected";
-    private static final String ATT_MIN                 = "min";
-    private static final String ATT_MAX                 = "max";
-    private static final String ATT_PLACEHOLDER         = "placeholder";
-    private static final String ATT_HREF                = "href";
-    private static final String ATT_TARGET              = "target";
-    private static final String ATT_SRC                 = "src";
-    private static final String ATT_VALUE               = "value";
-    private static final String ATT_ON_KEY_DOWN         = "onkeydown";
-    private static final String ATT_STYLE               = "style";
-    private static final String ATT_WIDTH               = "width";
-    private static final String ATT_HEIGHT              = "height";
+    private static final String        ATT_ID                  = "id";
+    private static final String        ATT_NAME                = "name";
+    private static final String        ATT_TYPE                = "type";
+    private static final String        ATT_FOR                 = "for";
+    private static final String        ATT_ON_INPUT            = "oninput";
+    private static final String        ATT_ON_CLICK            = "onclick";
+    private static final String        ATT_CHECKED             = "checked";
+    private static final String        ATT_SELECTED            = "selected";
+    private static final String        ATT_MIN                 = "min";
+    private static final String        ATT_MAX                 = "max";
+    private static final String        ATT_PLACEHOLDER         = "placeholder";
+    private static final String        ATT_HREF                = "href";
+    private static final String        ATT_TARGET              = "target";
+    private static final String        ATT_SRC                 = "src";
+    private static final String        ATT_VALUE               = "value";
+    private static final String        ATT_ON_KEY_DOWN         = "onkeydown";
+    private static final String        ATT_STYLE               = "style";
+    private static final String        ATT_WIDTH               = "width";
+    private static final String        ATT_HEIGHT              = "height";
+    private static final String        ATT_D                   = "d";
 
-    private static final String CLASS_INPUT_LEGEND      = "input-legend";
-    private static final String CLASS_FORM_CONTROL      = "form-control";
-    private static final String CLASS_HIDDEN            = "hidden";
-    private static final String CLASS_USER_SELECT_NONE  = "user-select-none";
-    private static final String CLASS_FORM_CHECK        = "form-checkbox";
-    private static final String CLASS_FORM_CHECK_INPUT  = "form-checkbox-input";
-    private static final String CLASS_FORM_CHECK_LABEL  = "form-checkbox-label";
-    private static final String CLASS_FORM_SELECT       = "form-select";
+    private static final String        CLASS_INPUT_LEGEND      = "input-legend";
+    private static final String        CLASS_FORM_CONTROL      = "form-control";
+    private static final String        CLASS_HIDDEN            = "hidden";
+    private static final String        CLASS_USER_SELECT_NONE  = "user-select-none";
+    private static final String        CLASS_FORM_CHECK        = "form-checkbox";
+    private static final String        CLASS_FORM_CHECK_INPUT  = "form-checkbox-input";
+    private static final String        CLASS_FORM_CHECK_LABEL  = "form-checkbox-label";
+    private static final String        CLASS_FORM_SELECT       = "form-select";
 
-    private static final String INPUT_CONTAINER         = "input-container";
+    private static final String        INPUT_CONTAINER         = "input-container";
 
-    private static final String DATA_ATT_SUBMIT_ID      = "submit-id";
-    private static final String DATA_ATT_SUBMIT_AS      = "submit-as";
-    private static final String DATA_ATT_VALUE_TYPE     = "value-type";
-    private static final String DATA_ATT_MAX_CHARACTERS = "max-characters";
-    private static final String DATA_ATT_ON_ENTER_PRESS = "on-enter-press";
-    private static final String DATA_ATT_TOOLTIP        = "tooltip";
+    private static final String        DATA_ATT_SUBMIT_ID      = "submit-id";
+    private static final String        DATA_ATT_SUBMIT_AS      = "submit-as";
+    private static final String        DATA_ATT_VALUE_TYPE     = "value-type";
+    private static final String        DATA_ATT_MAX_CHARACTERS = "max-characters";
+    private static final String        DATA_ATT_ON_ENTER_PRESS = "on-enter-press";
+    private static final String        DATA_ATT_TOOLTIP        = "tooltip";
+
+    private static final DecimalFormat DOUBLE_FORMATER         = new DecimalFormat("0.000", DecimalFormatSymbols.getInstance(Locale.ROOT));
 
     /**
      * Internal constructor
@@ -1721,6 +1730,7 @@ public final class HtmlMapper
             case GROUP -> render((SVGGroup) element, svgId);
             case LINE -> render((SVGLine) element, svgId);
             case TEXT -> render((SVGText) element, svgId);
+            case PATH -> render((SVGPath) element, svgId);
         };
     }
 
@@ -1754,7 +1764,7 @@ public final class HtmlMapper
                 .classes(group.getClasses())
                 .dataAttributes(group.getDataAttributes())
                 .dataAttribute(DATA_ATT_TOOLTIP, group.getTooltip().isBlank() ? null : group.getTooltip())
-                .contents(null)
+                .contents(contents)
                 .build();
 
         return elementMapper.html();
@@ -1784,29 +1794,70 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name("x1")
-                        .value(line.getX1().toString())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name("x2")
-                        .value(line.getX2().toString())
+                        .value(DOUBLE_FORMATER.format(line.getX1()))
                         .build())
                 .attribute(
                     Attribute
                         .builder()
                         .name("y1")
-                        .value(line.getY1().toString())
+                        .value(DOUBLE_FORMATER.format(line.getY1()))
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name("x2")
+                        .value(DOUBLE_FORMATER.format(line.getX2()))
                         .build())
                 .attribute(
                     Attribute
                         .builder()
                         .name("y2")
-                        .value(line.getY2().toString())
+                        .value(DOUBLE_FORMATER.format(line.getY2()))
                         .build())
                 .classes(line.getClasses())
                 .dataAttributes(line.getDataAttributes())
                 .dataAttribute(DATA_ATT_TOOLTIP, line.getTooltip().isBlank() ? null : line.getTooltip())
+                .build();
+
+        return elementMapper.html();
+    }
+
+    private String render(SVGPath path, String svgId)
+    {
+        List<String> commands = new ArrayList<>();
+
+        for (SVGPathCommand command : path.getCommands())
+        {
+            commands.add(command.getCommandString());
+        }
+
+        HtmlElement elementMapper =
+            HtmlElement
+                .builder()
+                .tag(TAG_PATH)
+                .isSingleTag(true)
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ID)
+                        .value(path.getUid())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_STYLE)
+                        .active(!path.getStyle().isBlank())
+                        .value(path.getStyle())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_D)
+                        .value(StringAdapter.separate(commands, " "))
+                        .build())
+                .classes(path.getClasses())
+                .dataAttributes(path.getDataAttributes())
+                .dataAttribute(DATA_ATT_TOOLTIP, path.getTooltip().isBlank() ? null : path.getTooltip())
                 .build();
 
         return elementMapper.html();
@@ -1836,38 +1887,38 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name("x")
-                        .value(line.getX().toString())
+                        .value(DOUBLE_FORMATER.format(line.getX()))
                         .build())
                 .attribute(
                     Attribute
                         .builder()
                         .name("y")
-                        .value(line.getY().toString())
+                        .value(DOUBLE_FORMATER.format(line.getY()))
                         .build())
                 .attribute(
                     Attribute
                         .builder()
                         .name("dx")
-                        .value(line.getDx().toString())
+                        .value(DOUBLE_FORMATER.format(line.getDx()))
                         .build())
                 .attribute(
                     Attribute
                         .builder()
                         .name("y2")
-                        .value(line.getDy().toString())
+                        .value(DOUBLE_FORMATER.format(line.getDy()))
                         .build())
                 .attribute(
                     Attribute
                         .builder()
                         .name("rotate")
-                        .value(line.getRotate().toString())
+                        .value(DOUBLE_FORMATER.format(line.getRotate()))
                         .build())
                 .attribute(
                     Attribute
                         .builder()
                         .name("y2")
                         .active(line.getTextLength() > 0d)
-                        .value(line.getTextLength().toString())
+                        .value(DOUBLE_FORMATER.format(line.getTextLength()))
                         .build())
                 .classes(line.getClasses())
                 .dataAttributes(line.getDataAttributes())

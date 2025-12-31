@@ -138,6 +138,7 @@ public class JsonMapper
     private static final String                    PARAM_WIDTH                    = "width";
     private static final String                    PARAM_HEIGHT                   = "height";
     private static final String                    PARAM_STYLE                    = "style";
+    private static final String                    PARAM_VALUES                   = "values";
 
     private static final String                    RANDOM_ID                      = "randomid";
     private static final String                    CONNECTED_BTN                  = "connected-btn";
@@ -350,8 +351,14 @@ public class JsonMapper
         }
         else if (sourceUid.startsWith(INDICATOR_VALUE_PLACEHOLDER))
         {
-            resultUid = handlePossiblePlaceholder(sourceUid, String.class,
-                "unresolvable-uid-" + sourceUid.substring(INDICATOR_VALUE_PLACEHOLDER.length()), depth);
+            resultUid = handlePossiblePlaceholder(sourceUid, String.class, depth);
+
+            if (Objects.isNull(resultUid))
+            {
+                LOG.warn("could not resolve uid key [{}] in [{}]", sourceUid, rscPath);
+
+                resultUid = "unresolvable-uid-" + sourceUid.substring(INDICATOR_VALUE_PLACEHOLDER.length());
+            }
         }
         else
         {
@@ -974,41 +981,73 @@ public class JsonMapper
     }
 
     /**
-     * Transform a list of children that are expected to be parsable as {@link InputValue} into a {@link InputValueList}.
+     * Transform children into a other type.
      * 
+     * @param <T> the expected result type
      * @param element to fetch children from
+     * @param parentUid the uid of the parent {@code element}
+     * @param targetEnumType the enum to compare the {@code element} type with
+     * @param returnType the expected return type of the operation
      * @param depth of the recursive operation
      * @param throwWhenEmpty whether to throw an exception on an empty children-list
      * @return a {@link InputValueList} of the transformed children
      */
-    private InputValueList handleInputValueChildren(PseudoElement element, int depth, boolean throwWhenEmpty)
+    private <E, T> List<T> handleChildren(PseudoElement element, String parentUid, Class<E> targetEnumType, List<E> allowedTypes,
+        Class<T> returnType, int depth,
+        boolean throwWhenEmpty)
     {
-        LOG.trace("[{}]:[{}]: map input children", uuid, depth);
+        LOG.trace("[{}]:[{}]: map children of [{}] as [{}] to [{}]", uuid, depth, parentUid, targetEnumType.getSimpleName(),
+            returnType.getSimpleName());
 
-        InputValueList values = new InputValueList();
+        if (throwWhenEmpty && element.getChildren().isEmpty())
+        {
+            LOG.trace("[{}]:[{}]: empty children are not allowed", uuid, depth);
+
+            throw new JsonMapperException("children list is not allowed to be empty");
+        }
+
+        List<T> values = new ArrayList<>();
 
         for (PseudoElement pe : element.getChildren())
         {
-            String  uid            = element.getUid() == null ? RANDOM_ID : element.getUid();
-
+            String  uid            = resolveUid(element, depth);
             boolean processElement = shouldProcess(element, uid, depth);
 
             if (!processElement)
             {
-                LOG.trace("[{}]:[{}]: skip InputValue [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth, uid);
+                LOG.trace("[{}]:[{}]: skip child [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth, uid);
 
                 continue;
             }
 
-            if (pe.getType().toUpperCase().equals("INPUT_VALUE"))
+            switch (targetEnumType.getSimpleName())
             {
-                values.add(transformInputValue(pe, depth + 1));
-            }
-        }
+                case "InputValue":
+                    if (pe.getType().toUpperCase().equals("INPUT_VALUE"))
+                    {
+                        values.add(returnType.cast(transformInputValue(pe, depth + 1)));
+                    }
+                    else
+                    {
+                        LOG.warn("[{}]:[{}]: the child transform of [{}] failed due to not be of type [INPUT_VALUE]", uuid, depth,
+                            uid);
+                    }
+                    break;
 
-        if (throwWhenEmpty && values.isEmpty())
-        {
-            throw new JsonParsingException(element.getUid(), depth, 0, "InputValue list can not be emtpy");
+                case "SVGType":
+                    transformSVGElement(pe, depth, SVGType.ALLOWED_BASE_TYPES)
+                        .stream()
+                        .map(returnType::cast)
+                        .forEach(values::add);
+                    break;
+
+                case "SVGPathCommandType":
+                    values.add(returnType.cast(transformSVGPathCommand(pe, depth)));
+
+                default:
+                    LOG.error("[{}]:[{}]: could not resolve child [{}] due to parameter [{}] is [unknown]", uuid, depth, uid,
+                        targetEnumType.getSimpleName());
+            }
         }
 
         return values;
@@ -1075,7 +1114,7 @@ public class JsonMapper
 
         List<Container> resultList     = new ArrayList<>();
 
-        String          uid            = element.getUid() == null ? RANDOM_ID : element.getUid();
+        String          uid            = resolveUid(element, depth);
 
         boolean         processElement = shouldProcess(element, uid, depth);
 
@@ -1110,6 +1149,14 @@ public class JsonMapper
             catch (IllegalArgumentException | NullPointerException ex)
             {
                 // do nothing since it is not a internal type
+            }
+            catch (Exception ex)
+            {
+                LOG.error("failed to transform component", ex);
+
+                resultList.add(failureContainer());
+
+                return resultList;
             }
 
             ContainerType type = ContainerType.valueOf(element.getType().toUpperCase());
@@ -1979,9 +2026,9 @@ public class JsonMapper
         String              infoText   = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
         String              infoUrl    = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
         String              boxesSrc   = getParameterValue(element, depth, "boxes", String.class, DEFAULT_EMPTY_VAL);
-        InputValueList      boxes      =
+        List<InputValue>    boxes      =
             boxesSrc.isBlank()
-                ? handleInputValueChildren(element, depth, false)
+                ? handleChildren(element, uid, InputValue.class, List.of(), InputValue.class, depth, false)
                 : handlePossiblePlaceholder(boxesSrc, InputValueList.class, new InputValueList(), depth);
 
         return Checkbox
@@ -2273,7 +2320,11 @@ public class JsonMapper
         String              onInput    = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
         String              infoText   = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
         String              infoUrl    = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
-        List<InputValue>    values     = handleInputValueChildren(element, depth, true);
+        String              valueSrc   = getParameterValue(element, depth, PARAM_VALUES, String.class, DEFAULT_EMPTY_VAL);
+        List<InputValue>    values     =
+            valueSrc.isBlank()
+                ? handleChildren(element, uid, InputValue.class, List.of(), InputValue.class, depth, false)
+                : handlePossiblePlaceholder(INDICATOR_VALUE_PLACEHOLDER + valueSrc, InputValueList.class, depth);
 
         return Radio
             .builder()
@@ -2309,11 +2360,11 @@ public class JsonMapper
         String              infoText   = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
         String              infoUrl    = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
         String              value      = getParameterValue(element, depth, PARAM_VALUE, String.class, "NOT_SELECTED");
-        String              valueSrc   = getParameterValue(element, depth, "values", String.class, DEFAULT_EMPTY_VAL);
-        InputValueList      values     =
+        String              valueSrc   = getParameterValue(element, depth, PARAM_VALUES, String.class, DEFAULT_EMPTY_VAL);
+        List<InputValue>    values     =
             valueSrc.isBlank()
-                ? handleInputValueChildren(element, depth, false)
-                : handlePossiblePlaceholder("$$value$" + valueSrc, InputValueList.class, depth);
+                ? handleChildren(element, uid, InputValue.class, List.of(), InputValue.class, depth, false)
+                : handlePossiblePlaceholder(INDICATOR_VALUE_PLACEHOLDER + valueSrc, InputValueList.class, depth);
 
         return Select
             .builder()
@@ -2671,6 +2722,7 @@ public class JsonMapper
                 {
                     case GROUP -> transformSVGGroup(repeatElement, depth);
                     case LINE -> transformSVGLine(repeatElement, depth);
+                    case PATH -> transformSVGPath(repeatElement, depth);
                     case TEXT -> transformSVGText(repeatElement, depth);
                 };
 
@@ -2725,12 +2777,8 @@ public class JsonMapper
         String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
         String              style      = getParameterValue(element, depth, PARAM_STYLE, String.class, DEFAULT_EMPTY_VAL);
 
-        List<SVGElement>    children   = new ArrayList<>();
-
-        for (PseudoElement pe : element.getChildren())
-        {
-            children.addAll(transformSVGElement(pe, depth, SVGType.ALLOWED_BASE_TYPES));
-        }
+        List<SVGElement>    children   =
+            handleChildren(element, uid, SVGType.class, SVGType.ALLOWED_BASE_TYPES, SVGElement.class, depth, false);
 
         return SVGGroup
             .builder()
@@ -2773,6 +2821,286 @@ public class JsonMapper
             .x2(x2)
             .y1(y1)
             .y2(y2)
+            .build();
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link SVGLine}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private SVGPath transformSVGPath(PseudoElement element, int depth)
+    {
+        String               uid        = resolveUid(element, depth);
+        List<String>         classes    = resolveClasses(element.getClasses(), depth);
+        Map<String, String>  attributes = resolveAttributes(element, depth);
+        String               tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String               style      = getParameterValue(element, depth, PARAM_STYLE, String.class, DEFAULT_EMPTY_VAL);
+
+        List<SVGPathCommand> commands   =
+            handleChildren(element, uid, SVGPathCommandType.class, SVGPathCommandType.ALLOWED_BASE_TYPES, SVGPathCommand.class, depth,
+                false);
+
+        return SVGPath
+            .builder()
+            .uid(uid)
+            .classes(classes)
+            .dataAttributes(attributes)
+            .tooltip(tooltip)
+            .style(style)
+            .commands(commands)
+            .build();
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link SVGPathCommand}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private SVGPathCommand transformSVGPathCommand(PseudoElement element, int depth)
+    {
+        return switch (SVGPathCommandType.valueOf(element.getType().toUpperCase()))
+        {
+            case A -> transformSVGPathCmdA(element, depth);
+            case C -> transformSVGPathCmdC(element, depth);
+            case H -> transformSVGPathCmdH(element, depth);
+            case L -> transformSVGPathCmdL(element, depth);
+            case M -> transformSVGPathCmdM(element, depth);
+            case Q -> transformSVGPathCmdQ(element, depth);
+            case S -> transformSVGPathCmdS(element, depth);
+            case T -> transformSVGPathCmdT(element, depth);
+            case V -> transformSVGPathCmdV(element, depth);
+            case Z -> transformSVGPathCmdZ(element, depth);
+        };
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link SVGPathCmdA}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private SVGPathCmdA transformSVGPathCmdA(PseudoElement element, int depth)
+    {
+        Boolean relative          = getParameterValue(element, depth, "relative", Boolean.class, false);
+        Double  rx                = getParameterValue(element, depth, "rx", Double.class);
+        Double  ry                = getParameterValue(element, depth, "ry", Double.class);
+        Integer angleLargeArcFlag = getParameterValue(element, depth, "rx", Integer.class, 0);
+        Integer sweepFlag         = getParameterValue(element, depth, "ry", Integer.class, 0);
+        Double  endPointX         = getParameterValue(element, depth, "endPointX", Double.class);
+        Double  endPointY         = getParameterValue(element, depth, "endPointY", Double.class);
+
+        return SVGPathCmdA
+            .builder()
+            .relative(relative)
+            .rx(rx)
+            .ry(ry)
+            .angleLargeArcFlag(angleLargeArcFlag)
+            .sweepFlag(sweepFlag)
+            .endPointX(endPointX)
+            .endPointY(endPointY)
+            .build();
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link SVGPathCmdC}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private SVGPathCmdC transformSVGPathCmdC(PseudoElement element, int depth)
+    {
+        Boolean relative       = getParameterValue(element, depth, "relative", Boolean.class, false);
+        Double  controlPoint1X = getParameterValue(element, depth, "controlPoint1X", Double.class);
+        Double  controlPoint1Y = getParameterValue(element, depth, "controlPoint1Y", Double.class);
+        Double  controlPoint2X = getParameterValue(element, depth, "controlPoint2X", Double.class);
+        Double  controlPoint2Y = getParameterValue(element, depth, "controlPoint2Y", Double.class);
+        Double  endPointX      = getParameterValue(element, depth, "endPointX", Double.class);
+        Double  endPointY      = getParameterValue(element, depth, "endPointY", Double.class);
+
+        return SVGPathCmdC
+            .builder()
+            .relative(relative)
+            .controlPoint1X(controlPoint1X)
+            .controlPoint1Y(controlPoint1Y)
+            .controlPoint2X(controlPoint2X)
+            .controlPoint2Y(controlPoint2Y)
+            .endPointX(endPointX)
+            .endPointY(endPointY)
+            .build();
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link SVGPathCmdH}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private SVGPathCmdH transformSVGPathCmdH(PseudoElement element, int depth)
+    {
+        Boolean relative = getParameterValue(element, depth, "relative", Boolean.class, false);
+        Double  x        = getParameterValue(element, depth, "x", Double.class);
+
+        return SVGPathCmdH
+            .builder()
+            .relative(relative)
+            .x(x)
+            .build();
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link SVGPathCmdL}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private SVGPathCmdL transformSVGPathCmdL(PseudoElement element, int depth)
+    {
+        Boolean relative = getParameterValue(element, depth, "relative", Boolean.class, false);
+        Double  x        = getParameterValue(element, depth, "x", Double.class);
+        Double  y        = getParameterValue(element, depth, "y", Double.class);
+
+        return SVGPathCmdL
+            .builder()
+            .relative(relative)
+            .x(x)
+            .y(y)
+            .build();
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link SVGPathCmdM}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private SVGPathCmdM transformSVGPathCmdM(PseudoElement element, int depth)
+    {
+        Boolean relative = getParameterValue(element, depth, "relative", Boolean.class, false);
+        Double  x        = getParameterValue(element, depth, "x", Double.class);
+        Double  y        = getParameterValue(element, depth, "y", Double.class);
+
+        return SVGPathCmdM
+            .builder()
+            .relative(relative)
+            .x(x)
+            .y(y)
+            .build();
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link SVGPathCmdQ}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private SVGPathCmdQ transformSVGPathCmdQ(PseudoElement element, int depth)
+    {
+        Boolean relative      = getParameterValue(element, depth, "relative", Boolean.class, false);
+        Double  controlPointX = getParameterValue(element, depth, "controlPointX", Double.class);
+        Double  controlPointY = getParameterValue(element, depth, "controlPointY", Double.class);
+        Double  endPointX     = getParameterValue(element, depth, "endPointX", Double.class);
+        Double  endPointY     = getParameterValue(element, depth, "endPointY", Double.class);
+
+        return SVGPathCmdQ
+            .builder()
+            .relative(relative)
+            .controlPointX(controlPointX)
+            .controlPointY(controlPointY)
+            .endPointX(endPointX)
+            .endPointY(endPointY)
+            .build();
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link SVGPathCmdS}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private SVGPathCmdS transformSVGPathCmdS(PseudoElement element, int depth)
+    {
+        Boolean relative      = getParameterValue(element, depth, "relative", Boolean.class, false);
+        Double  controlPointX = getParameterValue(element, depth, "controlPointX", Double.class);
+        Double  controlPointY = getParameterValue(element, depth, "controlPointY", Double.class);
+        Double  endPointX     = getParameterValue(element, depth, "endPointX", Double.class);
+        Double  endPointY     = getParameterValue(element, depth, "endPointY", Double.class);
+
+        return SVGPathCmdS
+            .builder()
+            .relative(relative)
+            .controlPointX(controlPointX)
+            .controlPointY(controlPointY)
+            .endPointX(endPointX)
+            .endPointY(endPointY)
+            .build();
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link SVGPathCmdT}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private SVGPathCmdT transformSVGPathCmdT(PseudoElement element, int depth)
+    {
+        Boolean relative  = getParameterValue(element, depth, "relative", Boolean.class, false);
+        Double  endPointX = getParameterValue(element, depth, "endPointX", Double.class);
+        Double  endPointY = getParameterValue(element, depth, "endPointY", Double.class);
+
+        return SVGPathCmdT
+            .builder()
+            .relative(relative)
+            .endPointX(endPointX)
+            .endPointY(endPointY)
+            .build();
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link SVGPathCmdV}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private SVGPathCmdV transformSVGPathCmdV(PseudoElement element, int depth)
+    {
+        Boolean relative = getParameterValue(element, depth, "relative", Boolean.class, false);
+        Double  y        = getParameterValue(element, depth, "y", Double.class);
+
+        return SVGPathCmdV
+            .builder()
+            .relative(relative)
+            .y(y)
+            .build();
+    }
+
+    /**
+     * Transform a {@link PseudoElement} to an {@link SVGPathCmdZ}.
+     *
+     * @param element to transfrom
+     * @param depth of the recursive operation
+     * @return the transformed object
+     */
+    private SVGPathCmdZ transformSVGPathCmdZ(PseudoElement element, int depth)
+    {
+        Boolean relative = getParameterValue(element, depth, "relative", Boolean.class, false);
+
+        return SVGPathCmdZ
+            .builder()
+            .relative(relative)
             .build();
     }
 
