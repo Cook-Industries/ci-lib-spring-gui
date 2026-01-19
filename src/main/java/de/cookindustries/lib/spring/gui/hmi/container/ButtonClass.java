@@ -13,7 +13,29 @@ package de.cookindustries.lib.spring.gui.hmi.container;
  */
 public enum ButtonClass {
 
-    DEFAULT("btn-primary"), SUCCESS("btn-success"), WARNING("btn-warning"), ERROR("btn-error"), CUSTOM("btn-custom");
+    DEFAULT("btn-primary"),
+
+    PRIMARY("btn-primary"),
+
+    SECONDARY("btn-secondary"),
+
+    SUCCESS("btn-success"),
+
+    WARNING("btn-warning"),
+
+    ERROR("btn-danger"),
+
+    DANGER("btn-danger"),
+
+    INFO("btn-info"),
+
+    LIGHT("btn-light"),
+
+    DARK("btn-dark"),
+
+    LINK("btn-link"),
+
+    CUSTOM("btn-custom-color");
 
     private final String className;
 
