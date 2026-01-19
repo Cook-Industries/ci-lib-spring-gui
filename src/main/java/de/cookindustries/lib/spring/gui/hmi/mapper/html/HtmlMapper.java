@@ -208,6 +208,7 @@ public final class HtmlMapper
                     .tag(TAG_DIV)
                     .clazz("burger-item")
                     .dataAttribute("burger-url", htmlEscape(item.getUrl()))
+                    .dataAttribute("burger-method", htmlEscape(item.getMethod()))
                     .content(
                         HtmlElement
                             .builder()

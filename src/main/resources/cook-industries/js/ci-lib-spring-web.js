@@ -4,6 +4,9 @@ export {
   init,
   GET,
   POST,
+  PUT,
+  PATCH,
+  DELETE,
   showGlobalLoader,
   hideGlobalLoader,
   requestModal,
@@ -172,7 +175,7 @@ $(document).ready(function () {
     }
   });
 
-  // Toggle dropdown on burger click (delegated)
+  // toggle dropdown on burger click
   $(document).on("click", ".burger-menu", function (e) {
     e.stopPropagation();
 
@@ -187,38 +190,60 @@ $(document).ready(function () {
 
     let top, left;
 
-    // Vertical positioning
     if (rect.top + rect.height + dropdownHeight < viewportHeight) {
-      top = rect.bottom; // dropdown below button
+      top = rect.bottom;
     } else {
-      top = rect.top - dropdownHeight; // dropdown above button
+      top = rect.top - dropdownHeight;
     }
 
-    // Horizontal positioning
     if (rect.left + dropdownWidth < viewportWidth) {
-      left = rect.left; // dropdown aligned left with button
+      left = rect.left;
     } else if (rect.right - dropdownWidth > 0) {
-      left = rect.right - dropdownWidth; // dropdown aligned right
+      left = rect.right - dropdownWidth;
     } else {
-      left = (viewportWidth - dropdownWidth) / 2; // center if too big
+      left = (viewportWidth - dropdownWidth) / 2;
     }
 
-    // Apply position
     $dropdown.css({ top: top + "px", left: left + "px" });
     $dropdown.toggleClass("show");
   });
 
-  // Handle item click (delegated)
+  // handle item click
   $(document).on("click", ".burger-item", function () {
     var url = $(this).data("burger-url");
+    var method = $(this).data("burger-method");
     if (url) {
       $(".burger-dropdown").removeClass("show");
       showGlobalLoader();
-      GET(url);
+
+      switch (method) {
+        case "POST":
+          POST(url);
+          break;
+
+        case "GET":
+          GET(url);
+          break;
+
+        case "DELETE":
+          DELETE(url);
+          break;
+
+        case "PATCH":
+          PATCH(url);
+          break;
+
+        case "PUT":
+          PUT(url);
+          break;
+
+        default:
+          console.error("BurgerItem method invalid.", { method });
+      }
     }
   });
 
-  // Close dropdown when clicking outside
+  // close dropdown when clicking outside
   $(document).on("click", function (e) {
     $(".burger-dropdown").removeClass("show");
   });
@@ -289,80 +314,114 @@ $(document).ready(function () {
 
 // === > global functions ==========================================================================
 /**
- *
- * @param {String} endpointUrl
- *
- * @returns a Promise
+ * Fetch data from a endpoint.
+ * 
+ * @param {string} method 
+ * @param {string} endpointUrl 
+ * @param {object} dataToSend 
  */
-function GET(endpointUrl) {
+function _fetchHttp(method, endpointUrl) {
   if (endpointUrl === undefined || endpointUrl === "") {
-    throw new Error("GET URL cannot be undefined/empty");
+    throw new Error(`"${method} URL cannot be undefined/empty"`);
   }
 
-  return new Promise((resolve, reject) => {
-    fetch(endpointUrl, {
-      method: "GET",
+  return fetch(endpointUrl, {
+    method: method,
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
     })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((json) => {
-        handleResponse(json);
-        return json;
-      })
-      .then((responseData) => {
-        resolve(responseData);
-      })
-      .catch((error) => {
-        hideGlobalLoader();
-        clientsideError(error.message);
-        reject(error);
-      });
-  });
+    .then((json) => {
+      handleResponse(json);
+      return json;
+    })
+    .catch((error) => {
+      hideGlobalLoader();
+      clientsideError(error.message);
+      throw error;
+    });
+}
+
+/**
+ * Send data asynchronous as JSON payload.
+ * 
+ * @param {string} method 
+ * @param {string} endpointUrl 
+ * @param {object} dataToSend 
+ */
+function _fetchHttpWithPayload(method, endpointUrl, dataToSend = {}) {
+  if (endpointUrl === undefined || endpointUrl === "") {
+    throw new Error(`"${method} URL cannot be undefined/empty"`);
+  }
+
+  return fetch(endpointUrl, {
+    method: method,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(dataToSend),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((json) => {
+      handleResponse(json);
+      return json;
+    })
+    .catch((error) => {
+      hideGlobalLoader();
+      clientsideError(error.message);
+      throw error;
+    });
+}
+
+/**
+ *
+ * @param {String} endpointUrl
+ */
+function GET(endpointUrl) {
+  _fetchHttp("GET", endpointUrl);
+}
+
+/**
+ *
+ * @param {String} endpointUrl
+ */
+function DELETE(endpointUrl) {
+  _fetchHttp("DELETE", endpointUrl);
 }
 
 /**
  *
  * @param {String} endpointUrl
  * @param {*} dataToSend
- *
- * @returns a Promise
  */
 function POST(endpointUrl, dataToSend = {}) {
-  if (endpointUrl === undefined || endpointUrl === "") {
-    throw new Error("POST URL cannot be undefined/empty");
-  }
+  _fetchHttpWithPayload("POST", endpointUrl, dataToSend);
+}
 
-  return new Promise((resolve, reject) => {
-    fetch(endpointUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(dataToSend),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((json) => {
-        handleResponse(json);
-        return json;
-      })
-      .then((responseData) => {
-        resolve(responseData);
-      })
-      .catch((error) => {
-        hideGlobalLoader();
-        clientsideError(error.message);
-        reject(error);
-      });
-  });
+/**
+ *
+ * @param {String} endpointUrl
+ * @param {*} dataToSend
+ */
+function PUT(endpointUrl, dataToSend = {}) {
+  _fetchHttpWithPayload("PUT", endpointUrl, dataToSend);
+}
+
+/**
+ *
+ * @param {String} endpointUrl
+ * @param {*} dataToSend
+ */
+function PATCH(endpointUrl, dataToSend = {}) {
+  _fetchHttpWithPayload("PATCH", endpointUrl, dataToSend);
 }
 
 /**
@@ -370,38 +429,31 @@ function POST(endpointUrl, dataToSend = {}) {
  *
  * @param {String} endpointUrl
  * @param {FormData} formData
- *
- * @returns a Promise
  */
 function POSTFormData(endpointUrl, formData = {}) {
   if (endpointUrl === undefined || endpointUrl === "") {
-    throw new Error("POST URL cannot be undefined/empty");
+    throw new Error(`"${method} URL cannot be undefined/empty"`);
   }
 
-  return new Promise((resolve, reject) => {
-    fetch(endpointUrl, {
-      method: "POST",
-      body: formData,
+  return fetch(endpointUrl, {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
     })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((json) => {
-        handleResponse(json);
-        return json;
-      })
-      .then((responseData) => {
-        resolve(responseData);
-      })
-      .catch((error) => {
-        hideGlobalLoader();
-        clientsideError(error.message);
-        reject(error);
-      });
-  });
+    .then((json) => {
+      handleResponse(json);
+      return json;
+    })
+    .catch((error) => {
+      hideGlobalLoader();
+      clientsideError(error.message);
+      throw error;
+    });
 }
 
 /**
@@ -413,7 +465,9 @@ function POSTFormData(endpointUrl, formData = {}) {
 function sendFromForm(id, url) {
   showGlobalLoader("collect data");
   resetMarker();
+
   const formData = extractValuesToSubmit(id);
+
   changeGlobalLoaderText("send data");
   POSTFormData(url, formData);
 }
@@ -613,8 +667,9 @@ var errorOverlayVisible = false;
 function handleMessages(messages, btnName = "ok") {
   for (let m in messages) {
     let msg = messages[m];
+    let target = msg.target;
 
-    switch (msg.target) {
+    switch (target) {
       case "MODAL":
         errorOverlayVisible = true;
         handleModalMsg(msg);
@@ -629,7 +684,7 @@ function handleMessages(messages, btnName = "ok") {
         break;
 
       default:
-        console.log(`"unrecognized message type [${msg.target}]`);
+        console.error("unrecognized message target.", { target });
     }
   }
 
@@ -665,6 +720,8 @@ function resetMarker() {
  * @return {undefined}
  */
 function clientsideError(msg) {
+  console.error("client error.", { msg });
+
   handleMessages([{ msg: msg, target: "MODAL", type: "ERROR" }]);
 }
 
@@ -797,14 +854,12 @@ function updateProgress(response) {
   const $bar = $elem.children(".loadbar");
   const $text = $elem.children(".loader-text");
 
-  if (!$bar.length) return; // no direct .loadbar child → stop
+  if (!$bar.length) return;
 
-  // update progress
   $bar
     .data("progress", response.progress)
     .css("--v", response.progress);
 
-  // update text
   $text.html(response.text);
 }
 
@@ -884,15 +939,12 @@ function extractValuesToSubmit(target) {
 function updateButton(btnId) {
   var $btn = $('#' + btnId);
 
-  // Remove any btn-* style
   $btn.removeClass(function (i, className) {
     return (className.match(/(^|\s)btn-\S+/g) || []).join(' ');
   });
 
-  // Add your "changed" style
   $btn.addClass('btn btn-warning');
 
-  // Mark button as having unsaved changes
   $btn.attr('data-pending-change', 'true');
 }
 
@@ -1049,8 +1101,10 @@ function initWebSocketsFromConfig(config) {
 
   for (const wsDef of config.websockets) {
     const { name, url, destinations, reconnectInterval } = wsDef;
+
     if (!name || !url || !Array.isArray(destinations)) {
       console.warn('Invalid websocket entry, skipping:', wsDef);
+
       continue;
     }
 

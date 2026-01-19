@@ -7,6 +7,8 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.container;
 
+import org.springframework.http.HttpMethod;
+
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Getter;
@@ -29,5 +31,9 @@ public final class BurgerItem
 
     @NonNull
     private final String  url;
+
+    @NonNull
+    @Default
+    private final String  method   = HttpMethod.POST.name();
 
 }

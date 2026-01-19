@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpMethod;
 
 import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.function.CloseModal;
@@ -104,6 +105,7 @@ public class JsonMapper
     private static final String                    PARAM_IS_SOURCE_LIST           = "isSourceList";
     private static final String                    PARAM_MAX                      = "max";
     private static final String                    PARAM_MAX_CHARS                = "maxChars";
+    private static final String                    PARAM_METHOD                   = "method";
     private static final String                    PARAM_MIN                      = "min";
     private static final String                    PARAM_NAME                     = "name";
     private static final String                    PARAM_ON_CLICK                 = "onClick";
@@ -1375,15 +1377,31 @@ public class JsonMapper
             return null;
         }
 
-        String icon = getParameterValue(element, depth, PARAM_ICON, String.class, DEFAULT_EMPTY_VAL);
-        String url  = getParameterValue(element, depth, PARAM_URL, String.class);
-        String text = getParameterValue(element, depth, PARAM_TEXT, String.class);
+        String     icon         = getParameterValue(element, depth, PARAM_ICON, String.class, DEFAULT_EMPTY_VAL);
+        String     url          = getParameterValue(element, depth, PARAM_URL, String.class);
+        String     text         = getParameterValue(element, depth, PARAM_TEXT, String.class);
+        String     methodString = getParameterValue(element, depth, PARAM_METHOD, String.class, HttpMethod.POST.name()).toUpperCase();
+
+        HttpMethod method       = switch (methodString)
+                                {
+                                    case "POST" -> HttpMethod.POST;
+                                    case "GET" -> HttpMethod.GET;
+                                    case "DELETE" -> HttpMethod.DELETE;
+                                    case "PUT" -> HttpMethod.PUT;
+                                    case "PATCH" -> HttpMethod.PATCH;
+                                    default -> {
+                                        LOG.warn("illegal method [{}] at BurgerItem [{}] default to POST", methodString, uid);
+
+                                        yield HttpMethod.POST;
+                                    }
+                                };
 
         return BurgerItem
             .builder()
             .icon(icon)
             .url(url)
             .text(text)
+            .method(method.name())
             .build();
     }
 
