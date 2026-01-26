@@ -274,38 +274,36 @@ public final class HtmlMapper
 
     private String render(Button button)
     {
-        HtmlElement elementMapper =
-            HtmlElement
-                .builder()
-                .tag("button")
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ID)
-                        .value(button.getUid())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ON_CLICK)
-                        .active(!button.getOnClick().isBlank())
-                        .value(button.getOnClick())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name("title")
-                        .active(button.getTitle() != null && !button.getTitle().isBlank())
-                        .value(htmlEscape(button.getTitle()))
-                        .build())
-                .clazz("btn")
-                .clazz(button.getBtnClass().getClassName())
-                .classes(button.getClasses())
-                .dataAttributes(button.getDataAttributes())
-                .content(htmlEscape(button.getText()))
-                .build();
-
-        return elementMapper.html();
+        return HtmlElement
+            .builder()
+            .tag("button")
+            .attribute(
+                Attribute
+                    .builder()
+                    .name(ATT_ID)
+                    .value(button.getUid())
+                    .build())
+            .attribute(
+                Attribute
+                    .builder()
+                    .name(ATT_ON_CLICK)
+                    .active(!button.getOnClick().isBlank())
+                    .value(button.getOnClick())
+                    .build())
+            .attribute(
+                Attribute
+                    .builder()
+                    .name("title")
+                    .active(button.getTitle() != null && !button.getTitle().isBlank())
+                    .value(htmlEscape(button.getTitle()))
+                    .build())
+            .clazz("btn")
+            .clazz(button.getBtnClass().getClassName())
+            .classes(button.getClasses())
+            .dataAttributes(button.getDataAttributes())
+            .content(htmlEscape(button.getText()))
+            .build()
+            .html();
     }
 
     private String render(ButtonBarContainer buttonBarContainer)

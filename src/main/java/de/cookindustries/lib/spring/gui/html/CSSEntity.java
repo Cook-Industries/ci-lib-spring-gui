@@ -8,6 +8,7 @@
 package de.cookindustries.lib.spring.gui.html;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -37,6 +38,31 @@ public final class CssEntity
 
     @Singular
     private final Map<String, String> attributes;
+
+    private final boolean             append;
+
+    public CssEntity merge(CssEntity other)
+    {
+        if (!selector.equals(other.getSelector()))
+        {
+            throw new IllegalArgumentException("selector not identical");
+        }
+
+        Map<String, String> map = new HashMap<>();
+
+        other
+            .getAttributes()
+            .forEach((key, val) -> map.put(key, val));
+
+        getAttributes()
+            .forEach((key, val) -> map.put(key, val));
+
+        return CssEntity
+            .builder()
+            .selector(getSelector())
+            .attributes(map)
+            .build();
+    }
 
     /**
      * Create a css object representation of this instance

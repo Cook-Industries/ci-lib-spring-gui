@@ -81,11 +81,32 @@ final class CiLibStaticFileCreator implements ApplicationRunner
             Map<String, CssEntity>    cssRules      = new HashMap<>();
             Map<String, CssAnimation> cssAnimations = new HashMap<>();
 
-            staticConfig.getRules().forEach(rule -> cssRules.put(rule.getSelector(), rule));
-            userConfig.getRules().forEach(rule -> cssRules.put(rule.getSelector(), rule));
+            staticConfig
+                .getRules()
+                .forEach(rule -> cssRules.put(rule.getSelector(), rule));
 
-            staticConfig.getAnimations().forEach(anim -> cssAnimations.put(anim.getName(), anim));
-            userConfig.getAnimations().forEach(anim -> cssAnimations.put(anim.getName(), anim));
+            userConfig
+                .getRules()
+                .forEach(rule -> {
+                    String selector = rule.getSelector();
+
+                    if (rule.isAppend() && cssRules.containsKey(selector))
+                    {
+                        cssRules.put(selector, rule.merge(cssRules.get(selector)));
+                    }
+                    else
+                    {
+                        cssRules.put(selector, rule);
+                    }
+                });
+
+            staticConfig
+                .getAnimations()
+                .forEach(anim -> cssAnimations.put(anim.getName(), anim));
+
+            userConfig
+                .getAnimations()
+                .forEach(anim -> cssAnimations.put(anim.getName(), anim));
 
             cssConfig =
                 CssConfig
@@ -112,7 +133,8 @@ final class CiLibStaticFileCreator implements ApplicationRunner
 
         try (BufferedWriter writer = Files.newBufferedWriter(filePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING))
         {
-            cssConfig.getRules()
+            cssConfig
+                .getRules()
                 .stream()
                 .sorted(CssEntity.compareByFirstChar())
                 .forEach(rule -> {
@@ -127,7 +149,8 @@ final class CiLibStaticFileCreator implements ApplicationRunner
                     }
                 });
 
-            cssConfig.getAnimations()
+            cssConfig
+                .getAnimations()
                 .stream()
                 .forEach(animation -> {
                     try
