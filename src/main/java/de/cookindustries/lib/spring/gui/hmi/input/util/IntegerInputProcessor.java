@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
+ * Copyright (c) 2016-2026 sebastian koch/Cook Industries.
  * <p>
  * Licensed under the MIT License.
  * <p>

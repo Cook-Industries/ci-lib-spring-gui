@@ -21,7 +21,7 @@ export {
 };
 
 /**
- * Copyright (c) 2016-2025 sebastian koch/Cook Industries.
+ * Copyright (c) 2016-2026 sebastian koch/Cook Industries.
  * <p>
  * Licensed under the MIT License.
  * <p>
@@ -30,7 +30,7 @@ export {
  * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
-const version = "3.4.0";
+const version = "3.5.2";
 
 const CLASS_HIDDEN = "hidden";
 
