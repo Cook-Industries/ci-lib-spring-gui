@@ -41,6 +41,7 @@ import de.cookindustries.lib.spring.gui.response.ModalResponse;
 import de.cookindustries.lib.spring.gui.response.NotificationResponse;
 import de.cookindustries.lib.spring.gui.response.message.ActivateMarkerMessage;
 import de.cookindustries.lib.spring.gui.response.message.MessageType;
+import de.cookindustries.lib.spring.gui.response.message.ModalMessage;
 import de.cookindustries.lib.spring.gui.response.message.PopupMessage;
 import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
 
@@ -353,6 +354,23 @@ public final class GUIFactory
     }
 
     /**
+     * Create a {@link NotificationResponse} with a single {@link ModalMessage}.
+     * 
+     * @param msg to display
+     * @param type to highlight
+     * @return a response with the processed content
+     */
+    public NotificationResponse createModalMessageNotificationResponse(String msg, MessageType type)
+    {
+        return createNotificationResponse(
+            ModalMessage
+                .builder()
+                .msg(msg)
+                .type(type)
+                .build());
+    }
+
+    /**
      * Create a {@link NotificationResponse} with a single {@link ResponseMessage}.
      * 
      * @param compSrc aggregator for settings
@@ -360,7 +378,10 @@ public final class GUIFactory
      */
     public NotificationResponse createNotificationResponse(ResponseMessage message)
     {
-        return createNotificationResponse(List.of(message));
+        return NotificationResponse
+            .builder()
+            .message(message)
+            .build();
     }
 
     /**
