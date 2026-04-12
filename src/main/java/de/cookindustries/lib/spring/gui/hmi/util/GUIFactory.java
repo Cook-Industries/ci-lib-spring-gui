@@ -373,7 +373,7 @@ public final class GUIFactory
     /**
      * Create a {@link NotificationResponse} with a single {@link ResponseMessage}.
      * 
-     * @param compSrc aggregator for settings
+     * @param message to send
      * @return a response with the processed content
      */
     public NotificationResponse createNotificationResponse(ResponseMessage message)
@@ -387,7 +387,7 @@ public final class GUIFactory
     /**
      * Create a {@link NotificationResponse} with a set of {@link ResponseMessage}s.
      * 
-     * @param compSrc aggregator for settings
+     * @param messages to send
      * @return a response with the processed content
      */
     public NotificationResponse createNotificationResponse(List<ResponseMessage> messages)
