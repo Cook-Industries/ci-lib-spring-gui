@@ -11,9 +11,16 @@ package de.cookindustries.lib.spring.gui.response.message;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-public enum MessageType {
+public enum MessageType
+{
 
-    SUCCESS("bi-check-circle"), ERROR("bi-x-circle"), WARNING("bi-exclamation-circle"), NOTIFICATION("bi-question-circle");
+    SUCCESS("bi-check-circle"),
+
+    ERROR("bi-x-circle"),
+
+    WARNING("bi-exclamation-circle"),
+
+    NOTIFICATION("bi-question-circle");
 
     private final String icon;
 

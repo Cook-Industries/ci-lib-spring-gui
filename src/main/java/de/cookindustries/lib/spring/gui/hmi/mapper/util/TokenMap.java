@@ -23,7 +23,7 @@ import lombok.EqualsAndHashCode.CacheStrategy;
 /**
  * Key/Value map to use by the {@link JsonMapper} to replace {@code token}s.
  * <p>
- * This map expects all elements to be immutable.
+ * This map expects all elements to be immutable and makes no assumptions or promises if this is not ensured.
  * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>

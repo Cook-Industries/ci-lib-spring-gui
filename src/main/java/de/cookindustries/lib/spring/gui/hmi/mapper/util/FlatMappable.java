@@ -41,16 +41,21 @@ import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
 public interface FlatMappable
 {
 
-    public default Map<String, String> getClasses()
+    public default Map<String, String> fmClasses()
     {
         return Map.of();
     }
 
-    public default Map<String, AbsFunctionCall> getFunctionCalls()
+    public default Map<String, AbsFunctionCall> fmFunctionCalls()
     {
         return Map.of();
     }
 
+    /**
+     * Get a list of names for methods to include in the flat-map.
+     * 
+     * @return default return is an ampty list
+     */
     public default List<String> includedMethods()
     {
         return List.of();

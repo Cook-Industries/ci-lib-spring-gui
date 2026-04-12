@@ -33,7 +33,7 @@ import de.cookindustries.lib.spring.gui.response.NotificationResponse;
  * with DTO objects either as POJOs with setters, or a builder.
  * <p>
  * Depending on the data types of the fields the data can be validated via the corresponding {@link AbsInputProcessor}. Either create a new
- * on with the restrictions that apply, or use on of the static defined ones in this class named with {@code DEFAULT_[type]}.
+ * on with the restrictions that apply, or use one of the static defined ones in this class named {@code DEFAULT_[type]}.
  * <p>
  * A {@code InputExtractor} can also validate a {@link MultipartFile} intended as a file upload from a {@link File} input. This validation
  * only checks whether there are any files uploaded and how many, but nothing about the state or value of the files, since this is up to the
@@ -54,10 +54,7 @@ import de.cookindustries.lib.spring.gui.response.NotificationResponse;
  *     extractor.consumeEnum("resultType", ImageType.class, dtoBuilder::resultType);
  *     extractor.checkFiles(false, true);
  * 
- *     if (extractor.hasMarker())
- *     {
- *         return guiFactory.getActiveMarkerResponse(extractor, locale);
- *     }
+ *     extractor.approve(); // throws if markers are raised
  * 
  *     Dto data = dtoBuilder.build();
  * 
@@ -215,6 +212,11 @@ public final class InputExtractor
         }
     }
 
+    /**
+     * Get the set {@link Locale} for this extractor.
+     * 
+     * @return the set {@code locale}
+     */
     public Locale getLocale()
     {
         return locale;

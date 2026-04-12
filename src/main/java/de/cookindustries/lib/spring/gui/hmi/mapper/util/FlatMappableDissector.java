@@ -44,18 +44,19 @@ public final class FlatMappableDissector
 
     private static final String          TRANSLATION_INDICATOR         = "$$text$";
 
-    private static final List<String>    RAW_BLACKLIST                 = List.of(
-        "^notifyAll$",
-        "^notify$",
-        "^clone$",
-        "^hashCode$",
-        "^toString$",
-        "^equals$",
-        "^wait$",
-        "^class$",
-        "classLoader",
-        "^classes$",
-        "^FunctionCalls$");
+    private static final List<String>    RAW_BLACKLIST                 =
+        List.of(
+            "^notifyAll$",
+            "^notify$",
+            "^clone$",
+            "^hashCode$",
+            "^toString$",
+            "^equals$",
+            "^wait$",
+            "^class$",
+            "classLoader",
+            "^classes$",
+            "^FunctionCalls$");
 
     private static final List<Pattern>   BLACKLIST_PATTERNS            =
         RAW_BLACKLIST
@@ -87,7 +88,7 @@ public final class FlatMappableDissector
     }
 
     /**
-     * Dissect a {@link FlatMappable} object and map it to a {@link Map}.
+     * Dissect a {@link FlatMappable} object and map it to a {@link TokenMap}.
      * 
      * @param obj to dissect
      * @param presedence to add to the resulting {@code TokenMap}
@@ -110,8 +111,8 @@ public final class FlatMappableDissector
             .builder()
             .presedence(2 * presedence + 10)
             .values(flatMap)
-            .classes(obj.getClasses())
-            .functions(obj.getFunctionCalls())
+            .classes(obj.fmClasses())
+            .functions(obj.fmFunctionCalls())
             .build();
     }
 
@@ -161,12 +162,12 @@ public final class FlatMappableDissector
                     }
                     else
                     {
-                        continue;
+                        throw new SkipFieldDissectionException();
                     }
 
                     if (stripped.length() < 1)
                     {
-                        continue;
+                        throw new SkipFieldDissectionException();
                     }
 
                     if (BLACKLIST_PATTERNS
@@ -175,119 +176,21 @@ public final class FlatMappableDissector
                     {
                         LOG.trace("{}ignore [{}] due to blacklisted", indent, stripped);
 
-                        continue;
+                        throw new SkipFieldDissectionException();
                     }
 
                     String fieldName = Character.toLowerCase(stripped.charAt(0)) + stripped.substring(1);
 
                     if (method.getParameterCount() > 0)
                     {
-                        continue;
+                        throw new SkipFieldDissectionException();
                     }
 
-                    try
-                    {
-                        LOG.trace("{}dissect field [{}] type [{}]", indent, fieldName, type.getSimpleName());
-
-                        String key   = prefix.isEmpty() ? fieldName : prefix + "." + fieldName;
-
-                        Object value = method.invoke(obj);
-
-                        if (value == null)
-                        {
-                            LOG.trace("{} - field is null", indent);
-
-                            continue;
-                        }
-                        else if (value instanceof FlatMappable || value instanceof FlatMappableList)
-                        {
-                            LOG.trace("{} - field is {}/{}, add unmodified", " ".repeat(depth + 1), FlatMappable.class.getSimpleName(),
-                                FlatMappableList.class.getSimpleName());
-
-                            result.put(key, value);
-                        }
-                        else if (value instanceof Map<?, ?> map)
-                        {
-                            LOG.trace("{} - field is {}, go deeper", " ".repeat(depth + 1), Map.class.getSimpleName());
-
-                            for (Map.Entry<?, ?> entry : map.entrySet())
-                            {
-                                Object k = entry.getKey();
-
-                                if ((k instanceof String ks))
-                                {
-                                    String mapKey = key + "." + ks;
-
-                                    if (isSimple(entry.getValue().getClass()))
-                                    {
-                                        handleSimple(mapKey, entry.getValue(), result, locale, depth);
-                                    }
-                                    else
-                                    {
-                                        Object imp = entry.getValue();
-
-                                        goDeeper(mapKey, imp, result, locale, depth + 1);
-                                    }
-                                }
-
-                                continue;
-                            }
-                        }
-                        else if (isSimple(value.getClass()))
-                        {
-                            handleSimple(key, value, result, locale, depth);
-                        }
-                        else if (value instanceof Collection<?> collection)
-                        {
-                            LOG.trace("{} - field is List", indent);
-
-                            List<FlatMappable> items = new ArrayList<>();
-
-                            for (Object element : collection)
-                            {
-                                if (element instanceof FlatMappable item)
-                                {
-                                    items.add(item);
-                                }
-                            }
-
-                            if (!items.isEmpty())
-                            {
-                                result.put(key, new FlatMappableList<>(items));
-                            }
-                        }
-                        else if (value.getClass().isArray())
-                        {
-                            LOG.trace("{} - field is Array", indent);
-
-                            List<FlatMappable> items  = new ArrayList<>();
-
-                            int                length = Array.getLength(value);
-
-                            for (int i = 0; i < length; i++)
-                            {
-                                Object element = Array.get(value, i);
-
-                                if (element instanceof FlatMappable item)
-                                {
-                                    items.add(item);
-                                }
-                            }
-
-                            if (!items.isEmpty())
-                            {
-                                result.put(key, new FlatMappableList<>(items));
-                            }
-                        }
-                        else
-                        {
-                            goDeeper(key, value, result, locale, depth + 1);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LOG.error("dissection went wrong", ex);
-                    }
+                    dissectField(obj, method, type, prefix, fieldName, indent, result, locale, depth);
+                }
+                catch (SkipFieldDissectionException ex)
+                {
+                    continue;
                 }
                 catch (Exception ex)
                 {
@@ -376,5 +279,140 @@ public final class FlatMappableDissector
             || Boolean.class.isAssignableFrom(type)
             || Character.class.isAssignableFrom(type)
             || Enum.class.isAssignableFrom(type);
+    }
+
+    /**
+     * Dissect a field.
+     * 
+     * @param obj the object to which the field belongs
+     * @param method the method (get/is) on the field
+     * @param type expected class type of the field
+     * @param prefix if applicable
+     * @param fieldName the name of the field
+     * @param indent indent for logging
+     * @param result to fill
+     * @param locale if something is to be translated
+     * @param depth of the recursive call for logging and termination
+     */
+    private void dissectField(Object obj, Method method, Class<?> type, String prefix, String fieldName, String indent,
+        Map<String, Object> result, Locale locale, int depth)
+    {
+        try
+        {
+            LOG.trace("{}dissect field [{}] type [{}]", indent, fieldName, type.getSimpleName());
+
+            String key   = prefix.isEmpty() ? fieldName : prefix + "." + fieldName;
+
+            Object value = method.invoke(obj);
+
+            if (value == null)
+            {
+                LOG.trace("{} - field is null", indent);
+
+                return;
+            }
+            else if (value instanceof FlatMappable || value instanceof FlatMappableList)
+            {
+                LOG.trace("{} - field is {}/{}, add unmodified", " ".repeat(depth + 1), FlatMappable.class.getSimpleName(),
+                    FlatMappableList.class.getSimpleName());
+
+                result.put(key, value);
+            }
+            else if (value instanceof Map<?, ?> map)
+            {
+                handleMap(key, map, result, locale, depth);
+            }
+            else if (isSimple(value.getClass()))
+            {
+                handleSimple(key, value, result, locale, depth);
+            }
+            else if (value instanceof Collection<?> collection)
+            {
+                LOG.trace("{} - field is List", indent);
+
+                List<FlatMappable> items = new ArrayList<>();
+
+                for (Object element : collection)
+                {
+                    if (element instanceof FlatMappable item)
+                    {
+                        items.add(item);
+                    }
+                }
+
+                if (!items.isEmpty())
+                {
+                    result.put(key, new FlatMappableList<>(items));
+                }
+            }
+            else if (value.getClass().isArray())
+            {
+                LOG.trace("{} - field is Array", indent);
+
+                List<FlatMappable> items  = new ArrayList<>();
+
+                int                length = Array.getLength(value);
+
+                for (int i = 0; i < length; i++)
+                {
+                    Object element = Array.get(value, i);
+
+                    if (element instanceof FlatMappable item)
+                    {
+                        items.add(item);
+                    }
+                }
+
+                if (!items.isEmpty())
+                {
+                    result.put(key, new FlatMappableList<>(items));
+                }
+            }
+            else
+            {
+                goDeeper(key, value, result, locale, depth + 1);
+            }
+        }
+        catch (Exception ex)
+        {
+            LOG.error("field issection failed", ex);
+        }
+    }
+
+    /**
+     * Handle a map field.
+     * 
+     * @param fieldKey name of the map field
+     * @param map the map itself
+     * @param result to fill
+     * @param locale if something is to be translated
+     * @param depth of the recursive call for logging and termination
+     */
+    private void handleMap(String fieldKey, Map<?, ?> map, Map<String, Object> result, Locale locale, int depth)
+    {
+        LOG.trace("{} - field is {}, go deeper", " ".repeat(depth + 1), Map.class.getSimpleName());
+
+        for (Map.Entry<?, ?> entry : map.entrySet())
+        {
+            Object k = entry.getKey();
+
+            if ((k instanceof String ks))
+            {
+                String mapKey = fieldKey + "." + ks;
+
+                if (isSimple(entry.getValue().getClass()))
+                {
+                    handleSimple(mapKey, entry.getValue(), result, locale, depth);
+                }
+                else
+                {
+                    Object imp = entry.getValue();
+
+                    goDeeper(mapKey, imp, result, locale, depth + 1);
+                }
+            }
+
+            continue;
+        }
     }
 }

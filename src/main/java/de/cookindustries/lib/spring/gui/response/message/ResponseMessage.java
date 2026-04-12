@@ -26,6 +26,11 @@ public abstract class ResponseMessage
     @NonNull
     private final MessageType   type;
 
+    /**
+     * Get the {@code icon} to the inherent {@link MessageType}.
+     * 
+     * @return the {@code icon} linked to {@code MessageType}
+     */
     public final String getIcon()
     {
         return type.getIcon();

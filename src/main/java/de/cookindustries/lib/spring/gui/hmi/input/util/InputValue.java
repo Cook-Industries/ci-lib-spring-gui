@@ -28,35 +28,25 @@ import lombok.Builder.Default;
 public class InputValue
 {
 
-    /**
-     * the text to this input value
-     */
+    /** The text to this input value */
     @NonNull
     @Default
     private final String       id      = "";
 
-    /**
-     * the text to this input value
-     */
+    /** The text to this input value */
     @NonNull
     private final String       text;
 
-    /**
-     * the value that gets transmitted at form-export
-     */
+    /** The value that gets transmitted at form-export */
     @NonNull
     private final String       value;
 
-    /**
-     * whether this input value is selected or not
-     */
+    /** Whether this input value is selected or not */
     @NonNull
     @Default
     private final Boolean      checked = false;
 
-    /**
-     * styling classes for this input value
-     */
+    /** Styling classes for this input value */
     @Singular("clazz")
     private final List<String> classes;
 

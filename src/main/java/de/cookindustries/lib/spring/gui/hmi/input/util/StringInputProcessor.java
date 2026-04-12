@@ -55,6 +55,7 @@ public final class StringInputProcessor extends AbsInputProcessor<String>
     @NonNull
     private final Boolean                  caseSensitiveCheck = true;
 
+    /** Set a {@link Function} to transform the result element in the prepare step */
     @Default
     private final Function<String, String> sanitazation       = null;
 

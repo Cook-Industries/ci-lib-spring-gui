@@ -7,6 +7,7 @@
  */
 package de.cookindustries.lib.spring.gui.response.message;
 
+import de.cookindustries.lib.spring.gui.hmi.input.util.MarkerCategory;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
@@ -23,15 +24,26 @@ public final class ActivateMarkerMessage extends ResponseMessage
 {
 
     @NonNull
-    private final String uid;
+    private final String         formId;
 
     @NonNull
-    private final String text;
+    private final MarkerCategory category;
+
+    @NonNull
+    private final String         fieldId;
+
+    @NonNull
+    private final String         text;
 
     @Override
     protected MessageTarget inferTarget()
     {
         return MessageTarget.MARKER;
+    }
+
+    public String getUid()
+    {
+        return String.format("input-icon-%s-%s-%s", formId, category.name().toLowerCase(), fieldId);
     }
 
 }

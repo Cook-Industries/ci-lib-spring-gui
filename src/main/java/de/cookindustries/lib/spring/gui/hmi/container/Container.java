@@ -40,4 +40,5 @@ public abstract class Container extends UiElement
      * @return the fix {@code type} of the definitive class implementation
      */
     protected abstract ContainerType inferType();
+
 }

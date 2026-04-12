@@ -27,9 +27,9 @@ import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.MapperResult;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableDissector;
+import de.cookindustries.lib.spring.gui.html.CSSLink;
 import de.cookindustries.lib.spring.gui.html.CssClass;
 import de.cookindustries.lib.spring.gui.html.HeadTitle;
-import de.cookindustries.lib.spring.gui.html.CSSLink;
 import de.cookindustries.lib.spring.gui.html.HtmlSite;
 import de.cookindustries.lib.spring.gui.html.JsImport;
 import de.cookindustries.lib.spring.gui.html.JsPlainLink;
@@ -42,6 +42,7 @@ import de.cookindustries.lib.spring.gui.response.NotificationResponse;
 import de.cookindustries.lib.spring.gui.response.message.ActivateMarkerMessage;
 import de.cookindustries.lib.spring.gui.response.message.MessageType;
 import de.cookindustries.lib.spring.gui.response.message.PopupMessage;
+import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
 
 /**
  * A set of convenience functions to create {@code HTML} sites or components to send as a response.
@@ -145,13 +146,20 @@ public final class GUIFactory
     {
         try
         {
+            String srcPath = compSrc.getSourcePath();
+
+            if (srcPath.startsWith("/"))
+            {
+                srcPath = srcPath.substring(1);
+            }
+
             JsonMapper mapper =
                 JsonMapper
                     .builder()
                     .templateFileCache(templateFileCache)
                     .translationProvider(translationProvider)
                     .flatMappableDissector(flatMappableDissector)
-                    .rscPath(compSrc.getSourcePath())
+                    .srcPath(srcPath)
                     .locale(compSrc.getLocale())
                     .tokenMaps(compSrc.getTokenMaps())
                     .build();
@@ -173,7 +181,7 @@ public final class GUIFactory
      */
     public String createHtmlSite(String title, ComponentSources compSrc)
     {
-        return createHtmlSite(title, EMPTY_IMPORTS, compSrc);
+        return createHtmlSite(title, GUIFactory.EMPTY_IMPORTS, compSrc);
     }
 
     /**
@@ -239,7 +247,7 @@ public final class GUIFactory
                             .content(
                                 ContentContainer
                                     .builder()
-                                    .uid("_lcsptp")
+                                    .uid("_lcsptp") // loader-circle spinner-border text-primary
                                     .clazz("loader-circle")
                                     .clazz("spinner-border")
                                     .clazz("text-primary")
@@ -275,7 +283,7 @@ public final class GUIFactory
                         .content(
                             Button
                                 .builder()
-                                .uid("_eob")
+                                .uid("_eob") // error-overlay button
                                 .text("OK")
                                 .onClick("CILIB.FunctionRegistry.call('dismissErrors');")
                                 .build())
@@ -290,7 +298,7 @@ public final class GUIFactory
             .functions(calls)
             .build()
             .getHtmlRep()
-            .replace("@@time", "" + result.getTime());
+            .replace("@@time", String.valueOf(result.getTime()));
     }
 
     /**
@@ -322,46 +330,50 @@ public final class GUIFactory
      * 
      * @param compSrc aggregator for settings
      * @return a response with the processed content
+     * @throws IllegalArgumentException if the given {@code ComponentSources#getSourcePath()} does not denote to a {@code ModalContainer}
      */
     public ModalResponse createModalResponse(ComponentSources compSrc)
     {
-        MapperResult          result  = readComponent(compSrc);
-        ModalContainer        content = (ModalContainer) result.getContainers().get(0);
-        List<AbsFunctionCall> calls   = new ArrayList<>();
-        calls.addAll(result.getFunctions());
-        calls.addAll(compSrc.getFunctionCalls());
+        MapperResult result = readComponent(compSrc);
 
-        return ModalResponse
-            .builder()
-            .modal(content)
-            .calls(calls)
-            .build();
+        if (result.getContainers().get(0) instanceof ModalContainer container)
+        {
+            List<AbsFunctionCall> calls = new ArrayList<>();
+            calls.addAll(result.getFunctions());
+            calls.addAll(compSrc.getFunctionCalls());
+
+            return ModalResponse
+                .builder()
+                .modal(container)
+                .calls(calls)
+                .build();
+        }
+
+        throw new IllegalArgumentException("given compSrc::sourcePath file is not a modal container");
     }
 
     /**
-     * Create a {@link NotificationResponse} from a {@link InputExtractor}.
+     * Create a {@link NotificationResponse} with a single {@link ResponseMessage}.
      * 
-     * @param inputExtractor to extract messages from
-     * @return a response containing the marker raised by {@code inputExtractor}
+     * @param compSrc aggregator for settings
+     * @return a response with the processed content
      */
-    public NotificationResponse createActiveMarkerResponseFrom(InputExtractor inputExtractor)
+    public NotificationResponse createNotificationResponse(ResponseMessage message)
     {
-        List<ActivateMarkerMessage> messages = new ArrayList<>();
+        return createNotificationResponse(List.of(message));
+    }
 
-        inputExtractor.getMarker()
-            .stream()
-            .forEach(m -> messages.add(
-                ActivateMarkerMessage
-                    .builder()
-                    .text(translationProvider.getText(inputExtractor.getLocale(), MarkerType.typeTranslationKey(m.getType())))
-                    .uid(String.format("input-icon-%s-%s-%s", m.getFormId(), m.getCategory().name().toLowerCase(), m.getTransferId()))
-                    .type(MessageType.ERROR)
-                    .build()));
-
+    /**
+     * Create a {@link NotificationResponse} with a set of {@link ResponseMessage}s.
+     * 
+     * @param compSrc aggregator for settings
+     * @return a response with the processed content
+     */
+    public NotificationResponse createNotificationResponse(List<ResponseMessage> messages)
+    {
         return NotificationResponse
             .builder()
             .messages(messages)
-            .call(new HideGlobalLoader())
             .build();
     }
 
@@ -384,6 +396,38 @@ public final class GUIFactory
                     .type(type)
                     .build())
             .calls(Arrays.asList(calls))
+            .build();
+    }
+
+    /**
+     * Create a {@link NotificationResponse} from a {@link InputExtractor}.
+     * <p>
+     * Triggers an implicit {@link HideGlobalLoader} call.
+     * 
+     * @param inputExtractor to extract messages from
+     * @return a response containing the markers raised by {@code inputExtractor}
+     */
+    public NotificationResponse createActiveMarkerResponseFrom(InputExtractor inputExtractor)
+    {
+        List<ActivateMarkerMessage> messages = new ArrayList<>();
+
+        inputExtractor.getMarker()
+            .stream()
+            .forEach(
+                m -> messages.add(
+                    ActivateMarkerMessage
+                        .builder()
+                        .text(translationProvider.getText(inputExtractor.getLocale(), MarkerType.typeTranslationKey(m.getType())))
+                        .formId(m.getFormId())
+                        .category(m.getCategory())
+                        .fieldId(m.getTransferId())
+                        .type(MessageType.ERROR)
+                        .build()));
+
+        return NotificationResponse
+            .builder()
+            .messages(messages)
+            .call(new HideGlobalLoader())
             .build();
     }
 }

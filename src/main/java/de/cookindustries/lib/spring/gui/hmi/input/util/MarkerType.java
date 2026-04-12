@@ -42,6 +42,12 @@ public enum MarkerType {
     /** Non discrete value for free usage */
     CUSTOM;
 
+    /**
+     * Returns a {@link String} 'error-description-{@code type}'.
+     * 
+     * @param type to transform
+     * @return the constructed {@code String}
+     */
     public static String typeTranslationKey(MarkerType type)
     {
         return "error-description-"
