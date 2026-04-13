@@ -25,7 +25,7 @@ public interface AbsFunctionArgs
 
         try
         {
-            return objectMapper.writeValueAsString(this).replace("\"", "&quot;");
+            return objectMapper.writeValueAsString(this);
         }
         catch (JsonProcessingException ex)
         {
