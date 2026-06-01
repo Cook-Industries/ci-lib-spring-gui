@@ -17,9 +17,44 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.text.StringEscapeUtils;
 
-import de.cookindustries.lib.spring.gui.hmi.container.*;
-import de.cookindustries.lib.spring.gui.hmi.input.*;
+import de.cookindustries.lib.spring.gui.hmi.container.AudioContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.BurgerContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.Button;
+import de.cookindustries.lib.spring.gui.hmi.container.ButtonBarContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.ButtonIcon;
+import de.cookindustries.lib.spring.gui.hmi.container.Container;
+import de.cookindustries.lib.spring.gui.hmi.container.ContentContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.Direction;
+import de.cookindustries.lib.spring.gui.hmi.container.FormContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.HeadingContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.HiddenContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.ImageContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.LinkContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.ModalContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.SVGContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.SplittedContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.TabContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.TableContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.TableRowContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.TextContainer;
+import de.cookindustries.lib.spring.gui.hmi.input.Checkbox;
+import de.cookindustries.lib.spring.gui.hmi.input.Currency;
+import de.cookindustries.lib.spring.gui.hmi.input.Date;
+import de.cookindustries.lib.spring.gui.hmi.input.File;
+import de.cookindustries.lib.spring.gui.hmi.input.Hidden;
+import de.cookindustries.lib.spring.gui.hmi.input.Input;
+import de.cookindustries.lib.spring.gui.hmi.input.Link;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
+import de.cookindustries.lib.spring.gui.hmi.input.Password;
+import de.cookindustries.lib.spring.gui.hmi.input.Radio;
+import de.cookindustries.lib.spring.gui.hmi.input.Select;
+import de.cookindustries.lib.spring.gui.hmi.input.Slider;
+import de.cookindustries.lib.spring.gui.hmi.input.SubmittableInput;
+import de.cookindustries.lib.spring.gui.hmi.input.Switch;
+import de.cookindustries.lib.spring.gui.hmi.input.Tag;
+import de.cookindustries.lib.spring.gui.hmi.input.Textarea;
+import de.cookindustries.lib.spring.gui.hmi.input.Textbox;
+import de.cookindustries.lib.spring.gui.hmi.input.Textfield;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.MarkerCategory;
 import de.cookindustries.lib.spring.gui.hmi.svg.SVGElement;
@@ -70,6 +105,7 @@ public final class HtmlMapper
     private static final String        ATT_WIDTH               = "width";
     private static final String        ATT_HEIGHT              = "height";
     private static final String        ATT_D                   = "d";
+    private static final String        ATT_DISABLED            = "disabled";
 
     private static final String        CLASS_INPUT_LEGEND      = "input-legend";
     private static final String        CLASS_FORM_CONTROL      = "form-control";
@@ -323,7 +359,7 @@ public final class HtmlMapper
                 buttonBarContainer
                     .getButtons()
                     .stream()
-                    .map(b -> render(b))
+                    .map(this::render)
                     .toList())
             .build()
             .html();
@@ -692,7 +728,7 @@ public final class HtmlMapper
             table
                 .getRows()
                 .stream()
-                .map(tr -> render(tr))
+                .map(this::render)
                 .toList();
 
         HtmlElement  tableHead     =
@@ -879,6 +915,13 @@ public final class HtmlMapper
                     .builder()
                     .name(ATT_ON_INPUT)
                     .value(input.getOnInput())
+                    .build())
+            .attribute(
+                Attribute
+                    .builder()
+                    .name(ATT_DISABLED)
+                    .value(ATT_DISABLED)
+                    .active(input.isDisabled())
                     .build())
             .clazz(formClass)
             .clazz("input-field")

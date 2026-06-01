@@ -7,9 +7,9 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input;
 
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -22,15 +22,18 @@ public abstract class SubmittableInput extends Input
 {
 
     @NonNull
-    private final String name;
+    private final String  name;
 
     @NonNull
-    private final String submitAs;
+    private final String  submitAs;
 
     @Default
-    private final String infoText = null;
+    private final String  infoText = null;
 
     @Default
-    private final String infoUrl  = null;
+    private final String  infoUrl  = null;
+
+    @Default
+    private final boolean disabled = false;
 
 }
