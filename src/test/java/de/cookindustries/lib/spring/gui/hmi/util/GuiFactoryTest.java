@@ -42,7 +42,7 @@ public class GuiFactoryTest
             "<link href=\"/webjars/bootstrap-icons/font/bootstrap-icons.css\" rel=\"stylesheet\">",
             "<link href=\"/webjars/yaireo__tagify/dist/tagify.css\" rel=\"stylesheet\">",
             "<link href=\"/css/cook-industries-core.css\" rel=\"stylesheet\">",
-            "<script type=\"importmap\">{\"imports\": {\"cilib\": \"/js/ci-lib-spring-web.js\"}}</script>",
+            "<script type=\"importmap\">{\"imports\": {\"cilib\": \"/js/ci-lib-spring-web.js\", \"cilogger\": \"/js/ci-lib-logger.js\"}}</script>",
             "<script src=\"/webjars/jquery/jquery.min.js\"></script>",
             "<script src=\"/webjars/bootstrap/js/bootstrap.min.js\"></script>",
             "<script src=\"/webjars/yaireo__tagify/dist/tagify.js\"></script>",

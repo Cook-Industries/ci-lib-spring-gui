@@ -1,4 +1,5 @@
 import { Client } from '/webjars/stomp__stompjs/esm6/index.js';
+import { Logger } from '/js/ci-lib-logger.js';
 
 export {
   init,
@@ -34,6 +35,8 @@ const version = "3.5.2";
 
 const CLASS_HIDDEN = "hidden";
 
+const LOGGER = Logger.createFor("ci-lib-spring-web");
+
 const StompJs = { Client };
 
 function init() {
@@ -41,15 +44,15 @@ function init() {
 }
 
 $(document).ready(function () {
-  console.log("ci-lib-js: ", version);
+  LOGGER.info("ci-lib-js: ", version);
 
   // load properties if neccessary
   var propertiesUrl = $('#ui-properties-url').html().trim();
   if (propertiesUrl) {
-    console.log("properties are requested from ", propertiesUrl);
+    LOGGER.debug("properties are requested from ", propertiesUrl);
     GET(propertiesUrl);
   } else {
-    console.log("no properties fetch url present, skip.");
+    LOGGER.debug("no properties fetch url present, skip.");
   }
 
   // close modal on overlay click
@@ -212,6 +215,7 @@ $(document).ready(function () {
   $(document).on("click", ".burger-item", function () {
     var url = $(this).data("burger-url");
     var method = $(this).data("burger-method");
+
     if (url) {
       $(".burger-dropdown").removeClass("show");
       showGlobalLoader();
@@ -238,7 +242,7 @@ $(document).ready(function () {
           break;
 
         default:
-          console.error("BurgerItem method invalid.", { method });
+          LOGGER.error("BurgerItem method invalid.", { method });
       }
     }
   });
@@ -302,7 +306,7 @@ $(document).ready(function () {
   });
 
   FunctionRegistry._registerInternal("noop", () => {
-    console.log("a call to the NoOp function occured. This is not normal and should be investigated.");
+    LOGGER.warn("a call to the NoOp function occured. This is not normal and should be investigated.");
   });
 
   FunctionRegistry._registerInternal("registerTagInput", (settings) => {
@@ -536,6 +540,11 @@ function handleResponse(response) {
       redirect(response.url);
       break;
     }
+
+    case "OBJECT": {
+      FunctionRegistry.call(response.function, response.object);
+      break;
+    }
   }
 
   call(response.calls);
@@ -566,7 +575,7 @@ function openSite(url) {
 }
 
 function registerProperties(properties) {
-  console.log("properties received", properties)
+  LOGGER.debug("properties received", properties)
 }
 // === < global functions ==========================================================================
 // === > function register =========================================================================
@@ -603,7 +612,7 @@ const FunctionRegistry = (function () {
       const fn = internalFunctions.get(name) || externalFunctions.get(name);
 
       if (typeof fn !== "function") {
-        console.warn(`Function '${name}' not found.`);
+        LOGGER.warn(`Function '${name}' not found.`);
         return;
       }
 
@@ -684,7 +693,7 @@ function handleMessages(messages, btnName = "ok") {
         break;
 
       default:
-        console.error("unrecognized message target.", { target });
+        LOGGER.error("unrecognized message target.", { target });
     }
   }
 
@@ -720,7 +729,7 @@ function resetMarker() {
  * @return {undefined}
  */
 function clientsideError(msg) {
-  console.error("client error.", { msg });
+  LOGGER.error("client error.", { msg });
 
   handleMessages([{ msg: msg, target: "MODAL", type: "ERROR" }]);
 }
@@ -844,7 +853,7 @@ function contentResponse(response) {
         break;
 
       default:
-        console.log(`"unrecognized content response type [${response.handling}]`);
+        LOGGER.error(`"unrecognized content response type [${response.handling}]`);
     }
   }
 }
@@ -1041,7 +1050,7 @@ const WebSocketManager = (function () {
       debug: () => { },
 
       onConnect: frame => {
-        console.log(`Connected [${name}]`);
+        LOGGER.debug(`Connected [${name}]`);
 
         connections.set(name, client);
 
@@ -1055,7 +1064,7 @@ const WebSocketManager = (function () {
       },
 
       onStompError: error => {
-        console.error(`Broker error [${name}]`, error);
+        LOGGER.error(`Broker error [${name}]`, error);
 
         if (FunctionRegistry.hasFunction('onWSError')) {
           FunctionRegistry.call('onWSError', name, error);
@@ -1063,7 +1072,7 @@ const WebSocketManager = (function () {
       },
 
       onWebSocketError: error => {
-        console.error(`WebSocket error [${name}]`, error);
+        LOGGER.error(`WebSocket error [${name}]`, error);
       }
     });
 
@@ -1087,7 +1096,7 @@ const WebSocketManager = (function () {
       c.deactivate();
       connections.delete(name);
 
-      console.log(`Disconnected [${name}]`);
+      LOGGER.debug(`Disconnected [${name}]`);
     }
   }
 
@@ -1103,7 +1112,7 @@ function initWebSocketsFromConfig(config) {
     const { name, url, destinations, reconnectInterval } = wsDef;
 
     if (!name || !url || !Array.isArray(destinations)) {
-      console.warn('Invalid websocket entry, skipping:', wsDef);
+      LOGGER.warn('Invalid websocket entry, skipping:', wsDef);
 
       continue;
     }

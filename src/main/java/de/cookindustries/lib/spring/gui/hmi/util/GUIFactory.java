@@ -86,6 +86,7 @@ public final class GUIFactory
             SiteImports
                 .builder()
                 .jsImport(new JsImport("cilib", "/js/ci-lib-spring-web.js"))
+                .jsImport(new JsImport("cilogger", "/js/ci-lib-logger.js"))
                 .jsScript(new JsPlainLink("/webjars/jquery/jquery.min.js"))
                 .jsScript(new JsPlainLink("/webjars/bootstrap/js/bootstrap.min.js"))
                 .jsScript(new JsPlainLink("/webjars/yaireo__tagify/dist/tagify.js"))

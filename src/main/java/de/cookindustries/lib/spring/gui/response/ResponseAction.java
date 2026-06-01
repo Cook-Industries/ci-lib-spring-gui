@@ -16,7 +16,8 @@ import de.cookindustries.lib.spring.gui.hmi.container.ModalContainer;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-public enum ResponseAction {
+public enum ResponseAction
+{
 
     /** show a notification */
     NOTIFICATION,
@@ -44,5 +45,9 @@ public enum ResponseAction {
     REDIRECT,
 
     /** send dynamic properties to the ui */
-    PROPERTIES;
+    PROPERTIES,
+
+    /** objects @since 3.6.0 */
+    OBJECT;
+
 }

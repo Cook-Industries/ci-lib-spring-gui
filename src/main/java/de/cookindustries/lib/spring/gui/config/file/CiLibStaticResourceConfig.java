@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -86,7 +87,7 @@ public class CiLibStaticResourceConfig implements WebMvcConfigurer
                 }
             });
 
-            copyJsLib(basePath);
+            copyJsLibs(basePath);
             copyImages(basePath);
         }
         catch (IOException ex)
@@ -101,26 +102,29 @@ public class CiLibStaticResourceConfig implements WebMvcConfigurer
      * @param basePath to the satics folder
      * @throws IOException if the file could not be copied
      */
-    private void copyJsLib(String basePath) throws IOException
+    private void copyJsLibs(String basePath) throws IOException
     {
-        try
-        {
-            Resource resource   = pathResolver.getResource("classpath:cook-industries/js/ci-lib-spring-web.js");
+        List<String> paths = List.of("ci-lib-spring-web.js", "ci-lib-logger.js");
 
-            File     targetFile = new File(basePath + "/js/" + resource.getFilename());
-
-            LOG.debug("copy JsLib to [{}]", targetFile);
-
-            try (InputStream in = resource.getInputStream())
+        paths.forEach(path -> {
+            try
             {
-                Files.copy(in, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            }
+                Resource resource   = pathResolver.getResource("classpath:cook-industries/js/" + path);
 
-        }
-        catch (Exception ex)
-        {
-            throw new RuntimeException("Failed to copy static resource JsLib", ex);
-        }
+                File     targetFile = new File(basePath + "/js/" + resource.getFilename());
+
+                LOG.debug("copy JsLib to [{}]", targetFile);
+
+                try (InputStream in = resource.getInputStream())
+                {
+                    Files.copy(in, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new RuntimeException("Failed to copy static resource JsLib", ex);
+            }
+        });
     }
 
     private void copyImages(String basePath) throws IOException
