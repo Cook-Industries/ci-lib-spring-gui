@@ -408,8 +408,7 @@ public final class InputExtractor
     }
 
     /**
-     * Extract a submitted {@code value} and consume it as a {@link Integer}. The {@code value} <b>must</b> conform inside
-     * {@code lower}(inclusive) &lt;= {@code value} &lt;= {@code upper}(inclusive) range.
+     * Extract a submitted {@code value} and consume it as a {@link Integer}.
      * <p>
      * The {@code consumer} will only be triggered if the {@code value} associated with {@code key} is non-null, can be parsed as a
      * {@link Integer} and clears all checks from the {@link IntegerInputProcessor}.
