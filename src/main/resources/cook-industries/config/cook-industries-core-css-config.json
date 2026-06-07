@@ -142,7 +142,7 @@
                 "display": "flex",
                 "flex-direction": "column",
                 "align-items": "stretch",
-                "max-height": "65rem",
+                "max-height": "90vh !important",
                 "overflow": "auto",
                 "margin-bottom": "2rem"
             }
@@ -351,7 +351,7 @@
         {
             "selector": ".modal-body",
             "attributes": {
-                "max-height": "95vh"
+                "max-height": "95vh !important"
             }
         },
         {

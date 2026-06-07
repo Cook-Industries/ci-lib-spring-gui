@@ -86,13 +86,13 @@ $(document).ready(function () {
 
     if ($overlay.length && !$overlay.hasClass("hidden")) {
       event.preventDefault();
-    }
 
-    if (event.key === 'F5') {
-      if (event.shiftKey) {
-        reload();
-      } else {
-        clientsideError("F5 key isblocked to prevent reload events while waiting on a result. To enforce a reload press SHIFT + F5.");
+      if (event.key === 'F5') {
+        if (event.shiftKey) {
+          reload();
+        } else {
+          clientsideError("F5 key isblocked to prevent reload events while waiting on a result. To enforce a reload press SHIFT + F5.");
+        }
       }
     }
   });
