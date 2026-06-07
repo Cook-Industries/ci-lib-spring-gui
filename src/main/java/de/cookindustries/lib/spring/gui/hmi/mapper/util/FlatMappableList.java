@@ -54,30 +54,30 @@ public class FlatMappableList<T extends FlatMappable> extends AbstractList<T>
     @Override
     public boolean add(T t)
     {
-        throw new UnsupportedOperationException("FixedList is immutable");
+        throw new UnsupportedOperationException("FlatMappableList is immutable");
     }
 
     @Override
     public T set(int index, T element)
     {
-        throw new UnsupportedOperationException("FixedList is immutable");
+        throw new UnsupportedOperationException("FlatMappableList is immutable");
     }
 
     @Override
     public void add(int index, T element)
     {
-        throw new UnsupportedOperationException("FixedList is immutable");
+        throw new UnsupportedOperationException("FlatMappableList is immutable");
     }
 
     @Override
     public T remove(int index)
     {
-        throw new UnsupportedOperationException("FixedList is immutable");
+        throw new UnsupportedOperationException("FlatMappableList is immutable");
     }
 
     @Override
     public boolean remove(Object o)
     {
-        throw new UnsupportedOperationException("FixedList is immutable");
+        throw new UnsupportedOperationException("FlatMappableList is immutable");
     }
 }
