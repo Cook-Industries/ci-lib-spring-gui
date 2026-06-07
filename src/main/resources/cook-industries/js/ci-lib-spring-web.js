@@ -31,7 +31,7 @@ export {
  * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
-const version = "3.5.2";
+const version = "3.6.0";
 
 const CLASS_HIDDEN = "hidden";
 
@@ -283,6 +283,10 @@ $(document).ready(function () {
 
   FunctionRegistry._registerInternal("sendFromForm", (id, url) => {
     sendFromForm(id, url);
+  });
+
+  FunctionRegistry._registerInternal("resetForm", (id) => {
+    resetForm(id);
   });
 
   FunctionRegistry._registerInternal("redirect", (url) => {
@@ -794,16 +798,20 @@ function submitFromModal() {
 function openModal(response) {
   openModals++;
 
-  $("#modal-container").append(`<div id="modal-overlay-${openModals}" class="modal-overlay" data-server-target="${response.modal.requestUrl}"></div>`);
+  const modalId = `modal-overlay-${openModals}`;
 
-  $(`#modal-overlay-${openModals}`).append(response.contentHtml);
+  $("#modal-container").append(`<div id="${modalId}" class="modal-overlay" data-server-target="${response.modal.requestUrl}"></div>`);
+
+  $(`#${modalId}`).append(response.contentHtml);
 
   $("#modal-container").removeClass(CLASS_HIDDEN);
-  $(`#modal-overlay-${openModals}`).removeClass(CLASS_HIDDEN);
-  $(`#modal-overlay-${openModals}`).css("z-index", 1000 + 100 * openModals);
-  $('#modal-container .modal-inlay').last().find('input:visible').first().focus();
-
-  $("body").addClass("no-scroll");
+  $(`#${modalId}`).removeClass(CLASS_HIDDEN);
+  $(`#${modalId}`).css("z-index", 10000 + 100 * openModals);
+  $(`#${modalId}`)
+    .last()
+    .find(':input:visible')
+    .first()
+    .focus();
 
   hideGlobalLoader();
 
@@ -872,6 +880,20 @@ function updateProgress(response) {
   $text.html(response.text);
 }
 
+function resetForm(formId) {
+  $(`#${formId}`)
+    .find('input, textarea, select')
+    .filter(':enabled')
+    .each(function () {
+      const $el = $(this);
+
+      if ($el.is(':checkbox, :radio')) {
+        $el.prop('checked', false);
+      } else {
+        $el.val('');
+      }
+    });
+}
 /**
  * Extracts values from fields specified by an identifier as an object to be send back to the jserver
  *

@@ -1,0 +1,41 @@
+/**
+ * Copyright (c) 2016-2026 sebastian koch/Cook Industries.
+ * <p>
+ * Licensed under the MIT License.
+ * <p>
+ * See LICENSE file in the project root for full license information.
+ */
+package de.cookindustries.lib.spring.gui.function;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+/**
+ * Function to reset a Button in the GUI view.
+ * 
+ * @since 3.0.0
+ * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
+ */
+@Data
+@EqualsAndHashCode(callSuper = false)
+public final class ResetForm extends AbsFunctionCall
+{
+
+    public ResetForm(String formId)
+    {
+        setParam(formId);
+    }
+
+    @Override
+    protected String functionName()
+    {
+        return "resetForm";
+    }
+
+    @Override
+    protected Integer numberOfParameters()
+    {
+        return 1;
+    }
+
+}

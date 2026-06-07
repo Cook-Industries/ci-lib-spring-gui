@@ -18,4 +18,9 @@ public final class BasicUiFunction
 
     public static final SubmitFromModal  SUBMIT_FROM_MODAL  = new SubmitFromModal();
 
+    public static ResetForm resetForm(String formId)
+    {
+        return new ResetForm(formId);
+    }
+
 }
