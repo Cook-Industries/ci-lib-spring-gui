@@ -13,18 +13,41 @@ package de.cookindustries.lib.spring.gui.response;
  * @since 3.4.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-public enum ContentHandling {
+public enum ContentHandling
+{
 
-    /** Append the content inside the target id */
+    /**
+     * Append the content inside the target id
+     */
     APPEND,
 
-    /** Prepend the content inside the target id */
+    /**
+     * Prepend the content inside the target id
+     */
     PREPEND,
 
-    /** Replace the complete id target */
+    /**
+     * Replace the complete id target
+     */
     REPLACE,
 
-    /** Delete the complete id target */
-    DELETE;
+    /**
+     * Delete the complete id target
+     */
+    DELETE,
+
+    /**
+     * Add or update a element in a parent by appending it.
+     * 
+     * @since 3.6.1
+     */
+    UPCERT,
+
+    /**
+     * Add or update a element in a parent by prepending it.
+     * 
+     * @since 3.6.1
+     */
+    UPCERT_PREPEND;
 
 }

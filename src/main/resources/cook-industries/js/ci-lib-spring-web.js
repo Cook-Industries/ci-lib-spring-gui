@@ -31,7 +31,7 @@ export {
  * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
-const version = "3.6.0";
+const version = "3.6.1";
 
 const CLASS_HIDDEN = "hidden";
 
@@ -330,7 +330,7 @@ $(document).ready(function () {
   hideGlobalLoader();
 });
 
-// === > global functions ==========================================================================
+// === > global functions ==================================================================================================================
 /**
  * Fetch data from a endpoint.
  * 
@@ -597,8 +597,16 @@ function openSite(url) {
 function registerProperties(properties) {
   LOGGER.debug("properties received", properties)
 }
-// === < global functions ==========================================================================
-// === > function register =========================================================================
+
+function toggleBodyScroll() {
+  if (errorOverlayVisible || globalLoaderVisible || openModals > 0) {
+    $("body").addClass("no-scroll");
+  } else {
+    $("body").removeClass("no-scroll");
+  }
+}
+// === < global functions ==================================================================================================================
+// === > function register =================================================================================================================
 const FunctionRegistry = (function () {
   const internalFunctions = new Map();
   const externalFunctions = new Map();
@@ -650,8 +658,77 @@ const FunctionRegistry = (function () {
     _registerInternal: registerInternal,
   };
 })();
-// === < function register =========================================================================
-// === > global loader =============================================================================
+// === < function register =================================================================================================================
+// === > content ===========================================================================================================================
+function contentResponse(response) {
+  const elementSelector = response.elementId ? `#${response.elementId}` : null;
+  const parentSelector = response.parentId ? `#${response.parentId}` : null;
+
+  const $element = elementSelector ? $(elementSelector) : $();
+  const $parent = parentSelector ? $(parentSelector) : $();
+
+  if ($(response).length) {
+    switch (response.handling) {
+      case "APPEND": if ($parent.length) {
+        $parent.append(response.htmlRep);
+      }
+        break;
+
+      case "PREPEND":
+        if ($parent.length) {
+          $parent.prepend(response.htmlRep);
+        }
+        break;
+
+      case "REPLACE":
+        if ($element.length) {
+          $element.replaceWith(response.htmlRep);
+        }
+        break;
+
+      case "UPCERT":
+        if ($element.length) {
+          $element.replaceWith(response.htmlRep);
+        } else {
+          parent.append(response.htmlRep);
+        }
+        break;
+
+      case "UPCERT_PREPEND":
+        if ($element.length) {
+          $element.replaceWith(response.htmlRep);
+        } else {
+          parent.prepend(response.htmlRep);
+        }
+        break;
+
+      case "DELETE":
+        if ($element.length) {
+          $element.remove();
+        }
+        break;
+
+      default:
+        LOGGER.error(`"unrecognized content response type [${response.handling}]`);
+    }
+  }
+}
+
+function updateProgress(response) {
+  const $elem = $(`#${response.elementId}`);
+  const $bar = $elem.children(".loadbar");
+  const $text = $elem.children(".loader-text");
+
+  if (!$bar.length) return;
+
+  $bar
+    .data("progress", response.progress)
+    .css("--v", response.progress);
+
+  $text.html(response.text);
+}
+// === < content ===========================================================================================================================
+// === > global loader =====================================================================================================================
 var globalLoaderVisible = false;
 /**
  * Shows the global loader overlay
@@ -685,8 +762,8 @@ function hideGlobalLoader() {
 function changeGlobalLoaderText(text) {
   $("#global-loader-text").html(text);
 }
-// === < global loader =============================================================================
-// === > notifications =============================================================================
+// === < global loader =====================================================================================================================
+// === > notifications =====================================================================================================================
 var errorOverlayVisible = false;
 
 /**
@@ -767,8 +844,8 @@ function dismissErrors() {
 
   toggleBodyScroll();
 }
-// === < notifications =============================================================================
-// === > modal =====================================================================================
+// === < notifications =====================================================================================================================
+// === > modal =============================================================================================================================
 let openModals = 0;
 
 function requestModal(url, args = {}) {
@@ -853,49 +930,8 @@ function closeModal() {
 
   toggleBodyScroll();
 }
-// === < modal =====================================================================================
-// === > form ======================================================================================
-function contentResponse(response) {
-  const elementId = `#${response.elementId}`;
-
-  if ($(response).length) {
-    switch (response.handling) {
-      case "APPEND":
-        $(elementId).append(response.contentHtml);
-        break;
-
-      case "PREPEND":
-        $(elementId).prepend(response.contentHtml);
-        break;
-
-      case "REPLACE":
-        $(elementId).replaceWith(response.contentHtml);
-        break;
-
-      case "DELETE":
-        $(elementId).remove();
-        break;
-
-      default:
-        LOGGER.error(`"unrecognized content response type [${response.handling}]`);
-    }
-  }
-}
-
-function updateProgress(response) {
-  const $elem = $(`#${response.elementId}`);
-  const $bar = $elem.children(".loadbar");
-  const $text = $elem.children(".loader-text");
-
-  if (!$bar.length) return;
-
-  $bar
-    .data("progress", response.progress)
-    .css("--v", response.progress);
-
-  $text.html(response.text);
-}
-
+// === < modal =============================================================================================================================
+// === > form ==============================================================================================================================
 function resetForm(formId) {
   $(`#${formId}`)
     .find('input, textarea, select')
@@ -1005,8 +1041,8 @@ function resetButton(btnId) {
   $btn.addClass('btn btn-primary');
   $btn.removeAttr('data-pending-change');
 }
-// === < form ======================================================================================
-// === > tags ======================================================================================
+// === < form ==============================================================================================================================
+// === > tags ==============================================================================================================================
 const tagifyInstances = new Map();
 const tagifyWhitelists = new Map();
 
@@ -1058,15 +1094,8 @@ function onInput(e, tagify) {
     });
   }
 }
-// === < tags ======================================================================================
-function toggleBodyScroll() {
-  if (errorOverlayVisible || globalLoaderVisible || openModals > 0) {
-    $("body").addClass("no-scroll");
-  } else {
-    $("body").removeClass("no-scroll");
-  }
-}
-// === > websocket =================================================================================
+// === < tags ==============================================================================================================================
+// === > websocket =========================================================================================================================
 const WebSocketManager = (function () {
   const connections = new Map();
 

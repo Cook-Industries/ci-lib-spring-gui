@@ -12,11 +12,13 @@ import java.util.stream.Collectors;
 
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
 import de.cookindustries.lib.spring.gui.hmi.mapper.html.HtmlMapper;
+import de.cookindustries.lib.spring.gui.html.HtmlExportable;
+import de.cookindustries.lib.spring.gui.response.exception.ResponseInvalidException;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
 import lombok.ToString;
-import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -28,17 +30,17 @@ import lombok.extern.jackson.Jacksonized;
 @Getter
 @Jacksonized
 @ToString
-public final class ContentResponse extends Response
+public final class ContentResponse extends Response implements HtmlExportable
 {
-
-    public static final String    LOADABLE  = "loadable-content";
 
     /**
      * Element id to place content in
      */
-    @NonNull
     @Default
-    private final String          elementId = LOADABLE;
+    private final String          elementId = null;
+
+    @Default
+    private final String          parentId  = null;
 
     /**
      * {@link Container}s to be sent
@@ -59,12 +61,44 @@ public final class ContentResponse extends Response
         return ResponseAction.CONTENT;
     }
 
-    public String getContentHtml()
+    @Override
+    public String getHtmlRep()
     {
+        validate();
+
         return HtmlMapper
             .map(contents)
             .stream()
             .collect(Collectors.joining("\n"));
+    }
+
+    private void validate()
+    {
+        switch (handling)
+        {
+            case APPEND, PREPEND -> throwIfInvalidParentId();
+            case DELETE, REPLACE -> throwIfInvalidElementId();
+            case UPCERT, UPCERT_PREPEND -> {
+                throwIfInvalidElementId();
+                throwIfInvalidParentId();
+            }
+        }
+    }
+
+    private void throwIfInvalidElementId()
+    {
+        if (parentId == null)
+        {
+            throw new ResponseInvalidException("parentId not set but expected");
+        }
+    }
+
+    private void throwIfInvalidParentId()
+    {
+        if (elementId == null)
+        {
+            throw new ResponseInvalidException("elementId not set but expected");
+        }
     }
 
 }
