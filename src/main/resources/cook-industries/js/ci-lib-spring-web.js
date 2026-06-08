@@ -128,6 +128,7 @@ $(document).ready(function () {
   // trigger info fetch for input fields
   $(document).on("click", "[data-fetch-input-info-url]", function () {
     const url = $(this).attr("data-fetch-input-info-url");
+
     if (url) {
       GET(url);
     }
@@ -349,15 +350,18 @@ function _fetchHttp(method, endpointUrl) {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
+
       return response.json();
     })
     .then((json) => {
       handleResponse(json);
+
       return json;
     })
     .catch((error) => {
       hideGlobalLoader();
       clientsideError(error.message);
+
       throw error;
     });
 }
@@ -389,11 +393,13 @@ function _fetchHttpWithPayload(method, endpointUrl, dataToSend = {}) {
     })
     .then((json) => {
       handleResponse(json);
+
       return json;
     })
     .catch((error) => {
       hideGlobalLoader();
       clientsideError(error.message);
+
       throw error;
     });
 }
@@ -460,15 +466,18 @@ function POSTFormData(endpointUrl, formData = {}) {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
+
       return response.json();
     })
     .then((json) => {
       handleResponse(json);
+
       return json;
     })
     .catch((error) => {
       hideGlobalLoader();
       clientsideError(error.message);
+
       throw error;
     });
 }
@@ -520,9 +529,7 @@ function handleResponse(response) {
     }
 
     case "COMPOUND": {
-      for (let s in response.results.list) {
-        let data = response.statements[s];
-
+      for (const data of response.responses) {
         handleResponse(data);
       }
       break;
@@ -531,7 +538,7 @@ function handleResponse(response) {
     case "FETCH_TAGS": {
       tagifyWhitelists.set(response.inputId, response.results);
 
-      let tagify = tagifyInstances.get(response.inputId);
+      const tagify = tagifyInstances.get(response.inputId);
       if (tagify) {
         tagify.whitelist = response.results;
       }
