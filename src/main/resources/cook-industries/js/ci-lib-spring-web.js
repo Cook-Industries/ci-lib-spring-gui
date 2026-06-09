@@ -31,7 +31,7 @@ export {
  * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
-const version = "3.6.1";
+const version = "3.6.2";
 
 const CLASS_HIDDEN = "hidden";
 

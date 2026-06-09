@@ -304,14 +304,75 @@ public final class GUIFactory
     }
 
     /**
-     * Create a {@link ContentResponse} from a template to append or replace existing content on a receiver.
+     * Create a {@link ContentResponse} from a template to append content on a receiver.
      * 
-     * @param elementId to append/replace content in
-     * @param handling how existing content should be handled
+     * @param parentId to append content in
      * @param compSrc aggregator for settings
      * @return a response with the processed content
      */
-    public ContentResponse createComponentResponse(String elementId, ContentHandling handling, ComponentSources compSrc)
+    public ContentResponse createAppendComponentResponse(String parentId, ComponentSources compSrc)
+    {
+        MapperResult          result = readComponent(compSrc);
+        List<AbsFunctionCall> calls  = new ArrayList<>();
+        calls.addAll(result.getFunctions());
+        calls.addAll(compSrc.getFunctionCalls());
+
+        return ContentResponse
+            .builder()
+            .parentId(parentId)
+            .contents(result.getContainers())
+            .calls(calls)
+            .handling(ContentHandling.APPEND)
+            .build();
+    }
+
+    /**
+     * Create a {@link ContentResponse} from a template to prepend content on a receiver.
+     * 
+     * @param parentId to prepend content in
+     * @param compSrc aggregator for settings
+     * @return a response with the processed content
+     */
+    public ContentResponse createPrependComponentResponse(String parentId, ComponentSources compSrc)
+    {
+        MapperResult          result = readComponent(compSrc);
+        List<AbsFunctionCall> calls  = new ArrayList<>();
+        calls.addAll(result.getFunctions());
+        calls.addAll(compSrc.getFunctionCalls());
+
+        return ContentResponse
+            .builder()
+            .parentId(parentId)
+            .contents(result.getContainers())
+            .calls(calls)
+            .handling(ContentHandling.PREPEND)
+            .build();
+    }
+
+    /**
+     * Create a {@link ContentResponse} from a template to delete content on a receiver.
+     * 
+     * @param elementId to delete
+     * @return a response
+     */
+    public ContentResponse createDeleteComponentResponse(String elementId, List<AbsFunctionCall> calls)
+    {
+        return ContentResponse
+            .builder()
+            .elementId(elementId)
+            .calls(calls)
+            .handling(ContentHandling.DELETE)
+            .build();
+    }
+
+    /**
+     * Create a {@link ContentResponse} from a template to replace content on a receiver.
+     * 
+     * @param elementId to replace
+     * @param compSrc aggregator for settings
+     * @return a response with the processed content
+     */
+    public ContentResponse createReplaceComponentResponse(String elementId, ComponentSources compSrc)
     {
         MapperResult          result = readComponent(compSrc);
         List<AbsFunctionCall> calls  = new ArrayList<>();
@@ -323,7 +384,57 @@ public final class GUIFactory
             .elementId(elementId)
             .contents(result.getContainers())
             .calls(calls)
-            .handling(handling)
+            .handling(ContentHandling.REPLACE)
+            .build();
+    }
+
+    /**
+     * Create a {@link ContentResponse} from a template to add or update content on a receiver.
+     * 
+     * @param elementId to replace content if existent
+     * @param parentId to append content in if not existent
+     * @param compSrc aggregator for settings
+     * @return a response with the processed content
+     */
+    public ContentResponse createUpcertComponentResponse(String elementId, String parentID, ComponentSources compSrc)
+    {
+        MapperResult          result = readComponent(compSrc);
+        List<AbsFunctionCall> calls  = new ArrayList<>();
+        calls.addAll(result.getFunctions());
+        calls.addAll(compSrc.getFunctionCalls());
+
+        return ContentResponse
+            .builder()
+            .elementId(elementId)
+            .parentId(parentID)
+            .contents(result.getContainers())
+            .calls(calls)
+            .handling(ContentHandling.UPCERT)
+            .build();
+    }
+
+    /**
+     * Create a {@link ContentResponse} from a template to add or update content on a receiver.
+     * 
+     * @param elementId to replace content if existent
+     * @param parentId to prepend content in if not existent
+     * @param compSrc aggregator for settings
+     * @return a response with the processed content
+     */
+    public ContentResponse createUpcertPrependComponentResponse(String elementId, String parentID, ComponentSources compSrc)
+    {
+        MapperResult          result = readComponent(compSrc);
+        List<AbsFunctionCall> calls  = new ArrayList<>();
+        calls.addAll(result.getFunctions());
+        calls.addAll(compSrc.getFunctionCalls());
+
+        return ContentResponse
+            .builder()
+            .elementId(elementId)
+            .parentId(parentID)
+            .contents(result.getContainers())
+            .calls(calls)
+            .handling(ContentHandling.UPCERT_PREPEND)
             .build();
     }
 
