@@ -25,7 +25,6 @@ import de.cookindustries.lib.spring.gui.config.properties.CiLibResourcesProperti
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableDissector;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
-import de.cookindustries.lib.spring.gui.response.ContentHandling;
 import de.cookindustries.lib.spring.gui.response.ContentResponse;
 import de.cookindustries.lib.spring.gui.util.TestHelper;
 
@@ -210,7 +209,7 @@ public class GuiFactoryTest
         GUIFactory       factory   = basicFactory();
 
         // run
-        ContentResponse  content   = factory.createComponentResponse(elementId, ContentHandling.APPEND, compSrc);
+        ContentResponse  content   = factory.createAppendComponentResponse(elementId, compSrc);
 
         // verify
         assertNotNull(content);
