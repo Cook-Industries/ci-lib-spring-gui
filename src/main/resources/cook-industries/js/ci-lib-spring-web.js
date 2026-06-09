@@ -31,7 +31,7 @@ export {
  * author: <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 
-const version = "3.6.2";
+const version = "3.6.3";
 
 const CLASS_HIDDEN = "hidden";
 
@@ -690,7 +690,7 @@ function contentResponse(response) {
         if ($element.length) {
           $element.replaceWith(response.htmlRep);
         } else {
-          parent.append(response.htmlRep);
+          $parent.append(response.htmlRep);
         }
         break;
 
@@ -698,7 +698,7 @@ function contentResponse(response) {
         if ($element.length) {
           $element.replaceWith(response.htmlRep);
         } else {
-          parent.prepend(response.htmlRep);
+          $parent.prepend(response.htmlRep);
         }
         break;
 

@@ -144,7 +144,7 @@ public final class GUIFactory
      * @param compSrc aggregator for settings
      * @return the parsed {@code Container}
      */
-    private MapperResult readComponent(ComponentSources compSrc)
+    public MapperResult readComponent(ComponentSources compSrc)
     {
         try
         {
@@ -396,7 +396,7 @@ public final class GUIFactory
      * @param compSrc aggregator for settings
      * @return a response with the processed content
      */
-    public ContentResponse createUpcertComponentResponse(String elementId, String parentID, ComponentSources compSrc)
+    public ContentResponse createUpcertComponentResponse(String elementId, String parentId, ComponentSources compSrc)
     {
         MapperResult          result = readComponent(compSrc);
         List<AbsFunctionCall> calls  = new ArrayList<>();
@@ -406,7 +406,7 @@ public final class GUIFactory
         return ContentResponse
             .builder()
             .elementId(elementId)
-            .parentId(parentID)
+            .parentId(parentId)
             .contents(result.getContainers())
             .calls(calls)
             .handling(ContentHandling.UPCERT)
@@ -421,7 +421,7 @@ public final class GUIFactory
      * @param compSrc aggregator for settings
      * @return a response with the processed content
      */
-    public ContentResponse createUpcertPrependComponentResponse(String elementId, String parentID, ComponentSources compSrc)
+    public ContentResponse createUpcertPrependComponentResponse(String elementId, String parentId, ComponentSources compSrc)
     {
         MapperResult          result = readComponent(compSrc);
         List<AbsFunctionCall> calls  = new ArrayList<>();
@@ -431,7 +431,7 @@ public final class GUIFactory
         return ContentResponse
             .builder()
             .elementId(elementId)
-            .parentId(parentID)
+            .parentId(parentId)
             .contents(result.getContainers())
             .calls(calls)
             .handling(ContentHandling.UPCERT_PREPEND)
