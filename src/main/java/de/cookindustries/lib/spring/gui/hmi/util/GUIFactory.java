@@ -15,7 +15,7 @@ import java.util.Locale;
 import org.springframework.stereotype.Component;
 
 import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
-import de.cookindustries.lib.spring.gui.function.HideGlobalLoader;
+import de.cookindustries.lib.spring.gui.function.BasicUiFunction;
 import de.cookindustries.lib.spring.gui.hmi.container.Button;
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
 import de.cookindustries.lib.spring.gui.hmi.container.ContentContainer;
@@ -44,6 +44,7 @@ import de.cookindustries.lib.spring.gui.response.message.MessageType;
 import de.cookindustries.lib.spring.gui.response.message.ModalMessage;
 import de.cookindustries.lib.spring.gui.response.message.PopupMessage;
 import de.cookindustries.lib.spring.gui.response.message.ResponseMessage;
+import de.cookindustries.lib.spring.gui.util.PathAdapter;
 
 /**
  * A set of convenience functions to create {@code HTML} sites or components to send as a response.
@@ -148,14 +149,9 @@ public final class GUIFactory
     {
         try
         {
-            String srcPath = compSrc.getSourcePath();
+            String     srcPath = PathAdapter.toUnixAndRemovePrefaceSlash(compSrc.getSourcePath());
 
-            if (srcPath.startsWith("/"))
-            {
-                srcPath = srcPath.substring(1);
-            }
-
-            JsonMapper mapper =
+            JsonMapper mapper  =
                 JsonMapper
                     .builder()
                     .templateFileCache(templateFileCache)
@@ -466,33 +462,19 @@ public final class GUIFactory
     }
 
     /**
-     * Create a {@link NotificationResponse} with a single {@link ModalMessage}.
-     * 
-     * @param msg to display
-     * @param type to highlight
-     * @return a response with the processed content
-     */
-    public NotificationResponse createModalMessageNotificationResponse(String msg, MessageType type)
-    {
-        return createNotificationResponse(
-            ModalMessage
-                .builder()
-                .msg(msg)
-                .type(type)
-                .build());
-    }
-
-    /**
      * Create a {@link NotificationResponse} with a single {@link ResponseMessage}.
      * 
      * @param message to send
+     * @param calls to perform
      * @return a response with the processed content
      */
-    public NotificationResponse createNotificationResponse(ResponseMessage message)
+    public NotificationResponse createNotificationResponse(ResponseMessage message, AbsFunctionCall... calls)
     {
         return NotificationResponse
             .builder()
             .message(message)
+            .calls(Arrays.asList(calls))
+            .call(BasicUiFunction.HIDE_GLOBAL_LOADER)
             .build();
     }
 
@@ -500,14 +482,35 @@ public final class GUIFactory
      * Create a {@link NotificationResponse} with a set of {@link ResponseMessage}s.
      * 
      * @param messages to send
+     * @param calls to perform
      * @return a response with the processed content
+     * @see NotificationResponse
      */
-    public NotificationResponse createNotificationResponse(List<ResponseMessage> messages)
+    public NotificationResponse createNotificationResponse(List<ResponseMessage> messages, AbsFunctionCall... calls)
     {
         return NotificationResponse
             .builder()
             .messages(messages)
+            .calls(Arrays.asList(calls))
             .build();
+    }
+
+    /**
+     * Create a {@link NotificationResponse} with a single {@link ModalMessage}.
+     * 
+     * @param msg to display
+     * @param type to highlight
+     * @return a response with the processed content
+     */
+    public NotificationResponse createNotificationModalMessageResponse(String msg, MessageType type, AbsFunctionCall... calls)
+    {
+        return createNotificationResponse(
+            ModalMessage
+                .builder()
+                .msg(msg)
+                .type(type)
+                .build(),
+            calls);
     }
 
     /**
@@ -518,7 +521,7 @@ public final class GUIFactory
      * @param calls to perform
      * @return a response containing a popup notification and function calls
      */
-    public NotificationResponse createPopUpResponse(String msg, MessageType type, AbsFunctionCall... calls)
+    public NotificationResponse createNotificationPopUpResponse(String msg, MessageType type, AbsFunctionCall... calls)
     {
         return NotificationResponse
             .builder()
@@ -535,32 +538,34 @@ public final class GUIFactory
     /**
      * Create a {@link NotificationResponse} from a {@link InputExtractor}.
      * <p>
-     * Triggers an implicit {@link HideGlobalLoader} call.
+     * Triggers an implicit {@link BasicUiFunction#HIDE_GLOBAL_LOADER} call.
      * 
      * @param inputExtractor to extract messages from
      * @return a response containing the markers raised by {@code inputExtractor}
      */
-    public NotificationResponse createActiveMarkerResponseFrom(InputExtractor inputExtractor)
+    public NotificationResponse createNotificationActiveMarkerResponse(InputExtractor inputExtractor)
     {
         List<ActivateMarkerMessage> messages = new ArrayList<>();
 
-        inputExtractor.getMarker()
+        inputExtractor
+            .getMarker()
             .stream()
             .forEach(
-                m -> messages.add(
-                    ActivateMarkerMessage
-                        .builder()
-                        .text(translationProvider.getText(inputExtractor.getLocale(), MarkerType.typeTranslationKey(m.getType())))
-                        .formId(m.getFormId())
-                        .category(m.getCategory())
-                        .fieldId(m.getTransferId())
-                        .type(MessageType.ERROR)
-                        .build()));
+                m -> messages
+                    .add(
+                        ActivateMarkerMessage
+                            .builder()
+                            .text(translationProvider.getText(inputExtractor.getLocale(), MarkerType.typeTranslationKey(m.getType())))
+                            .formId(m.getFormId())
+                            .category(m.getCategory())
+                            .fieldId(m.getTransferId())
+                            .type(MessageType.ERROR)
+                            .build()));
 
         return NotificationResponse
             .builder()
             .messages(messages)
-            .call(new HideGlobalLoader())
+            .call(BasicUiFunction.HIDE_GLOBAL_LOADER)
             .build();
     }
 }
