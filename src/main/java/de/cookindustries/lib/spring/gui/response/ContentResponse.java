@@ -87,17 +87,17 @@ public final class ContentResponse extends Response implements HtmlExportable
 
     private void throwIfInvalidElementId()
     {
-        if (parentId == null)
+        if (elementId == null)
         {
-            throw new ResponseInvalidException("parentId not set but expected");
+            throw new ResponseInvalidException("elementId not set but expected");
         }
     }
 
     private void throwIfInvalidParentId()
     {
-        if (elementId == null)
+        if (parentId == null)
         {
-            throw new ResponseInvalidException("elementId not set but expected");
+            throw new ResponseInvalidException("parentId not set but expected");
         }
     }
 
