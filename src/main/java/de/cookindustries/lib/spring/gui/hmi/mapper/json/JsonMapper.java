@@ -106,6 +106,7 @@ import de.cookindustries.lib.spring.gui.hmi.util.TemplateFileCache;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 import de.cookindustries.lib.spring.gui.i18n.BasicText;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
+import de.cookindustries.lib.spring.gui.util.PathAdapter;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.NonNull;
@@ -272,6 +273,8 @@ public class JsonMapper
     @NonNull
     private final String                           srcPath;
 
+    private String                                 srcPathSanitized;
+
     @NonNull
     @Default
     private final Locale                           locale                         = Locale.ENGLISH;
@@ -308,9 +311,11 @@ public class JsonMapper
      */
     public MapperResult map()
     {
-        long          start = System.nanoTime();
+        long start = System.nanoTime();
 
-        PseudoElement root  = templateFileCache.getTemplateTo(srcPath);
+        srcPathSanitized = PathAdapter.toUnixAndRemovePrefaceSlash(srcPath);
+
+        PseudoElement root = templateFileCache.getTemplateTo(srcPathSanitized);
 
         LOG.debug("[{}]: ### start ###", uuid);
 
@@ -415,7 +420,7 @@ public class JsonMapper
 
             if (Objects.isNull(resultUid))
             {
-                LOG.warn("could not resolve uid key [{}] in [{}]", sourceUid, srcPath);
+                LOG.warn("could not resolve uid key [{}] in [{}]", sourceUid, srcPathSanitized);
 
                 resultUid = "unresolvable-uid-" + sourceUid.substring(INDICATOR_VALUE_PLACEHOLDER.length());
             }
@@ -504,7 +509,7 @@ public class JsonMapper
 
                     if (Objects.isNull(resolvedKey))
                     {
-                        LOG.warn("could not resolve attribute key [{}] in [{}]", key, srcPath);
+                        LOG.warn("could not resolve attribute key [{}] in [{}]", key, srcPathSanitized);
 
                         resolvedKey = "unresolveable-key-" + key.substring(INDICATOR_VALUE_PLACEHOLDER.length());
                     }
@@ -516,7 +521,7 @@ public class JsonMapper
 
                     if (Objects.isNull(resolvedValue))
                     {
-                        LOG.warn("could not resolve attribute value [{}] in [{}]", key, srcPath);
+                        LOG.warn("could not resolve attribute value [{}] in [{}]", key, srcPathSanitized);
 
                         resolvedValue = "unresolveable-value-" + value.substring(INDICATOR_VALUE_PLACEHOLDER.length());
                     }
@@ -1446,8 +1451,7 @@ public class JsonMapper
     {
         ContainerParameters cpars = resolveContainerBaseParameters(element, depth);
 
-        String              icon  =
-            getParameterValue(element, depth, PARAM_ICON, String.class, DEFAULT_BURGER_ICON);
+        String              icon  = getParameterValue(element, depth, PARAM_ICON, String.class, DEFAULT_BURGER_ICON);
 
         List<BurgerItem>    items =
             element
@@ -1527,6 +1531,7 @@ public class JsonMapper
         String              text                = getParameterValue(element, depth, PARAM_TEXT, String.class);
         ButtonClass         btnClass            =
             getParameterValue(element, depth, PARAM_BTN_CLASS, ButtonClass.class, ButtonClass.DEFAULT);
+
         AbsFunctionCall     btnFunction         = null;
         String              fallbackBtnFunction = DEFAULT_EMPTY_VAL;
 
@@ -1573,14 +1578,11 @@ public class JsonMapper
     {
         ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
 
-        String              tooltip  =
-            getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              tooltip  = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
         String              image    = getParameterValue(element, depth, PARAM_IMAGE, String.class);
-        ButtonClass         btnClass =
-            getParameterValue(element, depth, PARAM_BTN_CLASS, ButtonClass.class, ButtonClass.DEFAULT);
+        ButtonClass         btnClass = getParameterValue(element, depth, PARAM_BTN_CLASS, ButtonClass.class, ButtonClass.DEFAULT);
         String              onClick  = getParameterValue(element, depth, PARAM_ON_CLICK, String.class);
-        String              title    =
-            getParameterValue(element, depth, PARAM_TITLE, String.class, DEFAULT_EMPTY_VAL);
+        String              title    = getParameterValue(element, depth, PARAM_TITLE, String.class, DEFAULT_EMPTY_VAL);
 
         return ButtonIcon
             .builder()
@@ -1631,13 +1633,14 @@ public class JsonMapper
      */
     private FormContainer transformFormContainer(PseudoElement element, int depth)
     {
-        String                                   uid          = resolveUid(element, depth);
+        ContainerParameters                      cpars        = resolveContainerBaseParameters(element, depth);
+
         Direction                                direction    =
             getParameterValue(element, depth, PARAM_DIRECTION, Direction.class, Direction.NONE);
-        List<String>                             classes      = resolveClasses(element.getClasses(), depth);
-        Map<String, String>                      attributes   = resolveAttributes(element, depth);
+
         String                                   connectedBtn =
             getParameterValue(element, depth, PARAM_CONNECTED_BTN, String.class, DEFAULT_EMPTY_VAL);
+
         List<Input>                              inputs       =
             element
                 .getChildren()
@@ -1654,10 +1657,10 @@ public class JsonMapper
         }
 
         return builder
-            .uid(uid)
+            .uid(cpars.uid())
+            .classes(cpars.classes())
+            .dataAttributes(cpars.attributes())
             .direction(direction)
-            .classes(classes)
-            .dataAttributes(attributes)
             .inputs(inputs)
             .build();
     }
@@ -1676,7 +1679,9 @@ public class JsonMapper
         Container           child =
             element
                 .getChildren()
-                .isEmpty() ? null : transform(element.getChildren().get(0), depth + 1, CONTENT_CONTAINER_CHILDREN).get(0);
+                .isEmpty()
+                    ? null
+                    : transform(element.getChildren().get(0), depth + 1, CONTENT_CONTAINER_CHILDREN).get(0);
 
         return HiddenContainer
             .builder()
@@ -1698,8 +1703,7 @@ public class JsonMapper
     {
         ContainerParameters cpars   = resolveContainerBaseParameters(element, depth);
 
-        String              tooltip =
-            getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              tooltip = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
         String              src     = getParameterValue(element, depth, PARAM_SRC, String.class);
 
         return ImageContainer
@@ -1723,11 +1727,10 @@ public class JsonMapper
     {
         ContainerParameters cpars   = resolveContainerBaseParameters(element, depth);
 
-        String              tooltip =
-            getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              tooltip = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
         String              href    = getParameterValue(element, depth, PARAM_HREF, String.class);
-        String              target  =
-            getParameterValue(element, depth, PARAM_TARGET, String.class, DEFAULT_TARGET_SELF);
+        String              target  = getParameterValue(element, depth, PARAM_TARGET, String.class, DEFAULT_TARGET_SELF);
+
         Container           content =
             element
                 .getChildren()

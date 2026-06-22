@@ -7,7 +7,7 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper.util;
 
-class SkipFieldDissectionException extends Exception
+final class SkipFieldDissectionException extends Exception
 {
 
 }

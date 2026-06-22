@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.cookindustries.lib.spring.gui.config.properties.CiLibProperties;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.PseudoElement;
-import de.cookindustries.lib.spring.gui.util.StringAdapter;
+import de.cookindustries.lib.spring.gui.util.PathAdapter;
 import jakarta.annotation.PostConstruct;
 
 /**
@@ -50,8 +50,17 @@ public class TemplateFileCache
     {
         templateMap = new ConcurrentHashMap<>();
 
-        String rawPath = properties.getResources().getPath().getTemplates();
-        path = rawPath.endsWith("/") ? rawPath : rawPath + "/";
+        String rawPath =
+            properties
+                .getResources()
+                .getPath()
+                .getTemplates();
+
+        path =
+            rawPath
+                .endsWith("/")
+                    ? rawPath
+                    : rawPath + "/";
     }
 
     /**
@@ -87,7 +96,11 @@ public class TemplateFileCache
                     String fullPath     = resource.getURL().getPath();
 
                     int    index        = fullPath.indexOf(path);
-                    String relativePath = index >= 0 ? fullPath.substring(index + path.length()) : resource.getFilename();
+
+                    String relativePath =
+                        index >= 0
+                            ? fullPath.substring(index + path.length())
+                            : resource.getFilename();
 
                     LOG.debug("read template [{}]", relativePath);
 
@@ -122,7 +135,7 @@ public class TemplateFileCache
      */
     public PseudoElement getTemplateTo(String path)
     {
-        String                  sanPath  = StringAdapter.sanitizePath(path);
+        String                  sanPath  = PathAdapter.toUnixTypePath(path);
         Optional<PseudoElement> template = Optional.ofNullable(templateMap.get(sanPath));
 
         return template.orElseThrow(() -> new IllegalArgumentException(String.format("no template for path [%s]", sanPath)));

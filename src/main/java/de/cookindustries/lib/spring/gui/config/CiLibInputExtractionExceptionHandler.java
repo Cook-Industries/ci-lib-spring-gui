@@ -39,7 +39,7 @@ public final class CiLibInputExtractionExceptionHandler
     public ResponseEntity<NotificationResponse> handleInputExtractionException(InputExtractionException ex)
     {
         InputExtractor       extractor = ex.getInputExtractor();
-        NotificationResponse response  = guiFactory.createActiveMarkerResponseFrom(extractor);
+        NotificationResponse response  = guiFactory.createNotificationActiveMarkerResponse(extractor);
 
         return ResponseEntity.ok(response);
     }
