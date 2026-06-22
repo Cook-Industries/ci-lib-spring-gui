@@ -55,8 +55,10 @@ public final class FlatMappableDissector
             "^wait$",
             "^class$",
             "classLoader",
-            "^classes$",
-            "^FunctionCalls$");
+            "^fmClasses$",
+            "^fmFunctionCalls$",
+            "^fmIncludedMethods$",
+            "^fmExcludedMethods$");
 
     private static final List<Pattern>   BLACKLIST_PATTERNS            =
         RAW_BLACKLIST
@@ -102,10 +104,11 @@ public final class FlatMappableDissector
             return null;
         }
 
-        List<String>        includedMethods = obj.includedMethods();
-        Map<String, Object> flatMap         = new LinkedHashMap<>();
+        List<String>        includedMethods  = obj.fmIncludedMethods();
+        List<String>        excludedMethodes = obj.fmExcludedMethods();
+        Map<String, Object> flatMap          = new LinkedHashMap<>();
 
-        flatten("", obj, includedMethods, flatMap, locale, 0);
+        flatten("", obj, includedMethods, excludedMethodes, flatMap, locale, 0);
 
         return TokenMap
             .builder()
@@ -119,13 +122,16 @@ public final class FlatMappableDissector
     /**
      * Flatten a given {@link Object}.
      * 
-     * @param prefix to insert befor variable names in nested calls
-     * @param value to flatten
+     * @param prefix to insert before variable names in nested calls
+     * @param obj the object to be flattend
+     * @param includedMethods list of to-include method names
+     * @param includedMethods list of to-exclude method names
      * @param result the result map to fill
      * @param locale to lookup translations with
      * @param depth of the recursive call
      */
-    private void flatten(String prefix, Object obj, List<String> includedMethods, Map<String, Object> result, Locale locale, int depth)
+    private void flatten(String prefix, Object obj, List<String> includedMethods, List<String> excludedMethods, Map<String, Object> result,
+        Locale locale, int depth)
     {
         if (obj == null)
         {
@@ -174,7 +180,16 @@ public final class FlatMappableDissector
                         .stream()
                         .anyMatch(p -> p.matcher(stripped).matches()))
                     {
-                        LOG.trace("{}ignore [{}] due to blacklisted", indent, stripped);
+                        LOG.trace("{}ignore [{}] due to globally blacklisted", indent, stripped);
+
+                        throw new SkipFieldDissectionException();
+                    }
+
+                    if (BLACKLIST_PATTERNS
+                        .stream()
+                        .anyMatch(p -> p.matcher(stripped).matches()))
+                    {
+                        LOG.trace("{}ignore [{}] due to globally blacklisted", indent, stripped);
 
                         throw new SkipFieldDissectionException();
                     }
@@ -221,23 +236,26 @@ public final class FlatMappableDissector
         if (depth > UNHEALTHY_DEPTH)
         {
             LOG.error(RECURSION_UNHEALTHY_DEPTH_MSG);
+
             handleSimple(key, RECURSION_UNHEALTHY_DEPTH_MSG, result, locale, depth);
         }
 
         LOG.trace("{} - field is nested go deeper", indent);
 
         List<String> inclMeth = List.of();
+        List<String> exclMeth = List.of();
 
         if (imp instanceof FlatMappable flatImp)
         {
-            inclMeth = flatImp.includedMethods();
+            inclMeth = flatImp.fmIncludedMethods();
+            exclMeth = flatImp.fmExcludedMethods();
         }
 
-        flatten(key, imp, inclMeth, result, locale, depth + 1);
+        flatten(key, imp, inclMeth, exclMeth, result, locale, depth + 1);
     }
 
     /**
-     * Write a base Java object to the result map.
+     * Write a primitive java object to the result map.
      * 
      * @param key to associate
      * @param value to put in the map
@@ -265,7 +283,7 @@ public final class FlatMappableDissector
     }
 
     /**
-     * Check if a class is a basic Java type.
+     * Check if a class is a primitive java type.
      * 
      * @param type to check
      * @return {@code true}, if {@code type} is {@code primitve}, {@code String}, {@code Number}, {@code Boolean}, {@code CHaracter} or
@@ -375,7 +393,7 @@ public final class FlatMappableDissector
         }
         catch (Exception ex)
         {
-            LOG.error("field issection failed", ex);
+            LOG.error("field dissection failed", ex);
         }
     }
 
