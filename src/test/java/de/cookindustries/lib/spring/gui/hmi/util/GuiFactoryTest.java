@@ -72,7 +72,7 @@ public class GuiFactoryTest
         templateFileCache = new TemplateFileCache(libProperties);
         templateFileCache.init();
 
-        flatMappableDissector = new FlatMappableDissector(new StaticTranslationProvider());
+        flatMappableDissector = new FlatMappableDissector(new StaticTranslationProvider(), libProperties);
 
         translationProvider = new StaticTranslationProvider();
 

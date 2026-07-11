@@ -9,16 +9,17 @@ package de.cookindustries.lib.spring.gui.hmi.mapper.util;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
+import lombok.EqualsAndHashCode.CacheStrategy;
 import lombok.NonNull;
 import lombok.Singular;
-import lombok.Builder.Default;
-import lombok.EqualsAndHashCode.CacheStrategy;
 
 /**
  * Key/Value map to use by the {@link JsonMapper} to replace {@code token}s.
@@ -39,7 +40,7 @@ public final class TokenMap
 
     @NonNull
     @Default
-    private final Integer                      presedence = 0;
+    private final Integer                      precedence = 0;
 
     @Singular
     private final Map<String, Object>          values;
@@ -61,9 +62,9 @@ public final class TokenMap
      * 
      * @return the presedence of this map
      */
-    public int getPresedence()
+    public int getPrecedence()
     {
-        return presedence;
+        return precedence;
     }
 
     /**
@@ -131,6 +132,7 @@ public final class TokenMap
             values
                 .keySet()
                 .stream()
+                .filter(Objects::nonNull)
                 .mapToInt(String::length)
                 .max()
                 .orElse(0);
@@ -141,6 +143,7 @@ public final class TokenMap
             classes
                 .keySet()
                 .stream()
+                .filter(Objects::nonNull)
                 .mapToInt(String::length)
                 .max()
                 .orElse(0);
@@ -151,6 +154,7 @@ public final class TokenMap
             functions
                 .keySet()
                 .stream()
+                .filter(Objects::nonNull)
                 .mapToInt(String::length)
                 .max()
                 .orElse(0);
@@ -170,7 +174,7 @@ public final class TokenMap
             .append("hash: ")
             .appendnl(hashCode())
             .append("presedence: ")
-            .appendnl(presedence)
+            .appendnl(precedence)
             .append("# of elements to dissect: ")
             .appendnl(dissect.size())
 

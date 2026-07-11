@@ -16,6 +16,7 @@ import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import de.cookindustries.lib.spring.gui.config.properties.CiLibProperties;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
 
 class FlatMappableDissectorTest
@@ -23,10 +24,12 @@ class FlatMappableDissectorTest
 
     private FlatMappableDissector flatMappableDissector;
 
+    CiLibProperties               properties = new CiLibProperties();
+
     @BeforeEach
     void init()
     {
-        flatMappableDissector = new FlatMappableDissector(new StaticTranslationProvider());
+        flatMappableDissector = new FlatMappableDissector(new StaticTranslationProvider(), properties);
     }
 
     private class TestObject implements FlatMappable

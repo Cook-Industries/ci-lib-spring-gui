@@ -78,7 +78,7 @@ public class JsonMapperTest
         templateFileCache = new TemplateFileCache(properties);
         templateFileCache.init();
 
-        flatMappableDissector = new FlatMappableDissector(new StaticTranslationProvider());
+        flatMappableDissector = new FlatMappableDissector(new StaticTranslationProvider(), properties);
 
         translationProvider = new StaticTranslationProvider();
     }

@@ -9,6 +9,7 @@ package de.cookindustries.lib.spring.gui.hmi.mapper.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
 
 import de.cookindustries.lib.spring.gui.function.VoidCall;
@@ -57,7 +58,7 @@ class TokenMapTest
         TokenMap map = TokenMap.builder().build();
 
         // run & verify
-        assertEquals(Integer.valueOf(0), map.getPresedence());
+        assertEquals(Integer.valueOf(0), map.getPrecedence());
     }
 
 }

@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import de.cookindustries.lib.spring.gui.config.properties.CiLibProperties;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 import jakarta.annotation.PostConstruct;
 
@@ -34,17 +35,13 @@ import jakarta.annotation.PostConstruct;
 public final class FlatMappableDissector
 {
 
-    private static final Logger          LOG                           = LoggerFactory.getLogger(FlatMappableDissector.class);
+    private static final Logger          LOG                   = LoggerFactory.getLogger(FlatMappableDissector.class);
 
-    private static final int             UNHEALTHY_DEPTH               = 25;
-    private static final String          RECURSION_UNHEALTHY_DEPTH_MSG =
-        "recursion in FlatMappable object has reached an unhealthy depth >" + UNHEALTHY_DEPTH;
+    private static final String          INDENT                = "  ";
 
-    private static final String          INDENT                        = "  ";
+    private static final String          TRANSLATION_INDICATOR = "$$text$";
 
-    private static final String          TRANSLATION_INDICATOR         = "$$text$";
-
-    private static final List<String>    RAW_BLACKLIST                 =
+    private static final List<String>    RAW_BLACKLIST         =
         List.of(
             "^notifyAll$",
             "^notify$",
@@ -60,7 +57,7 @@ public final class FlatMappableDissector
             "^fmIncludedMethods$",
             "^fmExcludedMethods$");
 
-    private static final List<Pattern>   BLACKLIST_PATTERNS            =
+    private static final List<Pattern>   BLACKLIST_PATTERNS    =
         RAW_BLACKLIST
             .stream()
             .map(pat -> Pattern.compile(pat, Pattern.CASE_INSENSITIVE))
@@ -69,13 +66,18 @@ public final class FlatMappableDissector
     private static FlatMappableDissector holder;
 
     private final AbsTranslationProvider translationProvider;
+    private final int                    unhealthyDepth;
+    private final String                 recursionUnhealthyDepthMsg;
 
     /**
      * Create a {@code FlatMappableDissector}.
      */
-    public FlatMappableDissector(AbsTranslationProvider translationProvider)
+    public FlatMappableDissector(AbsTranslationProvider translationProvider, CiLibProperties properties)
     {
         this.translationProvider = translationProvider;
+        this.unhealthyDepth = properties.getRuntime().getDissectionUnhealthyRecursionDepth();
+        this.recursionUnhealthyDepthMsg =
+            "recursion in FlatMappable object stopped due to it has reached an unhealthy depth >" + unhealthyDepth;
     }
 
     @PostConstruct
@@ -93,11 +95,11 @@ public final class FlatMappableDissector
      * Dissect a {@link FlatMappable} object and map it to a {@link TokenMap}.
      * 
      * @param obj to dissect
-     * @param presedence to add to the resulting {@code TokenMap}
+     * @param precedence to add to the resulting {@code TokenMap}
      * @param locale to use to translate
      * @return the filled unmodifiable {@code Map}, or {@code null} if the input was {@code null}
      */
-    public <T extends FlatMappable> TokenMap dissect(T obj, int presedence, Locale locale)
+    public <T extends FlatMappable> TokenMap dissect(T obj, int precedence, Locale locale)
     {
         if (obj == null)
         {
@@ -112,7 +114,7 @@ public final class FlatMappableDissector
 
         return TokenMap
             .builder()
-            .presedence(2 * presedence + 10)
+            .precedence(2 * precedence + 10)
             .values(flatMap)
             .classes(obj.fmClasses())
             .functions(obj.fmFunctionCalls())
@@ -185,15 +187,6 @@ public final class FlatMappableDissector
                         throw new SkipFieldDissectionException();
                     }
 
-                    if (BLACKLIST_PATTERNS
-                        .stream()
-                        .anyMatch(p -> p.matcher(stripped).matches()))
-                    {
-                        LOG.trace("{}ignore [{}] due to globally blacklisted", indent, stripped);
-
-                        throw new SkipFieldDissectionException();
-                    }
-
                     String fieldName = Character.toLowerCase(stripped.charAt(0)) + stripped.substring(1);
 
                     if (method.getParameterCount() > 0)
@@ -220,7 +213,7 @@ public final class FlatMappableDissector
     /**
      * Go deeper into this nested object.
      * <p>
-     * If the depth reaches a {@link #UNHEALTHY_DEPTH} the return value will be {@link #RECURSION_UNHEALTHY_DEPTH_MSG} and the digging will
+     * If the depth reaches a {@link #UNHEALTHY_DEPTH} the return value will be {@link #recursionUnhealthyDepthMsg} and the digging will
      * stop. This is to prevent death-loops of endless recursion until a stackoverflow occurs.
      * 
      * @param key of the field/method
@@ -233,11 +226,13 @@ public final class FlatMappableDissector
     {
         String indent = INDENT.repeat(depth);
 
-        if (depth > UNHEALTHY_DEPTH)
+        if (depth > unhealthyDepth)
         {
-            LOG.error(RECURSION_UNHEALTHY_DEPTH_MSG);
+            LOG.error(recursionUnhealthyDepthMsg);
 
-            handleSimple(key, RECURSION_UNHEALTHY_DEPTH_MSG, result, locale, depth);
+            handleSimple(key, recursionUnhealthyDepthMsg, result, locale, depth);
+
+            return;
         }
 
         LOG.trace("{} - field is nested go deeper", indent);
@@ -393,7 +388,7 @@ public final class FlatMappableDissector
         }
         catch (Exception ex)
         {
-            LOG.error("field dissection failed", ex);
+            LOG.error("field dissection failed for [{}] (type [{}])", fieldName, type.getSimpleName(), ex);
         }
     }
 
@@ -429,8 +424,6 @@ public final class FlatMappableDissector
                     goDeeper(mapKey, imp, result, locale, depth + 1);
                 }
             }
-
-            continue;
         }
     }
 }
