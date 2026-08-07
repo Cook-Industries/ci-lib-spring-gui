@@ -17,10 +17,10 @@ import de.cookindustries.lib.spring.gui.hmi.container.ContainerType;
 import de.cookindustries.lib.spring.gui.hmi.input.InputType;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
-import lombok.Builder.Default;
 import lombok.extern.jackson.Jacksonized;
 
 /**
@@ -72,4 +72,5 @@ public class PseudoElement
      */
     @Singular
     private final List<PseudoElement> children;
+
 }

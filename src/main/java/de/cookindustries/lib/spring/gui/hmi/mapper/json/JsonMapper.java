@@ -7,7 +7,6 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper.json;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,7 +20,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -374,17 +372,7 @@ public class JsonMapper
      */
     private String nextId()
     {
-        LocalDate now    = LocalDate.now();
-
-        int       d      = now.getDayOfMonth();
-        int       m      = now.getMonthValue();
-        int       mDigit = (m + 1) / 2;
-        int       rand   =
-            ThreadLocalRandom
-                .current()
-                .nextInt(0, 100_000);
-
-        return String.format("%02d%d%05d", d, mDigit, rand);
+        return UUID.randomUUID().toString();
     }
 
     private Container throwNotSupported(PseudoElement element, int depth)
@@ -411,6 +399,7 @@ public class JsonMapper
         if (sourceUid == null)
         {
             String random = UUID.randomUUID().toString();
+
             resultUid = RANDOM_ID + random.substring(8);
         }
         else if (sourceUid.startsWith(INDICATOR_VALUE_PLACEHOLDER))
@@ -645,7 +634,8 @@ public class JsonMapper
                 .filter(Objects::nonNull)
                 .findFirst();
 
-        if (tempResult.isEmpty() && result.isEmpty())
+        if (tempResult.isEmpty()
+            && result.isEmpty())
         {
             return null;
         }
@@ -813,9 +803,9 @@ public class JsonMapper
         String  onInput  = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
         String  infoText = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
         String  infoUrl  = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
-        boolean active   = getParameterValue(element, depth, PARAM_DISABLED, Boolean.class, false);
+        boolean disabled = getParameterValue(element, depth, PARAM_DISABLED, Boolean.class, false);
 
-        return new InputParameters(tooltip, name, submitAs, onInput, infoText, infoUrl, active);
+        return new InputParameters(tooltip, name, submitAs, onInput, infoText, infoUrl, disabled);
     }
 
     /**
@@ -850,7 +840,8 @@ public class JsonMapper
      * @param expectedType the expected result type
      * @param fallback to use if no result is found, can be {@code null}
      * @return the found parameter
-     * @throws JsonParsingException if parameter is expected but not found and no {@code fallback} is provided, or could not be parsed
+     * @throws JsonParsingException if {@code key} parameter is expected but not found, and no {@code fallback} is provided, or could not be
+     *             parsed
      */
     private <T> T getParameterValue(PseudoElement element, int depth, String key, Class<T> expectedType, T fallback)
     {
@@ -869,9 +860,10 @@ public class JsonMapper
      * @param key the key to lookup
      * @param expectedType the expected result type
      * @param fallback to use if no result is found, can be {@code null}
-     * @param processPlaceholder wheter or not {@code placeholder should be replaced}
+     * @param processPlaceholder wheter or not {@code $$...$} placeholder should be resolved
      * @return the found parameter
-     * @throws JsonParsingException if parameter is expected but not found and no {@code fallback} is provided, or could not be parsed
+     * @throws JsonParsingException if {@code key} parameter is expected but not found, and no {@code fallback} is provided, or could not be
+     *             parsed
      */
     private <T> T getParameterValue(PseudoElement element, int depth, String key, Class<T> expectedType, T fallback,
         boolean processPlaceholder)
@@ -897,7 +889,113 @@ public class JsonMapper
 
         LOG.trace("[{}]:[{}]: parameter is [{}]:[{}]", uuid, depth, rawValue.getClass().getSimpleName(), String.valueOf(rawValue));
 
+        return resolveSingleValue(uid, depth, key, rawValue, expectedType, processPlaceholder);
+    }
+
+    /**
+     * Resolve for a list of expected parameters.
+     * 
+     * @param <T> the expected result type
+     * @param element the element to extract from
+     * @param depth the current depth in the tree
+     * @param key the key to lookup
+     * @param expectedType the expected result type
+     * @return the found parameter list
+     * @throws JsonParsingException if {@code key} parameter is expected but not found or could not be parsed
+     */
+    private <T> List<T> getParameterList(PseudoElement element, int depth, String key, Class<T> expectedType)
+    {
+        return getParameterList(element, depth, key, expectedType, null, true);
+    }
+
+    /**
+     * Resolve for a list of expected parameters.
+     * 
+     * @param <T> the expected result type
+     * @param element the element to extract from
+     * @param depth the current depth in the tree
+     * @param key the key to lookup
+     * @param expectedType the expected result type
+     * @param fallback to use if no result is found, can be {@code null}
+     * @return the found parameter list
+     * @throws JsonParsingException if {@code key} parameter is expected but not found, and no {@code fallback} is provided, or could not be
+     *             parsed
+     */
+    private <T> List<T> getParameterList(PseudoElement element, int depth, String key, Class<T> expectedType, List<T> fallback)
+    {
+        return getParameterList(element, depth, key, expectedType, fallback, true);
+    }
+
+    /**
+     * Resolve for a list of expected parameters.
+     * 
+     * @param <T> the expected result type
+     * @param element the element to extract from
+     * @param depth the current depth in the tree
+     * @param key the key to lookup
+     * @param expectedType the expected result type
+     * @param fallback to use if no result is found, can be {@code null}
+     * @param processPlaceholder wheter or not {@code $$...$} placeholder should be resolved
+     * @return the found parameter list
+     * @throws JsonParsingException if {@code key} parameter is expected but not found, and no {@code fallback} is provided, or could not be
+     *             parsed
+     */
+    private <T> List<T> getParameterList(PseudoElement element, int depth, String key, Class<T> elementType, List<T> fallback,
+        boolean processPlaceholder)
+    {
+        Object rawValue = element.getParameters().get(key);
+
+        String uid      = element.getUid() == null ? RANDOM_ID : element.getUid();
+
+        LOG.trace("[{}]:[{}]: get list parameter [{}] from [{}] as List<{}>", uuid, depth, key, uid, elementType.getSimpleName());
+
+        if (rawValue == null)
+        {
+            if (fallback == null)
+            {
+                throw new JsonParsingException(uid, 0, this.count,
+                    String.format("parameter [%s] is expected but not set and no fallback given", key));
+            }
+
+            LOG.trace("[{}]:[{}]: parameter is [{}]", uuid, depth, String.valueOf(fallback));
+
+            return fallback;
+        }
+
+        if (!(rawValue instanceof List<?> rawList))
+        {
+            throw new JsonParsingException(uid, 0, this.count,
+                String.format("parameter [%s] expected a list but got [%s]", key, rawValue.getClass().getSimpleName()));
+        }
+
+        List<T> result = new ArrayList<>(rawList.size());
+
+        for (Object rawElement : rawList)
+        {
+            result.add(resolveSingleValue(uid, depth, key, rawElement, elementType, processPlaceholder));
+        }
+
+        return result;
+    }
+
+    /**
+     * Resolve a {@code Object} to a type {@code T}.
+     * 
+     * @param <T> to resolve to
+     * @param uid of the element for error logging
+     * @param depth of the tree
+     * @param key of the parameter for error logging
+     * @param rawValue the raw value to resolve
+     * @param expectedType class of the target type
+     * @param processPlaceholder wheter or not {@code $$...$} placeholder should be resolved
+     * @return the resolved type
+     * @throws JsonParsingException if the value could not be resolved
+     */
+    private <T> T resolveSingleValue(String uid, int depth, String key, Object rawValue, Class<T> expectedType,
+        boolean processPlaceholder)
+    {
         // ---> DO NOT CHANGE ORDER BETWEEN HERE...
+        // process first strings that should resolve to enums
         if (rawValue instanceof String enumVal && expectedType.isEnum())
         {
             @SuppressWarnings({"unchecked", "rawtypes"})
@@ -906,11 +1004,12 @@ public class JsonMapper
             return expectedType.cast(temp);
         }
 
+        // resolve strings that can be replacement strings
         if (rawValue instanceof String strVal)
         {
             if (strVal.startsWith(BASE_INDICATOR_START) && processPlaceholder)
             {
-                return handlePossiblePlaceholder(strVal, expectedType, fallback, depth);
+                return handlePossiblePlaceholder(strVal, expectedType, depth);
             }
             else
             {
@@ -918,6 +1017,7 @@ public class JsonMapper
             }
         }
 
+        // resolve anything else
         if (expectedType.isInstance(rawValue))
         {
             return expectedType.cast(rawValue);
@@ -1955,20 +2055,13 @@ public class JsonMapper
      */
     private TableContainer transformTableContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars          = resolveContainerBaseParameters(element, depth);
+        ContainerParameters cpars       = resolveContainerBaseParameters(element, depth);
 
-        String              name           = getParameterValue(element, depth, PARAM_NAME, String.class);
-        String              columnNames    = getParameterValue(element, depth, "columnNames", String.class, null, false);
-        Boolean             sortable       = getParameterValue(element, depth, "sortable", Boolean.class, false);
+        String              name        = getParameterValue(element, depth, PARAM_NAME, String.class);
+        Boolean             sortable    = getParameterValue(element, depth, "sortable", Boolean.class, false);
+        List<String>        columnNames = getParameterList(element, depth, "columnNames", String.class);
 
-        List<String>        columnNameList =
-            Arrays
-                .stream(columnNames.split("\\|\\|"))
-                .filter(Objects::nonNull)
-                .map(cn -> handlePossiblePlaceholder(cn, String.class, cn, depth))
-                .toList();
-
-        List<Container>     rows           = new ArrayList<>();
+        List<Container>     rows        = new ArrayList<>();
 
         for (PseudoElement pe : element.getChildren())
         {
@@ -1981,7 +2074,7 @@ public class JsonMapper
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
             .name(name)
-            .columnNames(columnNameList)
+            .columnNames(columnNames)
             .sortable(sortable)
             .rows(rows)
             .build();
@@ -2184,8 +2277,7 @@ public class JsonMapper
         String              symbol      = getParameterValue(element, depth, "symbol", String.class, DEFAULT_EMPTY_VAL);
         Integer             min         = getParameterValue(element, depth, PARAM_MIN, Integer.class, Integer.MIN_VALUE);
         Integer             max         = getParameterValue(element, depth, PARAM_MAX, Integer.class, Integer.MAX_VALUE);
-        String              placeholder =
-            getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
+        String              placeholder = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
 
         return Currency
             .builder()
@@ -2251,7 +2343,7 @@ public class JsonMapper
         InputParameters     ipars    = resolveInputBaseParameters(element, depth);
 
         Boolean             multiple = getParameterValue(element, depth, "multiple", Boolean.class, Boolean.FALSE);
-        String              accept   = getParameterValue(element, depth, "accept", String.class, "*");
+        List<String>        accept   = getParameterList(element, depth, "accept", String.class, List.of("*"));
 
         return File
             .builder()
@@ -2266,7 +2358,7 @@ public class JsonMapper
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
             .multiple(multiple)
-            .accept(accept)
+            .accepts(accept)
             .build();
     }
 
@@ -2282,8 +2374,7 @@ public class JsonMapper
         ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
 
         String              submitAs = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
-        String              value    =
-            getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
+        String              value    = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
 
         return Hidden
             .builder()
@@ -2307,12 +2398,10 @@ public class JsonMapper
     {
         ContainerParameters cpars   = resolveContainerBaseParameters(element, depth);
 
-        String              tooltip =
-            getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              tooltip = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
         String              text    = getParameterValue(element, depth, PARAM_TEXT, String.class);
         String              href    = getParameterValue(element, depth, PARAM_HREF, String.class);
-        String              target  =
-            getParameterValue(element, depth, PARAM_TARGET, String.class, DEFAULT_TARGET_SELF);
+        String              target  = getParameterValue(element, depth, PARAM_TARGET, String.class, DEFAULT_TARGET_SELF);
 
         return Link
             .builder()
@@ -2338,18 +2427,13 @@ public class JsonMapper
         ContainerParameters cpars        = resolveContainerBaseParameters(element, depth);
         InputParameters     ipars        = resolveInputBaseParameters(element, depth);
 
-        String              value        =
-            getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
+        String              value        = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
         Integer             min          = getParameterValue(element, depth, PARAM_MIN, Integer.class, Integer.MIN_VALUE);
         Integer             max          = getParameterValue(element, depth, PARAM_MAX, Integer.class, Integer.MAX_VALUE);
-        String              placeholder  =
-            getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
-        String              prefix       =
-            getParameterValue(element, depth, PARAM_PREFIX, String.class, DEFAULT_EMPTY_VAL);
-        String              suffix       =
-            getParameterValue(element, depth, PARAM_SUFFIX, String.class, DEFAULT_EMPTY_VAL);
-        String              onEnterPress =
-            getParameterValue(element, depth, PARAM_ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
+        String              placeholder  = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
+        String              prefix       = getParameterValue(element, depth, PARAM_PREFIX, String.class, DEFAULT_EMPTY_VAL);
+        String              suffix       = getParameterValue(element, depth, PARAM_SUFFIX, String.class, DEFAULT_EMPTY_VAL);
+        String              onEnterPress = getParameterValue(element, depth, PARAM_ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
 
         return Number
             .builder()
@@ -2386,8 +2470,7 @@ public class JsonMapper
         InputParameters     ipars        = resolveInputBaseParameters(element, depth);
 
         String              placeholder  = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, "***");
-        String              onEnterPress =
-            getParameterValue(element, depth, PARAM_ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
+        String              onEnterPress = getParameterValue(element, depth, PARAM_ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
 
         return Password
             .builder()
@@ -2418,8 +2501,8 @@ public class JsonMapper
         ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
         InputParameters     ipars    = resolveInputBaseParameters(element, depth);
 
-        String              valueSrc =
-            getParameterValue(element, depth, PARAM_VALUES, String.class, DEFAULT_EMPTY_VAL);
+        String              valueSrc = getParameterValue(element, depth, PARAM_VALUES, String.class, DEFAULT_EMPTY_VAL);
+
         List<InputValue>    values   =
             valueSrc.isBlank()
                 ? handleChildren(element, cpars.uid(), InputValue.class, List.of(), InputValue.class, depth, false)
@@ -2454,8 +2537,8 @@ public class JsonMapper
         InputParameters     ipars    = resolveInputBaseParameters(element, depth);
 
         String              value    = getParameterValue(element, depth, PARAM_VALUE, String.class, "NOT_SELECTED");
-        String              valueSrc =
-            getParameterValue(element, depth, PARAM_VALUES, String.class, DEFAULT_EMPTY_VAL);
+        String              valueSrc = getParameterValue(element, depth, PARAM_VALUES, String.class, DEFAULT_EMPTY_VAL);
+
         List<InputValue>    values   =
             valueSrc.isBlank()
                 ? handleChildren(element, cpars.uid(), InputValue.class, List.of(), InputValue.class, depth, false)
@@ -2554,8 +2637,7 @@ public class JsonMapper
         ContainerParameters cpars            = resolveContainerBaseParameters(element, depth);
         InputParameters     ipars            = resolveInputBaseParameters(element, depth);
 
-        String              value            =
-            getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
+        String              value            = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
         String              pattern          = getParameterValue(element, depth, "pattern", String.class, DEFAULT_EMPTY_VAL);
         String              fetchUrl         = getParameterValue(element, depth, "fetchUrl", String.class, DEFAULT_EMPTY_VAL);
         String              searchUrl        = getParameterValue(element, depth, "searchUrl", String.class, DEFAULT_EMPTY_VAL);
@@ -2603,11 +2685,9 @@ public class JsonMapper
         ContainerParameters cpars       = resolveContainerBaseParameters(element, depth);
         InputParameters     ipars       = resolveInputBaseParameters(element, depth);
 
-        String              value       =
-            getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
+        String              value       = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
         Integer             maxChars    = getParameterValue(element, depth, PARAM_MAX_CHARS, Integer.class, 32000);
-        String              placeholder =
-            getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
+        String              placeholder = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
 
         return Textarea
             .builder()
@@ -2636,11 +2716,15 @@ public class JsonMapper
      */
     private Textbox transformTextboxInput(PseudoElement element, int depth)
     {
-        String value = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
+        ContainerParameters cpars = resolveContainerBaseParameters(element, depth);
+
+        String              value = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
 
         return Textbox
             .builder()
-            .onInput(DEFAULT_EMPTY_VAL)
+            .uid(cpars.uid())
+            .classes(cpars.classes())
+            .dataAttributes(cpars.attributes())
             .value(value)
             .build();
     }

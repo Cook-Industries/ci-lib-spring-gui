@@ -1,0 +1,19 @@
+{
+    "uid": "uid",
+    "type": "TABLE",
+    "classes": [
+        "class1"
+    ],
+    "attributes": {
+        "key1": "value1"
+    },
+    "parameters": {
+        "name": "test-table",
+        "columnNames": [
+            "col1",
+            "col2",
+            "col3"
+        ]
+    },
+    "children": []
+}

@@ -30,6 +30,7 @@ import de.cookindustries.lib.spring.gui.hmi.container.HiddenContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.ImageContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.LinkContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.SplittedContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.TableContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.TextContainer;
 import de.cookindustries.lib.spring.gui.hmi.input.Checkbox;
 import de.cookindustries.lib.spring.gui.hmi.input.Currency;
@@ -117,7 +118,7 @@ public class JsonMapperTest
         JsonMapper mapper =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/root-component.json")
+                .srcPath("json-mapper/root-component.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -144,7 +145,7 @@ public class JsonMapperTest
         JsonMapper   mapper   =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/replace-uid.json")
+                .srcPath("json-mapper/replace-uid.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -175,7 +176,7 @@ public class JsonMapperTest
         JsonMapper   mapper   =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/replace-class.json")
+                .srcPath("json-mapper/replace-class.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -206,7 +207,7 @@ public class JsonMapperTest
         JsonMapper   mapper   =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/replace-class.json")
+                .srcPath("json-mapper/replace-class.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -245,7 +246,7 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/map-attributes.json")
+                .srcPath("json-mapper/map-attributes.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -279,7 +280,7 @@ public class JsonMapperTest
         JsonMapper   mapper   =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/replace-parameter.json")
+                .srcPath("json-mapper/replace-parameter.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -301,7 +302,7 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/container/audio-container.json")
+                .srcPath("json-mapper/container/audio-container.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -334,7 +335,7 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/container/button-container.json")
+                .srcPath("json-mapper/container/button-container.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -367,7 +368,7 @@ public class JsonMapperTest
         JsonMapper mapper =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/container/button-bar-container.json")
+                .srcPath("json-mapper/container/button-bar-container.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -388,7 +389,7 @@ public class JsonMapperTest
         JsonMapper mapper =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/container/button-icon-container.json")
+                .srcPath("json-mapper/container/button-icon-container.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -409,7 +410,7 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/container/content-container.json")
+                .srcPath("json-mapper/container/content-container.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -437,7 +438,7 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/container/form-container.json")
+                .srcPath("json-mapper/container/form-container.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -465,7 +466,7 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/container/hidden-container.json")
+                .srcPath("json-mapper/container/hidden-container.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -493,7 +494,7 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/container/image-container.json")
+                .srcPath("json-mapper/container/image-container.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -524,7 +525,7 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/container/link-container.json")
+                .srcPath("json-mapper/container/link-container.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -556,7 +557,7 @@ public class JsonMapperTest
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/container/splitted-container.json")
+                .srcPath("json-mapper/container/splitted-container.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -589,7 +590,7 @@ public class JsonMapperTest
         JsonMapper mapper =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/container/tabbed-container.json")
+                .srcPath("json-mapper/container/tabbed-container.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -604,13 +605,46 @@ public class JsonMapperTest
     }
 
     @Test
+    void test_map_TableContainer()
+    {
+        // setup
+        JsonMapper   mapper    =
+            JsonMapper
+                .builder()
+                .srcPath("json-mapper/container/table-container.ged")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
+                .flatMappableDissector(flatMappableDissector)
+                .build();
+
+        // run
+        MapperResult result    = mapper.map();
+
+        // verify
+        Container    container = result.getContainers().get(0);
+        assertEquals(TableContainer.class, container.getClass());
+        assertEquals("uid", container.getUid());
+        assertEquals(1, container.getClasses().size());
+        assertEquals(1, container.getDataAttributes().size());
+
+        TableContainer tableContainer = (TableContainer) container;
+        assertEquals("col1", tableContainer.getColumnNames().get(0));
+        assertEquals("col2", tableContainer.getColumnNames().get(1));
+        assertEquals("col3", tableContainer.getColumnNames().get(2));
+
+        String html = HtmlMapper.map(container);
+        assertTrue(checkDivTags(html));
+    }
+
+    @Test
     void test_map_TextContainer()
     {
         // setup
         JsonMapper   mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/container/text-container.json")
+                .srcPath("json-mapper/container/text-container.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -641,7 +675,7 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/input/checkbox-input.json")
+                .srcPath("json-mapper/input/checkbox-input.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -672,7 +706,7 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/input/currency-input.json")
+                .srcPath("json-mapper/input/currency-input.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -703,7 +737,7 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/input/date-input.json")
+                .srcPath("json-mapper/input/date-input.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -734,7 +768,7 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/input/file-input.json")
+                .srcPath("json-mapper/input/file-input.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -765,7 +799,7 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/input/hidden-input.json")
+                .srcPath("json-mapper/input/hidden-input.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -795,7 +829,7 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/input/link-input.json")
+                .srcPath("json-mapper/input/link-input.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -826,7 +860,7 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/input/number-input.json")
+                .srcPath("json-mapper/input/number-input.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -857,7 +891,7 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/input/password-input.json")
+                .srcPath("json-mapper/input/password-input.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -888,7 +922,7 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/input/radio-input.json")
+                .srcPath("json-mapper/input/radio-input.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -933,7 +967,7 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/input/select-input.json")
+                .srcPath("json-mapper/input/select-input.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -974,7 +1008,7 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/input/slider-input.json")
+                .srcPath("json-mapper/input/slider-input.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -1005,7 +1039,7 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/input/switch-input.json")
+                .srcPath("json-mapper/input/switch-input.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -1036,7 +1070,7 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/input/textarea-input.json")
+                .srcPath("json-mapper/input/textarea-input.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -1067,7 +1101,7 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/input/textbox-input.json")
+                .srcPath("json-mapper/input/textbox-input.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)
@@ -1094,7 +1128,7 @@ public class JsonMapperTest
         JsonMapper    mapper    =
             JsonMapper
                 .builder()
-                .srcPath("json-mapper/input/textfield-input.json")
+                .srcPath("json-mapper/input/textfield-input.ged")
                 .locale(Locale.ENGLISH)
                 .templateFileCache(templateFileCache)
                 .translationProvider(translationProvider)

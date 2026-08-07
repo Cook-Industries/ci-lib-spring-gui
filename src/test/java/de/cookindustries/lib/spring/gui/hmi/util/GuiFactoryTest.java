@@ -156,7 +156,7 @@ public class GuiFactoryTest
             ComponentSources
                 .builder()
                 .locale(Locale.ENGLISH)
-                .sourcePath("json-mapper/root-component.json")
+                .sourcePath("json-mapper/root-component.ged")
                 .build();
         GUIFactory       factory = basicFactory();
 
@@ -180,7 +180,7 @@ public class GuiFactoryTest
             ComponentSources
                 .builder()
                 .locale(Locale.ENGLISH)
-                .sourcePath("json-mapper/root-component.json")
+                .sourcePath("json-mapper/root-component.ged")
                 .build();
         GUIFactory       factory = basicFactory();
 
@@ -204,7 +204,7 @@ public class GuiFactoryTest
             ComponentSources
                 .builder()
                 .locale(Locale.ENGLISH)
-                .sourcePath("json-mapper/root-component.json")
+                .sourcePath("json-mapper/root-component.ged")
                 .build();
         GUIFactory       factory   = basicFactory();
 

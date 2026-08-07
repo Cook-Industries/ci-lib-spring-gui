@@ -79,7 +79,7 @@ public class TemplateFileCache
         {
             PathMatchingResourcePatternResolver resolver   = new PathMatchingResourcePatternResolver();
 
-            String                              searchPath = "classpath*:" + path + "**/*.json";
+            String                              searchPath = "classpath*:" + path + "**/*.ged";
 
             LOG.debug("load resources under [{}]", searchPath);
 

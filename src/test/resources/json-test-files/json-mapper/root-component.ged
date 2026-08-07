@@ -1,0 +1,6 @@
+{
+    "type": "COMPONENT",
+    "parameters": {
+        "path": "json-test-files/json-mapper/basic-root-static.ged"
+    }
+}
