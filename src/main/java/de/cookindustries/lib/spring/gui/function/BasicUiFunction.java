@@ -23,4 +23,9 @@ public final class BasicUiFunction
         return new ResetForm(formId);
     }
 
+    public static GetComponent getComponent(String url)
+    {
+        return new GetComponent(url);
+    }
+
 }

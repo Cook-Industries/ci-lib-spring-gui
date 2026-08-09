@@ -28,8 +28,6 @@ public class LoadComponent extends AbsFunctionCall
 
     public LoadComponent(String url, AbsFunctionArgs args)
     {
-        super();
-
         setParam(url);
         setParam(args);
     }
