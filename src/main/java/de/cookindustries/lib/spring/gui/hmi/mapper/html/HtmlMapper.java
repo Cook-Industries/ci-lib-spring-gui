@@ -367,52 +367,39 @@ public final class HtmlMapper
 
     private String render(ButtonIcon buttonIcon)
     {
-        HtmlElement elementMapper =
-            HtmlElement
-                .builder()
-                .tag(TAG_INPUT)
-                .isSingleTag(true)
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ID)
-                        .value(buttonIcon.getUid())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_TYPE)
-                        .value("image")
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_ON_CLICK)
-                        .active(!buttonIcon.getOnClick().isBlank())
-                        .value(buttonIcon.getOnClick())
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name("title")
-                        .active(buttonIcon.getTitle() != null && !buttonIcon.getTitle().isBlank())
-                        .value(htmlEscape(buttonIcon.getTitle()))
-                        .build())
-                .attribute(
-                    Attribute
-                        .builder()
-                        .name(ATT_SRC)
-                        .value(buttonIcon.getImage())
-                        .build())
-                .clazz("btn")
-                .clazz("btn-icon")
-                .clazz(buttonIcon.getBtnClass().getClassName())
-                .classes(buttonIcon.getClasses())
-                .dataAttributes(buttonIcon.getDataAttributes())
-                .dataAttribute(DATA_ATT_TOOLTIP, buttonIcon.getTooltip().isBlank() ? null : htmlEscape(buttonIcon.getTooltip()))
-                .build();
-
-        return elementMapper.html();
+        return HtmlElement
+            .builder()
+            .tag(TAG_DIV)
+            .clazz("btn")
+            .clazz("btn-icon")
+            .clazz(buttonIcon.getBtnClass().getClassName())
+            .classes(buttonIcon.getClasses())
+            .dataAttributes(buttonIcon.getDataAttributes())
+            .dataAttribute(DATA_ATT_TOOLTIP, buttonIcon.getTooltip().isBlank() ? null : htmlEscape(buttonIcon.getTooltip()))
+            .attribute(
+                Attribute
+                    .builder()
+                    .name(ATT_ID)
+                    .value(buttonIcon.getUid())
+                    .build())
+            .attribute(
+                Attribute
+                    .builder()
+                    .name(ATT_ON_CLICK)
+                    .active(!buttonIcon.getOnClick().isBlank())
+                    .value(buttonIcon.getOnClick())
+                    .build())
+            .content(
+                HtmlElement
+                    .builder()
+                    .tag("i")
+                    .clazz("bi")
+                    .clazz(buttonIcon.getIcon())
+                    .inactive(buttonIcon.getIcon().isBlank())
+                    .build()
+                    .html())
+            .build()
+            .html();
     }
 
     private String render(ContentContainer contentContainer)
@@ -640,10 +627,17 @@ public final class HtmlMapper
 
     private String render(SplittedContainer splittedContainer)
     {
-        String      head          = render(splittedContainer.getHead());
-        String      tail          = render(splittedContainer.getTail());
+        String       head          = render(splittedContainer.getHead());
+        String       tail          = render(splittedContainer.getTail());
 
-        HtmlElement elementMapper =
+        List<String> center        =
+            splittedContainer
+                .getCenter()
+                .stream()
+                .map(this::render)
+                .toList();
+
+        HtmlElement  elementMapper =
             HtmlElement
                 .builder()
                 .tag(TAG_DIV)
@@ -658,6 +652,7 @@ public final class HtmlMapper
                 .classes(splittedContainer.getClasses())
                 .dataAttributes(splittedContainer.getDataAttributes())
                 .content(head)
+                .contents(center)
                 .content(tail)
                 .build();
 

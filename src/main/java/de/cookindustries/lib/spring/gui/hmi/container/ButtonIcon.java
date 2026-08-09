@@ -7,9 +7,9 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.container;
 
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -24,10 +24,10 @@ public final class ButtonIcon extends Container
 {
 
     @NonNull
-    private final String      image;
+    private final String      icon;
 
     @Default
-    private final String      title    = null;
+    private final String      alt      = null;
 
     @NonNull
     private final String      onClick;

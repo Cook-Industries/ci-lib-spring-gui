@@ -1675,13 +1675,24 @@ public class JsonMapper
      */
     private ButtonIcon transformButtonIconContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
+        ContainerParameters cpars               = resolveContainerBaseParameters(element, depth);
 
-        String              image    = getParameterValue(element, depth, PARAM_IMAGE, String.class);
-        String              onClick  = getParameterValue(element, depth, PARAM_ON_CLICK, String.class);
-        ButtonClass         btnClass = getParameterValue(element, depth, PARAM_BTN_CLASS, ButtonClass.class, ButtonClass.DEFAULT);
-        String              tooltip  = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              title    = getParameterValue(element, depth, PARAM_TITLE, String.class, DEFAULT_EMPTY_VAL);
+        String              icon                = getParameterValue(element, depth, PARAM_ICON, String.class);
+        ButtonClass         btnClass            =
+            getParameterValue(element, depth, PARAM_BTN_CLASS, ButtonClass.class, ButtonClass.DEFAULT);
+        String              tooltip             = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+
+        AbsFunctionCall     btnFunction         = null;
+        String              fallbackBtnFunction = DEFAULT_EMPTY_VAL;
+
+        try
+        {
+            btnFunction = getParameterValue(element, depth, PARAM_ON_CLICK, AbsFunctionCall.class);
+        }
+        catch (JsonParsingException ex)
+        {
+            fallbackBtnFunction = getParameterValue(element, depth, PARAM_ON_CLICK, String.class, DEFAULT_EMPTY_VAL);
+        }
 
         return ButtonIcon
             .builder()
@@ -1689,10 +1700,9 @@ public class JsonMapper
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
             .tooltip(tooltip)
-            .image(image)
+            .icon(icon)
             .btnClass(btnClass)
-            .onClick(onClick)
-            .title(title)
+            .onClick(btnFunction == null ? fallbackBtnFunction : btnFunction.parseAsJS())
             .build();
     }
 
