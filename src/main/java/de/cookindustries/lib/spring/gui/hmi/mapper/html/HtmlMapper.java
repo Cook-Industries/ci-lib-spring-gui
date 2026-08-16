@@ -952,10 +952,10 @@ public final class HtmlMapper
             .getBoxes()
             .stream()
             .forEach(box -> {
-                String  boxId   = box.getId().isBlank() ? "" + cnt.getAndIncrement() : box.getId();
-                String  id      = checkbox.getSubmitAs().isBlank() ? boxId : checkbox.getSubmitAs() + "-" + boxId;
+                String  id       = String.format("%s-%s-%s", checkbox.getUid(), checkbox.getSubmitAs(), cnt.getAndIncrement());
+                String  submitId = String.format("%s-%s", checkbox.getSubmitAs(), box.getId());
 
-                String  input   =
+                String  input    =
                     HtmlElement
                         .builder()
                         .isSingleTag(true)
@@ -986,13 +986,13 @@ public final class HtmlMapper
                                 .build())
                         .clazz(CLASS_FORM_CHECK_INPUT)
                         .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
-                        .dataAttribute(DATA_ATT_SUBMIT_AS, id)
+                        .dataAttribute(DATA_ATT_SUBMIT_AS, submitId)
                         .dataAttribute(DATA_ATT_VALUE_TYPE, checkbox.getType().name())
                         .dataAttributes(checkbox.getDataAttributes())
                         .build()
                         .html();
 
-                String  label   =
+                String  label    =
                     HtmlElement
                         .builder()
                         .tag(TAG_LABEL)
@@ -1015,8 +1015,6 @@ public final class HtmlMapper
                         .clazz("input-checkbox-wrapper")
                         .content(input)
                         .content(label)
-                        .content(resolveWarningIcon(formId, id))
-                        .content(resolveErrorIcon(formId, id))
                         .build();
 
                 boxes.add(wrapper.html());
@@ -1041,6 +1039,8 @@ public final class HtmlMapper
                 .tag(TAG_DIV)
                 .clazz(INPUT_CONTAINER)
                 .content(StringAdapter.from(legend))
+                .content(resolveErrorIcon(formId, checkbox.getSubmitAs()))
+                .content(resolveWarningIcon(formId, checkbox.getSubmitAs()))
                 .content(resolveInfoIcon(formId, checkbox.getUid(), checkbox.getInfoText(), checkbox.getInfoUrl()))
                 .content(checkboxes)
                 .build();

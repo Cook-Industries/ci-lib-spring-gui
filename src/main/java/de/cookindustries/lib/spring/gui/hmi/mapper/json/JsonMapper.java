@@ -135,15 +135,15 @@ public class JsonMapper
     private static final String                    PARAM_ACTIVE                   = "active";
     private static final String                    PARAM_AUTOPLAY                 = "autoplay";
     private static final String                    PARAM_BTN_CLASS                = "btnClass";
-    private static final String                    PARAM_BTN_CLASS_CENTER         = "btnClassCenter";
-    private static final String                    PARAM_BTN_CLASS_LEFT           = "btnClassLeft";
-    private static final String                    PARAM_BTN_CLASS_RIGHT          = "btnClassRight";
-    private static final String                    PARAM_BTN_FUNCTION_CENTER      = "btnFunctionCenter";
-    private static final String                    PARAM_BTN_FUNCTION_LEFT        = "btnFunctionLeft";
-    private static final String                    PARAM_BTN_FUNCTION_RIGHT       = "btnFunctionRight";
-    private static final String                    PARAM_BTN_NAME_CENTER          = "btnNameCenter";
-    private static final String                    PARAM_BTN_NAME_LEFT            = "btnNameLeft";
-    private static final String                    PARAM_BTN_NAME_RIGHT           = "btnNameRight";
+    private static final String                    PARAM_BTN_CENTER_CLASS         = "btnCenterClass";
+    private static final String                    PARAM_BTN_LEFT_CLASS           = "btnLeftClass";
+    private static final String                    PARAM_BTN_RIGHT_CLASS          = "btnRightClass";
+    private static final String                    PARAM_BTN_CENTER_FUNCTION      = "btnCenterFunction";
+    private static final String                    PARAM_BTN_LEFT_FUNCTION        = "btnLeftFunction";
+    private static final String                    PARAM_BTN_RIGHT_FUNCTION       = "btnRightFunction";
+    private static final String                    PARAM_BTN_CENTER_NAME          = "btnCenterName";
+    private static final String                    PARAM_BTN_LEFT_NAME            = "btnLeftName";
+    private static final String                    PARAM_BTN_RIGHT_NAME           = "btnRightName";
     private static final String                    PARAM_CHECKED                  = "checked";
     private static final String                    PARAM_CLOSE_ON_OVERLAY_CLICK   = "closeOnOverlayClick";
     private static final String                    PARAM_CONNECTED_BTN            = "connectedBtn";
@@ -1877,10 +1877,10 @@ public class JsonMapper
             getParameterValue(element, depth, PARAM_CLOSE_ON_OVERLAY_CLICK, Boolean.class, Boolean.FALSE);
 
         String              btnLeftName             =
-            getParameterValue(element, depth, PARAM_BTN_NAME_LEFT, String.class, BasicText.CANCEL.getText());
+            getParameterValue(element, depth, PARAM_BTN_LEFT_NAME, String.class, BasicText.CANCEL.getText());
 
         ButtonClass         btnLeftClass            =
-            getParameterValue(element, depth, PARAM_BTN_CLASS_LEFT, ButtonClass.class, ButtonClass.DEFAULT);
+            getParameterValue(element, depth, PARAM_BTN_LEFT_CLASS, ButtonClass.class, ButtonClass.DEFAULT);
 
         AbsFunctionCall     btnLeftFunction         = null;
         String              fallbackBtnLeftFunction = DEFAULT_EMPTY_VAL;
@@ -1888,19 +1888,19 @@ public class JsonMapper
         try
         {
             btnLeftFunction =
-                getParameterValue(element, depth, PARAM_BTN_FUNCTION_LEFT, AbsFunctionCall.class, new CloseModal());
+                getParameterValue(element, depth, PARAM_BTN_LEFT_FUNCTION, AbsFunctionCall.class, new CloseModal());
         }
         catch (JsonParsingException ex)
         {
             fallbackBtnLeftFunction =
-                getParameterValue(element, depth, PARAM_BTN_FUNCTION_LEFT, String.class, DEFAULT_EMPTY_VAL);
+                getParameterValue(element, depth, PARAM_BTN_LEFT_FUNCTION, String.class, DEFAULT_EMPTY_VAL);
         }
 
         String          btnCenterName             =
-            getParameterValue(element, depth, PARAM_BTN_NAME_CENTER, String.class, DEFAULT_EMPTY_VAL);
+            getParameterValue(element, depth, PARAM_BTN_CENTER_NAME, String.class, DEFAULT_EMPTY_VAL);
 
         ButtonClass     btnCenterClass            =
-            getParameterValue(element, depth, PARAM_BTN_CLASS_CENTER, ButtonClass.class, ButtonClass.DEFAULT);
+            getParameterValue(element, depth, PARAM_BTN_CENTER_CLASS, ButtonClass.class, ButtonClass.DEFAULT);
 
         AbsFunctionCall btnCenterFunction         = null;
         String          fallbackBtnCenterFunction = DEFAULT_EMPTY_VAL;
@@ -1908,19 +1908,19 @@ public class JsonMapper
         try
         {
             btnCenterFunction =
-                getParameterValue(element, depth, PARAM_BTN_FUNCTION_CENTER, AbsFunctionCall.class);
+                getParameterValue(element, depth, PARAM_BTN_CENTER_FUNCTION, AbsFunctionCall.class);
         }
         catch (JsonParsingException ex)
         {
             fallbackBtnCenterFunction =
-                getParameterValue(element, depth, PARAM_BTN_FUNCTION_CENTER, String.class, DEFAULT_EMPTY_VAL);
+                getParameterValue(element, depth, PARAM_BTN_CENTER_FUNCTION, String.class, DEFAULT_EMPTY_VAL);
         }
 
         String          btnRightName             =
-            getParameterValue(element, depth, PARAM_BTN_NAME_RIGHT, String.class, "submit");
+            getParameterValue(element, depth, PARAM_BTN_RIGHT_NAME, String.class, "submit");
 
         ButtonClass     btnRightClass            =
-            getParameterValue(element, depth, PARAM_BTN_CLASS_RIGHT, ButtonClass.class, ButtonClass.DEFAULT);
+            getParameterValue(element, depth, PARAM_BTN_RIGHT_CLASS, ButtonClass.class, ButtonClass.DEFAULT);
 
         AbsFunctionCall btnRightFunction         = null;
         String          fallbackBtnRightFunction = DEFAULT_EMPTY_VAL;
@@ -1928,11 +1928,11 @@ public class JsonMapper
         try
         {
             btnRightFunction =
-                getParameterValue(element, depth, PARAM_BTN_FUNCTION_RIGHT, AbsFunctionCall.class, new SubmitFromModal());
+                getParameterValue(element, depth, PARAM_BTN_RIGHT_FUNCTION, AbsFunctionCall.class, new SubmitFromModal());
         }
         catch (JsonParsingException ex)
         {
-            fallbackBtnRightFunction = getParameterValue(element, depth, PARAM_BTN_FUNCTION_RIGHT, String.class);
+            fallbackBtnRightFunction = getParameterValue(element, depth, PARAM_BTN_RIGHT_FUNCTION, String.class);
         }
 
         List<Container> children = new ArrayList<>();
