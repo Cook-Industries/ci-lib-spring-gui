@@ -38,7 +38,6 @@ import de.cookindustries.lib.spring.gui.hmi.input.Date;
 import de.cookindustries.lib.spring.gui.hmi.input.File;
 import de.cookindustries.lib.spring.gui.hmi.input.Hidden;
 import de.cookindustries.lib.spring.gui.hmi.input.Input;
-import de.cookindustries.lib.spring.gui.hmi.input.Link;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
 import de.cookindustries.lib.spring.gui.hmi.input.Password;
 import de.cookindustries.lib.spring.gui.hmi.input.Radio;
@@ -817,37 +816,6 @@ public class JsonMapperTest
 
         Hidden hidden = (Hidden) input;
         assertEquals("hidden", hidden.getSubmitAs());
-
-        String html = HtmlMapper.map(container);
-        assertTrue(checkDivTags(html));
-    }
-
-    @Test
-    void test_map_LinkInput()
-    {
-        // setup
-        JsonMapper    mapper    =
-            JsonMapper
-                .builder()
-                .srcPath("json-mapper/input/link-input.ged")
-                .locale(Locale.ENGLISH)
-                .templateFileCache(templateFileCache)
-                .translationProvider(translationProvider)
-                .flatMappableDissector(flatMappableDissector)
-                .build();
-
-        // run
-        MapperResult  result    = mapper.map();
-
-        // verify
-        Container     container = result.getContainers().get(0);
-        FormContainer form      = (FormContainer) container;
-        Input         input     = form.getInputs().get(0);
-        assertEquals(Link.class, input.getClass());
-
-        Link link = (Link) input;
-        assertEquals("link", link.getText());
-        assertEquals("link/to/somewhere", link.getHref());
 
         String html = HtmlMapper.map(container);
         assertTrue(checkDivTags(html));

@@ -36,12 +36,6 @@ public final class Number extends SubmittableInput
     private final String  placeholder;
 
     @NonNull
-    private final String  prefix;
-
-    @NonNull
-    private final String  suffix;
-
-    @NonNull
     @Default
     private final String  onEnterPress = "";
 

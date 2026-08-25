@@ -63,7 +63,6 @@ import de.cookindustries.lib.spring.gui.hmi.input.File;
 import de.cookindustries.lib.spring.gui.hmi.input.Hidden;
 import de.cookindustries.lib.spring.gui.hmi.input.Input;
 import de.cookindustries.lib.spring.gui.hmi.input.InputType;
-import de.cookindustries.lib.spring.gui.hmi.input.Link;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
 import de.cookindustries.lib.spring.gui.hmi.input.Password;
 import de.cookindustries.lib.spring.gui.hmi.input.Radio;
@@ -759,9 +758,9 @@ public class JsonMapper
                 .filter(Objects::nonNull)
                 .map(m -> m.isUidActive(uid))
                 .filter(Objects::nonNull)
-                .allMatch(b -> b);;
+                .allMatch(b -> b);
 
-        boolean result =
+        boolean result     =
             finalizedTokenMaps
                 .stream()
                 .filter(Objects::nonNull)
@@ -1222,8 +1221,8 @@ public class JsonMapper
 
         for (PseudoElement pe : element.getChildren())
         {
-            String  uid            = resolveUid(element, depth);
-            boolean processElement = shouldProcess(element, uid, depth);
+            String  uid            = resolveUid(pe, depth);
+            boolean processElement = shouldProcess(pe, uid, depth);
 
             if (!processElement)
             {
@@ -1241,9 +1240,7 @@ public class JsonMapper
                     }
                     else
                     {
-                        LOG.warn("[{}]:[{}]: the child transform of [{}] failed due to not be of type [INPUT_VALUE]", uuid,
-                            depth,
-                            uid);
+                        LOG.warn("[{}]:[{}]: the child transform of [{}] failed due to not be of type [INPUT_VALUE]", uuid, depth, uid);
                     }
                     break;
 
@@ -1256,6 +1253,7 @@ public class JsonMapper
 
                 case "SVGPathCommandType":
                     values.add(returnType.cast(transformSVGPathCommand(pe, depth)));
+                    break;
 
                 default:
                     LOG.error("[{}]:[{}]: could not resolve child [{}] due to parameter [{}] is [unknown]", uuid, depth, uid,
@@ -2215,7 +2213,6 @@ public class JsonMapper
                 case DATE -> transformDateInput(element, depth);
                 case FILE -> transformFileInput(element, depth);
                 case HIDDEN -> transformHiddenInput(element, depth);
-                case LINK -> transformLinkInput(element, depth);
                 case NUMBER -> transformNumberInput(element, depth);
                 case PASSWORD -> transformPasswordInput(element, depth);
                 case RADIO -> transformRadioInput(element, depth);
@@ -2398,34 +2395,6 @@ public class JsonMapper
     }
 
     /**
-     * Transform a {@link PseudoElement} to an {@link Link} input.
-     *
-     * @param element to transfrom
-     * @param depth of the recursive operation
-     * @return the transformed object
-     */
-    private Link transformLinkInput(PseudoElement element, int depth)
-    {
-        ContainerParameters cpars   = resolveContainerBaseParameters(element, depth);
-
-        String              tooltip = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              text    = getParameterValue(element, depth, PARAM_TEXT, String.class);
-        String              href    = getParameterValue(element, depth, PARAM_HREF, String.class);
-        String              target  = getParameterValue(element, depth, PARAM_TARGET, String.class, DEFAULT_TARGET_SELF);
-
-        return Link
-            .builder()
-            .uid(cpars.uid())
-            .classes(cpars.classes())
-            .dataAttributes(cpars.attributes())
-            .tooltip(tooltip)
-            .text(text)
-            .href(href)
-            .target(target)
-            .build();
-    }
-
-    /**
      * Transform a {@link PseudoElement} to an {@link Number} input.
      *
      * @param element to transfrom
@@ -2441,8 +2410,6 @@ public class JsonMapper
         Integer             min          = getParameterValue(element, depth, PARAM_MIN, Integer.class, Integer.MIN_VALUE);
         Integer             max          = getParameterValue(element, depth, PARAM_MAX, Integer.class, Integer.MAX_VALUE);
         String              placeholder  = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
-        String              prefix       = getParameterValue(element, depth, PARAM_PREFIX, String.class, DEFAULT_EMPTY_VAL);
-        String              suffix       = getParameterValue(element, depth, PARAM_SUFFIX, String.class, DEFAULT_EMPTY_VAL);
         String              onEnterPress = getParameterValue(element, depth, PARAM_ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
 
         return Number
@@ -2461,8 +2428,6 @@ public class JsonMapper
             .min(min)
             .max(max)
             .placeholder(placeholder)
-            .prefix(prefix)
-            .suffix(suffix)
             .onEnterPress(onEnterPress)
             .build();
     }

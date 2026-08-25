@@ -12,7 +12,9 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.text.StringEscapeUtils;
@@ -43,7 +45,6 @@ import de.cookindustries.lib.spring.gui.hmi.input.Date;
 import de.cookindustries.lib.spring.gui.hmi.input.File;
 import de.cookindustries.lib.spring.gui.hmi.input.Hidden;
 import de.cookindustries.lib.spring.gui.hmi.input.Input;
-import de.cookindustries.lib.spring.gui.hmi.input.Link;
 import de.cookindustries.lib.spring.gui.hmi.input.Number;
 import de.cookindustries.lib.spring.gui.hmi.input.Password;
 import de.cookindustries.lib.spring.gui.hmi.input.Radio;
@@ -84,6 +85,7 @@ public final class HtmlMapper
     private static final String        TAG_TEXT                = "text";
     private static final String        TAG_GROUP               = "g";
     private static final String        TAG_PATH                = "path";
+    private static final String        TAG_SPAN                = "span";
 
     private static final String        ATT_ID                  = "id";
     private static final String        ATT_NAME                = "name";
@@ -177,6 +179,19 @@ public final class HtmlMapper
         String s = name + " element not supported yet.";
 
         return StringAdapter.prefixAndSuffix("<div>", s, "</div>");
+    }
+
+    /**
+     * Check whether a {@code String} is {@code null} or {@code blank}.
+     * 
+     * @param sup to test
+     * @return {@code true} if {@code sup} is non {@code null} and non {@code blank}
+     */
+    private boolean isFilled(Supplier<String> sup)
+    {
+        String s = sup.get();
+
+        return !(Objects.isNull(s) || s.isBlank());
     }
 
     /**
@@ -850,7 +865,6 @@ public final class HtmlMapper
             case DATE -> render((Date) input, formId);
             case FILE -> render((File) input, formId);
             case HIDDEN -> render((Hidden) input, formId);
-            case LINK -> render((Link) input, formId);
             case NUMBER -> render((Number) input, formId);
             case PASSWORD -> render((Password) input, formId);
             case RADIO -> render((Radio) input, formId);
@@ -910,6 +924,7 @@ public final class HtmlMapper
                     .builder()
                     .name(ATT_ON_INPUT)
                     .value(input.getOnInput())
+                    .active(isFilled(input::getOnInput))
                     .build())
             .attribute(
                 Attribute
@@ -1153,12 +1168,6 @@ public final class HtmlMapper
                 .build();
 
         return elementMapper.html();
-    }
-
-    private String render(Link link, String formId)
-    {
-        // TODO: implement
-        return elementNotYetImplemented("link input");
     }
 
     private String render(Number number, String formId)
