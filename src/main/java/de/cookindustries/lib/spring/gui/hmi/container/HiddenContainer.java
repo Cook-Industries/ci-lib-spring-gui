@@ -7,8 +7,10 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.container;
 
-import io.micrometer.common.lang.NonNull;
+import java.util.List;
+
 import lombok.Getter;
+import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -24,8 +26,8 @@ import lombok.extern.jackson.Jacksonized;
 public final class HiddenContainer extends Container
 {
 
-    @NonNull
-    private final Container child;
+    @Singular
+    private final List<Container> children;
 
     @Override
     protected ContainerType inferType()

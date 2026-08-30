@@ -36,7 +36,6 @@ import de.cookindustries.lib.spring.gui.hmi.container.AudioContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.BurgerContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.BurgerItem;
 import de.cookindustries.lib.spring.gui.hmi.container.Button;
-import de.cookindustries.lib.spring.gui.hmi.container.ButtonBarContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.ButtonClass;
 import de.cookindustries.lib.spring.gui.hmi.container.ButtonIcon;
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
@@ -57,7 +56,6 @@ import de.cookindustries.lib.spring.gui.hmi.container.TableContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.TableRowContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.TextContainer;
 import de.cookindustries.lib.spring.gui.hmi.input.Checkbox;
-import de.cookindustries.lib.spring.gui.hmi.input.Currency;
 import de.cookindustries.lib.spring.gui.hmi.input.Date;
 import de.cookindustries.lib.spring.gui.hmi.input.File;
 import de.cookindustries.lib.spring.gui.hmi.input.Hidden;
@@ -129,26 +127,49 @@ import lombok.Singular;
 public class JsonMapper
 {
 
+    private static final String                    PARAM_TABLE_NAME               = "tableName";
+
+    private static final String                    PARAM_COLUMN_NAMES             = "columnNames";
+
+    private static final String                    PARAM_SORTABLE                 = "sortable";
+
     private static final Logger                    LOG                            = LoggerFactory.getLogger(JsonMapper.class);
 
     private static final String                    PARAM_ACTIVE                   = "active";
+    private static final String                    PARAM_ACCEPT                   = "accept";
+    private static final String                    PARAM_ANGLE_LARGE_ARC_FLAG     = "angleLargeArcFlag";
     private static final String                    PARAM_AUTOPLAY                 = "autoplay";
-    private static final String                    PARAM_BTN_CLASS                = "btnClass";
+    private static final String                    PARAM_BOXES                    = "boxes";
     private static final String                    PARAM_BTN_CENTER_CLASS         = "btnCenterClass";
-    private static final String                    PARAM_BTN_LEFT_CLASS           = "btnLeftClass";
-    private static final String                    PARAM_BTN_RIGHT_CLASS          = "btnRightClass";
     private static final String                    PARAM_BTN_CENTER_FUNCTION      = "btnCenterFunction";
-    private static final String                    PARAM_BTN_LEFT_FUNCTION        = "btnLeftFunction";
-    private static final String                    PARAM_BTN_RIGHT_FUNCTION       = "btnRightFunction";
     private static final String                    PARAM_BTN_CENTER_NAME          = "btnCenterName";
+    private static final String                    PARAM_BTN_CLASS                = "btnClass";
+    private static final String                    PARAM_BTN_LEFT_CLASS           = "btnLeftClass";
+    private static final String                    PARAM_BTN_LEFT_FUNCTION        = "btnLeftFunction";
     private static final String                    PARAM_BTN_LEFT_NAME            = "btnLeftName";
+    private static final String                    PARAM_BTN_RIGHT_CLASS          = "btnRightClass";
+    private static final String                    PARAM_BTN_RIGHT_FUNCTION       = "btnRightFunction";
     private static final String                    PARAM_BTN_RIGHT_NAME           = "btnRightName";
     private static final String                    PARAM_CHECKED                  = "checked";
     private static final String                    PARAM_CLOSE_ON_OVERLAY_CLICK   = "closeOnOverlayClick";
     private static final String                    PARAM_CONNECTED_BTN            = "connectedBtn";
     private static final String                    PARAM_CONTROLS                 = "controls";
+    private static final String                    PARAM_CONTROL_POINT_1_X        = "controlPoint1X";
+    private static final String                    PARAM_CONTROL_POINT_1_Y        = "controlPoint1Y";
+    private static final String                    PARAM_CONTROL_POINT_2_X        = "controlPoint2X";
+    private static final String                    PARAM_CONTROL_POINT_2_Y        = "controlPoint2Y";
+    private static final String                    PARAM_CONTROL_POINT_X          = "controlPointX";
+    private static final String                    PARAM_CONTROL_POINT_Y          = "controlPointY";
     private static final String                    PARAM_DIRECTION                = "direction";
+    private static final String                    PARAM_DISABLED                 = "disabled";
+    private static final String                    PARAM_DX                       = "dx";
+    private static final String                    PARAM_DY                       = "dy";
     private static final String                    PARAM_ELEMENT_SOURCE           = "elementSource";
+    private static final String                    PARAM_END_POINT_X              = "endPointX";
+    private static final String                    PARAM_END_POINT_Y              = "endPointY";
+    private static final String                    PARAM_ENFORCE_WHITELIST        = "enforceWhitelist";
+    private static final String                    PARAM_FETCH_URL                = "fetchUrl";
+    private static final String                    PARAM_HEIGHT                   = "height";
     private static final String                    PARAM_HREF                     = "href";
     private static final String                    PARAM_ICON                     = "icon";
     private static final String                    PARAM_ID                       = "id";
@@ -157,44 +178,49 @@ public class JsonMapper
     private static final String                    PARAM_INFO_URL                 = "infoUrl";
     private static final String                    PARAM_INLINE                   = "inline";
     private static final String                    PARAM_IS_SOURCE_LIST           = "isSourceList";
+    private static final String                    PARAM_MANDATORY                = "mandatory";
     private static final String                    PARAM_MAX                      = "max";
     private static final String                    PARAM_MAX_CHARS                = "maxChars";
+    private static final String                    PARAM_MAX_TAGS                 = "maxTags";
     private static final String                    PARAM_METHOD                   = "method";
     private static final String                    PARAM_MIN                      = "min";
+    private static final String                    PARAM_MULTIPLE                 = "multiple";
     private static final String                    PARAM_NAME                     = "name";
     private static final String                    PARAM_ON_CLICK                 = "onClick";
     private static final String                    PARAM_ON_ENTER_PRESS           = "onEnterPress";
     private static final String                    PARAM_ON_INPUT                 = "onInput";
     private static final String                    PARAM_PATH                     = "path";
+    private static final String                    PARAM_PATTERN                  = "pattern";
     private static final String                    PARAM_PLACEHOLDER              = "placeholder";
     private static final String                    PARAM_PREFIX                   = "prefix";
+    private static final String                    PARAM_RELATIVE                 = "relative";
     private static final String                    PARAM_REPETITION_SOURCE        = "repetitionSource";
     private static final String                    PARAM_REQUEST_URL              = "requestUrl";
+    private static final String                    PARAM_ROTATE                   = "rotate";
+    private static final String                    PARAM_RX                       = "rx";
+    private static final String                    PARAM_RY                       = "ry";
+    private static final String                    PARAM_SEARCH_URL               = "searchUrl";
     private static final String                    PARAM_SIZE                     = "size";
     private static final String                    PARAM_SRC                      = "src";
+    private static final String                    PARAM_STYLE                    = "style";
     private static final String                    PARAM_SUBMIT_AS                = "submitAs";
     private static final String                    PARAM_SUFFIX                   = "suffix";
+    private static final String                    PARAM_SWEEP_FLAG               = "sweepFlag";
     private static final String                    PARAM_TARGET                   = "target";
     private static final String                    PARAM_TEXT                     = "text";
+    private static final String                    PARAM_TEXT_LENGTH              = "textLength";
     private static final String                    PARAM_TITLE                    = "title";
     private static final String                    PARAM_TOOLTIP                  = "tooltip";
     private static final String                    PARAM_URL                      = "url";
     private static final String                    PARAM_VALUE                    = "value";
+    private static final String                    PARAM_VALUES                   = "values";
+    private static final String                    PARAM_WIDTH                    = "width";
     private static final String                    PARAM_X                        = "x";
-    private static final String                    PARAM_Y                        = "y";
-    private static final String                    PARAM_DX                       = "dx";
-    private static final String                    PARAM_DY                       = "dy";
     private static final String                    PARAM_X1                       = "x1";
     private static final String                    PARAM_X2                       = "x2";
+    private static final String                    PARAM_Y                        = "y";
     private static final String                    PARAM_Y1                       = "y1";
     private static final String                    PARAM_Y2                       = "y2";
-    private static final String                    PARAM_ROTATE                   = "rotate";
-    private static final String                    PARAM_TEXT_LENGTH              = "textLength";
-    private static final String                    PARAM_WIDTH                    = "width";
-    private static final String                    PARAM_HEIGHT                   = "height";
-    private static final String                    PARAM_STYLE                    = "style";
-    private static final String                    PARAM_VALUES                   = "values";
-    private static final String                    PARAM_DISABLED                 = "disabled";
 
     private static final String                    RANDOM_ID                      = "randomid";
     private static final String                    CONNECTED_BTN                  = "connected-btn";
@@ -204,12 +230,15 @@ public class JsonMapper
     private static final String                    DEFAULT_EMPTY_VAL              = "";
     private static final String                    DEFAULT_TARGET_SELF            = "_self";
     private static final String                    DEFAULT_BURGER_ICON            = "bi-caret-right-fill";
+    private static final String                    DEFAULT_VALUE_NOT_SET          = "value not set";
+    private static final String                    DEFAULT_NOT_SELECTED           = "NOT_SELECTED";
 
     private static final String                    BASE_INDICATOR_START           = "$$";
-    private static final String                    INDICATOR_VALUE_PLACEHOLDER    = "$$value$";
-    private static final String                    INDICATOR_TEXT_PLACEHOLDER     = "$$text$";
-    private static final String                    INDICATOR_CLASS_PLACEHOLDER    = "$$class$";
-    private static final String                    INDICATOR_FUNCTION_PLACEHOLDER = "$$function$";
+    private static final String                    INDICATOR_SEPARATOR            = "$";
+    private static final String                    INDICATOR_VALUE_PLACEHOLDER    = BASE_INDICATOR_START + "value" + INDICATOR_SEPARATOR;
+    private static final String                    INDICATOR_TEXT_PLACEHOLDER     = BASE_INDICATOR_START + "text" + INDICATOR_SEPARATOR;
+    private static final String                    INDICATOR_CLASS_PLACEHOLDER    = BASE_INDICATOR_START + "class" + INDICATOR_SEPARATOR;
+    private static final String                    INDICATOR_FUNCTION_PLACEHOLDER = BASE_INDICATOR_START + "function" + INDICATOR_SEPARATOR;
 
     private static final StaticTranslationProvider NOOP_TRANSLATION_PROVIDER      = new StaticTranslationProvider();
 
@@ -218,7 +247,6 @@ public class JsonMapper
             ContainerType.AUDIO,
             ContainerType.BUTTON,
             ContainerType.BURGER,
-            ContainerType.BUTTON_BAR,
             ContainerType.BUTTON_ICON,
             ContainerType.CONTENT,
             ContainerType.FORM,
@@ -240,7 +268,6 @@ public class JsonMapper
         {
             ContainerType.BUTTON,
             ContainerType.BURGER,
-            ContainerType.BUTTON_BAR,
             ContainerType.BUTTON_ICON,
             ContainerType.CONTENT,
             ContainerType.HIDDEN,
@@ -290,7 +317,7 @@ public class JsonMapper
 
     private final List<AbsFunctionCall>            functions                      = new ArrayList<>();
 
-    private final String                           uuid                           = nextId();
+    private final String                           uuid                           = UUID.randomUUID().toString();
 
     @Default
     private Integer                                count                          = 0;
@@ -363,16 +390,6 @@ public class JsonMapper
     /*
      * --- > utility functions -------------------------------------------------------------------------------------------------------------
      */
-
-    /**
-     * Create a new id for this mapper.
-     * 
-     * @return a id build from {@code day-of-month} {@code month-value / 2} {@code 5-digit random number}
-     */
-    private String nextId()
-    {
-        return UUID.randomUUID().toString();
-    }
 
     private Container throwNotSupported(PseudoElement element, int depth)
     {
@@ -751,6 +768,11 @@ public class JsonMapper
      */
     private boolean checkActiveStateFromTokenMaps(String uid) throws JsonMapperException
     {
+        if (Objects.isNull(uid))
+        {
+            return true;
+        }
+
         boolean tempResult =
             tempTokenMaps
                 .values()
@@ -768,7 +790,7 @@ public class JsonMapper
                 .filter(Objects::nonNull)
                 .allMatch(b -> b);
 
-        return uid == null || (tempResult && result);
+        return (tempResult && result);
     }
 
     /**
@@ -796,15 +818,16 @@ public class JsonMapper
      */
     private InputParameters resolveInputBaseParameters(PseudoElement element, int depth)
     {
-        String  tooltip  = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String  name     = getParameterValue(element, depth, PARAM_NAME, String.class);
-        String  submitAs = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class, DEFAULT_EMPTY_VAL);
-        String  onInput  = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
-        String  infoText = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
-        String  infoUrl  = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
-        boolean disabled = getParameterValue(element, depth, PARAM_DISABLED, Boolean.class, false);
+        String  tooltip   = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String  name      = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String  submitAs  = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class, DEFAULT_EMPTY_VAL);
+        String  onInput   = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
+        String  infoText  = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
+        String  infoUrl   = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
+        boolean disabled  = getParameterValue(element, depth, PARAM_DISABLED, Boolean.class, false);
+        boolean mandatory = getParameterValue(element, depth, PARAM_MANDATORY, Boolean.class, false);
 
-        return new InputParameters(tooltip, name, submitAs, onInput, infoText, infoUrl, disabled);
+        return new InputParameters(tooltip, name, submitAs, onInput, infoText, infoUrl, disabled, mandatory);
     }
 
     /**
@@ -990,19 +1013,9 @@ public class JsonMapper
      * @return the resolved type
      * @throws JsonParsingException if the value could not be resolved
      */
-    private <T> T resolveSingleValue(String uid, int depth, String key, Object rawValue, Class<T> expectedType,
-        boolean processPlaceholder)
+    private <T> T resolveSingleValue(String uid, int depth, String key, Object rawValue, Class<T> expectedType, boolean processPlaceholder)
     {
         // ---> DO NOT CHANGE ORDER BETWEEN HERE...
-        // process first strings that should resolve to enums
-        if (rawValue instanceof String enumVal && expectedType.isEnum())
-        {
-            @SuppressWarnings({"unchecked", "rawtypes"})
-            Enum<?> temp = Enum.valueOf((Class) expectedType, enumVal.toUpperCase());
-
-            return expectedType.cast(temp);
-        }
-
         // resolve strings that can be replacement strings
         if (rawValue instanceof String strVal)
         {
@@ -1012,6 +1025,15 @@ public class JsonMapper
             }
             else
             {
+                // process strings that should resolve to enums
+                if (expectedType.isEnum())
+                {
+                    @SuppressWarnings({"unchecked", "rawtypes"})
+                    Enum<?> temp = Enum.valueOf((Class) expectedType, strVal.toUpperCase());
+
+                    return expectedType.cast(temp);
+                }
+
                 return transformRawStringValue(uid, depth, strVal, expectedType);
             }
         }
@@ -1023,7 +1045,7 @@ public class JsonMapper
         }
         // ---> ... AND HERE.
 
-        throw new JsonParsingException(uid, 0, this.count,
+        throw new JsonParsingException(uid, depth, this.count,
             String.format("parameter [%s] parsing inconclusive for value [%s] expected type [%s]", key, rawValue,
                 expectedType.getSimpleName()));
     }
@@ -1074,7 +1096,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} as a internal component.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -1267,7 +1289,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link InputValue}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -1331,8 +1353,7 @@ public class JsonMapper
 
         if (!processElement)
         {
-            LOG.debug("[{}]:[{}]: skip CONTAINER [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth,
-                uid);
+            LOG.debug("[{}]:[{}]: skip CONTAINER [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth, uid);
 
             return List.of(EmptyContainer.builder().build());
         }
@@ -1386,27 +1407,30 @@ public class JsonMapper
 
             try
             {
-                String targetListName = getParameterValue(element, depth, PARAM_REPETITION_SOURCE, String.class);
-                targetList = extractFromTokenMapsAsValue(targetListName, FlatMappableList.class);
+                String  targetName   =
+                    getParameterValue(element, depth, PARAM_ELEMENT_SOURCE, String.class, DEFAULT_VALUE_NOT_SET);
 
-                numberOfRepetitions = targetList.size();
+                boolean targetIsList =
+                    getParameterValue(element, depth, PARAM_REPETITION_SOURCE, Boolean.class, false);
 
-                LOG.debug("[{}]:[{}]: repeat container [{}] times", uuid, depth, numberOfRepetitions);
-            }
-            catch (JsonParsingException ex)
-            {
-                LOG.trace("[{}]:[{}]: repetitionSource not set", uuid, depth);
-
-                try
+                if (!DEFAULT_VALUE_NOT_SET.equalsIgnoreCase(targetName))
                 {
-                    String targetName = getParameterValue(element, depth, PARAM_ELEMENT_SOURCE, String.class);
-                    target = extractFromTokenMapsAsValue(targetName, FlatMappable.class);
+                    if (targetIsList)
+                    {
+                        LOG.debug("[{}]:[{}]: repetition source element found", uuid, depth);
 
-                    LOG.debug("[{}]:[{}]: source element found", uuid, depth);
-                }
-                catch (JsonParsingException exInner)
-                {
-                    LOG.trace("[{}]:[{}]: elementSource not set", uuid, depth);
+                        targetList = extractFromTokenMapsAsValue(targetName, FlatMappableList.class);
+
+                        numberOfRepetitions = targetList.size();
+
+                        LOG.debug("[{}]:[{}]: repeat container [{}] times", uuid, depth, numberOfRepetitions);
+                    }
+                    else
+                    {
+                        LOG.debug("[{}]:[{}]: source element found", uuid, depth);
+
+                        target = extractFromTokenMapsAsValue(targetName, FlatMappable.class);
+                    }
                 }
             }
             catch (JsonMapperException ex)
@@ -1421,13 +1445,15 @@ public class JsonMapper
             for (int i = 0; i < numberOfRepetitions; i++)
             {
                 TokenMap      tempTokenMap  = null;
+
                 PseudoElement repeatElement =
-                    numberOfRepetitions > 1 && element.getUid() != null
-                        ? element
-                            .toBuilder()
-                            .uid(uid + "-" + i)
-                            .build()
-                        : element;
+                    numberOfRepetitions > 1
+                        && element.getUid() != null
+                            ? element
+                                .toBuilder()
+                                .uid(uid + "-" + i)
+                                .build()
+                            : element;
 
                 if (targetList != null)
                 {
@@ -1457,10 +1483,9 @@ public class JsonMapper
 
                 Container result = switch (type)
                 {
-                    case AUDIO -> transfromAudioContainer(repeatElement, depth);
-                    case BURGER -> transfromBurgerContainer(repeatElement, depth);
-                    case BUTTON -> transfromButtonContainer(repeatElement, depth);
-                    case BUTTON_BAR -> transformButtonBarContainer(repeatElement, depth);
+                    case AUDIO -> transformAudioContainer(repeatElement, depth);
+                    case BURGER -> transformBurgerContainer(repeatElement, depth);
+                    case BUTTON -> transformButtonContainer(repeatElement, depth);
                     case BUTTON_ICON -> transformButtonIconContainer(repeatElement, depth);
                     case CONTENT -> transformContentContainer(repeatElement, depth);
                     case EMPTY -> EmptyContainer.builder().build();
@@ -1514,11 +1539,11 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link AudioContainer}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private AudioContainer transfromAudioContainer(PseudoElement element, int depth)
+    private AudioContainer transformAudioContainer(PseudoElement element, int depth)
     {
         ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
 
@@ -1540,11 +1565,11 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link BurgerContainer}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private BurgerContainer transfromBurgerContainer(PseudoElement element, int depth)
+    private BurgerContainer transformBurgerContainer(PseudoElement element, int depth)
     {
         ContainerParameters cpars = resolveContainerBaseParameters(element, depth);
 
@@ -1571,7 +1596,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link BurgerItem}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -1617,11 +1642,11 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link ButtonContainer}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
-    private Button transfromButtonContainer(PseudoElement element, int depth)
+    private Button transformButtonContainer(PseudoElement element, int depth)
     {
         ContainerParameters cpars               = resolveContainerBaseParameters(element, depth);
 
@@ -1653,21 +1678,9 @@ public class JsonMapper
     }
 
     /**
-     * Transform a {@link PseudoElement} to an {@link ButtonBarContainer}.
-     *
-     * @param element to transfrom
-     * @param depth of the recursive operation
-     * @return the transformed object
-     */
-    private ButtonBarContainer transformButtonBarContainer(PseudoElement element, int depth)
-    {
-        return (ButtonBarContainer) throwNotSupported(element, depth);
-    }
-
-    /**
      * Transform a {@link PseudoElement} to an {@link ButtonIconContainer}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -1707,7 +1720,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link ContentContainer}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -1734,7 +1747,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link FormContainer}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -1775,34 +1788,38 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link HiddenContainer}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
     private HiddenContainer transformHiddenContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars = resolveContainerBaseParameters(element, depth);
+        ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
 
-        Container           child =
+        List<Container>     children = new ArrayList<>();
+
+        if (!element.getChildren().isEmpty())
+        {
             element
                 .getChildren()
-                .isEmpty()
-                    ? null
-                    : transform(element.getChildren().get(0), depth + 1, CONTENT_CONTAINER_CHILDREN).get(0);
+                .stream()
+                .map(this::transform)
+                .forEach(children::addAll);
+        }
 
         return HiddenContainer
             .builder()
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
-            .child(child)
+            .children(children)
             .build();
     }
 
     /**
      * Transform a {@link PseudoElement} to an {@link ImageContainer}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -1826,7 +1843,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link LinkContainer}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -1858,7 +1875,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link Modal}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -1968,7 +1985,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SplittedContainer}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -1985,15 +2002,15 @@ public class JsonMapper
         {
             if (cnt > 0 && cnt < element.getChildren().size() - 1)
             {
-                center.addAll(transform(pe, depth, CONTENT_CONTAINER_CHILDREN));
+                center.addAll(transform(pe, depth + 1, CONTENT_CONTAINER_CHILDREN));
             }
             else if (cnt == 0)
             {
-                head = transform(pe, depth, CONTENT_CONTAINER_CHILDREN).get(0);
+                head = transform(pe, depth + 1, CONTENT_CONTAINER_CHILDREN).get(0);
             }
             else
             {
-                tail = transform(pe, depth, CONTENT_CONTAINER_CHILDREN).get(0);
+                tail = transform(pe, depth + 1, CONTENT_CONTAINER_CHILDREN).get(0);
             }
 
             cnt++;
@@ -2013,7 +2030,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SVGContainer}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2045,7 +2062,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link TabContainer}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2057,7 +2074,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link TabContainer}
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2066,14 +2083,14 @@ public class JsonMapper
         ContainerParameters cpars       = resolveContainerBaseParameters(element, depth);
 
         String              name        = getParameterValue(element, depth, PARAM_NAME, String.class);
-        Boolean             sortable    = getParameterValue(element, depth, "sortable", Boolean.class, false);
-        List<String>        columnNames = getParameterList(element, depth, "columnNames", String.class);
+        Boolean             sortable    = getParameterValue(element, depth, PARAM_SORTABLE, Boolean.class, false);
+        List<String>        columnNames = getParameterList(element, depth, PARAM_COLUMN_NAMES, String.class);
 
         List<Container>     rows        = new ArrayList<>();
 
         for (PseudoElement pe : element.getChildren())
         {
-            rows.addAll(transform(pe, depth, ContainerType.TABLE_ROW));
+            rows.addAll(transform(pe, depth + 1, ContainerType.TABLE_ROW));
         }
 
         return TableContainer
@@ -2091,7 +2108,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link TabContainer}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2099,7 +2116,7 @@ public class JsonMapper
     {
         ContainerParameters cpars     = resolveContainerBaseParameters(element, depth);
 
-        String              tableName = getParameterValue(element, depth, "tableName", String.class);
+        String              tableName = getParameterValue(element, depth, PARAM_TABLE_NAME, String.class);
         List<Container>     cells     = new ArrayList<>();
 
         for (PseudoElement pe : element.getChildren())
@@ -2120,7 +2137,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link TextContainer}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2146,7 +2163,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link TextContainer}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2191,7 +2208,7 @@ public class JsonMapper
     {
         InputType type           = InputType.valueOf(element.getType().toUpperCase());
 
-        String    uid            = element.getUid() == null ? "random uid" : element.getUid();
+        String    uid            = element.getUid() == null ? RANDOM_ID : element.getUid();
 
         boolean   processElement = shouldProcess(element, uid, depth);
 
@@ -2209,7 +2226,6 @@ public class JsonMapper
             return switch (type)
             {
                 case CHECKBOX -> transformCheckboxInput(element, depth);
-                case CURRENCY -> transformCurrencyInput(element, depth);
                 case DATE -> transformDateInput(element, depth);
                 case FILE -> transformFileInput(element, depth);
                 case HIDDEN -> transformHiddenInput(element, depth);
@@ -2235,7 +2251,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link Checkbox} input.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2244,12 +2260,12 @@ public class JsonMapper
         ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
         InputParameters     ipars    = resolveInputBaseParameters(element, depth);
 
-        String              boxesSrc = getParameterValue(element, depth, "boxes", String.class, DEFAULT_EMPTY_VAL);
+        String              boxesSrc = getParameterValue(element, depth, PARAM_BOXES, String.class, DEFAULT_EMPTY_VAL);
 
         List<InputValue>    boxes    =
             boxesSrc.isBlank()
                 ? handleChildren(element, cpars.uid(), InputValue.class, List.of(), InputValue.class, depth, false)
-                : handlePossiblePlaceholder(boxesSrc, InputValueList.class, new InputValueList(), depth);
+                : handlePossiblePlaceholder(INDICATOR_VALUE_PLACEHOLDER + boxesSrc, InputValueList.class, new InputValueList(), depth);
 
         return Checkbox
             .builder()
@@ -2263,54 +2279,15 @@ public class JsonMapper
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
+            .mandatory(ipars.mandatory())
             .boxes(boxes)
-            .build();
-    }
-
-    /**
-     * Transform a {@link PseudoElement} to an {@link Currency} input.
-     *
-     * @param element to transfrom
-     * @param depth of the recursive operation
-     * @return the transformed object
-     */
-    private Currency transformCurrencyInput(PseudoElement element, int depth)
-    {
-        ContainerParameters cpars       = resolveContainerBaseParameters(element, depth);
-        InputParameters     ipars       = resolveInputBaseParameters(element, depth);
-
-        Integer             valueF      = getParameterValue(element, depth, "valueF", Integer.class, 0);
-        Integer             valueB      = getParameterValue(element, depth, "valueB", Integer.class, 0);
-        String              symbol      = getParameterValue(element, depth, "symbol", String.class, DEFAULT_EMPTY_VAL);
-        Integer             min         = getParameterValue(element, depth, PARAM_MIN, Integer.class, Integer.MIN_VALUE);
-        Integer             max         = getParameterValue(element, depth, PARAM_MAX, Integer.class, Integer.MAX_VALUE);
-        String              placeholder = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
-
-        return Currency
-            .builder()
-            .uid(cpars.uid())
-            .classes(cpars.classes())
-            .dataAttributes(cpars.attributes())
-            .tooltip(ipars.tooltip())
-            .name(ipars.name())
-            .submitAs(ipars.submitAs())
-            .onInput(ipars.onInput())
-            .infoText(ipars.infoText())
-            .infoUrl(ipars.infoUrl())
-            .disabled(ipars.disabled())
-            .valueF(valueF)
-            .valueB(valueB)
-            .symbol(symbol)
-            .min(min)
-            .max(max)
-            .placeholder(placeholder)
             .build();
     }
 
     /**
      * Transform a {@link PseudoElement} to an {@link Date} input.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2333,6 +2310,7 @@ public class JsonMapper
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
+            .mandatory(ipars.mandatory())
             .value(value)
             .build();
     }
@@ -2340,7 +2318,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link File} input.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2349,8 +2327,8 @@ public class JsonMapper
         ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
         InputParameters     ipars    = resolveInputBaseParameters(element, depth);
 
-        Boolean             multiple = getParameterValue(element, depth, "multiple", Boolean.class, Boolean.FALSE);
-        List<String>        accept   = getParameterList(element, depth, "accept", String.class, List.of("*"));
+        Boolean             multiple = getParameterValue(element, depth, PARAM_MULTIPLE, Boolean.class, Boolean.FALSE);
+        List<String>        accept   = getParameterList(element, depth, PARAM_ACCEPT, String.class, List.of("*"));
 
         return File
             .builder()
@@ -2364,6 +2342,7 @@ public class JsonMapper
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
+            .mandatory(ipars.mandatory())
             .multiple(multiple)
             .accepts(accept)
             .build();
@@ -2372,7 +2351,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link Hidden} input.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2397,7 +2376,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link Number} input.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2424,6 +2403,7 @@ public class JsonMapper
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
+            .mandatory(ipars.mandatory())
             .value(value)
             .min(min)
             .max(max)
@@ -2435,7 +2415,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link Password} input.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2459,6 +2439,7 @@ public class JsonMapper
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
+            .mandatory(ipars.mandatory())
             .placeholder(placeholder)
             .onEnterPress(onEnterPress)
             .build();
@@ -2467,7 +2448,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link Radio} input.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2495,6 +2476,7 @@ public class JsonMapper
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
+            .mandatory(ipars.mandatory())
             .values(values)
             .build();
     }
@@ -2502,7 +2484,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link Select} input.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2511,7 +2493,7 @@ public class JsonMapper
         ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
         InputParameters     ipars    = resolveInputBaseParameters(element, depth);
 
-        String              value    = getParameterValue(element, depth, PARAM_VALUE, String.class, "NOT_SELECTED");
+        String              value    = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_NOT_SELECTED);
         String              valueSrc = getParameterValue(element, depth, PARAM_VALUES, String.class, DEFAULT_EMPTY_VAL);
 
         List<InputValue>    values   =
@@ -2531,6 +2513,7 @@ public class JsonMapper
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
+            .mandatory(ipars.mandatory())
             .selected(value)
             .values(values)
             .build();
@@ -2539,7 +2522,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link Slider} input.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2564,6 +2547,7 @@ public class JsonMapper
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
+            .mandatory(ipars.mandatory())
             .value(value)
             .min(min)
             .max(max)
@@ -2573,7 +2557,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link Switch} input.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2596,6 +2580,7 @@ public class JsonMapper
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
+            .mandatory(ipars.mandatory())
             .checked(checked)
             .build();
     }
@@ -2603,7 +2588,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link TagInput} input.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2613,11 +2598,11 @@ public class JsonMapper
         InputParameters     ipars            = resolveInputBaseParameters(element, depth);
 
         String              value            = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
-        String              pattern          = getParameterValue(element, depth, "pattern", String.class, DEFAULT_EMPTY_VAL);
-        String              fetchUrl         = getParameterValue(element, depth, "fetchUrl", String.class, DEFAULT_EMPTY_VAL);
-        String              searchUrl        = getParameterValue(element, depth, "searchUrl", String.class, DEFAULT_EMPTY_VAL);
-        Boolean             enforceWhitelist = getParameterValue(element, depth, "enforceWhitelist", Boolean.class, Boolean.FALSE);
-        Integer             maxTags          = getParameterValue(element, depth, "maxTags", Integer.class, Integer.MAX_VALUE);
+        String              pattern          = getParameterValue(element, depth, PARAM_PATTERN, String.class, DEFAULT_EMPTY_VAL);
+        String              fetchUrl         = getParameterValue(element, depth, PARAM_FETCH_URL, String.class, DEFAULT_EMPTY_VAL);
+        String              searchUrl        = getParameterValue(element, depth, PARAM_SEARCH_URL, String.class, DEFAULT_EMPTY_VAL);
+        Boolean             enforceWhitelist = getParameterValue(element, depth, PARAM_ENFORCE_WHITELIST, Boolean.class, Boolean.FALSE);
+        Integer             maxTags          = getParameterValue(element, depth, PARAM_MAX_TAGS, Integer.class, Integer.MAX_VALUE);
 
         TagInputSettings    settings         =
             TagInputSettings
@@ -2643,6 +2628,7 @@ public class JsonMapper
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
+            .mandatory(ipars.mandatory())
             .value(value)
             .pattern(pattern)
             .build();
@@ -2651,7 +2637,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link Textarea} input.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2676,6 +2662,7 @@ public class JsonMapper
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
+            .mandatory(ipars.mandatory())
             .value(value)
             .maxCharacters(maxChars)
             .placeholder(placeholder)
@@ -2685,7 +2672,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link Textbox} input.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2707,7 +2694,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link Textfield} input.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2740,6 +2727,7 @@ public class JsonMapper
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
+            .mandatory(ipars.mandatory())
             .value(value)
             .placeholder(placeholder)
             .prefix(prefix)
@@ -2752,7 +2740,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SVGContainer}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2900,14 +2888,14 @@ public class JsonMapper
         return SVGText
             .builder()
             .clazz("svg-text-warn")
-            .text(String.format("the creation of this svg element failed. please rever to the server log. mapper id: [%s]", uuid))
+            .text(String.format("the creation of this svg element failed. please refer to the server log. mapper id: [%s]", uuid))
             .build();
     }
 
     /**
      * Transform a {@link PseudoElement} to an {@link SVGLine}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2937,7 +2925,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SVGLine}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -2971,7 +2959,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SVGLine}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -3000,7 +2988,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SVGPathCommand}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -3024,19 +3012,19 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SVGPathCmdA}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
     private SVGPathCmdA transformSVGPathCmdA(PseudoElement element, int depth)
     {
-        Boolean relative          = getParameterValue(element, depth, "relative", Boolean.class, false);
-        Double  rx                = getParameterValue(element, depth, "rx", Double.class);
-        Double  ry                = getParameterValue(element, depth, "ry", Double.class);
-        Integer angleLargeArcFlag = getParameterValue(element, depth, "rx", Integer.class, 0);
-        Integer sweepFlag         = getParameterValue(element, depth, "ry", Integer.class, 0);
-        Double  endPointX         = getParameterValue(element, depth, "endPointX", Double.class);
-        Double  endPointY         = getParameterValue(element, depth, "endPointY", Double.class);
+        Boolean relative          = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        Double  rx                = getParameterValue(element, depth, PARAM_RX, Double.class);
+        Double  ry                = getParameterValue(element, depth, PARAM_RY, Double.class);
+        Boolean angleLargeArcFlag = getParameterValue(element, depth, PARAM_ANGLE_LARGE_ARC_FLAG, Boolean.class, false);
+        Boolean sweepFlag         = getParameterValue(element, depth, PARAM_SWEEP_FLAG, Boolean.class, false);
+        Double  endPointX         = getParameterValue(element, depth, PARAM_END_POINT_X, Double.class);
+        Double  endPointY         = getParameterValue(element, depth, PARAM_END_POINT_Y, Double.class);
 
         return SVGPathCmdA
             .builder()
@@ -3053,19 +3041,19 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SVGPathCmdC}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
     private SVGPathCmdC transformSVGPathCmdC(PseudoElement element, int depth)
     {
-        Boolean relative       = getParameterValue(element, depth, "relative", Boolean.class, false);
-        Double  controlPoint1X = getParameterValue(element, depth, "controlPoint1X", Double.class);
-        Double  controlPoint1Y = getParameterValue(element, depth, "controlPoint1Y", Double.class);
-        Double  controlPoint2X = getParameterValue(element, depth, "controlPoint2X", Double.class);
-        Double  controlPoint2Y = getParameterValue(element, depth, "controlPoint2Y", Double.class);
-        Double  endPointX      = getParameterValue(element, depth, "endPointX", Double.class);
-        Double  endPointY      = getParameterValue(element, depth, "endPointY", Double.class);
+        Boolean relative       = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        Double  controlPoint1X = getParameterValue(element, depth, PARAM_CONTROL_POINT_1_X, Double.class);
+        Double  controlPoint1Y = getParameterValue(element, depth, PARAM_CONTROL_POINT_1_Y, Double.class);
+        Double  controlPoint2X = getParameterValue(element, depth, PARAM_CONTROL_POINT_2_X, Double.class);
+        Double  controlPoint2Y = getParameterValue(element, depth, PARAM_CONTROL_POINT_2_Y, Double.class);
+        Double  endPointX      = getParameterValue(element, depth, PARAM_END_POINT_X, Double.class);
+        Double  endPointY      = getParameterValue(element, depth, PARAM_END_POINT_Y, Double.class);
 
         return SVGPathCmdC
             .builder()
@@ -3082,14 +3070,14 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SVGPathCmdH}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
     private SVGPathCmdH transformSVGPathCmdH(PseudoElement element, int depth)
     {
-        Boolean relative = getParameterValue(element, depth, "relative", Boolean.class, false);
-        Double  x        = getParameterValue(element, depth, "x", Double.class);
+        Boolean relative = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        Double  x        = getParameterValue(element, depth, PARAM_X, Double.class);
 
         return SVGPathCmdH
             .builder()
@@ -3101,15 +3089,15 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SVGPathCmdL}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
     private SVGPathCmdL transformSVGPathCmdL(PseudoElement element, int depth)
     {
-        Boolean relative = getParameterValue(element, depth, "relative", Boolean.class, false);
-        Double  x        = getParameterValue(element, depth, "x", Double.class);
-        Double  y        = getParameterValue(element, depth, "y", Double.class);
+        Boolean relative = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        Double  x        = getParameterValue(element, depth, PARAM_X, Double.class);
+        Double  y        = getParameterValue(element, depth, PARAM_Y, Double.class);
 
         return SVGPathCmdL
             .builder()
@@ -3122,15 +3110,15 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SVGPathCmdM}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
     private SVGPathCmdM transformSVGPathCmdM(PseudoElement element, int depth)
     {
-        Boolean relative = getParameterValue(element, depth, "relative", Boolean.class, false);
-        Double  x        = getParameterValue(element, depth, "x", Double.class);
-        Double  y        = getParameterValue(element, depth, "y", Double.class);
+        Boolean relative = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        Double  x        = getParameterValue(element, depth, PARAM_X, Double.class);
+        Double  y        = getParameterValue(element, depth, PARAM_Y, Double.class);
 
         return SVGPathCmdM
             .builder()
@@ -3143,17 +3131,17 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SVGPathCmdQ}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
     private SVGPathCmdQ transformSVGPathCmdQ(PseudoElement element, int depth)
     {
-        Boolean relative      = getParameterValue(element, depth, "relative", Boolean.class, false);
-        Double  controlPointX = getParameterValue(element, depth, "controlPointX", Double.class);
-        Double  controlPointY = getParameterValue(element, depth, "controlPointY", Double.class);
-        Double  endPointX     = getParameterValue(element, depth, "endPointX", Double.class);
-        Double  endPointY     = getParameterValue(element, depth, "endPointY", Double.class);
+        Boolean relative      = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        Double  controlPointX = getParameterValue(element, depth, PARAM_CONTROL_POINT_X, Double.class);
+        Double  controlPointY = getParameterValue(element, depth, PARAM_CONTROL_POINT_Y, Double.class);
+        Double  endPointX     = getParameterValue(element, depth, PARAM_END_POINT_X, Double.class);
+        Double  endPointY     = getParameterValue(element, depth, PARAM_END_POINT_Y, Double.class);
 
         return SVGPathCmdQ
             .builder()
@@ -3168,17 +3156,17 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SVGPathCmdS}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
     private SVGPathCmdS transformSVGPathCmdS(PseudoElement element, int depth)
     {
-        Boolean relative      = getParameterValue(element, depth, "relative", Boolean.class, false);
-        Double  controlPointX = getParameterValue(element, depth, "controlPointX", Double.class);
-        Double  controlPointY = getParameterValue(element, depth, "controlPointY", Double.class);
-        Double  endPointX     = getParameterValue(element, depth, "endPointX", Double.class);
-        Double  endPointY     = getParameterValue(element, depth, "endPointY", Double.class);
+        Boolean relative      = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        Double  controlPointX = getParameterValue(element, depth, PARAM_CONTROL_POINT_X, Double.class);
+        Double  controlPointY = getParameterValue(element, depth, PARAM_CONTROL_POINT_Y, Double.class);
+        Double  endPointX     = getParameterValue(element, depth, PARAM_END_POINT_X, Double.class);
+        Double  endPointY     = getParameterValue(element, depth, PARAM_END_POINT_Y, Double.class);
 
         return SVGPathCmdS
             .builder()
@@ -3193,15 +3181,15 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SVGPathCmdT}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
     private SVGPathCmdT transformSVGPathCmdT(PseudoElement element, int depth)
     {
-        Boolean relative  = getParameterValue(element, depth, "relative", Boolean.class, false);
-        Double  endPointX = getParameterValue(element, depth, "endPointX", Double.class);
-        Double  endPointY = getParameterValue(element, depth, "endPointY", Double.class);
+        Boolean relative  = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        Double  endPointX = getParameterValue(element, depth, PARAM_END_POINT_X, Double.class);
+        Double  endPointY = getParameterValue(element, depth, PARAM_END_POINT_Y, Double.class);
 
         return SVGPathCmdT
             .builder()
@@ -3214,14 +3202,14 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SVGPathCmdV}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
     private SVGPathCmdV transformSVGPathCmdV(PseudoElement element, int depth)
     {
-        Boolean relative = getParameterValue(element, depth, "relative", Boolean.class, false);
-        Double  y        = getParameterValue(element, depth, "y", Double.class);
+        Boolean relative = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        Double  y        = getParameterValue(element, depth, PARAM_Y, Double.class);
 
         return SVGPathCmdV
             .builder()
@@ -3233,13 +3221,13 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SVGPathCmdZ}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
     private SVGPathCmdZ transformSVGPathCmdZ(PseudoElement element, int depth)
     {
-        Boolean relative = getParameterValue(element, depth, "relative", Boolean.class, false);
+        Boolean relative = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
 
         return SVGPathCmdZ
             .builder()
@@ -3250,7 +3238,7 @@ public class JsonMapper
     /**
      * Transform a {@link PseudoElement} to an {@link SVGText}.
      *
-     * @param element to transfrom
+     * @param element to transform
      * @param depth of the recursive operation
      * @return the transformed object
      */
@@ -3258,10 +3246,8 @@ public class JsonMapper
     {
         ContainerParameters cpars      = resolveContainerBaseParameters(element, depth);
 
-        String              tooltip    =
-            getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              style      =
-            getParameterValue(element, depth, PARAM_STYLE, String.class, DEFAULT_EMPTY_VAL);
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              style      = getParameterValue(element, depth, PARAM_STYLE, String.class, DEFAULT_EMPTY_VAL);
         String              text       = getParameterValue(element, depth, PARAM_TEXT, String.class);
         Double              x          = getParameterValue(element, depth, PARAM_X, Double.class, 0d);
         Double              y          = getParameterValue(element, depth, PARAM_Y, Double.class, 0d);

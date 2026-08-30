@@ -13,7 +13,8 @@ package de.cookindustries.lib.spring.gui.hmi.container;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-public enum ContainerType {
+public enum ContainerType
+{
 
     /** Type for tab {@link Container} */
     TAB,
@@ -50,9 +51,6 @@ public enum ContainerType {
 
     /** Type for iconized button {@link Container} */
     BUTTON_ICON,
-
-    /** Type for button bar {@link Container} */
-    BUTTON_BAR,
 
     /** Type for burger menu {@link Container} */
     BURGER,

@@ -33,7 +33,6 @@ import de.cookindustries.lib.spring.gui.hmi.container.SplittedContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.TableContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.TextContainer;
 import de.cookindustries.lib.spring.gui.hmi.input.Checkbox;
-import de.cookindustries.lib.spring.gui.hmi.input.Currency;
 import de.cookindustries.lib.spring.gui.hmi.input.Date;
 import de.cookindustries.lib.spring.gui.hmi.input.File;
 import de.cookindustries.lib.spring.gui.hmi.input.Hidden;
@@ -699,37 +698,6 @@ public class JsonMapperTest
     }
 
     @Test
-    void test_map_CurrencyInput()
-    {
-        // setup
-        JsonMapper    mapper    =
-            JsonMapper
-                .builder()
-                .srcPath("json-mapper/input/currency-input.ged")
-                .locale(Locale.ENGLISH)
-                .templateFileCache(templateFileCache)
-                .translationProvider(translationProvider)
-                .flatMappableDissector(flatMappableDissector)
-                .build();
-
-        // run
-        MapperResult  result    = mapper.map();
-
-        // verify
-        Container     container = result.getContainers().get(0);
-        FormContainer form      = (FormContainer) container;
-        Input         input     = form.getInputs().get(0);
-        assertEquals(Currency.class, input.getClass());
-
-        Currency currency = (Currency) input;
-        assertEquals("name", currency.getName());
-        assertEquals("currency", currency.getSubmitAs());
-
-        String html = HtmlMapper.map(container);
-        assertTrue(checkDivTags(html));
-    }
-
-    @Test
     void test_map_DateInput()
     {
         // setup
@@ -920,6 +888,7 @@ public class JsonMapperTest
     {
         // setup
         InputValueList list = new InputValueList();
+
         list.add(
             InputValue
                 .builder()
@@ -927,11 +896,13 @@ public class JsonMapperTest
                 .text("text")
                 .value("value")
                 .build());
+
         TokenMap      map       =
             TokenMap
                 .builder()
                 .value("list", list)
                 .build();
+
         JsonMapper    mapper    =
             JsonMapper
                 .builder()

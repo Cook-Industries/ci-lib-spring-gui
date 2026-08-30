@@ -26,8 +26,8 @@ public class SVGPathTest
                 .builder()
                 .rx(D_1)
                 .ry(D_1)
-                .angleLargeArcFlag(1)
-                .sweepFlag(1)
+                .angleLargeArcFlag(true)
+                .sweepFlag(true)
                 .endPointX(D_10)
                 .endPointY(D_10)
                 .build();
@@ -38,8 +38,8 @@ public class SVGPathTest
                 .relative(true)
                 .rx(D_1)
                 .ry(D_1)
-                .angleLargeArcFlag(1)
-                .sweepFlag(1)
+                .angleLargeArcFlag(true)
+                .sweepFlag(true)
                 .endPointX(D_10)
                 .endPointY(D_10)
                 .build();

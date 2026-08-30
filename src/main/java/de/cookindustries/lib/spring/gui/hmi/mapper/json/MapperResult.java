@@ -11,7 +11,6 @@ import java.util.List;
 
 import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
-import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
@@ -27,7 +26,6 @@ public final class MapperResult
     @Singular
     private final List<AbsFunctionCall> functions;
 
-    @NotNull
-    private final Long                  time;
+    private final long                  time;
 
 }

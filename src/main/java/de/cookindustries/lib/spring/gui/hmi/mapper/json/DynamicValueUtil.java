@@ -23,7 +23,7 @@ public final class DynamicValueUtil
 
     private final AbsTranslationProvider translationProvider;
 
-    protected DynamicValueUtil(AbsTranslationProvider translationProvider)
+    public DynamicValueUtil(AbsTranslationProvider translationProvider)
     {
         this.translationProvider = translationProvider;
     }
@@ -45,16 +45,17 @@ public final class DynamicValueUtil
 
         Arrays
             .stream(enumClass.getEnumConstants())
-            .forEach(enu -> {
-                String text = translationProvider.getText(locale, enumClassName + "." + enu.name());
+            .forEach(
+                enu -> {
+                    String text = translationProvider.getText(locale, enumClassName + "." + enu.name());
 
-                list.add(
-                    InputValue
-                        .builder()
-                        .text(text)
-                        .value(enu.name())
-                        .build());
-            });
+                    list.add(
+                        InputValue
+                            .builder()
+                            .text(text)
+                            .value(enu.name())
+                            .build());
+                });
 
         return list;
     }
@@ -70,16 +71,18 @@ public final class DynamicValueUtil
     {
         InputValueList list = new InputValueList();
 
-        values.forEach(value -> {
-            String text = translationProvider.getText(locale, value);
+        values
+            .forEach(
+                value -> {
+                    String text = translationProvider.getText(locale, value);
 
-            list.add(
-                InputValue
-                    .builder()
-                    .text(text)
-                    .value(value)
-                    .build());
-        });
+                    list.add(
+                        InputValue
+                            .builder()
+                            .text(text)
+                            .value(value)
+                            .build());
+                });
 
         return list;
     }

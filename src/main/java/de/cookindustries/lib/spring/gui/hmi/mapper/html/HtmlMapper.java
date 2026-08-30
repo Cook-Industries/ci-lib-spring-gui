@@ -22,7 +22,6 @@ import org.apache.commons.text.StringEscapeUtils;
 import de.cookindustries.lib.spring.gui.hmi.container.AudioContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.BurgerContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.Button;
-import de.cookindustries.lib.spring.gui.hmi.container.ButtonBarContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.ButtonIcon;
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
 import de.cookindustries.lib.spring.gui.hmi.container.ContentContainer;
@@ -40,7 +39,6 @@ import de.cookindustries.lib.spring.gui.hmi.container.TableContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.TableRowContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.TextContainer;
 import de.cookindustries.lib.spring.gui.hmi.input.Checkbox;
-import de.cookindustries.lib.spring.gui.hmi.input.Currency;
 import de.cookindustries.lib.spring.gui.hmi.input.Date;
 import de.cookindustries.lib.spring.gui.hmi.input.File;
 import de.cookindustries.lib.spring.gui.hmi.input.Hidden;
@@ -223,7 +221,6 @@ public final class HtmlMapper
             case AUDIO -> render((AudioContainer) container);
             case BURGER -> render((BurgerContainer) container);
             case BUTTON -> render((Button) container);
-            case BUTTON_BAR -> render((ButtonBarContainer) container);
             case BUTTON_ICON -> render((ButtonIcon) container);
             case CONTENT -> render((ContentContainer) container);
             case EMPTY -> "";
@@ -357,29 +354,6 @@ public final class HtmlMapper
             .html();
     }
 
-    private String render(ButtonBarContainer buttonBarContainer)
-    {
-        return HtmlElement
-            .builder()
-            .tag(TAG_DIV)
-            .attribute(
-                Attribute
-                    .builder()
-                    .name(ATT_ID)
-                    .value(buttonBarContainer.getUid())
-                    .build())
-            .classes(buttonBarContainer.getClasses())
-            .dataAttributes(buttonBarContainer.getDataAttributes())
-            .contents(
-                buttonBarContainer
-                    .getButtons()
-                    .stream()
-                    .map(this::render)
-                    .toList())
-            .build()
-            .html();
-    }
-
     private String render(ButtonIcon buttonIcon)
     {
         return HtmlElement
@@ -475,6 +449,13 @@ public final class HtmlMapper
 
     private String render(HiddenContainer hiddenContainer)
     {
+        String      children      =
+            hiddenContainer
+                .getChildren()
+                .stream()
+                .map(this::render)
+                .collect(Collectors.joining());
+
         HtmlElement elementMapper =
             HtmlElement
                 .builder()
@@ -488,7 +469,7 @@ public final class HtmlMapper
                 .clazz(CLASS_HIDDEN)
                 .classes(hiddenContainer.getClasses())
                 .dataAttributes(hiddenContainer.getDataAttributes())
-                .content(render(hiddenContainer.getChild()))
+                .content(children)
                 .build();
 
         return elementMapper.html();
@@ -593,13 +574,14 @@ public final class HtmlMapper
                     .build());
         }
 
-        ButtonBarContainer buttonBar     =
-            ButtonBarContainer.builder()
+        ContentContainer buttonBar     =
+            ContentContainer
+                .builder()
                 .clazz("modal-buttons")
-                .buttons(buttons)
+                .contents(buttons)
                 .build();
 
-        ContentContainer   modalInlay    =
+        ContentContainer modalInlay    =
             ContentContainer
                 .builder()
                 .clazz("modal-inlay")
@@ -620,7 +602,7 @@ public final class HtmlMapper
                 .content(buttonBar)
                 .build();
 
-        HtmlElement        elementMapper =
+        HtmlElement      elementMapper =
             HtmlElement
                 .builder()
                 .tag(TAG_DIV)
@@ -861,7 +843,6 @@ public final class HtmlMapper
         return switch (input.getType())
         {
             case CHECKBOX -> render((Checkbox) input, formId);
-            case CURRENCY -> render((Currency) input, formId);
             case DATE -> render((Date) input, formId);
             case FILE -> render((File) input, formId);
             case HIDDEN -> render((Hidden) input, formId);
@@ -1061,12 +1042,6 @@ public final class HtmlMapper
                 .build();
 
         return elementMapper.html();
-    }
-
-    private String render(Currency currency, String formId)
-    {
-        // TODO: implement
-        return elementNotYetImplemented("currency");
     }
 
     private String render(Date date, String formId)
@@ -1313,12 +1288,6 @@ public final class HtmlMapper
                 HtmlElement
                     .builder()
                     .tag(TAG_DIV)
-                    .attribute(
-                        Attribute
-                            .builder()
-                            .name(ATT_ID)
-                            .value(radio.getUid())
-                            .build())
                     .clazz(CLASS_FORM_CHECK)
                     .content(input)
                     .content(btnLabel)
@@ -1339,6 +1308,12 @@ public final class HtmlMapper
                 .builder()
                 .tag(TAG_DIV)
                 .clazz(CLASS_FORM_CHECK)
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ID)
+                        .value(radio.getUid())
+                        .build())
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
                 .dataAttribute(DATA_ATT_SUBMIT_AS, radio.getSubmitAs())
                 .dataAttribute(DATA_ATT_VALUE_TYPE, radio.getType().name())

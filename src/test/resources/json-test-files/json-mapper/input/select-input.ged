@@ -19,7 +19,7 @@
                     "type": "INPUT_VALUE",
                     "classes": [],
                     "parameters": {
-                        "text": "radio 1",
+                        "text": "select 1",
                         "value": "1"
                     }
                 }
@@ -40,7 +40,7 @@
                     "type": "INPUT_VALUE",
                     "classes": [],
                     "parameters": {
-                        "text": "radio 1",
+                        "text": "select 1",
                         "value": "1"
                     }
                 }
