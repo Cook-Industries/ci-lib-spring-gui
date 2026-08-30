@@ -797,6 +797,12 @@
                 "background": "hsl(calc(var(--v) * 1.2) 75% 45%)",
                 "transition": "transform .25s linear, background .25s linear"
             }
+        },
+        {
+            "selector": ".form-checkbox-label",
+            "attributes": {
+                "margin-left": "1rem"
+            }
         }
     ],
     "animations": [
