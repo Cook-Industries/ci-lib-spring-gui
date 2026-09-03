@@ -7,9 +7,12 @@
  */
 package de.cookindustries.lib.spring.gui.i18n;
 
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +26,9 @@ import org.slf4j.LoggerFactory;
 public abstract class AbsTranslationProvider
 {
 
-    private static final Logger                    LOG = LoggerFactory.getLogger(AbsTranslationProvider.class);
+    private static final Logger                    LOG         = LoggerFactory.getLogger(AbsTranslationProvider.class);
+
+    private final Pattern                          PLACEHOLDER = Pattern.compile("\\{(\\d+)}");
 
     private final Map<Locale, Map<String, String>> translations;
 
@@ -81,7 +86,7 @@ public abstract class AbsTranslationProvider
      * @return either the associated text, or "I18N [{@code key}] not set." if no associate exists
      * @throws IllegalArgumentException if {@code locale} is null, or if {@code key} is null or empty
      */
-    public final String getText(Locale locale, String key)
+    public final String getText(Locale locale, String key, Object... values)
     {
         if (locale == null)
         {
@@ -96,16 +101,36 @@ public abstract class AbsTranslationProvider
         Map<String, String> map = translations.get(locale);
         String              translation;
 
-        if (map != null && map.get(key) != null)
+        if (map != null && map.containsKey(key))
         {
-            translation = map.get(key);
+            String template = map.get(key);
+
+            translation = format(key, template, values);
         }
         else
         {
             translation = String.format("I18N [%s] not set.", key);
-            LOG.warn("no translation defined for [{}]", key);
+
+            LOG.warn("no translation defined for [{}]-[{}]", key, locale);
         }
 
         return translation;
+    }
+
+    private final String format(String key, String template, Object... args)
+    {
+        Matcher matcher = PLACEHOLDER.matcher(template);
+
+        while (matcher.find())
+        {
+            int index = Integer.parseInt(matcher.group(1));
+
+            if (index >= args.length)
+            {
+                LOG.warn("no translation defined for [{}]", key);
+            }
+        }
+
+        return MessageFormat.format(template, args);
     }
 }

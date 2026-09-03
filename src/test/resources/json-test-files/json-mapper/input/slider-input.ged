@@ -12,7 +12,8 @@
             "attributes": {},
             "parameters": {
                 "name": "name",
-                "submitAs": "slider"
+                "submitAs": "slider",
+                "mandatory": true
             }
         }
     ]

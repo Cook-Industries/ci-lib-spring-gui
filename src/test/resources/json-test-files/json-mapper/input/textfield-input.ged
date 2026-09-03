@@ -12,7 +12,8 @@
             "attributes": {},
             "parameters": {
                 "name": "name",
-                "submitAs": "textfield"
+                "submitAs": "textfield",
+                "mandatory": true
             }
         }
     ]

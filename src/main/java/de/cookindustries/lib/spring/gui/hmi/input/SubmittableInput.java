@@ -39,4 +39,7 @@ public abstract class SubmittableInput extends Input
     @Default
     private final boolean mandatory = false;
 
+    @NonNull
+    private final String  mandatoryText;
+
 }

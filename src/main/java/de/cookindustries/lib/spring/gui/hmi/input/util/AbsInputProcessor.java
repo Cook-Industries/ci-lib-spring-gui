@@ -10,9 +10,9 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
 import java.util.Optional;
 
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.NullIgnoreException;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -65,7 +65,7 @@ public abstract class AbsInputProcessor<T>
     /**
      * Parse the raw {@link String} {@code input} value from the {@code UI form} to {@code T}.
      * <p>
-     * Variable {@code input} is never {@code null};
+     * Variable {@code input} is never {@code null}.
      * 
      * @param input to transfrom to the designated type
      * @return the transformed {@code input}
@@ -88,7 +88,7 @@ public abstract class AbsInputProcessor<T>
 
     /**
      * Make final preparations to the {@code #check(Object)} result {@code output} before calling
-     * {@code #createResult(InputCheckResultType, Object)} the endresult.
+     * {@code #createResult(InputCheckResultType, Object)}.
      * <p>
      * The default implementation does nothing and simply returns the input as-is.
      * 

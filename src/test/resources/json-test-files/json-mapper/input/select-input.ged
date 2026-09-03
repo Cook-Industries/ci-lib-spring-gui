@@ -12,7 +12,8 @@
             "attributes": {},
             "parameters": {
                 "name": "name",
-                "submitAs": "select1"
+                "submitAs": "select1",
+                "mandatory": true
             },
             "children": [
                 {
@@ -33,6 +34,7 @@
             "parameters": {
                 "name": "name",
                 "submitAs": "select2",
+                "mandatory": true,
                 "values": "list"
             },
             "children": [

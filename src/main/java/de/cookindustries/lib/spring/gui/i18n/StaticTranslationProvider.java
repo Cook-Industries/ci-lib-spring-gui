@@ -19,14 +19,19 @@ import java.util.Locale;
 public final class StaticTranslationProvider extends AbsTranslationProvider
 {
 
+    public StaticTranslationProvider()
+    {
+        initMaps();
+    }
+
     @Override
-    public final AbsTranslationProvider initMaps()
+    public AbsTranslationProvider initMaps()
     {
         Locale eng = Locale.ENGLISH;
 
         for (BasicText text : BasicText.values())
         {
-            addTranslation(eng, text.getText(), text.getText());
+            addTranslation(eng, text.getKey(), text.getText());
         }
 
         return this;

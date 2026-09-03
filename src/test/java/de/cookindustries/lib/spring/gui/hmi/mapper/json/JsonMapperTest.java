@@ -1056,6 +1056,10 @@ public class JsonMapperTest
         Input         input     = form.getInputs().get(0);
         assertEquals(Textbox.class, input.getClass());
 
+        Textbox textbox = (Textbox) input;
+        assertEquals("name", textbox.getName());
+        assertEquals("text", textbox.getText());
+
         String html = HtmlMapper.map(container);
         assertTrue(checkDivTags(html));
     }

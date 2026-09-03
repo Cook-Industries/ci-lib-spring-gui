@@ -128,15 +128,16 @@ public final class GUIFactory
     }
 
     /**
-     * Get a translation to an id.
+     * Get a translation to a key.
      * 
      * @param language to use
-     * @param id to lookup
-     * @return the translated {@code text} or a placeholder if no mapping for {@code id} id found
+     * @param key to lookup
+     * @param placeholderValues for translation infill
+     * @return the translated {@code text} or a placeholder
      */
-    public String getTranslatedText(Locale language, String id)
+    public String getTranslatedText(Locale language, String key, Object placeholderValues)
     {
-        return translationProvider.getText(language, id);
+        return translationProvider.getText(language, key, placeholderValues);
     }
 
     /**

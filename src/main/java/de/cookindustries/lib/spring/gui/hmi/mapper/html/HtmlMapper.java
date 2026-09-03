@@ -923,13 +923,16 @@ public final class HtmlMapper
             .build();
     }
 
-    private String createInputWrapper(String legend, String warningIcon, String errorIcon, String infoIcon, String input)
+    private String createInputWrapper(String legend, String mandatoryIcon, String warningIcon, String errorIcon, String infoIcon,
+        String input)
     {
         return HtmlElement
             .builder()
             .tag(TAG_DIV)
             .clazz(INPUT_CONTAINER)
             .content(legend)
+            .content(input)
+            .content(mandatoryIcon)
             .content(warningIcon)
             .content(errorIcon)
             .content(infoIcon)
@@ -1035,6 +1038,7 @@ public final class HtmlMapper
                 .tag(TAG_DIV)
                 .clazz(INPUT_CONTAINER)
                 .content(StringAdapter.from(legend))
+                .content(resolveMandatoryIcon(checkbox.isMandatory(), formId, checkbox.getSubmitAs(), checkbox.getMandatoryText()))
                 .content(resolveErrorIcon(formId, checkbox.getSubmitAs()))
                 .content(resolveWarningIcon(formId, checkbox.getSubmitAs()))
                 .content(resolveInfoIcon(formId, checkbox.getUid(), checkbox.getInfoText(), checkbox.getInfoUrl()))
@@ -1064,6 +1068,7 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
+            resolveMandatoryIcon(date.isMandatory(), formId, date.getSubmitAs(), date.getMandatoryText()),
             resolveWarningIcon(formId, date.getSubmitAs()),
             resolveErrorIcon(formId, date.getSubmitAs()),
             resolveInfoIcon(formId, date.getSubmitAs(), date.getInfoText(), date.getInfoUrl()),
@@ -1096,6 +1101,7 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
+            resolveMandatoryIcon(file.isMandatory(), formId, file.getSubmitAs(), file.getMandatoryText()),
             resolveWarningIcon(formId, file.getSubmitAs()),
             resolveErrorIcon(formId, file.getSubmitAs()),
             resolveInfoIcon(formId, file.getSubmitAs(), file.getInfoText(), file.getInfoUrl()),
@@ -1172,6 +1178,7 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
+            resolveMandatoryIcon(number.isMandatory(), formId, number.getSubmitAs(), number.getMandatoryText()),
             resolveWarningIcon(formId, number.getSubmitAs()),
             resolveErrorIcon(formId, number.getSubmitAs()),
             resolveInfoIcon(formId, number.getSubmitAs(), number.getInfoText(), number.getInfoUrl()),
@@ -1205,6 +1212,7 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
+            resolveMandatoryIcon(password.isMandatory(), formId, password.getSubmitAs(), password.getMandatoryText()),
             resolveWarningIcon(formId, password.getSubmitAs()),
             resolveErrorIcon(formId, password.getSubmitAs()),
             resolveInfoIcon(formId, password.getSubmitAs(), password.getInfoText(), password.getInfoUrl()),
@@ -1368,6 +1376,7 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
+            resolveMandatoryIcon(select.isMandatory(), formId, select.getSubmitAs(), select.getMandatoryText()),
             resolveWarningIcon(formId, select.getSubmitAs()),
             resolveErrorIcon(formId, select.getSubmitAs()),
             resolveInfoIcon(formId, select.getSubmitAs(), select.getInfoText(), select.getInfoUrl()),
@@ -1431,6 +1440,7 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
+            resolveMandatoryIcon(slider.isMandatory(), formId, slider.getSubmitAs(), slider.getMandatoryText()),
             resolveWarningIcon(formId, slider.getSubmitAs()),
             resolveErrorIcon(formId, slider.getSubmitAs()),
             resolveInfoIcon(formId, slider.getSubmitAs(), slider.getInfoText(), slider.getInfoUrl()),
@@ -1520,6 +1530,7 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
+            resolveMandatoryIcon(tag.isMandatory(), formId, tag.getSubmitAs(), tag.getMandatoryText()),
             resolveWarningIcon(formId, tag.getSubmitAs()),
             resolveErrorIcon(formId, tag.getSubmitAs()),
             resolveInfoIcon(formId, tag.getSubmitAs(), tag.getInfoText(), tag.getInfoUrl()),
@@ -1569,6 +1580,7 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
+            resolveMandatoryIcon(textarea.isMandatory(), formId, textarea.getSubmitAs(), textarea.getMandatoryText()),
             resolveWarningIcon(formId, textarea.getSubmitAs()),
             resolveErrorIcon(formId, textarea.getSubmitAs()),
             resolveInfoIcon(formId, textarea.getSubmitAs(), textarea.getInfoText(), textarea.getInfoUrl()),
@@ -1577,7 +1589,17 @@ public final class HtmlMapper
 
     private String render(Textbox textbox)
     {
-        HtmlElement elementMapper =
+        String legend  =
+            HtmlElement
+                .builder()
+                .tag(TAG_LABEL)
+                .clazz(CLASS_USER_SELECT_NONE)
+                .dataAttribute(DATA_ATT_TOOLTIP, textbox.getTooltip().isBlank() ? null : htmlEscape(textbox.getTooltip()))
+                .content(htmlEscape(textbox.getName()))
+                .build()
+                .html();
+
+        String content =
             HtmlElement
                 .builder()
                 .tag(TAG_DIV)
@@ -1590,11 +1612,11 @@ public final class HtmlMapper
                 .clazz("text-preserve-newline")
                 .classes(textbox.getClasses())
                 .dataAttributes(textbox.getDataAttributes())
-                .dataAttribute(DATA_ATT_TOOLTIP, textbox.getTooltip().isBlank() ? null : textbox.getTooltip())
-                .content(htmlEscape(textbox.getValue()))
-                .build();
+                .content(htmlEscape(textbox.getText()))
+                .build()
+                .html();
 
-        return elementMapper.html();
+        return createInputWrapper(legend, "", "", "", "", content);
     }
 
     private String render(Textfield textfield, String formId)
@@ -1632,10 +1654,28 @@ public final class HtmlMapper
 
         return createInputWrapper(
             legend,
+            resolveMandatoryIcon(textfield.isMandatory(), formId, textfield.getSubmitAs(), textfield.getMandatoryText()),
             resolveWarningIcon(formId, textfield.getSubmitAs()),
             resolveErrorIcon(formId, textfield.getSubmitAs()),
             resolveInfoIcon(formId, textfield.getSubmitAs(), textfield.getInfoText(), textfield.getInfoUrl()),
             input);
+    }
+
+    /**
+     * Create {@code warning icon} for an input field.
+     * 
+     * @param formId to which this field belongs for identifiaction
+     * @param submitId of the field for identification
+     * @return the resolved icon
+     */
+    private String resolveMandatoryIcon(boolean active, String formId, String submitId, String text)
+    {
+        if (active)
+        {
+            return resolveIcon(formId, submitId, "mandatory", "bi-asterisk", text, null);
+        }
+
+        return "";
     }
 
     /**

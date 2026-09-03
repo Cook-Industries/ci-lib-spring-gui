@@ -12,7 +12,8 @@
             "attributes": {},
             "parameters": {
                 "name": "name",
-                "submitAs": "file"
+                "submitAs": "file",
+                "mandatory": true
             }
         }
     ]

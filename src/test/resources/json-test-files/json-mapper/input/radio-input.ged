@@ -12,7 +12,8 @@
             "attributes": {},
             "parameters": {
                 "name": "name",
-                "submitAs": "radio"
+                "submitAs": "radio",
+                "mandatory": true
             },
             "children": [
                 {

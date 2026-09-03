@@ -11,7 +11,8 @@
             "classes": [],
             "attributes": {},
             "parameters": {
-                "name": "name"
+                "name": "name",
+                "text": "text"
             }
         }
     ]

@@ -12,7 +12,8 @@
             "attributes": {},
             "parameters": {
                 "name": "name",
-                "submitAs": "checkbox"
+                "submitAs": "checkbox",
+                "mandatory": true
             },
             "children": [
                 {

@@ -13,29 +13,35 @@ package de.cookindustries.lib.spring.gui.i18n;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-public enum BasicText {
+public enum BasicText
+{
 
     /** Default fallback for no text set */
-    TEXT_NOT_SET("TNS"),
+    TEXT_NOT_SET("text-not-set", "TNS"),
 
     /** Text for 'ok' button */
-    OK("ok"),
+    OK("ok", "ok"),
 
     /** Text for 'cancel' button */
-    CANCEL("cancel"),
+    CANCEL("cancel", "cancel"),
 
     /** Text for 'help' button */
-    HELP("help"),
+    HELP("help", "help"),
 
     /** Text for 'close' button */
-    CLOSE("close"),
+    CLOSE("close", "close"),
 
     /** Text for 'close' button */
-    NO_VALUE_SET("no value set"),
+    NO_VALUE_SET("no.value-set", "no value set"),
 
     /** Text for 'close' button */
-    NO_TEXT_SET("no text set");
+    NO_TEXT_SET("no-text-set", "no text set"),
 
+    MANDATORY("mandatory", "mandatory"),
+
+    INPUT_MANDATORY("input-mandatory", "Input {0} is mandatory.");
+
+    private final String key;
     private final String text;
 
     /**
@@ -44,9 +50,20 @@ public enum BasicText {
      * @param id of this text block
      * @param text to use as a fallback
      */
-    BasicText(String text)
+    BasicText(String key, String text)
     {
+        this.key = key;
         this.text = text;
+    }
+
+    /**
+     * Get the fallback text assiciated with this enum
+     * 
+     * @return the fallback text
+     */
+    public final String getKey()
+    {
+        return key;
     }
 
     /**

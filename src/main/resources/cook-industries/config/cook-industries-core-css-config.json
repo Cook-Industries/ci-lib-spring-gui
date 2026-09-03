@@ -552,9 +552,9 @@
             "selector": ".input-container",
             "attributes": {
                 "display": "grid",
-                "grid-template-columns": "6fr 1fr 1fr 1fr",
+                "grid-template-columns": "6fr 1fr 1fr 1fr 1fr",
                 "grid-template-rows": "auto",
-                "grid-template-areas": "\"legend notification error info\"\n\"field field field field\"\n\"text text text text\"",
+                "grid-template-areas": "\"legend mandatory notification error info\"\n\"field field field field field\"\n\"text text text text text\"",
                 "align-items": "baseline",
                 "margin-bottom": "1rem"
             }
@@ -577,6 +577,20 @@
             "selector": ".input-icon-container:hover",
             "attributes": {
                 "cursor": "pointer"
+            }
+        },
+        {
+            "selector": ".input-icon-mandatory",
+            "attributes": {
+                "grid-area": "mandatory",
+                "justify-self": "center",
+                "color": "black"
+            }
+        },
+        {
+            "selector": ".input-icon-mandatory>i",
+            "attributes": {
+                "font-size": "0.75rem !important"
             }
         },
         {

@@ -23,7 +23,10 @@ public final class Textbox extends Input
 {
 
     @NonNull
-    private final String value;
+    private final String name;
+
+    @NonNull
+    private final String text;
 
     @Override
     protected InputType inferType()

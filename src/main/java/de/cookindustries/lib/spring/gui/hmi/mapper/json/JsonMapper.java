@@ -818,16 +818,17 @@ public class JsonMapper
      */
     private InputParameters resolveInputBaseParameters(PseudoElement element, int depth)
     {
-        String  tooltip   = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String  name      = getParameterValue(element, depth, PARAM_NAME, String.class);
-        String  submitAs  = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class, DEFAULT_EMPTY_VAL);
-        String  onInput   = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
-        String  infoText  = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
-        String  infoUrl   = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
-        boolean disabled  = getParameterValue(element, depth, PARAM_DISABLED, Boolean.class, false);
-        boolean mandatory = getParameterValue(element, depth, PARAM_MANDATORY, Boolean.class, false);
+        String  tooltip       = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String  name          = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String  submitAs      = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class, DEFAULT_EMPTY_VAL);
+        String  onInput       = getParameterValue(element, depth, PARAM_ON_INPUT, String.class, DEFAULT_EMPTY_VAL);
+        String  infoText      = getParameterValue(element, depth, PARAM_INFO_TEXT, String.class, DEFAULT_EMPTY_VAL);
+        String  infoUrl       = getParameterValue(element, depth, PARAM_INFO_URL, String.class, DEFAULT_EMPTY_VAL);
+        boolean disabled      = getParameterValue(element, depth, PARAM_DISABLED, Boolean.class, false);
+        boolean mandatory     = getParameterValue(element, depth, PARAM_MANDATORY, Boolean.class, false);
+        String  mandatoryText = translationProvider.getText(locale, "input-mandatory", name);
 
-        return new InputParameters(tooltip, name, submitAs, onInput, infoText, infoUrl, disabled, mandatory);
+        return new InputParameters(tooltip, name, submitAs, onInput, infoText, infoUrl, disabled, mandatory, mandatoryText);
     }
 
     /**
@@ -2276,6 +2277,7 @@ public class JsonMapper
             .name(ipars.name())
             .submitAs(ipars.submitAs())
             .onInput(ipars.onInput())
+            .mandatoryText(ipars.mandatoryText())
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
@@ -2307,6 +2309,7 @@ public class JsonMapper
             .name(ipars.name())
             .submitAs(ipars.submitAs())
             .onInput(ipars.onInput())
+            .mandatoryText(ipars.mandatoryText())
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
@@ -2339,6 +2342,7 @@ public class JsonMapper
             .name(ipars.name())
             .submitAs(ipars.submitAs())
             .onInput(ipars.onInput())
+            .mandatoryText(ipars.mandatoryText())
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
@@ -2357,16 +2361,21 @@ public class JsonMapper
      */
     private Hidden transformHiddenInput(PseudoElement element, int depth)
     {
-        ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
+        ContainerParameters cpars     = resolveContainerBaseParameters(element, depth);
 
-        String              submitAs = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
-        String              value    = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
+        String              submitAs  = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
+        String              value     = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
+        boolean             disabled  = getParameterValue(element, depth, PARAM_DISABLED, Boolean.class, false);
+        boolean             mandatory = getParameterValue(element, depth, PARAM_MANDATORY, Boolean.class, false);
 
         return Hidden
             .builder()
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
+            .mandatory(mandatory)
+            .mandatoryText("")
+            .disabled(disabled)
             .name(DEFAULT_EMPTY_VAL)
             .submitAs(submitAs)
             .value(value)
@@ -2400,6 +2409,7 @@ public class JsonMapper
             .name(ipars.name())
             .submitAs(ipars.submitAs())
             .onInput(ipars.onInput())
+            .mandatoryText(ipars.mandatoryText())
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
@@ -2436,6 +2446,7 @@ public class JsonMapper
             .name(ipars.name())
             .submitAs(ipars.submitAs())
             .onInput(ipars.onInput())
+            .mandatoryText(ipars.mandatoryText())
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
@@ -2473,6 +2484,7 @@ public class JsonMapper
             .name(ipars.name())
             .submitAs(ipars.submitAs())
             .onInput(ipars.onInput())
+            .mandatoryText(ipars.mandatoryText())
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
@@ -2510,6 +2522,7 @@ public class JsonMapper
             .name(ipars.name())
             .submitAs(ipars.submitAs())
             .onInput(ipars.onInput())
+            .mandatoryText(ipars.mandatoryText())
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
@@ -2544,6 +2557,7 @@ public class JsonMapper
             .name(ipars.name())
             .submitAs(ipars.submitAs())
             .onInput(ipars.onInput())
+            .mandatoryText(ipars.mandatoryText())
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
@@ -2577,6 +2591,7 @@ public class JsonMapper
             .name(ipars.name())
             .submitAs(ipars.submitAs())
             .onInput(ipars.onInput())
+            .mandatoryText(ipars.mandatoryText())
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
@@ -2625,6 +2640,7 @@ public class JsonMapper
             .name(ipars.name())
             .submitAs(ipars.submitAs())
             .onInput(ipars.onInput())
+            .mandatoryText(ipars.mandatoryText())
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
@@ -2659,6 +2675,7 @@ public class JsonMapper
             .name(ipars.name())
             .submitAs(ipars.submitAs())
             .onInput(ipars.onInput())
+            .mandatoryText(ipars.mandatoryText())
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
@@ -2680,14 +2697,16 @@ public class JsonMapper
     {
         ContainerParameters cpars = resolveContainerBaseParameters(element, depth);
 
-        String              value = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
+        String              name  = getParameterValue(element, depth, PARAM_NAME, String.class);
+        String              text  = getParameterValue(element, depth, PARAM_TEXT, String.class, DEFAULT_EMPTY_VAL);
 
         return Textbox
             .builder()
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
-            .value(value)
+            .name(name)
+            .text(text)
             .build();
     }
 
@@ -2724,6 +2743,7 @@ public class JsonMapper
             .name(ipars.name())
             .submitAs(ipars.submitAs())
             .onInput(ipars.onInput())
+            .mandatoryText(ipars.mandatoryText())
             .infoText(ipars.infoText())
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
