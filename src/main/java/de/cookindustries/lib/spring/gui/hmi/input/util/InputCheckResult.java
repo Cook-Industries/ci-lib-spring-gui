@@ -10,9 +10,9 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
 import java.util.Optional;
 
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
-
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -27,8 +27,17 @@ public final class InputCheckResult<T>
     @NonNull
     private final Optional<T>          result;
 
+    @Default
+    private final Object[]             translationPlaceholderValues = new Object[0];
+
+    /**
+     * Get the result itself.
+     * 
+     * @return the result
+     * @throws ValueNotPresentException if no result was set
+     */
     public T getResult()
     {
-        return result.orElseThrow(() -> new ValueNotPresentException());
+        return result.orElseThrow(ValueNotPresentException::new);
     }
 }

@@ -141,39 +141,12 @@ public final class InputExtractor
      * It is assumed that the {@code key} <b>__form_id</b> exists inside {@code inputs} and is non-null.
      * 
      * @param inputs from the {@code Form}
-     * @throws IllegalArgumentException if {@code key} <b>__form_id</b> {@code null} or empty
-     */
-    public InputExtractor(MultiValueMap<String, String> inputs)
-    {
-        this(inputs, null, Locale.ENGLISH);
-    }
-
-    /**
-     * Create a extractor for a inputs from a {@link FormContainer} request
-     * <p>
-     * It is assumed that the {@code key} <b>__form_id</b> exists inside {@code inputs} and is non-null.
-     * 
-     * @param inputs from the {@code Form}
      * @param locale to fetch error messages with
      * @throws IllegalArgumentException if {@code key} <b>__form_id</b> is {@code null} or empty
      */
     public InputExtractor(MultiValueMap<String, String> inputs, Locale locale)
     {
         this(inputs, null, locale);
-    }
-
-    /**
-     * Create a extractor for a inputs from a {@link FormContainer} request
-     * <p>
-     * It is assumed that the {@code key} <b>__form_id</b> exists inside {@code inputs} and is non-null.
-     * 
-     * @param inputs from the {@code Form}
-     * @param files from the {@code Form}
-     * @throws IllegalArgumentException if {@code key} <b>__form_id</b> is {@code null} or empty
-     */
-    public InputExtractor(MultiValueMap<String, String> inputs, MultipartFile[] files)
-    {
-        this(inputs, files, Locale.ENGLISH);
     }
 
     /**
@@ -253,7 +226,9 @@ public final class InputExtractor
                     consumer.accept(obj);
                 }
 
-                default -> activateMarker(key, MarkerCategory.ERROR, resultType.getMarkerType());
+                default -> {
+                    activateMarker(key, MarkerCategory.ERROR, resultType, result.getTranslationPlaceholderValues());
+                }
             };
         }
         catch (NullIgnoreException ex)
@@ -263,13 +238,14 @@ public final class InputExtractor
     }
 
     /**
-     * Add a message to the internal list
+     * Activate a marker for a failed input field.
      * 
-     * @param key which prompted the message
-     * @param msg to add
-     * @param type that was tried to consume
+     * @param key to identify the field
+     * @param category of the marker to raise
+     * @param type the result type of the check
+     * @param translationPlaceholders potential placeholder values for the ui message
      */
-    private void activateMarker(String key, MarkerCategory category, MarkerType type)
+    private void activateMarker(String key, MarkerCategory category, InputCheckResultType type, Object... translationPlaceholders)
     {
         marker.add(
             InputCheckMarker
@@ -277,7 +253,9 @@ public final class InputExtractor
                 .formId(formId)
                 .transferId(key)
                 .category(category)
-                .type(type)
+                .type(type.getMarkerType())
+                .translationKey(type.getTranslationKey())
+                .translationPlaceholders(translationPlaceholders)
                 .build());
     }
 
@@ -589,14 +567,15 @@ public final class InputExtractor
 
         if (files == null || files.length == 0)
         {
-            if (!nullable) // this needs to be in its own if since the null check against files will trigger
+            if (!nullable) // this needs to be in its own 'if' since the null check against files will trigger
             {
-                activateMarker(key, MarkerCategory.ERROR, MarkerType.EMPTY);
+
+                activateMarker(key, MarkerCategory.ERROR, InputCheckResultType.EMPTY_BUT_EXPECTED, key);
             }
         }
         else if (!multipleAllowed && files.length > 1)
         {
-            activateMarker(key, MarkerCategory.ERROR, MarkerType.TOO_LONG);
+            activateMarker(key, MarkerCategory.ERROR, InputCheckResultType.TOO_MANY, key);
         }
 
         return this;

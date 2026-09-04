@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -127,122 +128,182 @@ import lombok.Singular;
 public class JsonMapper
 {
 
-    private static final String                    PARAM_TABLE_NAME               = "tableName";
+    private static final String                                 PARAM_TABLE_NAME               = "tableName";
 
-    private static final String                    PARAM_COLUMN_NAMES             = "columnNames";
+    private static final String                                 PARAM_COLUMN_NAMES             = "columnNames";
 
-    private static final String                    PARAM_SORTABLE                 = "sortable";
+    private static final String                                 PARAM_SORTABLE                 = "sortable";
 
-    private static final Logger                    LOG                            = LoggerFactory.getLogger(JsonMapper.class);
+    private static final Logger                                 LOG                            =
+        LoggerFactory.getLogger(JsonMapper.class);
 
-    private static final String                    PARAM_ACTIVE                   = "active";
-    private static final String                    PARAM_ACCEPT                   = "accept";
-    private static final String                    PARAM_ANGLE_LARGE_ARC_FLAG     = "angleLargeArcFlag";
-    private static final String                    PARAM_AUTOPLAY                 = "autoplay";
-    private static final String                    PARAM_BOXES                    = "boxes";
-    private static final String                    PARAM_BTN_CENTER_CLASS         = "btnCenterClass";
-    private static final String                    PARAM_BTN_CENTER_FUNCTION      = "btnCenterFunction";
-    private static final String                    PARAM_BTN_CENTER_NAME          = "btnCenterName";
-    private static final String                    PARAM_BTN_CLASS                = "btnClass";
-    private static final String                    PARAM_BTN_LEFT_CLASS           = "btnLeftClass";
-    private static final String                    PARAM_BTN_LEFT_FUNCTION        = "btnLeftFunction";
-    private static final String                    PARAM_BTN_LEFT_NAME            = "btnLeftName";
-    private static final String                    PARAM_BTN_RIGHT_CLASS          = "btnRightClass";
-    private static final String                    PARAM_BTN_RIGHT_FUNCTION       = "btnRightFunction";
-    private static final String                    PARAM_BTN_RIGHT_NAME           = "btnRightName";
-    private static final String                    PARAM_CHECKED                  = "checked";
-    private static final String                    PARAM_CLOSE_ON_OVERLAY_CLICK   = "closeOnOverlayClick";
-    private static final String                    PARAM_CONNECTED_BTN            = "connectedBtn";
-    private static final String                    PARAM_CONTROLS                 = "controls";
-    private static final String                    PARAM_CONTROL_POINT_1_X        = "controlPoint1X";
-    private static final String                    PARAM_CONTROL_POINT_1_Y        = "controlPoint1Y";
-    private static final String                    PARAM_CONTROL_POINT_2_X        = "controlPoint2X";
-    private static final String                    PARAM_CONTROL_POINT_2_Y        = "controlPoint2Y";
-    private static final String                    PARAM_CONTROL_POINT_X          = "controlPointX";
-    private static final String                    PARAM_CONTROL_POINT_Y          = "controlPointY";
-    private static final String                    PARAM_DIRECTION                = "direction";
-    private static final String                    PARAM_DISABLED                 = "disabled";
-    private static final String                    PARAM_DX                       = "dx";
-    private static final String                    PARAM_DY                       = "dy";
-    private static final String                    PARAM_ELEMENT_SOURCE           = "elementSource";
-    private static final String                    PARAM_END_POINT_X              = "endPointX";
-    private static final String                    PARAM_END_POINT_Y              = "endPointY";
-    private static final String                    PARAM_ENFORCE_WHITELIST        = "enforceWhitelist";
-    private static final String                    PARAM_FETCH_URL                = "fetchUrl";
-    private static final String                    PARAM_HEIGHT                   = "height";
-    private static final String                    PARAM_HREF                     = "href";
-    private static final String                    PARAM_ICON                     = "icon";
-    private static final String                    PARAM_ID                       = "id";
-    private static final String                    PARAM_IMAGE                    = "image";
-    private static final String                    PARAM_INFO_TEXT                = "infoText";
-    private static final String                    PARAM_INFO_URL                 = "infoUrl";
-    private static final String                    PARAM_INLINE                   = "inline";
-    private static final String                    PARAM_IS_SOURCE_LIST           = "isSourceList";
-    private static final String                    PARAM_MANDATORY                = "mandatory";
-    private static final String                    PARAM_MAX                      = "max";
-    private static final String                    PARAM_MAX_CHARS                = "maxChars";
-    private static final String                    PARAM_MAX_TAGS                 = "maxTags";
-    private static final String                    PARAM_METHOD                   = "method";
-    private static final String                    PARAM_MIN                      = "min";
-    private static final String                    PARAM_MULTIPLE                 = "multiple";
-    private static final String                    PARAM_NAME                     = "name";
-    private static final String                    PARAM_ON_CLICK                 = "onClick";
-    private static final String                    PARAM_ON_ENTER_PRESS           = "onEnterPress";
-    private static final String                    PARAM_ON_INPUT                 = "onInput";
-    private static final String                    PARAM_PATH                     = "path";
-    private static final String                    PARAM_PATTERN                  = "pattern";
-    private static final String                    PARAM_PLACEHOLDER              = "placeholder";
-    private static final String                    PARAM_PREFIX                   = "prefix";
-    private static final String                    PARAM_RELATIVE                 = "relative";
-    private static final String                    PARAM_REPETITION_SOURCE        = "repetitionSource";
-    private static final String                    PARAM_REQUEST_URL              = "requestUrl";
-    private static final String                    PARAM_ROTATE                   = "rotate";
-    private static final String                    PARAM_RX                       = "rx";
-    private static final String                    PARAM_RY                       = "ry";
-    private static final String                    PARAM_SEARCH_URL               = "searchUrl";
-    private static final String                    PARAM_SIZE                     = "size";
-    private static final String                    PARAM_SRC                      = "src";
-    private static final String                    PARAM_STYLE                    = "style";
-    private static final String                    PARAM_SUBMIT_AS                = "submitAs";
-    private static final String                    PARAM_SUFFIX                   = "suffix";
-    private static final String                    PARAM_SWEEP_FLAG               = "sweepFlag";
-    private static final String                    PARAM_TARGET                   = "target";
-    private static final String                    PARAM_TEXT                     = "text";
-    private static final String                    PARAM_TEXT_LENGTH              = "textLength";
-    private static final String                    PARAM_TITLE                    = "title";
-    private static final String                    PARAM_TOOLTIP                  = "tooltip";
-    private static final String                    PARAM_URL                      = "url";
-    private static final String                    PARAM_VALUE                    = "value";
-    private static final String                    PARAM_VALUES                   = "values";
-    private static final String                    PARAM_WIDTH                    = "width";
-    private static final String                    PARAM_X                        = "x";
-    private static final String                    PARAM_X1                       = "x1";
-    private static final String                    PARAM_X2                       = "x2";
-    private static final String                    PARAM_Y                        = "y";
-    private static final String                    PARAM_Y1                       = "y1";
-    private static final String                    PARAM_Y2                       = "y2";
+    private static final String                                 PARAM_ACTIVE                   = "active";
+    private static final String                                 PARAM_ACCEPT                   = "accept";
+    private static final String                                 PARAM_ANGLE_LARGE_ARC_FLAG     = "angleLargeArcFlag";
+    private static final String                                 PARAM_AUTOPLAY                 = "autoplay";
+    private static final String                                 PARAM_BOXES                    = "boxes";
+    private static final String                                 PARAM_BTN_CENTER_CLASS         = "btnCenterClass";
+    private static final String                                 PARAM_BTN_CENTER_FUNCTION      = "btnCenterFunction";
+    private static final String                                 PARAM_BTN_CENTER_NAME          = "btnCenterName";
+    private static final String                                 PARAM_BTN_CLASS                = "btnClass";
+    private static final String                                 PARAM_BTN_LEFT_CLASS           = "btnLeftClass";
+    private static final String                                 PARAM_BTN_LEFT_FUNCTION        = "btnLeftFunction";
+    private static final String                                 PARAM_BTN_LEFT_NAME            = "btnLeftName";
+    private static final String                                 PARAM_BTN_RIGHT_CLASS          = "btnRightClass";
+    private static final String                                 PARAM_BTN_RIGHT_FUNCTION       = "btnRightFunction";
+    private static final String                                 PARAM_BTN_RIGHT_NAME           = "btnRightName";
+    private static final String                                 PARAM_CHECKED                  = "checked";
+    private static final String                                 PARAM_CLOSE_ON_OVERLAY_CLICK   = "closeOnOverlayClick";
+    private static final String                                 PARAM_CONNECTED_BTN            = "connectedBtn";
+    private static final String                                 PARAM_CONTROLS                 = "controls";
+    private static final String                                 PARAM_CONTROL_POINT_1_X        = "controlPoint1X";
+    private static final String                                 PARAM_CONTROL_POINT_1_Y        = "controlPoint1Y";
+    private static final String                                 PARAM_CONTROL_POINT_2_X        = "controlPoint2X";
+    private static final String                                 PARAM_CONTROL_POINT_2_Y        = "controlPoint2Y";
+    private static final String                                 PARAM_CONTROL_POINT_X          = "controlPointX";
+    private static final String                                 PARAM_CONTROL_POINT_Y          = "controlPointY";
+    private static final String                                 PARAM_DIRECTION                = "direction";
+    private static final String                                 PARAM_DISABLED                 = "disabled";
+    private static final String                                 PARAM_DX                       = "dx";
+    private static final String                                 PARAM_DY                       = "dy";
+    private static final String                                 PARAM_ELEMENT_SOURCE           = "elementSource";
+    private static final String                                 PARAM_ELEMENT_SOURCE_IS_LIST   = "elementSourceIsList";
+    private static final String                                 PARAM_END_POINT_X              = "endPointX";
+    private static final String                                 PARAM_END_POINT_Y              = "endPointY";
+    private static final String                                 PARAM_ENFORCE_WHITELIST        = "enforceWhitelist";
+    private static final String                                 PARAM_FETCH_URL                = "fetchUrl";
+    private static final String                                 PARAM_HEIGHT                   = "height";
+    private static final String                                 PARAM_HREF                     = "href";
+    private static final String                                 PARAM_ICON                     = "icon";
+    private static final String                                 PARAM_ID                       = "id";
+    private static final String                                 PARAM_INFO_TEXT                = "infoText";
+    private static final String                                 PARAM_INFO_URL                 = "infoUrl";
+    private static final String                                 PARAM_INLINE                   = "inline";
+    private static final String                                 PARAM_IS_SOURCE_LIST           = "isSourceList";
+    private static final String                                 PARAM_MANDATORY                = "mandatory";
+    private static final String                                 PARAM_MAX                      = "max";
+    private static final String                                 PARAM_MAX_CHARS                = "maxChars";
+    private static final String                                 PARAM_MAX_TAGS                 = "maxTags";
+    private static final String                                 PARAM_METHOD                   = "method";
+    private static final String                                 PARAM_MIN                      = "min";
+    private static final String                                 PARAM_MULTIPLE                 = "multiple";
+    private static final String                                 PARAM_NAME                     = "name";
+    private static final String                                 PARAM_ON_CLICK                 = "onClick";
+    private static final String                                 PARAM_ON_ENTER_PRESS           = "onEnterPress";
+    private static final String                                 PARAM_ON_INPUT                 = "onInput";
+    private static final String                                 PARAM_PATH                     = "path";
+    private static final String                                 PARAM_PATTERN                  = "pattern";
+    private static final String                                 PARAM_PLACEHOLDER              = "placeholder";
+    private static final String                                 PARAM_PREFIX                   = "prefix";
+    private static final String                                 PARAM_RELATIVE                 = "relative";
+    private static final String                                 PARAM_REQUEST_URL              = "requestUrl";
+    private static final String                                 PARAM_ROTATE                   = "rotate";
+    private static final String                                 PARAM_RX                       = "rx";
+    private static final String                                 PARAM_RY                       = "ry";
+    private static final String                                 PARAM_SEARCH_URL               = "searchUrl";
+    private static final String                                 PARAM_SIZE                     = "size";
+    private static final String                                 PARAM_SRC                      = "src";
+    private static final String                                 PARAM_STYLE                    = "style";
+    private static final String                                 PARAM_SUBMIT_AS                = "submitAs";
+    private static final String                                 PARAM_SUFFIX                   = "suffix";
+    private static final String                                 PARAM_SWEEP_FLAG               = "sweepFlag";
+    private static final String                                 PARAM_TARGET                   = "target";
+    private static final String                                 PARAM_TEXT                     = "text";
+    private static final String                                 PARAM_TEXT_LENGTH              = "textLength";
+    private static final String                                 PARAM_TOOLTIP                  = "tooltip";
+    private static final String                                 PARAM_URL                      = "url";
+    private static final String                                 PARAM_VALUE                    = "value";
+    private static final String                                 PARAM_VALUES                   = "values";
+    private static final String                                 PARAM_WIDTH                    = "width";
+    private static final String                                 PARAM_X                        = "x";
+    private static final String                                 PARAM_X1                       = "x1";
+    private static final String                                 PARAM_X2                       = "x2";
+    private static final String                                 PARAM_Y                        = "y";
+    private static final String                                 PARAM_Y1                       = "y1";
+    private static final String                                 PARAM_Y2                       = "y2";
 
-    private static final String                    RANDOM_ID                      = "randomid";
-    private static final String                    CONNECTED_BTN                  = "connected-btn";
-    private static final String                    TYPE_ITEM                      = "burger-item";
+    private static final String                                 RANDOM_ID                      = "randomid";
+    private static final String                                 CONNECTED_BTN                  = "connected-btn";
+    private static final String                                 TYPE_ITEM                      = "burger-item";
 
-    private static final String                    DEFAULT_DATE                   = "0000-00-00";
-    private static final String                    DEFAULT_EMPTY_VAL              = "";
-    private static final String                    DEFAULT_TARGET_SELF            = "_self";
-    private static final String                    DEFAULT_BURGER_ICON            = "bi-caret-right-fill";
-    private static final String                    DEFAULT_VALUE_NOT_SET          = "value not set";
-    private static final String                    DEFAULT_NOT_SELECTED           = "NOT_SELECTED";
+    private static final String                                 DEFAULT_DATE                   = "0000-00-00";
+    private static final String                                 DEFAULT_EMPTY_VAL              = "";
+    private static final String                                 DEFAULT_TARGET_SELF            = "_self";
+    private static final String                                 DEFAULT_BURGER_ICON            = "bi-caret-right-fill";
+    private static final String                                 DEFAULT_VALUE_NOT_SET          = "value not set";
+    private static final String                                 DEFAULT_NOT_SELECTED           = "NOT_SELECTED";
 
-    private static final String                    BASE_INDICATOR_START           = "$$";
-    private static final String                    INDICATOR_SEPARATOR            = "$";
-    private static final String                    INDICATOR_VALUE_PLACEHOLDER    = BASE_INDICATOR_START + "value" + INDICATOR_SEPARATOR;
-    private static final String                    INDICATOR_TEXT_PLACEHOLDER     = BASE_INDICATOR_START + "text" + INDICATOR_SEPARATOR;
-    private static final String                    INDICATOR_CLASS_PLACEHOLDER    = BASE_INDICATOR_START + "class" + INDICATOR_SEPARATOR;
-    private static final String                    INDICATOR_FUNCTION_PLACEHOLDER = BASE_INDICATOR_START + "function" + INDICATOR_SEPARATOR;
+    private static final String                                 BASE_INDICATOR_START           = "$$";
+    private static final String                                 INDICATOR_SEPARATOR            = "$";
+    private static final String                                 INDICATOR_VALUE_PLACEHOLDER    =
+        BASE_INDICATOR_START + "value" + INDICATOR_SEPARATOR;
+    private static final String                                 INDICATOR_TEXT_PLACEHOLDER     =
+        BASE_INDICATOR_START + "text" + INDICATOR_SEPARATOR;
+    private static final String                                 INDICATOR_CLASS_PLACEHOLDER    =
+        BASE_INDICATOR_START + "class" + INDICATOR_SEPARATOR;
+    private static final String                                 INDICATOR_FUNCTION_PLACEHOLDER =
+        BASE_INDICATOR_START + "function" + INDICATOR_SEPARATOR;
 
-    private static final StaticTranslationProvider NOOP_TRANSLATION_PROVIDER      = new StaticTranslationProvider();
+    private static final StaticTranslationProvider              NOOP_TRANSLATION_PROVIDER      =
+        new StaticTranslationProvider();
 
-    private static final ContainerType[]           CONTENT_CONTAINER_CHILDREN     =
+    // @formatter:off
+    private static final TypeResolver<ContainerType, Container> CONTAINER_RESOLVER = 
+    (mapper, type, element, depth) ->
+        (switch (type)
+        {
+            case AUDIO -> mapper.transformAudioContainer(element, depth);
+            case BURGER -> mapper.transformBurgerContainer(element, depth);
+            case BUTTON -> mapper.transformButtonContainer(element, depth);
+            case BUTTON_ICON -> mapper.transformButtonIconContainer(element, depth);
+            case CONTENT -> mapper.transformContentContainer(element, depth);
+            case EMPTY -> EmptyContainer.builder().build();
+            case FORM -> mapper.transformFormContainer(element, depth);
+            case HEADING -> mapper.transformHeadingContainer(element, depth);
+            case HIDDEN -> mapper.transformHiddenContainer(element, depth);
+            case IMAGE -> mapper.transformImageContainer(element, depth);
+            case LINK -> mapper.transformLinkContainer(element, depth);
+            case MODAL -> mapper.transformModal(element, depth);
+            case SPLITTED -> mapper.transformSplittedContainer(element, depth);
+            case SVG -> mapper.transformSVGContainer(element, depth);
+            case TAB -> mapper.transformTabbedContainer(element, depth);
+            case TABLE -> mapper.transformTableContainer(element, depth);
+            case TABLE_ROW -> mapper.transformTableRowContainer(element, depth);
+            case TEXT -> mapper.transformTextContainer(element, depth);
+        });
+
+     private static final TypeResolver<InputType, Input> INPUT_RESOLVER = 
+    (mapper, type, element, depth) ->
+        (switch (type)
+        {
+            case CHECKBOX -> mapper.transformCheckboxInput(element, depth);
+            case DATE -> mapper.transformDateInput(element, depth);
+            case FILE -> mapper.transformFileInput(element, depth);
+            case HIDDEN -> mapper.transformHiddenInput(element, depth);
+            case NUMBER -> mapper.transformNumberInput(element, depth);
+            case PASSWORD -> mapper.transformPasswordInput(element, depth);
+            case RADIO -> mapper.transformRadioInput(element, depth);
+            case SELECT -> mapper.transformSelectInput(element, depth);
+            case SLIDER -> mapper.transformSliderInput(element, depth);
+            case SWITCH -> mapper.transformSwitchInput(element, depth);
+            case TAG -> mapper.transformTagInput(element, depth);
+            case TEXTAREA -> mapper.transformTextareaInput(element, depth);
+            case TEXTBOX -> mapper.transformTextboxInput(element, depth);
+            case TEXTFIELD -> mapper.transformTextfieldInput(element, depth);
+        });
+
+    private static final TypeResolver<SVGType, SVGElement> SVG_RESOLVER = 
+    (mapper, type, element, depth) ->
+        (switch (type)
+        {
+            case GROUP -> mapper.transformSVGGroup(element, depth);
+            case LINE -> mapper. transformSVGLine(element, depth);
+            case PATH -> mapper.transformSVGPath(element, depth);
+            case TEXT -> mapper.transformSVGText(element, depth);
+        });       
+    // @formatter:on
+
+    private static final ContainerType[]                        CONTENT_CONTAINER_CHILDREN     =
         {
             ContainerType.AUDIO,
             ContainerType.BUTTON,
@@ -262,9 +323,10 @@ public class JsonMapper
             ContainerType.EMPTY
         };
 
-    private static final ContainerType[]           LINK_CONTAINER_CHILDREN        = {ContainerType.IMAGE, ContainerType.TEXT};
+    private static final ContainerType[]                        LINK_CONTAINER_CHILDREN        =
+        {ContainerType.IMAGE, ContainerType.TEXT};
 
-    private static final ContainerType[]           TABLE_ROW_CONTAINER_CHILDREN   =
+    private static final ContainerType[]                        TABLE_ROW_CONTAINER_CHILDREN   =
         {
             ContainerType.BUTTON,
             ContainerType.BURGER,
@@ -279,7 +341,7 @@ public class JsonMapper
             ContainerType.EMPTY
         };
 
-    private static final ContainerType[]           MODAL_CONTAINER_CHILDREN       =
+    private static final ContainerType[]                        MODAL_CONTAINER_CHILDREN       =
         {
             ContainerType.FORM,
             ContainerType.IMAGE,
@@ -290,41 +352,43 @@ public class JsonMapper
         };
 
     @NonNull
-    private final TemplateFileCache                templateFileCache;
+    private final TemplateFileCache                             templateFileCache;
 
     @NonNull
-    private final String                           srcPath;
+    private final String                                        srcPath;
 
-    private String                                 srcPathSanitized;
-
-    @NonNull
-    @Default
-    private final Locale                           locale                         = Locale.ENGLISH;
+    private String                                              srcPathSanitized;
 
     @NonNull
     @Default
-    private final AbsTranslationProvider           translationProvider            = NOOP_TRANSLATION_PROVIDER;
+    private final Locale                                        locale                         = Locale.ENGLISH;
 
     @NonNull
-    private final FlatMappableDissector            flatMappableDissector;
+    @Default
+    private final AbsTranslationProvider                        translationProvider            =
+        NOOP_TRANSLATION_PROVIDER;
+
+    @NonNull
+    private final FlatMappableDissector                         flatMappableDissector;
 
     @Singular
-    private final List<TokenMap>                   tokenMaps;
+    private final List<TokenMap>                                tokenMaps;
 
-    private final Set<TokenMap>                    finalizedTokenMaps             = new HashSet<>();
+    private final Set<TokenMap>                                 finalizedTokenMaps             = new HashSet<>();
 
-    private final Map<Integer, TokenMap>           tempTokenMaps                  = new HashMap<>();
+    private final Map<Integer, TokenMap>                        tempTokenMaps                  = new HashMap<>();
 
-    private final List<AbsFunctionCall>            functions                      = new ArrayList<>();
+    private final List<AbsFunctionCall>                         functions                      = new ArrayList<>();
 
-    private final String                           uuid                           = UUID.randomUUID().toString();
+    private final String                                        uuid                           =
+        UUID.randomUUID().toString();
 
     @Default
-    private Integer                                count                          = 0;
+    private Integer                                             count                          = 0;
 
     @NonNull
     @Default
-    private final ContainerType[]                  depth0AllowedTypes             = ContainerType.values();
+    private final ContainerType[]                               depth0AllowedTypes             = ContainerType.values();
 
     /**
      * Run the mapping process.
@@ -1362,34 +1426,13 @@ public class JsonMapper
         LOG.trace("[{}]:[{}]: start transform >", uuid, depth);
         LOG.trace("[{}]:[{}]: map [{}] with allowed types [{}]", uuid, depth, uid, allowedTypes);
 
-        InternalElementType internalType = null;
-
         try
         {
-            try
-            {
-                internalType = InternalElementType.valueOf(element.getType().toUpperCase());
+            List<Container> componentResult = resolveComponentLink(element, depth, allowedTypes);
 
-                return switch (internalType)
-                {
-                    case COMPONENT -> {
-                        MapperResult result = transformInternalComponent(element, depth, allowedTypes);
-                        functions.addAll(result.getFunctions());
-                        yield result.getContainers();
-                    }
-                };
-            }
-            catch (IllegalArgumentException | NullPointerException ex)
+            if (Objects.nonNull(componentResult))
             {
-                // do nothing since it is not a internal type
-            }
-            catch (Exception ex)
-            {
-                LOG.error("failed to transform component", ex);
-
-                resultList.add(failureContainer());
-
-                return resultList;
+                return componentResult;
             }
 
             ContainerType type = ContainerType.valueOf(element.getType().toUpperCase());
@@ -1402,79 +1445,134 @@ public class JsonMapper
 
             LOG.debug("[{}]:[{}]: map CONTAINER [{}] as [{}]", uuid, depth, uid, type);
 
-            int                 numberOfRepetitions = 1;
-            FlatMappableList<?> targetList          = null;
-            FlatMappable        target              = null;
+            resultList.addAll(transformElement(element, depth, type, uid, CONTAINER_RESOLVER, this::failureContainer));
+        }
+        catch (Exception ex)
+        {
+            LOG.error("error parsing container element", ex);
+
+            return List.of(failureContainer());
+        }
+
+        return resultList;
+    }
+
+    /**
+     * Resolve an internal {@code Component} element.
+     * 
+     * @param element to resolve from
+     * @param depth of the recursive operation
+     * @param allowedTypes inside {@code element}
+     * @return a list of the created results
+     */
+    private List<Container> resolveComponentLink(PseudoElement element, int depth, ContainerType... allowedTypes)
+    {
+        try
+        {
+            InternalElementType internalType = InternalElementType.valueOf(element.getType().toUpperCase());
+
+            return switch (internalType)
+            {
+                case COMPONENT -> {
+                    MapperResult result = transformInternalComponent(element, depth, allowedTypes);
+                    functions.addAll(result.getFunctions());
+                    yield result.getContainers();
+                }
+            };
+        }
+        catch (IllegalArgumentException | NullPointerException ex)
+        {
+            // do nothing since it is not a internal type
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve whether this element has repetitions set.
+     * 
+     * @param element to resolve from
+     * @param depth of the recursive operation
+     * @return a resolved result
+     */
+    private SourceResolveParameters resolveRepetition(PseudoElement element, int depth)
+    {
+        int                 numberOfRepetitions = 1;
+        boolean             sourceExpected      = false;
+        FlatMappable        target              = null;
+        FlatMappableList<?> targetList          = null;
+
+        String              targetName          =
+            getParameterValue(element, depth, PARAM_ELEMENT_SOURCE, String.class, DEFAULT_VALUE_NOT_SET);
+
+        boolean             targetIsList        =
+            getParameterValue(element, depth, PARAM_ELEMENT_SOURCE_IS_LIST, Boolean.class, false);
+
+        if (!DEFAULT_VALUE_NOT_SET.equalsIgnoreCase(targetName))
+        {
+            sourceExpected = true;
+
+            if (targetIsList)
+            {
+                LOG.debug("[{}]:[{}]: repetition source element found", uuid, depth);
+
+                targetList = extractFromTokenMapsAsValue(targetName, FlatMappableList.class);
+
+                numberOfRepetitions = targetList.size();
+
+                LOG.debug("[{}]:[{}]: repeat container [{}] times", uuid, depth, numberOfRepetitions);
+            }
+            else
+            {
+                LOG.debug("[{}]:[{}]: source element found", uuid, depth);
+
+                target = extractFromTokenMapsAsValue(targetName, FlatMappable.class);
+            }
+        }
+
+        return new SourceResolveParameters(numberOfRepetitions, sourceExpected, targetIsList, target, targetList);
+    }
+
+    private <T, R> List<R> transformElement(PseudoElement element, int depth, T type, String resolvedUid, TypeResolver<T, R> resolver,
+        Supplier<R> failureSupplier)
+    {
+        List<R>                 resultList = new ArrayList<>();
+        SourceResolveParameters rrp        = resolveRepetition(element, depth);
+
+        for (int i = 0; i < rrp.repetitions(); i++)
+        {
+            int tempTokemMapHash = 0;
 
             try
             {
-                String  targetName   =
-                    getParameterValue(element, depth, PARAM_ELEMENT_SOURCE, String.class, DEFAULT_VALUE_NOT_SET);
-
-                boolean targetIsList =
-                    getParameterValue(element, depth, PARAM_REPETITION_SOURCE, Boolean.class, false);
-
-                if (!DEFAULT_VALUE_NOT_SET.equalsIgnoreCase(targetName))
-                {
-                    if (targetIsList)
-                    {
-                        LOG.debug("[{}]:[{}]: repetition source element found", uuid, depth);
-
-                        targetList = extractFromTokenMapsAsValue(targetName, FlatMappableList.class);
-
-                        numberOfRepetitions = targetList.size();
-
-                        LOG.debug("[{}]:[{}]: repeat container [{}] times", uuid, depth, numberOfRepetitions);
-                    }
-                    else
-                    {
-                        LOG.debug("[{}]:[{}]: source element found", uuid, depth);
-
-                        target = extractFromTokenMapsAsValue(targetName, FlatMappable.class);
-                    }
-                }
-            }
-            catch (JsonMapperException ex)
-            {
-                LOG.error("elementSource/repetitionSource expected but not found", ex);
-
-                resultList.add(failureContainer());
-
-                return resultList;
-            }
-
-            for (int i = 0; i < numberOfRepetitions; i++)
-            {
-                TokenMap      tempTokenMap  = null;
+                TokenMap      tempTokenMap  = rrp.resolveToTempTokenMap(flatMappableDissector, i, depth, locale);
 
                 PseudoElement repeatElement =
-                    numberOfRepetitions > 1
+                    rrp.repetitions() > 1
                         && element.getUid() != null
                             ? element
                                 .toBuilder()
-                                .uid(uid + "-" + i)
+                                .uid(resolvedUid + "-" + i)
                                 .build()
                             : element;
 
-                if (targetList != null)
+                if (tempTokenMap != null)
                 {
-                    tempTokenMap = flatMappableDissector.dissect(targetList.get(i), depth, locale);
+                    tempTokemMapHash = tempTokenMap.hashCode();
 
-                    tempTokenMaps.put(tempTokenMap.hashCode(), tempTokenMap);
-                }
-
-                if (target != null)
-                {
-                    tempTokenMap = flatMappableDissector.dissect(target, depth, locale);
-
-                    tempTokenMaps.put(tempTokenMap.hashCode(), tempTokenMap);
+                    tempTokenMaps.put(tempTokemMapHash, tempTokenMap);
                 }
 
                 if (LOG.isTraceEnabled() && !tempTokenMaps.isEmpty())
                 {
                     LOG.debug("[{}]:[{}]: with following temp token maps", uuid, depth);
 
-                    tempTokenMaps.values()
+                    tempTokenMaps
+                        .values()
                         .stream()
                         .filter(Objects::nonNull)
                         .map(TokenMap::toString)
@@ -1482,41 +1580,21 @@ public class JsonMapper
                         .forEach(stream -> stream.forEach(line -> LOG.trace("[{}]: {}", uuid, line)));
                 }
 
-                Container result = switch (type)
-                {
-                    case AUDIO -> transformAudioContainer(repeatElement, depth);
-                    case BURGER -> transformBurgerContainer(repeatElement, depth);
-                    case BUTTON -> transformButtonContainer(repeatElement, depth);
-                    case BUTTON_ICON -> transformButtonIconContainer(repeatElement, depth);
-                    case CONTENT -> transformContentContainer(repeatElement, depth);
-                    case EMPTY -> EmptyContainer.builder().build();
-                    case FORM -> transformFormContainer(repeatElement, depth);
-                    case HEADING -> transformHeadingContainer(repeatElement, depth);
-                    case HIDDEN -> transformHiddenContainer(repeatElement, depth);
-                    case IMAGE -> transformImageContainer(repeatElement, depth);
-                    case LINK -> transformLinkContainer(repeatElement, depth);
-                    case MODAL -> transformModal(repeatElement, depth);
-                    case SPLITTED -> transformSplittedContainer(repeatElement, depth);
-                    case SVG -> transformSVGContainer(repeatElement, depth);
-                    case TAB -> transformTabbedContainer(repeatElement, depth);
-                    case TABLE -> transformTableContainer(repeatElement, depth);
-                    case TABLE_ROW -> transformTableRowContainer(repeatElement, depth);
-                    case TEXT -> transformTextContainer(repeatElement, depth);
-                };
+                resultList.add(resolver.apply(this, type, repeatElement, depth));
+            }
+            catch (Exception ex)
+            {
+                LOG.error("error parsing repeated element", ex);
 
-                resultList.add(result);
-
-                if (tempTokenMap != null)
+                resultList.add(failureSupplier.get());
+            }
+            finally
+            {
+                if (tempTokemMapHash != 0)
                 {
-                    tempTokenMaps.remove(tempTokenMap.hashCode());
+                    tempTokenMaps.remove(tempTokemMapHash);
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            LOG.error("error parsing element", ex);
-
-            return List.of(failureContainer());
         }
 
         return resultList;
@@ -1527,7 +1605,7 @@ public class JsonMapper
      * 
      * @return a {@code TextContainer} with an error message and appropriate styling
      */
-    private TextContainer failureContainer()
+    private Container failureContainer()
     {
         return TextContainer
             .builder()
@@ -1625,7 +1703,7 @@ public class JsonMapper
                                     case "PUT" -> HttpMethod.PUT;
                                     case "PATCH" -> HttpMethod.PATCH;
                                     default -> {
-                                        LOG.warn("illegal method [{}] at BurgerItem [{}] default to POST", methodString, uid);
+                                        LOG.error("illegal method [{}] at BurgerItem [{}] default to POST", methodString, uid);
 
                                         yield HttpMethod.POST;
                                     }
@@ -1690,8 +1768,10 @@ public class JsonMapper
         ContainerParameters cpars               = resolveContainerBaseParameters(element, depth);
 
         String              icon                = getParameterValue(element, depth, PARAM_ICON, String.class);
+
         ButtonClass         btnClass            =
             getParameterValue(element, depth, PARAM_BTN_CLASS, ButtonClass.class, ButtonClass.DEFAULT);
+
         String              tooltip             = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
 
         AbsFunctionCall     btnFunction         = null;
@@ -2207,11 +2287,9 @@ public class JsonMapper
      */
     private Input transformInput(PseudoElement element, int depth)
     {
-        InputType type           = InputType.valueOf(element.getType().toUpperCase());
+        String  uid            = element.getUid() == null ? RANDOM_ID : element.getUid();
 
-        String    uid            = element.getUid() == null ? RANDOM_ID : element.getUid();
-
-        boolean   processElement = shouldProcess(element, uid, depth);
+        boolean processElement = shouldProcess(element, uid, depth);
 
         if (!processElement)
         {
@@ -2220,33 +2298,36 @@ public class JsonMapper
             return null;
         }
 
-        LOG.debug("[{}]:[{}]: map INPUT [{}] as [{}]", uuid, depth, element.getUid(), type);
-
         try
         {
-            return switch (type)
-            {
-                case CHECKBOX -> transformCheckboxInput(element, depth);
-                case DATE -> transformDateInput(element, depth);
-                case FILE -> transformFileInput(element, depth);
-                case HIDDEN -> transformHiddenInput(element, depth);
-                case NUMBER -> transformNumberInput(element, depth);
-                case PASSWORD -> transformPasswordInput(element, depth);
-                case RADIO -> transformRadioInput(element, depth);
-                case SELECT -> transformSelectInput(element, depth);
-                case SLIDER -> transformSliderInput(element, depth);
-                case SWITCH -> transformSwitchInput(element, depth);
-                case TAG -> transformTagInput(element, depth);
-                case TEXTAREA -> transformTextareaInput(element, depth);
-                case TEXTBOX -> transformTextboxInput(element, depth);
-                case TEXTFIELD -> transformTextfieldInput(element, depth);
-            };
+            InputType type = InputType.valueOf(element.getType().toUpperCase());
+
+            LOG.debug("[{}]:[{}]: map input [{}] as [{}]", uuid, depth, element.getUid(), type);
+
+            return transformElement(element, depth, type, uid, INPUT_RESOLVER, this::failureInput).get(0);
         }
-        catch (final Exception ex)
+        catch (Exception ex)
         {
-            // TODO: write better exception
-            throw new JsonParsingException(element.getUid(), depth, this.count, "error parsing element", ex);
+            LOG.error("error parsing svg element", ex);
+
+            return failureInput();
         }
+    }
+
+    /**
+     * Create a wrapper object for a failed transformation to show instead.
+     * 
+     * @return a {@code TextContainer} with an error message and appropriate styling
+     */
+    private Input failureInput()
+    {
+        return Textbox
+            .builder()
+            .clazz("alert")
+            .clazz("error")
+            .name("error on creation")
+            .text(String.format("the creation of this element failed. please refer to the server log. mapper id: [%s]", uuid))
+            .build();
     }
 
     /**
@@ -2330,7 +2411,7 @@ public class JsonMapper
         ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
         InputParameters     ipars    = resolveInputBaseParameters(element, depth);
 
-        Boolean             multiple = getParameterValue(element, depth, PARAM_MULTIPLE, Boolean.class, Boolean.FALSE);
+        boolean             multiple = getParameterValue(element, depth, PARAM_MULTIPLE, Boolean.class, Boolean.FALSE);
         List<String>        accept   = getParameterList(element, depth, PARAM_ACCEPT, String.class, List.of("*"));
 
         return File
@@ -2395,8 +2476,8 @@ public class JsonMapper
         InputParameters     ipars        = resolveInputBaseParameters(element, depth);
 
         String              value        = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
-        Integer             min          = getParameterValue(element, depth, PARAM_MIN, Integer.class, Integer.MIN_VALUE);
-        Integer             max          = getParameterValue(element, depth, PARAM_MAX, Integer.class, Integer.MAX_VALUE);
+        int                 min          = getParameterValue(element, depth, PARAM_MIN, Integer.class, Integer.MIN_VALUE);
+        int                 max          = getParameterValue(element, depth, PARAM_MAX, Integer.class, Integer.MAX_VALUE);
         String              placeholder  = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
         String              onEnterPress = getParameterValue(element, depth, PARAM_ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
 
@@ -2544,9 +2625,9 @@ public class JsonMapper
         ContainerParameters cpars = resolveContainerBaseParameters(element, depth);
         InputParameters     ipars = resolveInputBaseParameters(element, depth);
 
-        Integer             value = getParameterValue(element, depth, PARAM_VALUE, Integer.class, 0);
-        Integer             min   = getParameterValue(element, depth, PARAM_MIN, Integer.class, Integer.MIN_VALUE);
-        Integer             max   = getParameterValue(element, depth, PARAM_MAX, Integer.class, Integer.MAX_VALUE);
+        int                 value = getParameterValue(element, depth, PARAM_VALUE, Integer.class, 0);
+        int                 min   = getParameterValue(element, depth, PARAM_MIN, Integer.class, Integer.MIN_VALUE);
+        int                 max   = getParameterValue(element, depth, PARAM_MAX, Integer.class, Integer.MAX_VALUE);
 
         return Slider
             .builder()
@@ -2579,8 +2660,7 @@ public class JsonMapper
     {
         ContainerParameters cpars   = resolveContainerBaseParameters(element, depth);
         InputParameters     ipars   = resolveInputBaseParameters(element, depth);
-
-        Boolean             checked = getParameterValue(element, depth, PARAM_CHECKED, Boolean.class, Boolean.FALSE);
+        boolean             checked = getParameterValue(element, depth, PARAM_CHECKED, Boolean.class, Boolean.FALSE);
 
         return Switch
             .builder()
@@ -2722,17 +2802,12 @@ public class JsonMapper
         ContainerParameters cpars        = resolveContainerBaseParameters(element, depth);
         InputParameters     ipars        = resolveInputBaseParameters(element, depth);
 
-        String              value        =
-            getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
-        String              placeholder  =
-            getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
-        String              prefix       =
-            getParameterValue(element, depth, PARAM_PREFIX, String.class, DEFAULT_EMPTY_VAL);
-        String              suffix       =
-            getParameterValue(element, depth, PARAM_SUFFIX, String.class, DEFAULT_EMPTY_VAL);
+        String              value        = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
+        String              placeholder  = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
+        String              prefix       = getParameterValue(element, depth, PARAM_PREFIX, String.class, DEFAULT_EMPTY_VAL);
+        String              suffix       = getParameterValue(element, depth, PARAM_SUFFIX, String.class, DEFAULT_EMPTY_VAL);
         Integer             maxChars     = getParameterValue(element, depth, PARAM_MAX_CHARS, Integer.class, 150);
-        String              onEnterPress =
-            getParameterValue(element, depth, PARAM_ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
+        String              onEnterPress = getParameterValue(element, depth, PARAM_ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
 
         return Textfield
             .builder()
@@ -2769,15 +2844,12 @@ public class JsonMapper
         this.count++;
 
         List<SVGElement> resultList     = new ArrayList<>();
-
         String           uid            = element.getUid() == null ? RANDOM_ID : element.getUid();
-
         boolean          processElement = shouldProcess(element, uid, depth);
 
         if (!processElement)
         {
-            LOG.debug("[{}]:[{}]: skip svg element [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid,
-                depth, uid);
+            LOG.debug("[{}]:[{}]: skip svg element [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth, uid);
 
             return resultList;
         }
@@ -2793,96 +2865,7 @@ public class JsonMapper
 
             LOG.debug("[{}]:[{}]: map svg element [{}] as [{}]", uuid, depth, uid, type);
 
-            int                 numberOfRepetitions = 1;
-            FlatMappableList<?> targetList          = null;
-            FlatMappable        target              = null;
-
-            try
-            {
-                String targetListName = getParameterValue(element, depth, PARAM_REPETITION_SOURCE, String.class);
-                targetList = extractFromTokenMapsAsValue(targetListName, FlatMappableList.class);
-
-                numberOfRepetitions = targetList.size();
-
-                LOG.debug("[{}]:[{}]: repeat svg element [{}] times", uuid, depth, numberOfRepetitions);
-            }
-            catch (JsonParsingException ex)
-            {
-                LOG.trace("[{}]:[{}]: repetitionSource not set", uuid, depth);
-
-                try
-                {
-                    String targetName = getParameterValue(element, depth, PARAM_ELEMENT_SOURCE, String.class);
-                    target = extractFromTokenMapsAsValue(targetName, FlatMappable.class);
-
-                    LOG.debug("[{}]:[{}]: source element found", uuid, depth);
-                }
-                catch (JsonParsingException exInner)
-                {
-                    LOG.trace("[{}]:[{}]: elementSource not set", uuid, depth);
-                }
-            }
-            catch (JsonMapperException ex)
-            {
-                LOG.error("elementSource/repetitionSource expected but not found", ex);
-
-                resultList.add(failureSVGElement());
-
-                return resultList;
-            }
-
-            for (int i = 0; i < numberOfRepetitions; i++)
-            {
-                TokenMap      tempTokenMap  = null;
-                PseudoElement repeatElement =
-                    numberOfRepetitions > 1 && element.getUid() != null
-                        ? element
-                            .toBuilder()
-                            .uid(uid + "-" + i)
-                            .build()
-                        : element;
-
-                if (targetList != null)
-                {
-                    tempTokenMap = flatMappableDissector.dissect(targetList.get(i), depth, locale);
-
-                    tempTokenMaps.put(tempTokenMap.hashCode(), tempTokenMap);
-                }
-
-                if (target != null)
-                {
-                    tempTokenMap = flatMappableDissector.dissect(target, depth, locale);
-
-                    tempTokenMaps.put(tempTokenMap.hashCode(), tempTokenMap);
-                }
-
-                if (LOG.isTraceEnabled() && !tempTokenMaps.isEmpty())
-                {
-                    LOG.debug("[{}]:[{}]: with following temp token maps", uuid, depth);
-
-                    tempTokenMaps.values()
-                        .stream()
-                        .filter(Objects::nonNull)
-                        .map(TokenMap::toString)
-                        .map(String::lines)
-                        .forEach(stream -> stream.forEach(line -> LOG.trace("[{}]: {}", uuid, line)));
-                }
-
-                SVGElement result = switch (type)
-                {
-                    case GROUP -> transformSVGGroup(repeatElement, depth);
-                    case LINE -> transformSVGLine(repeatElement, depth);
-                    case PATH -> transformSVGPath(repeatElement, depth);
-                    case TEXT -> transformSVGText(repeatElement, depth);
-                };
-
-                resultList.add(result);
-
-                if (tempTokenMap != null)
-                {
-                    tempTokenMaps.remove(tempTokenMap.hashCode());
-                }
-            }
+            resultList.addAll(transformElement(element, depth, type, uid, SVG_RESOLVER, this::failureSVGElement));
         }
         catch (Exception ex)
         {

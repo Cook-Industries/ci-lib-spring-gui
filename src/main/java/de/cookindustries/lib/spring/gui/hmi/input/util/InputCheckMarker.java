@@ -8,6 +8,7 @@
 package de.cookindustries.lib.spring.gui.hmi.input.util;
 
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -27,5 +28,11 @@ public class InputCheckMarker
 
     @NonNull
     private final MarkerType     type;
+
+    @NonNull
+    private final String         translationKey;
+
+    @Default
+    private final Object[]       translationPlaceholders = new Object[0];
 
 }

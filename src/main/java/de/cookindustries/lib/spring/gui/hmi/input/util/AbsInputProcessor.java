@@ -37,9 +37,10 @@ public abstract class AbsInputProcessor<T>
      * Create an {@link InputCheckResult} with a {@code type} and a empty result object.
      * 
      * @param type of the result
+     * @param translationPlaceholderValues values to fill in in the resulting ui message
      * @return a empty {@code InputCheckResult}
      */
-    protected final InputCheckResult<T> createEmptyResult(InputCheckResultType type)
+    protected final InputCheckResult<T> createEmptyResult(InputCheckResultType type, Object... translationPlaceholderValues)
     {
         return createResult(type, null);
     }
@@ -49,9 +50,10 @@ public abstract class AbsInputProcessor<T>
      * 
      * @param type of the result
      * @param result object to include
+     * @param translationPlaceholderValues values to fill in in the resulting ui message
      * @return a {@code InputCheckResult}
      */
-    protected final InputCheckResult<T> createResult(InputCheckResultType type, T result)
+    protected final InputCheckResult<T> createResult(InputCheckResultType type, T result, Object... translationPlaceholderValues)
     {
         T endResult = prepare(result);
 
@@ -59,6 +61,7 @@ public abstract class AbsInputProcessor<T>
             .<T>builder()
             .type(type)
             .result(Optional.ofNullable(endResult))
+            .translationPlaceholderValues(translationPlaceholderValues)
             .build();
     }
 
@@ -77,8 +80,8 @@ public abstract class AbsInputProcessor<T>
      * <p>
      * Use
      * <ul>
-     * <li>{@link #createEmptyResult(InputCheckResultType)} for failures</li>
-     * <li>{@link #createResult(InputCheckResultType, Object)} for a passes</li>
+     * <li>{@link #createEmptyResult(InputCheckResultType, Object...)} for failures</li>
+     * <li>{@link #createResult(InputCheckResultType, Object, Object...)} for a passes</li>
      * </ul>
      * 
      * @param input to check

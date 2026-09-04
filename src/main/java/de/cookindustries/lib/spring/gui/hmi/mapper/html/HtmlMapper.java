@@ -931,7 +931,6 @@ public final class HtmlMapper
             .tag(TAG_DIV)
             .clazz(INPUT_CONTAINER)
             .content(legend)
-            .content(input)
             .content(mandatoryIcon)
             .content(warningIcon)
             .content(errorIcon)

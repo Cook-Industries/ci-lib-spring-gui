@@ -22,7 +22,6 @@ import de.cookindustries.lib.spring.gui.hmi.container.ContentContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.ModalContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.TextContainer;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputExtractor;
-import de.cookindustries.lib.spring.gui.hmi.input.util.MarkerType;
 import de.cookindustries.lib.spring.gui.hmi.mapper.exception.JsonMapperException;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.JsonMapper;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.MapperResult;
@@ -135,7 +134,7 @@ public final class GUIFactory
      * @param placeholderValues for translation infill
      * @return the translated {@code text} or a placeholder
      */
-    public String getTranslatedText(Locale language, String key, Object placeholderValues)
+    public String getTranslatedText(Locale language, String key, Object... placeholderValues)
     {
         return translationProvider.getText(language, key, placeholderValues);
     }
@@ -556,7 +555,12 @@ public final class GUIFactory
                     .add(
                         ActivateMarkerMessage
                             .builder()
-                            .text(translationProvider.getText(inputExtractor.getLocale(), MarkerType.typeTranslationKey(m.getType())))
+                            .text(
+                                translationProvider
+                                    .getText(
+                                        inputExtractor.getLocale(),
+                                        m.getTranslationKey(),
+                                        m.getTranslationPlaceholders()))
                             .formId(m.getFormId())
                             .category(m.getCategory())
                             .fieldId(m.getTransferId())

@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +29,8 @@ import de.cookindustries.lib.spring.gui.hmi.input.util.exception.InputExtraction
 class InputExtractorTest
 {
 
-    private enum TestEnum {
+    private enum TestEnum
+    {
         VALUE1, VALUE2;
     }
 
@@ -48,7 +50,7 @@ class InputExtractorTest
         inputs.clear();
 
         // run & verify
-        assertThrows(IllegalArgumentException.class, () -> new InputExtractor(inputs));
+        assertThrows(IllegalArgumentException.class, () -> new InputExtractor(inputs, Locale.ENGLISH));
     }
 
     @Test
@@ -59,7 +61,7 @@ class InputExtractorTest
         inputs.add("__form_id", "");
 
         // run & verify
-        assertThrows(IllegalArgumentException.class, () -> new InputExtractor(inputs));
+        assertThrows(IllegalArgumentException.class, () -> new InputExtractor(inputs, Locale.ENGLISH));
     }
 
     @Test
@@ -67,7 +69,7 @@ class InputExtractorTest
     {
         // setup
         List<String>   result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run & verify
         assertThrows(IllegalArgumentException.class, () -> extractor.checkAndConsumeAsString(null, result::add));
@@ -80,7 +82,7 @@ class InputExtractorTest
         // setup
         inputs.add("testKey", "");
         List<String>   result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         extractor.checkAndConsumeAsNotEmptyString("testKey", result::add);
@@ -95,7 +97,7 @@ class InputExtractorTest
         // setup
         inputs.add("testKey", "testValue");
         List<String>   result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         extractor.checkAndConsumeAsString("testKey", result::add);
@@ -117,7 +119,7 @@ class InputExtractorTest
                 .build();
         inputs.add("testKey", "test");
         List<String>   result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         extractor.checkAndConsumeAsString("testKey", processor, result::add);
@@ -139,7 +141,7 @@ class InputExtractorTest
                 .build();
         inputs.add("testKey", "test");
         List<String>   result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         extractor.checkAndConsumeAsString("testKey", processor, result::add);
@@ -157,7 +159,7 @@ class InputExtractorTest
         // setup
         inputs.add("testKey", "testValue");
         List<String>   result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         extractor.checkAndConsumeAsNotEmptyString("testKey", result::add);
@@ -174,7 +176,7 @@ class InputExtractorTest
         // setup
         inputs.add("testKey", "");
         List<String>   result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         extractor.checkAndConsumeAsNotEmptyString("testKey", result::add);
@@ -193,7 +195,7 @@ class InputExtractorTest
         inputs.add("testKey", "");
         inputs.add("bool", "true");
         List<Boolean>  result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         extractor.checkAndConsumeAsBooleanDefaultFalse("testKey", result::add);
@@ -213,7 +215,7 @@ class InputExtractorTest
         inputs.add("testKey", "");
         inputs.add("bool", "false");
         List<Boolean>  result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         extractor.checkAndConsumeAsBooleanDefaultTrue("testKey", result::add);
@@ -232,7 +234,7 @@ class InputExtractorTest
         // setup
         inputs.add("testKey", "1");
         List<Integer>  result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         extractor.checkAndConsumeAsInteger("testKey", result::add);
@@ -248,7 +250,7 @@ class InputExtractorTest
     {
         // setup
         inputs.add("testKey", "a");
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         extractor.checkAndConsumeAsInteger("testKey", s -> s.toString());
@@ -271,7 +273,7 @@ class InputExtractorTest
             .build();
         inputs.add("testKey", "1");
         List<Integer>  result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         extractor.checkAndConsumeAsInteger("testKey", processor, result::add);
@@ -289,7 +291,7 @@ class InputExtractorTest
         IntegerInputProcessor processor;
         inputs.add("testKey", "1");
         List<Integer>  result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         processor = IntegerInputProcessor
@@ -321,7 +323,7 @@ class InputExtractorTest
         // setup
         inputs.add("testKey", "1.0");
         List<Double>   result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         extractor.checkAndConsumeAsDouble("testKey", result::add);
@@ -338,7 +340,7 @@ class InputExtractorTest
         // setup
         inputs.add("testKey", "a");
         List<Double>   result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         extractor.checkAndConsumeAsDouble("testKey", result::add);
@@ -361,7 +363,7 @@ class InputExtractorTest
             .build();
         inputs.add("testKey", "1.0");
         List<Double>   result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         extractor.checkAndConsumeAsDouble("testKey", processor, result::add);
@@ -381,7 +383,7 @@ class InputExtractorTest
         List<Double>   result    = new ArrayList<>();
 
         // run
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         processor = DoubleInputProcessor
             .builder()
@@ -414,7 +416,7 @@ class InputExtractorTest
         List<Date>     result    = new ArrayList<>();
 
         // run
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         extractor.checkAndConsumeAsDate("testKey", result::add);
 
@@ -431,7 +433,7 @@ class InputExtractorTest
         inputs.add("testKey", "a");
 
         // run
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         extractor.checkAndConsumeAsDate("testKey", s -> {
         });
@@ -451,7 +453,7 @@ class InputExtractorTest
         List<TestEnum> result    = new ArrayList<>();
 
         // run
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         extractor.checkAndConsumeAsEnum("testKey", TestEnum.class, result::add);
 
@@ -469,7 +471,7 @@ class InputExtractorTest
         List<TestEnum> result    = new ArrayList<>();
 
         // run
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         extractor.checkAndConsumeAsEnum("testKey", TestEnum.class, result::add);
 
@@ -487,7 +489,7 @@ class InputExtractorTest
         inputs.add("", "value1");
 
         // run
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         extractor.checkAndConsumeAsEnum("testKey", TestEnum.class, s -> {
             throw new IllegalArgumentException();
@@ -506,7 +508,7 @@ class InputExtractorTest
         // setup
         inputs.add("testKey", "[{\"value\":\"tag1\"}]");
         List<TagList>  result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         extractor.checkAndConsumeAsTagList("testKey", result::add);
@@ -523,7 +525,7 @@ class InputExtractorTest
         // setup
         inputs.add("testKey", "[]");
         List<TagList>  result    = new ArrayList<>();
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run
         extractor.checkAndConsumeAsNotEmptyTagList("testKey", result::add);
@@ -537,7 +539,7 @@ class InputExtractorTest
     void test_checkFiles_invalidKey()
     {
         // setup
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run & verify
         assertThrows(IllegalArgumentException.class, () -> extractor.checkFiles(null, false, false));
@@ -548,7 +550,7 @@ class InputExtractorTest
     void test_checkFiles_nullArray()
     {
         // setup
-        InputExtractor extractor = new InputExtractor(inputs);
+        InputExtractor extractor = new InputExtractor(inputs, Locale.ENGLISH);
 
         // run & verify
         extractor.checkFiles("files", true, false);
@@ -563,7 +565,7 @@ class InputExtractorTest
     void test_checkFiles_nullFile()
     {
         // setup
-        InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {});
+        InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {}, Locale.ENGLISH);
 
         // run
         extractor.checkFiles("files", true, false);
@@ -583,7 +585,7 @@ class InputExtractorTest
             "Sample file content".getBytes(StandardCharsets.UTF_8));
 
         // run
-        InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {file});
+        InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {file}, Locale.ENGLISH);
 
         extractor.checkFiles("files", false, false);
 
@@ -602,7 +604,7 @@ class InputExtractorTest
             "Sample file content".getBytes(StandardCharsets.UTF_8));
 
         // run
-        InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {file, file});
+        InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {file, file}, Locale.ENGLISH);
 
         extractor.checkFiles("files", false, true);
 
@@ -621,7 +623,7 @@ class InputExtractorTest
             "Sample file content".getBytes(StandardCharsets.UTF_8));
 
         // run
-        InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {file, file});
+        InputExtractor extractor = new InputExtractor(inputs, new MultipartFile[] {file, file}, Locale.ENGLISH);
 
         extractor.checkFiles("files", false, false);
 

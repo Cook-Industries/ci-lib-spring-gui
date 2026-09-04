@@ -8,7 +8,7 @@
         "key1": "value1"
     },
     "parameters": {
-        "text": "this is a button",
+        "icon": "/images/btn-icon.png",
         "onClick": "doShit()",
         "btnClass": "success"
     }
