@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 
 import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
@@ -31,7 +32,7 @@ import lombok.extern.jackson.Jacksonized;
 public final class CssEntity
 {
 
-    private static final String       INDENT = "    ";
+    private static final String       INDENT   = "    ";
 
     @NonNull
     private final String              selector;
@@ -39,8 +40,18 @@ public final class CssEntity
     @Singular
     private final Map<String, String> attributes;
 
-    private final boolean             append;
+    /** whether this rule overrides only specific values or the whole entity */
+    @Default
+    private final boolean             override = false;
 
+    /**
+     * Merge {@code other} with {@code this}. On conflicting rules - they exist in both instances - the ones in {@code other} take
+     * presedence.
+     * 
+     * @param other to merge with
+     * @return a merged entity
+     * @throws IllegalArgumentException if the {@code selector} is not equal in both entities
+     */
     public CssEntity merge(CssEntity other)
     {
         if (!selector.equals(other.getSelector()))
@@ -55,7 +66,7 @@ public final class CssEntity
             .forEach((key, val) -> map.put(key, val));
 
         getAttributes()
-            .forEach((key, val) -> map.put(key, val));
+            .forEach((key, val) -> map.putIfAbsent(key, val));
 
         return CssEntity
             .builder()

@@ -17,8 +17,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import de.cookindustries.lib.spring.gui.config.properties.CiLibProperties;
@@ -26,9 +24,10 @@ import de.cookindustries.lib.spring.gui.html.CssAnimation;
 import de.cookindustries.lib.spring.gui.html.CssConfig;
 import de.cookindustries.lib.spring.gui.html.CssEntity;
 import de.cookindustries.lib.spring.gui.util.ResourceLoader;
+import jakarta.annotation.PostConstruct;
 
 @Component
-final class CiLibStaticFileCreator implements ApplicationRunner
+final class CiLibStaticFileCreator
 {
 
     private static final Logger   LOG = LoggerFactory.getLogger(CiLibStaticFileCreator.class);
@@ -40,8 +39,8 @@ final class CiLibStaticFileCreator implements ApplicationRunner
         this.properties = properties;
     }
 
-    @Override
-    public void run(ApplicationArguments args)
+    @PostConstruct
+    public void init()
     {
         createCssBaseFile();
     }
@@ -69,7 +68,7 @@ final class CiLibStaticFileCreator implements ApplicationRunner
         }
         catch (Exception ex)
         {
-            LOG.warn("could not load/find css-config");
+            LOG.warn("could not load/find css-config", ex);
         }
 
         if (userConfig == null)
@@ -81,6 +80,7 @@ final class CiLibStaticFileCreator implements ApplicationRunner
             Map<String, CssEntity>    cssRules      = new HashMap<>();
             Map<String, CssAnimation> cssAnimations = new HashMap<>();
 
+            // --> rules
             staticConfig
                 .getRules()
                 .forEach(rule -> cssRules.put(rule.getSelector(), rule));
@@ -90,23 +90,27 @@ final class CiLibStaticFileCreator implements ApplicationRunner
                 .forEach(rule -> {
                     String selector = rule.getSelector();
 
-                    if (rule.isAppend() && cssRules.containsKey(selector))
+                    if (!rule.isOverride()
+                        && cssRules.containsKey(selector))
                     {
-                        cssRules.put(selector, rule.merge(cssRules.get(selector)));
+                        cssRules.put(selector, cssRules.get(selector).merge(rule));
                     }
                     else
                     {
                         cssRules.put(selector, rule);
                     }
                 });
+            // <-- rules
 
-            staticConfig
-                .getAnimations()
-                .forEach(anim -> cssAnimations.put(anim.getName(), anim));
-
+            // --> animations
             userConfig
                 .getAnimations()
                 .forEach(anim -> cssAnimations.put(anim.getName(), anim));
+
+            staticConfig
+                .getAnimations()
+                .forEach(anim -> cssAnimations.putIfAbsent(anim.getName(), anim));
+            // <-- animations
 
             cssConfig =
                 CssConfig
@@ -116,8 +120,7 @@ final class CiLibStaticFileCreator implements ApplicationRunner
                     .build();
         }
 
-        Path filePath =
-            Path.of(properties.getWeb().getPath().getStaticWebResources(), "css", "cook-industries-core.css");
+        Path filePath = Path.of(properties.getWeb().getPath().getStaticWebResources(), "css", "cook-industries-core.css");
 
         try
         {
@@ -137,17 +140,18 @@ final class CiLibStaticFileCreator implements ApplicationRunner
                 .getRules()
                 .stream()
                 .sorted(CssEntity.compareByFirstChar())
-                .forEach(rule -> {
-                    try
-                    {
-                        writer.write(rule.toCssString());
-                        writer.newLine();
-                    }
-                    catch (IOException ex)
-                    {
-                        throw new RuntimeException(ex);
-                    }
-                });
+                .forEach(
+                    rule -> {
+                        try
+                        {
+                            writer.write(rule.toCssString());
+                            writer.newLine();
+                        }
+                        catch (IOException ex)
+                        {
+                            throw new RuntimeException(ex);
+                        }
+                    });
 
             cssConfig
                 .getAnimations()
