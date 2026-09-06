@@ -1,0 +1,23 @@
+{
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "NUMBER",
+            "classes": [],
+            "attributes": {},
+            "parameters": {
+                "name": "name",
+                "submitAs": "number",
+                "mandatory": true,
+                "value": 12,
+                "min": 0,
+                "max": 15,
+                "step": 2
+            }
+        }
+    ]
+}

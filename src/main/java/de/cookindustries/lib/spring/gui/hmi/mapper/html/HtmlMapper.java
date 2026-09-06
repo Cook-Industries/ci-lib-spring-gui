@@ -83,7 +83,6 @@ public final class HtmlMapper
     private static final String        TAG_TEXT                = "text";
     private static final String        TAG_GROUP               = "g";
     private static final String        TAG_PATH                = "path";
-    private static final String        TAG_SPAN                = "span";
 
     private static final String        ATT_ID                  = "id";
     private static final String        ATT_NAME                = "name";
@@ -95,6 +94,7 @@ public final class HtmlMapper
     private static final String        ATT_SELECTED            = "selected";
     private static final String        ATT_MIN                 = "min";
     private static final String        ATT_MAX                 = "max";
+    private static final String        ATT_STEP                = "step";
     private static final String        ATT_PLACEHOLDER         = "placeholder";
     private static final String        ATT_HREF                = "href";
     private static final String        ATT_TARGET              = "target";
@@ -980,7 +980,7 @@ public final class HtmlMapper
                             Attribute
                                 .builder()
                                 .name(ATT_CHECKED)
-                                .active(box.getChecked())
+                                .active(box.isChecked())
                                 .build())
                         .clazz(CLASS_FORM_CHECK_INPUT)
                         .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
@@ -1163,13 +1163,31 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_VALUE)
-                        .value(htmlEscape(number.getValue()))
+                        .value(String.valueOf(number.getValue()))
                         .build())
                 .attribute(
                     Attribute
                         .builder()
                         .name(ATT_PLACEHOLDER)
                         .value(htmlEscape(number.getPlaceholder()))
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_MIN)
+                        .value(String.valueOf(number.getMin()))
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_MAX)
+                        .value(String.valueOf(number.getMax()))
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_STEP)
+                        .value(String.valueOf(number.getStep()))
                         .build())
                 .dataAttribute(DATA_ATT_ON_ENTER_PRESS, number.getOnEnterPress())
                 .build()
@@ -1220,13 +1238,18 @@ public final class HtmlMapper
 
     private String render(Radio radio, String formId)
     {
-        ArrayList<String> buttons = new ArrayList<>();
+        ArrayList<String> buttons    = new ArrayList<>();
 
-        Integer           i       = 0;
-        Boolean           checked = false;
+        int               i          = 0;
         String            radioID;
 
-        for (InputValue btn : radio.getValues())
+        boolean           checkFirst =
+            radio
+                .getBoxes()
+                .stream()
+                .noneMatch(InputValue::isChecked);
+
+        for (InputValue box : radio.getBoxes())
         {
             radioID = radio.getUid() + "-" + i;
 
@@ -1251,7 +1274,7 @@ public final class HtmlMapper
                         Attribute
                             .builder()
                             .name(ATT_VALUE)
-                            .value(htmlEscape(btn.getValue()))
+                            .value(htmlEscape(box.getValue()))
                             .build())
                     .attribute(
                         Attribute
@@ -1269,7 +1292,7 @@ public final class HtmlMapper
                         Attribute
                             .builder()
                             .name(ATT_CHECKED)
-                            .active(btn.getChecked())
+                            .active(checkFirst || box.isChecked())
                             .build())
                     .clazz(CLASS_FORM_CHECK_INPUT)
                     .build()
@@ -1287,7 +1310,7 @@ public final class HtmlMapper
                             .build())
                     .clazz(CLASS_FORM_CHECK_LABEL)
                     .clazz(CLASS_USER_SELECT_NONE)
-                    .content(btn.getText())
+                    .content(box.getText())
                     .build()
                     .html();
 
@@ -1301,7 +1324,7 @@ public final class HtmlMapper
                     .build();
 
             i++;
-            checked = checked || btn.getChecked();
+            checkFirst = false;
 
             buttons.add(innerDiv.html());
         }
@@ -1429,6 +1452,12 @@ public final class HtmlMapper
                         .name(ATT_MAX)
                         .value(String.valueOf(slider.getMax()))
                         .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_STEP)
+                        .value(String.valueOf(slider.getStep()))
+                        .build())
                 .clazz("form-range")
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
                 .dataAttribute(DATA_ATT_SUBMIT_AS, slider.getSubmitAs())
@@ -1515,7 +1544,12 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_VALUE)
-                        .value(htmlEscape(tag.getValue()))
+                        .value(
+                            htmlEscape(
+                                tag
+                                    .getTags()
+                                    .stream()
+                                    .collect(Collectors.joining(","))))
                         .build())
                 .attribute(
                     Attribute

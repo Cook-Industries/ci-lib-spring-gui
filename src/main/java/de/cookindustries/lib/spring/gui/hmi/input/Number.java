@@ -24,20 +24,23 @@ public final class Number extends SubmittableInput
 {
 
     @NonNull
-    private final String  value;
+    private final java.lang.Number value;
 
     @NonNull
-    private final Integer min;
+    private final java.lang.Number min;
 
     @NonNull
-    private final Integer max;
+    private final java.lang.Number max;
 
     @NonNull
-    private final String  placeholder;
+    private final java.lang.Number step;
+
+    @NonNull
+    private final String           placeholder;
 
     @NonNull
     @Default
-    private final String  onEnterPress = "";
+    private final String           onEnterPress = "";
 
     @Override
     protected InputType inferType()

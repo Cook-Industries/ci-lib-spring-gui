@@ -7,6 +7,7 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input;
 
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
@@ -24,6 +25,15 @@ public final class Date extends SubmittableInput
 
     @NonNull
     private final String value;
+
+    @NonNull
+    private final String min;
+
+    @NonNull
+    private final String max;
+
+    @Default
+    private final int    step = 1;
 
     @Override
     protected InputType inferType()

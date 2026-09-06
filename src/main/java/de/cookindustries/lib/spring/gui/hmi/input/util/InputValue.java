@@ -10,11 +10,11 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
 import java.util.List;
 
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
 import lombok.ToString;
-import lombok.Builder.Default;
 
 /**
  * An object representing various input values for checkboxes, selection and others.
@@ -42,9 +42,8 @@ public class InputValue
     private final String       value;
 
     /** Whether this input value is selected or not */
-    @NonNull
     @Default
-    private final Boolean      checked = false;
+    private final boolean      checked = false;
 
     /** Styling classes for this input value */
     @Singular("clazz")

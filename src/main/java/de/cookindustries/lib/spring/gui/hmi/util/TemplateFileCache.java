@@ -19,6 +19,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.cookindustries.lib.spring.gui.config.properties.CiLibProperties;
@@ -72,8 +73,11 @@ public class TemplateFileCache
         LOG.info("init [{}]", TemplateFileCache.class.getSimpleName());
 
         ObjectMapper mapper = new ObjectMapper();
-        int          expected;
-        int          cnt    = 0;
+        mapper.enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS);
+        mapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+
+        int expected;
+        int cnt = 0;
 
         try
         {

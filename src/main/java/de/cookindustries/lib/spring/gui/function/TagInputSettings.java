@@ -8,9 +8,9 @@
 package de.cookindustries.lib.spring.gui.function;
 
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Builder.Default;
 
 /**
  * Settings to submit for a {@link RegisterTagInput} function.
@@ -26,8 +26,8 @@ public class TagInputSettings implements AbsFunctionArgs
     @NonNull
     private final String  id;
 
-    @NonNull
-    private final Boolean enforceWhitelist;
+    @Default
+    private final boolean enforceWhitelist  = false;
 
     @NonNull
     @Default
@@ -37,8 +37,7 @@ public class TagInputSettings implements AbsFunctionArgs
     @Default
     private final String  searchTagsUrl     = "";
 
-    @NonNull
     @Default
-    private final Integer maxTags           = Integer.MAX_VALUE;
+    private final int     maxTags           = Integer.MAX_VALUE;
 
 }

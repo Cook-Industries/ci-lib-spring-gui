@@ -43,6 +43,7 @@ import de.cookindustries.lib.spring.gui.hmi.input.Radio;
 import de.cookindustries.lib.spring.gui.hmi.input.Select;
 import de.cookindustries.lib.spring.gui.hmi.input.Slider;
 import de.cookindustries.lib.spring.gui.hmi.input.Switch;
+import de.cookindustries.lib.spring.gui.hmi.input.Tag;
 import de.cookindustries.lib.spring.gui.hmi.input.Textarea;
 import de.cookindustries.lib.spring.gui.hmi.input.Textbox;
 import de.cookindustries.lib.spring.gui.hmi.input.Textfield;
@@ -723,6 +724,7 @@ public class JsonMapperTest
         Date date = (Date) input;
         assertEquals("name", date.getName());
         assertEquals("date", date.getSubmitAs());
+        assertEquals("2026-05-01", date.getValue());
 
         String html = HtmlMapper.map(container);
         assertTrue(checkDivTags(html));
@@ -821,6 +823,76 @@ public class JsonMapperTest
     }
 
     @Test
+    void test_map_NumberInputInteger()
+    {
+        // setup
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .srcPath("json-mapper/input/number-input-integer.ged")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
+                .flatMappableDissector(flatMappableDissector)
+                .build();
+
+        // run
+        MapperResult  result    = mapper.map();
+
+        // verify
+        Container     container = result.getContainers().get(0);
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
+        assertEquals(Number.class, input.getClass());
+
+        Number number = (Number) input;
+        assertEquals("name", number.getName());
+        assertEquals("number", number.getSubmitAs());
+        assertEquals("12", String.valueOf(number.getValue()));
+        assertEquals("0", String.valueOf(number.getMin()));
+        assertEquals("15", String.valueOf(number.getMax()));
+        assertEquals("2", String.valueOf(number.getStep()));
+
+        String html = HtmlMapper.map(container);
+        assertTrue(checkDivTags(html));
+    }
+
+    @Test
+    void test_map_NumberInputDouble()
+    {
+        // setup
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .srcPath("json-mapper/input/number-input-double.ged")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
+                .flatMappableDissector(flatMappableDissector)
+                .build();
+
+        // run
+        MapperResult  result    = mapper.map();
+
+        // verify
+        Container     container = result.getContainers().get(0);
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
+        assertEquals(Number.class, input.getClass());
+
+        Number number = (Number) input;
+        assertEquals("name", number.getName());
+        assertEquals("number", number.getSubmitAs());
+        assertEquals("12.0", String.valueOf(number.getValue()));
+        assertEquals("0.0", String.valueOf(number.getMin()));
+        assertEquals("15.0", String.valueOf(number.getMax()));
+        assertEquals("2.0", String.valueOf(number.getStep()));
+
+        String html = HtmlMapper.map(container);
+        assertTrue(checkDivTags(html));
+    }
+
+    @Test
     void test_map_PasswordInput()
     {
         // setup
@@ -877,7 +949,7 @@ public class JsonMapperTest
         Radio radio = (Radio) input;
         assertEquals("name", radio.getName());
         assertEquals("radio", radio.getSubmitAs());
-        assertEquals(2, radio.getValues().size());
+        assertEquals(2, radio.getBoxes().size());
 
         String html = HtmlMapper.map(container);
         assertTrue(checkDivTags(html));
@@ -997,6 +1069,39 @@ public class JsonMapperTest
         Switch switchi = (Switch) input;
         assertEquals("name", switchi.getName());
         assertEquals("switch", switchi.getSubmitAs());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(checkDivTags(html));
+    }
+
+    @Test
+    void test_map_TagInput()
+    {
+        // setup
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .srcPath("json-mapper/input/tag-input.ged")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
+                .flatMappableDissector(flatMappableDissector)
+                .build();
+
+        // run
+        MapperResult  result    = mapper.map();
+
+        // verify
+        Container     container = result.getContainers().get(0);
+        FormContainer form      = (FormContainer) container;
+        Input         input     = form.getInputs().get(0);
+        assertEquals(Tag.class, input.getClass());
+
+        Tag tag = (Tag) input;
+        assertEquals("name", tag.getName());
+        assertEquals("tag", tag.getSubmitAs());
+        assertEquals("#?[a-zA-Z]{1}[a-zA-Z0-9\\-]{2,*}", tag.getPattern());
+        assertEquals(10, tag.getSettings().getMaxTags());
 
         String html = HtmlMapper.map(container);
         assertTrue(checkDivTags(html));

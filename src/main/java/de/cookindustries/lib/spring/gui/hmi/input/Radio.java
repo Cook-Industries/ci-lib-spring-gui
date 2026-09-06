@@ -25,7 +25,7 @@ public final class Radio extends SubmittableInput
 {
 
     @Singular
-    private final List<InputValue> values;
+    private final List<InputValue> boxes;
 
     @Override
     protected InputType inferType()

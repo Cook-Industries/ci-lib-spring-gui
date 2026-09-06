@@ -7,10 +7,9 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input;
 
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
-
-import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -35,13 +34,10 @@ public final class Textfield extends SubmittableInput
     private final String  placeholder   = "";
 
     @Default
-    private final String  prefix        = "";
-
-    @Default
-    private final String  suffix        = "";
-
-    @Default
     private final Integer maxCharacters = Integer.MAX_VALUE;
+
+    @Default
+    final String          pattern       = null;
 
     @Default
     private final String  onKeydown     = "";

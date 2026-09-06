@@ -8,7 +8,7 @@
 package de.cookindustries.lib.spring.gui.hmi.input.util.exception;
 
 /**
- * Excpetion raised when a value is expected but is {@code null}.
+ * Excpetion raised when a value of {@code null} is allowed and ignored.
  * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>

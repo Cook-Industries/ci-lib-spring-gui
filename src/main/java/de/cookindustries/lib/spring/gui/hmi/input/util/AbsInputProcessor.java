@@ -42,7 +42,7 @@ public abstract class AbsInputProcessor<T>
      */
     protected final InputCheckResult<T> createEmptyResult(InputCheckResultType type, Object... translationPlaceholderValues)
     {
-        return createResult(type, null);
+        return createResult(type, null, translationPlaceholderValues);
     }
 
     /**

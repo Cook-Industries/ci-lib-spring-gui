@@ -11,11 +11,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
-
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
-import lombok.Builder.Default;
 
 /**
  * A processor to parse and check a {@code input} as {@link Integer}.
@@ -35,7 +34,7 @@ public final class DoubleInputProcessor extends AbsInputProcessor<Double>
     /** Lower bound the {@code input} must clear (inclusive) {@code lowerBound} &lt; {@code input} */
     @NonNull
     @Default
-    private final Double  lowerBound    = Double.MIN_VALUE;
+    private final Double  lowerBound    = -Double.MAX_VALUE;
 
     /** Upper bound the {@code input} must clear (exclusiv) {@code input} &lt; {@code upperBound} */
     @NonNull

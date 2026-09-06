@@ -1,5 +1,4 @@
 {
-    "uid": "uid",
     "type": "FORM",
     "classes": [],
     "attributes": {},
@@ -13,7 +12,8 @@
             "parameters": {
                 "name": "name",
                 "submitAs": "date",
-                "mandatory": true
+                "mandatory": true,
+                "value": "2026-05-01"
             }
         }
     ]

@@ -7,9 +7,13 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input;
 
+import java.util.List;
+
+import de.cookindustries.lib.spring.gui.function.TagInputSettings;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Builder.Default;
+import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -20,11 +24,15 @@ public final class Tag extends SubmittableInput
 {
 
     @NonNull
-    @Default
-    private final String value   = "";
+    @Singular
+    private final List<String>     tags;
 
+    @NonNull
     @Default
-    private final String pattern = null;
+    private final String           pattern = "#?[a-zA-Z]{1}[a-zA-Z0-9\\-]{2,*}";
+
+    @NonNull
+    private final TagInputSettings settings;
 
     @Override
     protected InputType inferType()

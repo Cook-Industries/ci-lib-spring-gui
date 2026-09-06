@@ -23,13 +23,16 @@ public final class Slider extends SubmittableInput
 {
 
     @NonNull
-    private final Integer value;
+    private final java.lang.Number value;
 
     @NonNull
-    private final Integer min;
+    private final java.lang.Number min;
 
     @NonNull
-    private final Integer max;
+    private final java.lang.Number max;
+
+    @NonNull
+    private final java.lang.Number step;
 
     @Override
     protected InputType inferType()

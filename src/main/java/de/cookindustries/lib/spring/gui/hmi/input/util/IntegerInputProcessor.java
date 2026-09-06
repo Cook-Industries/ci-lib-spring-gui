@@ -10,12 +10,11 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
 import java.util.Set;
 
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
-
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
-import lombok.Builder.Default;
 
 /**
  * A processor to parse and check a {@code input} as {@link Integer}.
@@ -71,7 +70,7 @@ public final class IntegerInputProcessor extends AbsInputProcessor<Integer>
     {
         if (input < lowerBound || input > upperBound)
         {
-            return createEmptyResult(InputCheckResultType.OUT_OF_BOUNDS);
+            return createEmptyResult(InputCheckResultType.OUT_OF_BOUNDS, lowerBound, upperBound);
         }
 
         if (rejects.stream().anyMatch(input::equals))

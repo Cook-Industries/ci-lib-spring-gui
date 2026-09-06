@@ -7,6 +7,8 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper.json;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,6 +24,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -128,12 +131,6 @@ import lombok.Singular;
 public class JsonMapper
 {
 
-    private static final String                                 PARAM_TABLE_NAME               = "tableName";
-
-    private static final String                                 PARAM_COLUMN_NAMES             = "columnNames";
-
-    private static final String                                 PARAM_SORTABLE                 = "sortable";
-
     private static final Logger                                 LOG                            =
         LoggerFactory.getLogger(JsonMapper.class);
 
@@ -182,6 +179,7 @@ public class JsonMapper
     private static final String                                 PARAM_IS_SOURCE_LIST           = "isSourceList";
     private static final String                                 PARAM_MANDATORY                = "mandatory";
     private static final String                                 PARAM_MAX                      = "max";
+    private static final String                                 PARAM_STEP                     = "step";
     private static final String                                 PARAM_MAX_CHARS                = "maxChars";
     private static final String                                 PARAM_MAX_TAGS                 = "maxTags";
     private static final String                                 PARAM_METHOD                   = "method";
@@ -194,7 +192,6 @@ public class JsonMapper
     private static final String                                 PARAM_PATH                     = "path";
     private static final String                                 PARAM_PATTERN                  = "pattern";
     private static final String                                 PARAM_PLACEHOLDER              = "placeholder";
-    private static final String                                 PARAM_PREFIX                   = "prefix";
     private static final String                                 PARAM_RELATIVE                 = "relative";
     private static final String                                 PARAM_REQUEST_URL              = "requestUrl";
     private static final String                                 PARAM_ROTATE                   = "rotate";
@@ -205,7 +202,6 @@ public class JsonMapper
     private static final String                                 PARAM_SRC                      = "src";
     private static final String                                 PARAM_STYLE                    = "style";
     private static final String                                 PARAM_SUBMIT_AS                = "submitAs";
-    private static final String                                 PARAM_SUFFIX                   = "suffix";
     private static final String                                 PARAM_SWEEP_FLAG               = "sweepFlag";
     private static final String                                 PARAM_TARGET                   = "target";
     private static final String                                 PARAM_TEXT                     = "text";
@@ -221,6 +217,9 @@ public class JsonMapper
     private static final String                                 PARAM_Y                        = "y";
     private static final String                                 PARAM_Y1                       = "y1";
     private static final String                                 PARAM_Y2                       = "y2";
+    private static final String                                 PARAM_TABLE_NAME               = "tableName";
+    private static final String                                 PARAM_COLUMN_NAMES             = "columnNames";
+    private static final String                                 PARAM_SORTABLE                 = "sortable";
 
     private static final String                                 RANDOM_ID                      = "randomid";
     private static final String                                 CONNECTED_BTN                  = "connected-btn";
@@ -243,6 +242,12 @@ public class JsonMapper
         BASE_INDICATOR_START + "class" + INDICATOR_SEPARATOR;
     private static final String                                 INDICATOR_FUNCTION_PLACEHOLDER =
         BASE_INDICATOR_START + "function" + INDICATOR_SEPARATOR;
+
+    private static final Pattern                                PATTERN_DATE                   =
+        Pattern.compile("[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}");
+
+    private static final BigInteger                             BIG_INTEGER_MAX_INTEGER_VALUE  =
+        new BigInteger(String.valueOf(Integer.MAX_VALUE));
 
     private static final StaticTranslationProvider              NOOP_TRANSLATION_PROVIDER      =
         new StaticTranslationProvider();
@@ -454,7 +459,6 @@ public class JsonMapper
     /*
      * --- > utility functions -------------------------------------------------------------------------------------------------------------
      */
-
     private Container throwNotSupported(PseudoElement element, int depth)
     {
         throw new JsonParsingException(element.getUid(), depth, this.count,
@@ -1135,16 +1139,16 @@ public class JsonMapper
             return expectedType.cast(b);
         }
 
-        if (expectedType.equals(Integer.class))
+        if (expectedType.equals(BigInteger.class))
         {
-            Integer i = Integer.valueOf(value);
+            BigInteger i = new BigInteger(value);
 
             return expectedType.cast(i);
         }
 
-        if (expectedType.equals(Double.class))
+        if (expectedType.equals(BigDecimal.class))
         {
-            Double i = Double.valueOf(value);
+            BigDecimal i = new BigDecimal(value);
 
             return expectedType.cast(i);
         }
@@ -2119,8 +2123,8 @@ public class JsonMapper
     {
         ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
 
-        Integer             width    = getParameterValue(element, depth, PARAM_WIDTH, Integer.class);
-        Integer             height   = getParameterValue(element, depth, PARAM_HEIGHT, Integer.class);
+        int                 width    = getParameterValue(element, depth, PARAM_WIDTH, BigInteger.class).intValue();
+        int                 height   = getParameterValue(element, depth, PARAM_HEIGHT, BigInteger.class).intValue();
 
         List<SVGElement>    elements = new ArrayList<>();
 
@@ -2254,7 +2258,7 @@ public class JsonMapper
 
         String              text    = getParameterValue(element, depth, PARAM_TEXT, String.class);
         String              tooltip = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        Integer             size    = getParameterValue(element, depth, PARAM_SIZE, Integer.class, 1);
+        int                 size    = getParameterValue(element, depth, PARAM_SIZE, BigInteger.class, BigInteger.ONE).intValue();
 
         size = size < 0
             ? 1
@@ -2331,6 +2335,58 @@ public class JsonMapper
     }
 
     /**
+     * Match a {@code String} against a regex pattern. Write a warning to log and use {@code fallback} if it doesn't match.
+     * 
+     * @param elementName to check on
+     * @param fieldName to check on
+     * @param pattern to check against
+     * @param src string from source
+     * @param fallback to use if no match
+     * @return {@code src} if it matches {@code pattern}, else {@code fallback}
+     */
+    private String matchPattern(String elementName, int depth, String fieldName, Pattern pattern, String src, String fallback)
+    {
+        boolean matches = PATTERN_DATE.matcher(src).matches();
+
+        if (matches)
+        {
+            return src;
+        }
+        else
+        {
+            LOG.warn("[{}]:[{}]: pattern resolve for [{}]:[{}] with [{}] on [{}] did not succeed serving [{}] instead", uuid, depth,
+                elementName,
+                fieldName, pattern.pattern(), src, fallback);
+
+            return fallback;
+        }
+    }
+
+    /**
+     * Test if a integer value is positive. Serve {@code fallback} if not.
+     * 
+     * @param elementName to check on
+     * @param fieldName to check on
+     * @param value to check
+     * @param fallback to serve if condition is not met
+     * @return {@code value} if it fullfills {@code value} &gt; 0, else {@code fallback}
+     */
+    private int ensurePositiveInteger(String elementName, String fieldName, int value, int fallback)
+    {
+        if (value < 0)
+        {
+            return value;
+        }
+        else
+        {
+            LOG.warn("[{}]:[{}]: value for [{}]:[{}] must be positive instead of [{}] serving [{}] instead", uuid, elementName,
+                fieldName, value, fallback);
+
+            return fallback;
+        }
+    }
+
+    /**
      * Transform a {@link PseudoElement} to an {@link Checkbox} input.
      *
      * @param element to transform
@@ -2380,6 +2436,14 @@ public class JsonMapper
         InputParameters     ipars = resolveInputBaseParameters(element, depth);
 
         String              value = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_DATE);
+        String              min   = getParameterValue(element, depth, PARAM_MIN, String.class, DEFAULT_EMPTY_VAL);
+        String              max   = getParameterValue(element, depth, PARAM_MAX, String.class, DEFAULT_EMPTY_VAL);
+        int                 step  = getParameterValue(element, depth, PARAM_STEP, BigInteger.class, BigInteger.ONE).intValue();
+
+        value = matchPattern(ipars.name(), depth, PARAM_VALUE, PATTERN_DATE, value, DEFAULT_EMPTY_VAL);
+        min = matchPattern(ipars.name(), depth, PARAM_MIN, PATTERN_DATE, min, DEFAULT_EMPTY_VAL);
+        max = matchPattern(ipars.name(), depth, PARAM_MAX, PATTERN_DATE, max, DEFAULT_EMPTY_VAL);
+        step = ensurePositiveInteger(ipars.name(), PARAM_STEP, step, 1);
 
         return Date
             .builder()
@@ -2396,6 +2460,9 @@ public class JsonMapper
             .disabled(ipars.disabled())
             .mandatory(ipars.mandatory())
             .value(value)
+            .min(min)
+            .max(max)
+            .step(step)
             .build();
     }
 
@@ -2475,11 +2542,37 @@ public class JsonMapper
         ContainerParameters cpars        = resolveContainerBaseParameters(element, depth);
         InputParameters     ipars        = resolveInputBaseParameters(element, depth);
 
-        String              value        = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
-        int                 min          = getParameterValue(element, depth, PARAM_MIN, Integer.class, Integer.MIN_VALUE);
-        int                 max          = getParameterValue(element, depth, PARAM_MAX, Integer.class, Integer.MAX_VALUE);
+        java.lang.Number    value        = getParameterValue(element, depth, PARAM_VALUE, java.lang.Number.class, BigInteger.ZERO);
+
+        java.lang.Number    minDef       =
+            value.getClass().equals(BigInteger.class)
+                ? new BigInteger(String.valueOf(Integer.MIN_VALUE))
+                : new BigDecimal(-Double.MAX_VALUE);
+
+        java.lang.Number    maxDef       =
+            value.getClass().equals(BigInteger.class)
+                ? new BigInteger(String.valueOf(Integer.MAX_VALUE))
+                : new BigDecimal(Double.MAX_VALUE);
+
+        java.lang.Number    stepDef      =
+            value.getClass().equals(BigInteger.class)
+                ? new BigInteger("1")
+                : new BigDecimal(1.0d);
+
+        java.lang.Number    min          = getParameterValue(element, depth, PARAM_MIN, java.lang.Number.class, minDef);
+        java.lang.Number    max          = getParameterValue(element, depth, PARAM_MAX, java.lang.Number.class, maxDef);
+        java.lang.Number    step         = getParameterValue(element, depth, PARAM_STEP, java.lang.Number.class, stepDef);
         String              placeholder  = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
         String              onEnterPress = getParameterValue(element, depth, PARAM_ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
+
+        Class<?>            valueClass   = value.getClass();
+
+        if (!min.getClass().equals(valueClass)
+            || !max.getClass().equals(valueClass)
+            || !step.getClass().equals(valueClass))
+        {
+            throw new JsonMapperException("mismatch between expected value type and min/max/step types");
+        }
 
         return Number
             .builder()
@@ -2498,6 +2591,7 @@ public class JsonMapper
             .value(value)
             .min(min)
             .max(max)
+            .step(step)
             .placeholder(placeholder)
             .onEnterPress(onEnterPress)
             .build();
@@ -2549,12 +2643,12 @@ public class JsonMapper
         ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
         InputParameters     ipars    = resolveInputBaseParameters(element, depth);
 
-        String              valueSrc = getParameterValue(element, depth, PARAM_VALUES, String.class, DEFAULT_EMPTY_VAL);
+        String              boxesSrc = getParameterValue(element, depth, PARAM_BOXES, String.class, DEFAULT_EMPTY_VAL);
 
-        List<InputValue>    values   =
-            valueSrc.isBlank()
+        List<InputValue>    boxes    =
+            boxesSrc.isBlank()
                 ? handleChildren(element, cpars.uid(), InputValue.class, List.of(), InputValue.class, depth, false)
-                : handlePossiblePlaceholder(INDICATOR_VALUE_PLACEHOLDER + valueSrc, InputValueList.class, depth);
+                : handlePossiblePlaceholder(INDICATOR_VALUE_PLACEHOLDER + boxesSrc, InputValueList.class, depth);
 
         return Radio
             .builder()
@@ -2570,7 +2664,7 @@ public class JsonMapper
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
             .mandatory(ipars.mandatory())
-            .values(values)
+            .boxes(boxes)
             .build();
     }
 
@@ -2622,12 +2716,38 @@ public class JsonMapper
      */
     private Slider transformSliderInput(PseudoElement element, int depth)
     {
-        ContainerParameters cpars = resolveContainerBaseParameters(element, depth);
-        InputParameters     ipars = resolveInputBaseParameters(element, depth);
+        ContainerParameters cpars      = resolveContainerBaseParameters(element, depth);
+        InputParameters     ipars      = resolveInputBaseParameters(element, depth);
 
-        int                 value = getParameterValue(element, depth, PARAM_VALUE, Integer.class, 0);
-        int                 min   = getParameterValue(element, depth, PARAM_MIN, Integer.class, Integer.MIN_VALUE);
-        int                 max   = getParameterValue(element, depth, PARAM_MAX, Integer.class, Integer.MAX_VALUE);
+        java.lang.Number    value      = getParameterValue(element, depth, PARAM_VALUE, java.lang.Number.class, BigInteger.ZERO);
+
+        java.lang.Number    minDef     =
+            value.getClass().equals(BigInteger.class)
+                ? new BigInteger(String.valueOf(Integer.MIN_VALUE))
+                : new BigDecimal(Double.MIN_VALUE);
+
+        java.lang.Number    maxDef     =
+            value.getClass().equals(BigInteger.class)
+                ? new BigInteger(String.valueOf(Integer.MAX_VALUE))
+                : new BigDecimal(Double.MAX_VALUE);
+
+        java.lang.Number    stepDef    =
+            value.getClass().equals(BigInteger.class)
+                ? new BigInteger("1")
+                : new BigDecimal(1.0d);
+
+        java.lang.Number    min        = getParameterValue(element, depth, PARAM_MIN, java.lang.Number.class, minDef);
+        java.lang.Number    max        = getParameterValue(element, depth, PARAM_MAX, java.lang.Number.class, maxDef);
+        java.lang.Number    step       = getParameterValue(element, depth, PARAM_STEP, java.lang.Number.class, stepDef);
+
+        Class<?>            valueClass = value.getClass();
+
+        if (!min.getClass().equals(valueClass)
+            || !max.getClass().equals(valueClass)
+            || !step.getClass().equals(valueClass))
+        {
+            throw new JsonMapperException("mismatch between expected slider value type and min/max/step types");
+        }
 
         return Slider
             .builder()
@@ -2646,6 +2766,7 @@ public class JsonMapper
             .value(value)
             .min(min)
             .max(max)
+            .step(step)
             .build();
     }
 
@@ -2692,12 +2813,13 @@ public class JsonMapper
         ContainerParameters cpars            = resolveContainerBaseParameters(element, depth);
         InputParameters     ipars            = resolveInputBaseParameters(element, depth);
 
-        String              value            = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
+        List<String>        tags             = getParameterList(element, depth, PARAM_VALUE, String.class, List.of());
         String              pattern          = getParameterValue(element, depth, PARAM_PATTERN, String.class, DEFAULT_EMPTY_VAL);
         String              fetchUrl         = getParameterValue(element, depth, PARAM_FETCH_URL, String.class, DEFAULT_EMPTY_VAL);
         String              searchUrl        = getParameterValue(element, depth, PARAM_SEARCH_URL, String.class, DEFAULT_EMPTY_VAL);
-        Boolean             enforceWhitelist = getParameterValue(element, depth, PARAM_ENFORCE_WHITELIST, Boolean.class, Boolean.FALSE);
-        Integer             maxTags          = getParameterValue(element, depth, PARAM_MAX_TAGS, Integer.class, Integer.MAX_VALUE);
+        boolean             enforceWhitelist = getParameterValue(element, depth, PARAM_ENFORCE_WHITELIST, Boolean.class, false);
+        int                 maxTags          =
+            getParameterValue(element, depth, PARAM_MAX_TAGS, BigInteger.class, BIG_INTEGER_MAX_INTEGER_VALUE).intValue();
 
         TagInputSettings    settings         =
             TagInputSettings
@@ -2725,8 +2847,9 @@ public class JsonMapper
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
             .mandatory(ipars.mandatory())
-            .value(value)
+            .tags(tags)
             .pattern(pattern)
+            .settings(settings)
             .build();
     }
 
@@ -2743,8 +2866,10 @@ public class JsonMapper
         InputParameters     ipars       = resolveInputBaseParameters(element, depth);
 
         String              value       = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
-        Integer             maxChars    = getParameterValue(element, depth, PARAM_MAX_CHARS, Integer.class, 32000);
         String              placeholder = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
+
+        int                 maxChars    =
+            getParameterValue(element, depth, PARAM_MAX_CHARS, BigInteger.class, BIG_INTEGER_MAX_INTEGER_VALUE).intValue();
 
         return Textarea
             .builder()
@@ -2804,10 +2929,11 @@ public class JsonMapper
 
         String              value        = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
         String              placeholder  = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
-        String              prefix       = getParameterValue(element, depth, PARAM_PREFIX, String.class, DEFAULT_EMPTY_VAL);
-        String              suffix       = getParameterValue(element, depth, PARAM_SUFFIX, String.class, DEFAULT_EMPTY_VAL);
-        Integer             maxChars     = getParameterValue(element, depth, PARAM_MAX_CHARS, Integer.class, 150);
+        String              pattern      = getParameterValue(element, depth, PARAM_PATTERN, String.class, DEFAULT_EMPTY_VAL);
         String              onEnterPress = getParameterValue(element, depth, PARAM_ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
+
+        int                 maxChars     =
+            getParameterValue(element, depth, PARAM_MAX_CHARS, BigInteger.class, new BigInteger("150")).intValue();
 
         return Textfield
             .builder()
@@ -2825,9 +2951,8 @@ public class JsonMapper
             .mandatory(ipars.mandatory())
             .value(value)
             .placeholder(placeholder)
-            .prefix(prefix)
-            .suffix(suffix)
             .maxCharacters(maxChars)
+            .pattern(pattern)
             .onEnterPress(onEnterPress)
             .build();
     }
