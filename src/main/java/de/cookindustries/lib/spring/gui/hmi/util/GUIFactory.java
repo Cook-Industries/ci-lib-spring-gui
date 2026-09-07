@@ -127,6 +127,14 @@ public final class GUIFactory
     }
 
     /**
+     * Trigger a reload of the {@link AbsTranslationProvider} instance.
+     */
+    public void reloadTranslations()
+    {
+        translationProvider.initMaps();
+    }
+
+    /**
      * Get a translation to a key.
      * 
      * @param language to use

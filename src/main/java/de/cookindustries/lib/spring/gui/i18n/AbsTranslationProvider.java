@@ -105,7 +105,7 @@ public abstract class AbsTranslationProvider
         {
             String template = map.get(key);
 
-            translation = format(key, template, values);
+            translation = format(key, locale, template, values);
         }
         else
         {
@@ -117,9 +117,19 @@ public abstract class AbsTranslationProvider
         return translation;
     }
 
-    private final String format(String key, String template, Object... args)
+    /**
+     * Format a translated {@code String} by filling out placeholders if present.
+     * 
+     * @param key of translation for logging
+     * @param template the translated String
+     * @param args arguments to fill in the placeholders
+     * @return
+     */
+    private final String format(String key, Locale locale, String template, Object... args)
     {
-        Matcher matcher = PLACEHOLDER.matcher(template);
+        Matcher matcher  = PLACEHOLDER.matcher(template);
+
+        int     maxIndex = 0;
 
         while (matcher.find())
         {
@@ -127,8 +137,16 @@ public abstract class AbsTranslationProvider
 
             if (index >= args.length)
             {
-                LOG.warn("no translation defined for [{}]", key);
+                LOG.warn("no translation placeholder value defined for [{}]:[{}] in [{}]", key, index, locale);
             }
+
+            maxIndex = maxIndex < index ? index : maxIndex;
+        }
+
+        if (args.length > maxIndex)
+        {
+            LOG.warn("too many translation placeholder values submitted for [{}] in [{}] expected [{}] got [{}]", key, locale, maxIndex,
+                args.length);
         }
 
         return MessageFormat.format(template, args);
