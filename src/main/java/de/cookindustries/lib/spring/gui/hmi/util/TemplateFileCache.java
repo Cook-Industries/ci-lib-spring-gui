@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.cookindustries.lib.spring.gui.config.properties.CiLibProperties;
 import de.cookindustries.lib.spring.gui.hmi.mapper.json.PseudoElement;
+import de.cookindustries.lib.spring.gui.hmi.util.exception.TemplateFileNotFoundException;
 import de.cookindustries.lib.spring.gui.util.PathAdapter;
 import jakarta.annotation.PostConstruct;
 
@@ -142,6 +143,6 @@ public class TemplateFileCache
         String                  sanPath  = PathAdapter.toUnixTypePath(path);
         Optional<PseudoElement> template = Optional.ofNullable(templateMap.get(sanPath));
 
-        return template.orElseThrow(() -> new IllegalArgumentException(String.format("no template for path [%s]", sanPath)));
+        return template.orElseThrow(() -> new TemplateFileNotFoundException(sanPath));
     }
 }

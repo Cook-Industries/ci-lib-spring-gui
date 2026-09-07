@@ -102,6 +102,7 @@ import de.cookindustries.lib.spring.gui.hmi.svg.SVGPathCommandType;
 import de.cookindustries.lib.spring.gui.hmi.svg.SVGText;
 import de.cookindustries.lib.spring.gui.hmi.svg.SVGType;
 import de.cookindustries.lib.spring.gui.hmi.util.TemplateFileCache;
+import de.cookindustries.lib.spring.gui.hmi.util.exception.TemplateFileNotFoundException;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 import de.cookindustries.lib.spring.gui.i18n.BasicText;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
@@ -1451,6 +1452,12 @@ public class JsonMapper
 
             resultList.addAll(transformElement(element, depth, type, uid, CONTAINER_RESOLVER, this::failureContainer));
         }
+        catch (TemplateFileNotFoundException ex)
+        {
+            LOG.error(ex.getMessage());
+
+            return List.of(failureContainer());
+        }
         catch (Exception ex)
         {
             LOG.error("error parsing container element", ex);
@@ -1471,29 +1478,30 @@ public class JsonMapper
      */
     private List<Container> resolveComponentLink(PseudoElement element, int depth, ContainerType... allowedTypes)
     {
+        InternalElementType internalType = null;
+        MapperResult        result       = null;
+
         try
         {
-            InternalElementType internalType = InternalElementType.valueOf(element.getType().toUpperCase());
-
-            return switch (internalType)
-            {
-                case COMPONENT -> {
-                    MapperResult result = transformInternalComponent(element, depth, allowedTypes);
-                    functions.addAll(result.getFunctions());
-                    yield result.getContainers();
-                }
-            };
+            internalType = InternalElementType.valueOf(element.getType().toUpperCase());
         }
-        catch (IllegalArgumentException | NullPointerException ex)
+        catch (IllegalArgumentException ex)
         {
             // do nothing since it is not a internal type
         }
-        catch (Exception ex)
+
+        if (internalType != null)
         {
-            throw ex;
+            switch (internalType)
+            {
+                case COMPONENT -> {
+                    result = transformInternalComponent(element, depth, allowedTypes);
+                    functions.addAll(result.getFunctions());
+                }
+            }
         }
 
-        return null;
+        return Objects.isNull(result) ? null : result.getContainers();
     }
 
     /**
