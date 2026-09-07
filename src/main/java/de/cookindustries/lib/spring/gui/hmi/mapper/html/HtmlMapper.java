@@ -83,6 +83,8 @@ public final class HtmlMapper
     private static final String        TAG_TEXT                = "text";
     private static final String        TAG_GROUP               = "g";
     private static final String        TAG_PATH                = "path";
+    private static final String        TAG_SPAN                = "span";
+    private static final String        TAG_P                   = "p";
 
     private static final String        ATT_ID                  = "id";
     private static final String        ATT_NAME                = "name";
@@ -614,7 +616,7 @@ public final class HtmlMapper
                         .build())
                 .clazz("modal-body")
                 .classes(modalContainer.getClasses())
-                .dataAttribute("close-on-overlay", modalContainer.getCloseOnOverlayClick().toString())
+                .dataAttribute("close-on-overlay", String.valueOf(modalContainer.isCloseOnOverlayClick()))
                 .dataAttributes(modalContainer.getDataAttributes())
                 .content(render(modalInlay))
                 .build();
@@ -679,13 +681,13 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_WIDTH)
-                        .value(svgContainer.getWidth().toString())
+                        .value(String.valueOf(svgContainer.getWidth()))
                         .build())
                 .attribute(
                     Attribute
                         .builder()
                         .name(ATT_HEIGHT)
-                        .value(svgContainer.getHeight().toString())
+                        .value(String.valueOf(svgContainer.getHeight()))
                         .build())
                 .classes(svgContainer.getClasses())
                 .dataAttributes(svgContainer.getDataAttributes())
@@ -800,7 +802,7 @@ public final class HtmlMapper
         HtmlElement elementMapper =
             HtmlElement
                 .builder()
-                .tag(textContainer.getInline() ? "span" : "p")
+                .tag(textContainer.isInline() ? TAG_SPAN : TAG_P)
                 .attribute(
                     Attribute
                         .builder()

@@ -11,7 +11,6 @@ import java.util.List;
 
 import de.cookindustries.lib.spring.gui.hmi.svg.SVGElement;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
@@ -33,14 +32,12 @@ public final class SVGContainer extends Container
     /**
      * {@code height} of the svg
      */
-    @NonNull
-    private final Integer          height;
+    private final int              height;
 
     /**
      * {@code width} of the svg
      */
-    @NonNull
-    private final Integer          width;
+    private final int              width;
 
     @Singular
     private final List<SVGElement> elements;

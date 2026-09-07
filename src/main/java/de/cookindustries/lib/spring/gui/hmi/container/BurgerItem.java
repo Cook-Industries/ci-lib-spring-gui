@@ -20,20 +20,19 @@ public final class BurgerItem
 {
 
     @NonNull
-    private final String  text;
+    private final String text;
 
     @NonNull
-    private final String  icon;
+    private final String icon;
+
+    @Default
+    private final int    iconSize = 2;
+
+    @NonNull
+    private final String url;
 
     @NonNull
     @Default
-    private final Integer iconSize = 2;
-
-    @NonNull
-    private final String  url;
-
-    @NonNull
-    @Default
-    private final String  method   = HttpMethod.POST.name();
+    private final String method   = HttpMethod.POST.name();
 
 }

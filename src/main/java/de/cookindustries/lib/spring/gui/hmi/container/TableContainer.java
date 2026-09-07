@@ -9,10 +9,10 @@ package de.cookindustries.lib.spring.gui.hmi.container;
 
 import java.util.List;
 
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
-import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -32,9 +32,8 @@ public final class TableContainer extends Container
     @Singular
     private final List<String>    columnNames;
 
-    @NonNull
     @Default
-    private final Boolean         sortable = false;
+    private final boolean         sortable = false;
 
     @Singular
     private final List<Container> rows;

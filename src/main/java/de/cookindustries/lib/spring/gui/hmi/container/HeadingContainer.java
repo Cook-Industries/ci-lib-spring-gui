@@ -7,9 +7,9 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.container;
 
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -25,12 +25,11 @@ import lombok.extern.jackson.Jacksonized;
 public class HeadingContainer extends Container
 {
 
-    @NonNull
     @Default
-    private final Integer size = 1;
+    private final int    size = 1;
 
     @NonNull
-    private final String  text;
+    private final String text;
 
     @Override
     protected ContainerType inferType()

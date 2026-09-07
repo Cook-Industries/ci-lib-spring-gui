@@ -320,8 +320,8 @@ public class JsonMapperTest
 
         AudioContainer audioContainer = (AudioContainer) container;
         assertEquals("path/to/resource", audioContainer.getSrc());
-        assertEquals(false, audioContainer.getControls());
-        assertEquals(true, audioContainer.getAutoplay());
+        assertEquals(false, audioContainer.isControls());
+        assertEquals(true, audioContainer.isAutoplay());
 
         String html = HtmlMapper.map(container);
         assertTrue(checkDivTags(html));

@@ -11,10 +11,10 @@ import java.util.List;
 
 import de.cookindustries.lib.spring.gui.function.CloseModal;
 import de.cookindustries.lib.spring.gui.function.SubmitFromModal;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
-import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -67,9 +67,8 @@ public final class ModalContainer extends Container
     @Singular
     private final List<Container> contents;
 
-    @NonNull
     @Default
-    private final Boolean         closeOnOverlayClick = Boolean.FALSE;
+    private final boolean         closeOnOverlayClick = Boolean.FALSE;
 
     @Override
     protected ContainerType inferType()
