@@ -255,6 +255,7 @@ public final class HtmlMapper
                 HtmlElement
                     .builder()
                     .tag(TAG_FIGCAPTION)
+                    .dataAttribute(DATA_ATT_TOOLTIP, audio.getTooltip().isBlank() ? null : htmlEscape(audio.getTooltip()))
                     .content(audio.getCaption())
                     .build()
                     .html())
@@ -262,7 +263,6 @@ public final class HtmlMapper
                 HtmlElement
                     .builder()
                     .tag(TAG_AUDIO)
-                    .dataAttribute(DATA_ATT_TOOLTIP, audio.getTooltip().isBlank() ? null : htmlEscape(audio.getTooltip()))
                     .attribute(
                         Attribute
                             .builder()
@@ -748,13 +748,14 @@ public final class HtmlMapper
             table
                 .getColumnNames()
                 .stream()
-                .map(name -> HtmlElement
-                    .builder()
-                    .tag(TAG_DIV)
-                    .clazz("table-cell")
-                    .content(htmlEscape(name))
-                    .build()
-                    .html())
+                .map(
+                    name -> HtmlElement
+                        .builder()
+                        .tag(TAG_DIV)
+                        .clazz("table-cell")
+                        .content(htmlEscape(name))
+                        .build()
+                        .html())
                 .toList();
 
         List<String> rows          =
