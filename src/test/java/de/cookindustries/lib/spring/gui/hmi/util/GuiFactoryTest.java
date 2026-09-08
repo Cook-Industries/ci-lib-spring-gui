@@ -46,9 +46,9 @@ public class GuiFactoryTest
             "<script src=\"/webjars/bootstrap/js/bootstrap.min.js\"></script>",
             "<script src=\"/webjars/yaireo__tagify/dist/tagify.js\"></script>",
             "<script src=\"/webjars/stomp__stompjs/esm6/index.js\"></script>",
-            "<p id=\"ui-properties-url\" class=\"hidden\" ></p>",
+            "<p id=\"ui-properties-url\" class=\"hidden\"></p>",
             "<div id=\"modal-container\" class=\"hidden\"></div>",
-            "<div id=\"global-loader-overlay\" class=\"d-flex justify-content-center align-items-center vh-100\"><div id=\"global-loader\" class=\"d-flex flex-column justify-items-center align-items-center\"><div id=\"_lcsptp\" class=\"loader-circle spinner-border text-primary\"></div><p id=\"global-loader-text\" class=\"loader-text\" >loading...</p><div id=\"global-loader-bar\" class=\"loadbar\"></div></div></div>",
+            "<div id=\"global-loader-overlay\" class=\"d-flex justify-content-center align-items-center vh-100\"><div id=\"global-loader\" class=\"d-flex flex-column justify-items-center align-items-center\"><div id=\"_lcsptp\" class=\"loader-circle spinner-border text-primary\"></div><p id=\"global-loader-text\" class=\"loader-text\">loading...</p><div id=\"global-loader-bar\" class=\"loadbar\"></div></div></div>",
             "<div id=\"error-overlay\" class=\"hidden\"><div id=\"error-container\"><div id=\"error-holder\"></div><button id=\"_eob\" onclick=\"CILIB.FunctionRegistry.call('dismissErrors');\" class=\"btn btn-primary\">OK</button></div></div>",
             "<div id=\"popup-holder\"></div>");
 
@@ -83,9 +83,11 @@ public class GuiFactoryTest
     {
         List<Runnable> asserts = new ArrayList<>();
 
-        HTML_STRINGS.forEach(line -> {
-            asserts.add(() -> assertTrue(html.contains(line), String.format("expected [%s]", line)));
-        });
+        HTML_STRINGS
+            .forEach(
+                line -> {
+                    asserts.add(() -> assertTrue(html.contains(line), String.format("expected [%s]", line)));
+                });
 
         TestHelper.multiAssert(asserts);
     }
@@ -167,7 +169,7 @@ public class GuiFactoryTest
         assertNotNull(content);
         // must be false since this line exists <!DOCTYPE html>
         assertFalse(checkTags("html", content));
-        assertTrue(checkTags("body>", content));
+        assertTrue(checkTags("body", content));
         checkAgainstBasicStrings(content);
     }
 

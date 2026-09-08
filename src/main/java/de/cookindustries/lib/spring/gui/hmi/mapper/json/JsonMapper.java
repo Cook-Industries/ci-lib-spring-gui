@@ -154,6 +154,7 @@ public class JsonMapper
     private static final String                                 PARAM_CLOSE_ON_OVERLAY_CLICK   = "closeOnOverlayClick";
     private static final String                                 PARAM_CONNECTED_BTN            = "connectedBtn";
     private static final String                                 PARAM_CONTROLS                 = "controls";
+    private static final String                                 PARAM_CAPTION                  = "caption";
     private static final String                                 PARAM_CONTROL_POINT_1_X        = "controlPoint1X";
     private static final String                                 PARAM_CONTROL_POINT_1_Y        = "controlPoint1Y";
     private static final String                                 PARAM_CONTROL_POINT_2_X        = "controlPoint2X";
@@ -869,13 +870,14 @@ public class JsonMapper
      * @param depth the current depth in the tree
      * @return extracted parameters in record
      */
-    private ContainerParameters resolveContainerBaseParameters(PseudoElement element, int depth)
+    private UiElementParameters resolveUiElementBaseParameters(PseudoElement element, int depth)
     {
         String              uid        = resolveUid(element, depth);
         List<String>        classes    = resolveClasses(element.getClasses(), depth);
         Map<String, String> attributes = resolveAttributes(element, depth);
+        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
 
-        return new ContainerParameters(uid, classes, attributes);
+        return new UiElementParameters(uid, classes, attributes, tooltip);
     }
 
     /**
@@ -1366,14 +1368,14 @@ public class JsonMapper
     private InputValue transformInputValue(PseudoElement element, int depth)
     {
         List<String> classes = resolveClasses(element.getClasses(), depth);
-        String       id      = getParameterValue(element, depth, PARAM_ID, String.class, DEFAULT_EMPTY_VAL);
+        String       uid     = getParameterValue(element, depth, PARAM_ID, String.class, DEFAULT_EMPTY_VAL);
         String       text    = getParameterValue(element, depth, PARAM_TEXT, String.class, BasicText.NO_TEXT_SET.getText());
         String       value   = getParameterValue(element, depth, PARAM_VALUE, String.class, BasicText.NO_VALUE_SET.getText());
-        Boolean      checked = getParameterValue(element, depth, PARAM_CHECKED, Boolean.class, Boolean.FALSE);
+        boolean      checked = getParameterValue(element, depth, PARAM_CHECKED, Boolean.class, Boolean.FALSE);
 
         return InputValue
             .builder()
-            .id(id)
+            .uid(uid)
             .text(text)
             .value(value)
             .checked(checked)
@@ -1636,18 +1638,21 @@ public class JsonMapper
      */
     private AudioContainer transformAudioContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars    = resolveUiElementBaseParameters(element, depth);
 
         String              src      = getParameterValue(element, depth, PARAM_SRC, String.class);
-        Boolean             controls = getParameterValue(element, depth, PARAM_CONTROLS, Boolean.class, Boolean.FALSE);
-        Boolean             autoplay = getParameterValue(element, depth, PARAM_AUTOPLAY, Boolean.class, Boolean.FALSE);
+        String              caption  = getParameterValue(element, depth, PARAM_CAPTION, String.class);
+        boolean             controls = getParameterValue(element, depth, PARAM_CONTROLS, Boolean.class, Boolean.FALSE);
+        boolean             autoplay = getParameterValue(element, depth, PARAM_AUTOPLAY, Boolean.class, Boolean.FALSE);
 
         return AudioContainer
             .builder()
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
+            .tooltip(cpars.tooltip())
             .src(src)
+            .caption(caption)
             .controls(controls)
             .autoplay(autoplay)
             .build();
@@ -1662,7 +1667,7 @@ public class JsonMapper
      */
     private BurgerContainer transformBurgerContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars = resolveUiElementBaseParameters(element, depth);
 
         String              icon  = getParameterValue(element, depth, PARAM_ICON, String.class, DEFAULT_BURGER_ICON);
 
@@ -1679,6 +1684,7 @@ public class JsonMapper
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
+            .tooltip(cpars.tooltip())
             .icon(icon)
             .items(items)
             .build();
@@ -1739,9 +1745,10 @@ public class JsonMapper
      */
     private Button transformButtonContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars               = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars               = resolveUiElementBaseParameters(element, depth);
 
         String              text                = getParameterValue(element, depth, PARAM_TEXT, String.class);
+
         ButtonClass         btnClass            =
             getParameterValue(element, depth, PARAM_BTN_CLASS, ButtonClass.class, ButtonClass.DEFAULT);
 
@@ -1762,6 +1769,7 @@ public class JsonMapper
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
+            .tooltip(cpars.tooltip())
             .text(text)
             .btnClass(btnClass)
             .onClick(btnFunction == null ? fallbackBtnFunction : btnFunction.parseAsJS())
@@ -1777,14 +1785,12 @@ public class JsonMapper
      */
     private ButtonIcon transformButtonIconContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars               = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars               = resolveUiElementBaseParameters(element, depth);
 
         String              icon                = getParameterValue(element, depth, PARAM_ICON, String.class);
 
         ButtonClass         btnClass            =
             getParameterValue(element, depth, PARAM_BTN_CLASS, ButtonClass.class, ButtonClass.DEFAULT);
-
-        String              tooltip             = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
 
         AbsFunctionCall     btnFunction         = null;
         String              fallbackBtnFunction = DEFAULT_EMPTY_VAL;
@@ -1803,7 +1809,7 @@ public class JsonMapper
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
-            .tooltip(tooltip)
+            .tooltip(cpars.tooltip())
             .icon(icon)
             .btnClass(btnClass)
             .onClick(btnFunction == null ? fallbackBtnFunction : btnFunction.parseAsJS())
@@ -1819,7 +1825,7 @@ public class JsonMapper
      */
     private ContentContainer transformContentContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars    = resolveUiElementBaseParameters(element, depth);
 
         List<Container>     contents = new ArrayList<>();
 
@@ -1833,6 +1839,7 @@ public class JsonMapper
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
+            .tooltip(cpars.tooltip())
             .contents(contents)
             .build();
     }
@@ -1846,7 +1853,7 @@ public class JsonMapper
      */
     private FormContainer transformFormContainer(PseudoElement element, int depth)
     {
-        ContainerParameters                      cpars        = resolveContainerBaseParameters(element, depth);
+        UiElementParameters                      cpars        = resolveUiElementBaseParameters(element, depth);
 
         Direction                                direction    =
             getParameterValue(element, depth, PARAM_DIRECTION, Direction.class, Direction.NONE);
@@ -1887,7 +1894,7 @@ public class JsonMapper
      */
     private HiddenContainer transformHiddenContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars    = resolveUiElementBaseParameters(element, depth);
 
         List<Container>     children = new ArrayList<>();
 
@@ -1918,17 +1925,16 @@ public class JsonMapper
      */
     private ImageContainer transformImageContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars   = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars = resolveUiElementBaseParameters(element, depth);
 
-        String              src     = getParameterValue(element, depth, PARAM_SRC, String.class);
-        String              tooltip = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
+        String              src   = getParameterValue(element, depth, PARAM_SRC, String.class);
 
         return ImageContainer
             .builder()
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
-            .tooltip(tooltip)
+            .tooltip(cpars.tooltip())
             .src(src)
             .build();
     }
@@ -1942,7 +1948,7 @@ public class JsonMapper
      */
     private LinkContainer transformLinkContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars   = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars   = resolveUiElementBaseParameters(element, depth);
 
         String              href    = getParameterValue(element, depth, PARAM_HREF, String.class);
         String              target  = getParameterValue(element, depth, PARAM_TARGET, String.class, DEFAULT_TARGET_SELF);
@@ -1959,6 +1965,7 @@ public class JsonMapper
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
+            .tooltip(cpars.tooltip())
             .href(href)
             .target(target)
             .content(content)
@@ -1974,7 +1981,7 @@ public class JsonMapper
      */
     private ModalContainer transformModal(PseudoElement element, int depth)
     {
-        ContainerParameters cpars                   = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars                   = resolveUiElementBaseParameters(element, depth);
 
         String              name                    = getParameterValue(element, depth, PARAM_NAME, String.class);
 
@@ -2084,7 +2091,7 @@ public class JsonMapper
      */
     private SplittedContainer transformSplittedContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars  = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars  = resolveUiElementBaseParameters(element, depth);
 
         Container           head   = null;
         Container           tail   = null;
@@ -2129,7 +2136,7 @@ public class JsonMapper
      */
     private SVGContainer transformSVGContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars    = resolveUiElementBaseParameters(element, depth);
 
         int                 width    = getParameterValue(element, depth, PARAM_WIDTH, BigInteger.class).intValue();
         int                 height   = getParameterValue(element, depth, PARAM_HEIGHT, BigInteger.class).intValue();
@@ -2173,7 +2180,7 @@ public class JsonMapper
      */
     private TableContainer transformTableContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars       = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars       = resolveUiElementBaseParameters(element, depth);
 
         String              name        = getParameterValue(element, depth, PARAM_NAME, String.class);
         Boolean             sortable    = getParameterValue(element, depth, PARAM_SORTABLE, Boolean.class, false);
@@ -2207,7 +2214,7 @@ public class JsonMapper
      */
     private TableRowContainer transformTableRowContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars     = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars     = resolveUiElementBaseParameters(element, depth);
 
         String              tableName = getParameterValue(element, depth, PARAM_TABLE_NAME, String.class);
         List<Container>     cells     = new ArrayList<>();
@@ -2236,18 +2243,17 @@ public class JsonMapper
      */
     private TextContainer transformTextContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars   = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars  = resolveUiElementBaseParameters(element, depth);
 
-        String              text    = getParameterValue(element, depth, PARAM_TEXT, String.class);
-        String              tooltip = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        Boolean             inline  = getParameterValue(element, depth, PARAM_INLINE, Boolean.class, false);
+        String              text   = getParameterValue(element, depth, PARAM_TEXT, String.class);
+        Boolean             inline = getParameterValue(element, depth, PARAM_INLINE, Boolean.class, false);
 
         return TextContainer
             .builder()
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
-            .tooltip(tooltip)
+            .tooltip(cpars.tooltip())
             .text(text)
             .inline(inline)
             .build();
@@ -2262,11 +2268,10 @@ public class JsonMapper
      */
     private HeadingContainer transformHeadingContainer(PseudoElement element, int depth)
     {
-        ContainerParameters cpars   = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars = resolveUiElementBaseParameters(element, depth);
 
-        String              text    = getParameterValue(element, depth, PARAM_TEXT, String.class);
-        String              tooltip = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        int                 size    = getParameterValue(element, depth, PARAM_SIZE, BigInteger.class, BigInteger.ONE).intValue();
+        String              text  = getParameterValue(element, depth, PARAM_TEXT, String.class);
+        int                 size  = getParameterValue(element, depth, PARAM_SIZE, BigInteger.class, BigInteger.ONE).intValue();
 
         size = size < 0
             ? 1
@@ -2279,7 +2284,7 @@ public class JsonMapper
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
-            .tooltip(tooltip)
+            .tooltip(cpars.tooltip())
             .text(text)
             .size(size)
             .build();
@@ -2403,7 +2408,7 @@ public class JsonMapper
      */
     private Checkbox transformCheckboxInput(PseudoElement element, int depth)
     {
-        ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars    = resolveUiElementBaseParameters(element, depth);
         InputParameters     ipars    = resolveInputBaseParameters(element, depth);
 
         String              boxesSrc = getParameterValue(element, depth, PARAM_BOXES, String.class, DEFAULT_EMPTY_VAL);
@@ -2440,7 +2445,7 @@ public class JsonMapper
      */
     private Date transformDateInput(PseudoElement element, int depth)
     {
-        ContainerParameters cpars = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars = resolveUiElementBaseParameters(element, depth);
         InputParameters     ipars = resolveInputBaseParameters(element, depth);
 
         String              value = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_DATE);
@@ -2483,7 +2488,7 @@ public class JsonMapper
      */
     private File transformFileInput(PseudoElement element, int depth)
     {
-        ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars    = resolveUiElementBaseParameters(element, depth);
         InputParameters     ipars    = resolveInputBaseParameters(element, depth);
 
         boolean             multiple = getParameterValue(element, depth, PARAM_MULTIPLE, Boolean.class, Boolean.FALSE);
@@ -2517,7 +2522,7 @@ public class JsonMapper
      */
     private Hidden transformHiddenInput(PseudoElement element, int depth)
     {
-        ContainerParameters cpars     = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars     = resolveUiElementBaseParameters(element, depth);
 
         String              submitAs  = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class);
         String              value     = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
@@ -2547,7 +2552,7 @@ public class JsonMapper
      */
     private Number transformNumberInput(PseudoElement element, int depth)
     {
-        ContainerParameters cpars        = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars        = resolveUiElementBaseParameters(element, depth);
         InputParameters     ipars        = resolveInputBaseParameters(element, depth);
 
         java.lang.Number    value        = getParameterValue(element, depth, PARAM_VALUE, java.lang.Number.class, BigInteger.ZERO);
@@ -2614,7 +2619,7 @@ public class JsonMapper
      */
     private Password transformPasswordInput(PseudoElement element, int depth)
     {
-        ContainerParameters cpars        = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars        = resolveUiElementBaseParameters(element, depth);
         InputParameters     ipars        = resolveInputBaseParameters(element, depth);
 
         String              placeholder  = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, "***");
@@ -2648,7 +2653,7 @@ public class JsonMapper
      */
     private Radio transformRadioInput(PseudoElement element, int depth)
     {
-        ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars    = resolveUiElementBaseParameters(element, depth);
         InputParameters     ipars    = resolveInputBaseParameters(element, depth);
 
         String              boxesSrc = getParameterValue(element, depth, PARAM_BOXES, String.class, DEFAULT_EMPTY_VAL);
@@ -2685,7 +2690,7 @@ public class JsonMapper
      */
     private Select transformSelectInput(PseudoElement element, int depth)
     {
-        ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars    = resolveUiElementBaseParameters(element, depth);
         InputParameters     ipars    = resolveInputBaseParameters(element, depth);
 
         String              value    = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_NOT_SELECTED);
@@ -2724,7 +2729,7 @@ public class JsonMapper
      */
     private Slider transformSliderInput(PseudoElement element, int depth)
     {
-        ContainerParameters cpars      = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars      = resolveUiElementBaseParameters(element, depth);
         InputParameters     ipars      = resolveInputBaseParameters(element, depth);
 
         java.lang.Number    value      = getParameterValue(element, depth, PARAM_VALUE, java.lang.Number.class, BigInteger.ZERO);
@@ -2787,7 +2792,7 @@ public class JsonMapper
      */
     private Switch transformSwitchInput(PseudoElement element, int depth)
     {
-        ContainerParameters cpars   = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars   = resolveUiElementBaseParameters(element, depth);
         InputParameters     ipars   = resolveInputBaseParameters(element, depth);
         boolean             checked = getParameterValue(element, depth, PARAM_CHECKED, Boolean.class, Boolean.FALSE);
 
@@ -2818,7 +2823,7 @@ public class JsonMapper
      */
     private Tag transformTagInput(PseudoElement element, int depth)
     {
-        ContainerParameters cpars            = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars            = resolveUiElementBaseParameters(element, depth);
         InputParameters     ipars            = resolveInputBaseParameters(element, depth);
 
         List<String>        tags             = getParameterList(element, depth, PARAM_VALUE, String.class, List.of());
@@ -2870,7 +2875,7 @@ public class JsonMapper
      */
     private Textarea transformTextareaInput(PseudoElement element, int depth)
     {
-        ContainerParameters cpars       = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars       = resolveUiElementBaseParameters(element, depth);
         InputParameters     ipars       = resolveInputBaseParameters(element, depth);
 
         String              value       = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
@@ -2908,7 +2913,7 @@ public class JsonMapper
      */
     private Textbox transformTextboxInput(PseudoElement element, int depth)
     {
-        ContainerParameters cpars = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars = resolveUiElementBaseParameters(element, depth);
 
         String              name  = getParameterValue(element, depth, PARAM_NAME, String.class);
         String              text  = getParameterValue(element, depth, PARAM_TEXT, String.class, DEFAULT_EMPTY_VAL);
@@ -2932,7 +2937,7 @@ public class JsonMapper
      */
     private Textfield transformTextfieldInput(PseudoElement element, int depth)
     {
-        ContainerParameters cpars        = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars        = resolveUiElementBaseParameters(element, depth);
         InputParameters     ipars        = resolveInputBaseParameters(element, depth);
 
         String              value        = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
@@ -3037,12 +3042,9 @@ public class JsonMapper
      */
     private SVGGroup transformSVGGroup(PseudoElement element, int depth)
     {
-        ContainerParameters cpars    = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars    = resolveUiElementBaseParameters(element, depth);
 
-        String              tooltip  =
-            getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              style    =
-            getParameterValue(element, depth, PARAM_STYLE, String.class, DEFAULT_EMPTY_VAL);
+        String              style    = getParameterValue(element, depth, PARAM_STYLE, String.class, DEFAULT_EMPTY_VAL);
 
         List<SVGElement>    children =
             handleChildren(element, cpars.uid(), SVGType.class, SVGType.ALLOWED_BASE_TYPES, SVGElement.class, depth, false);
@@ -3052,7 +3054,6 @@ public class JsonMapper
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
-            .tooltip(tooltip)
             .style(style)
             .children(children)
             .build();
@@ -3067,23 +3068,20 @@ public class JsonMapper
      */
     private SVGLine transformSVGLine(PseudoElement element, int depth)
     {
-        ContainerParameters cpars   = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars = resolveUiElementBaseParameters(element, depth);
 
-        String              tooltip =
-            getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
-        String              style   =
-            getParameterValue(element, depth, PARAM_STYLE, String.class, DEFAULT_EMPTY_VAL);
-        Double              x1      = getParameterValue(element, depth, PARAM_X1, Double.class);
-        Double              x2      = getParameterValue(element, depth, PARAM_X2, Double.class);
-        Double              y1      = getParameterValue(element, depth, PARAM_Y1, Double.class);
-        Double              y2      = getParameterValue(element, depth, PARAM_Y2, Double.class);
+        String              style = getParameterValue(element, depth, PARAM_STYLE, String.class, DEFAULT_EMPTY_VAL);
+        double              x1    = getParameterValue(element, depth, PARAM_X1, Double.class);
+        double              x2    = getParameterValue(element, depth, PARAM_X2, Double.class);
+        double              y1    = getParameterValue(element, depth, PARAM_Y1, Double.class);
+        double              y2    = getParameterValue(element, depth, PARAM_Y2, Double.class);
 
         return SVGLine
             .builder()
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
-            .tooltip(tooltip)
+            .tooltip(cpars.tooltip())
             .style(style)
             .x1(x1)
             .x2(x2)
@@ -3101,9 +3099,8 @@ public class JsonMapper
      */
     private SVGPath transformSVGPath(PseudoElement element, int depth)
     {
-        ContainerParameters  cpars    = resolveContainerBaseParameters(element, depth);
+        UiElementParameters  cpars    = resolveUiElementBaseParameters(element, depth);
 
-        String               tooltip  = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
         String               style    = getParameterValue(element, depth, PARAM_STYLE, String.class, DEFAULT_EMPTY_VAL);
 
         List<SVGPathCommand> commands =
@@ -3115,7 +3112,7 @@ public class JsonMapper
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
-            .tooltip(tooltip)
+            .tooltip(cpars.tooltip())
             .style(style)
             .commands(commands)
             .build();
@@ -3154,13 +3151,13 @@ public class JsonMapper
      */
     private SVGPathCmdA transformSVGPathCmdA(PseudoElement element, int depth)
     {
-        Boolean relative          = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
-        Double  rx                = getParameterValue(element, depth, PARAM_RX, Double.class);
-        Double  ry                = getParameterValue(element, depth, PARAM_RY, Double.class);
-        Boolean angleLargeArcFlag = getParameterValue(element, depth, PARAM_ANGLE_LARGE_ARC_FLAG, Boolean.class, false);
-        Boolean sweepFlag         = getParameterValue(element, depth, PARAM_SWEEP_FLAG, Boolean.class, false);
-        Double  endPointX         = getParameterValue(element, depth, PARAM_END_POINT_X, Double.class);
-        Double  endPointY         = getParameterValue(element, depth, PARAM_END_POINT_Y, Double.class);
+        boolean relative          = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        double  rx                = getParameterValue(element, depth, PARAM_RX, Double.class);
+        double  ry                = getParameterValue(element, depth, PARAM_RY, Double.class);
+        boolean angleLargeArcFlag = getParameterValue(element, depth, PARAM_ANGLE_LARGE_ARC_FLAG, Boolean.class, false);
+        boolean sweepFlag         = getParameterValue(element, depth, PARAM_SWEEP_FLAG, Boolean.class, false);
+        double  endPointX         = getParameterValue(element, depth, PARAM_END_POINT_X, Double.class);
+        double  endPointY         = getParameterValue(element, depth, PARAM_END_POINT_Y, Double.class);
 
         return SVGPathCmdA
             .builder()
@@ -3183,13 +3180,13 @@ public class JsonMapper
      */
     private SVGPathCmdC transformSVGPathCmdC(PseudoElement element, int depth)
     {
-        Boolean relative       = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
-        Double  controlPoint1X = getParameterValue(element, depth, PARAM_CONTROL_POINT_1_X, Double.class);
-        Double  controlPoint1Y = getParameterValue(element, depth, PARAM_CONTROL_POINT_1_Y, Double.class);
-        Double  controlPoint2X = getParameterValue(element, depth, PARAM_CONTROL_POINT_2_X, Double.class);
-        Double  controlPoint2Y = getParameterValue(element, depth, PARAM_CONTROL_POINT_2_Y, Double.class);
-        Double  endPointX      = getParameterValue(element, depth, PARAM_END_POINT_X, Double.class);
-        Double  endPointY      = getParameterValue(element, depth, PARAM_END_POINT_Y, Double.class);
+        boolean relative       = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        double  controlPoint1X = getParameterValue(element, depth, PARAM_CONTROL_POINT_1_X, Double.class);
+        double  controlPoint1Y = getParameterValue(element, depth, PARAM_CONTROL_POINT_1_Y, Double.class);
+        double  controlPoint2X = getParameterValue(element, depth, PARAM_CONTROL_POINT_2_X, Double.class);
+        double  controlPoint2Y = getParameterValue(element, depth, PARAM_CONTROL_POINT_2_Y, Double.class);
+        double  endPointX      = getParameterValue(element, depth, PARAM_END_POINT_X, Double.class);
+        double  endPointY      = getParameterValue(element, depth, PARAM_END_POINT_Y, Double.class);
 
         return SVGPathCmdC
             .builder()
@@ -3212,8 +3209,8 @@ public class JsonMapper
      */
     private SVGPathCmdH transformSVGPathCmdH(PseudoElement element, int depth)
     {
-        Boolean relative = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
-        Double  x        = getParameterValue(element, depth, PARAM_X, Double.class);
+        boolean relative = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        double  x        = getParameterValue(element, depth, PARAM_X, Double.class);
 
         return SVGPathCmdH
             .builder()
@@ -3231,9 +3228,9 @@ public class JsonMapper
      */
     private SVGPathCmdL transformSVGPathCmdL(PseudoElement element, int depth)
     {
-        Boolean relative = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
-        Double  x        = getParameterValue(element, depth, PARAM_X, Double.class);
-        Double  y        = getParameterValue(element, depth, PARAM_Y, Double.class);
+        boolean relative = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        double  x        = getParameterValue(element, depth, PARAM_X, Double.class);
+        double  y        = getParameterValue(element, depth, PARAM_Y, Double.class);
 
         return SVGPathCmdL
             .builder()
@@ -3252,9 +3249,9 @@ public class JsonMapper
      */
     private SVGPathCmdM transformSVGPathCmdM(PseudoElement element, int depth)
     {
-        Boolean relative = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
-        Double  x        = getParameterValue(element, depth, PARAM_X, Double.class);
-        Double  y        = getParameterValue(element, depth, PARAM_Y, Double.class);
+        boolean relative = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        double  x        = getParameterValue(element, depth, PARAM_X, Double.class);
+        double  y        = getParameterValue(element, depth, PARAM_Y, Double.class);
 
         return SVGPathCmdM
             .builder()
@@ -3273,11 +3270,11 @@ public class JsonMapper
      */
     private SVGPathCmdQ transformSVGPathCmdQ(PseudoElement element, int depth)
     {
-        Boolean relative      = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
-        Double  controlPointX = getParameterValue(element, depth, PARAM_CONTROL_POINT_X, Double.class);
-        Double  controlPointY = getParameterValue(element, depth, PARAM_CONTROL_POINT_Y, Double.class);
-        Double  endPointX     = getParameterValue(element, depth, PARAM_END_POINT_X, Double.class);
-        Double  endPointY     = getParameterValue(element, depth, PARAM_END_POINT_Y, Double.class);
+        boolean relative      = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        double  controlPointX = getParameterValue(element, depth, PARAM_CONTROL_POINT_X, Double.class);
+        double  controlPointY = getParameterValue(element, depth, PARAM_CONTROL_POINT_Y, Double.class);
+        double  endPointX     = getParameterValue(element, depth, PARAM_END_POINT_X, Double.class);
+        double  endPointY     = getParameterValue(element, depth, PARAM_END_POINT_Y, Double.class);
 
         return SVGPathCmdQ
             .builder()
@@ -3298,11 +3295,11 @@ public class JsonMapper
      */
     private SVGPathCmdS transformSVGPathCmdS(PseudoElement element, int depth)
     {
-        Boolean relative      = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
-        Double  controlPointX = getParameterValue(element, depth, PARAM_CONTROL_POINT_X, Double.class);
-        Double  controlPointY = getParameterValue(element, depth, PARAM_CONTROL_POINT_Y, Double.class);
-        Double  endPointX     = getParameterValue(element, depth, PARAM_END_POINT_X, Double.class);
-        Double  endPointY     = getParameterValue(element, depth, PARAM_END_POINT_Y, Double.class);
+        boolean relative      = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        double  controlPointX = getParameterValue(element, depth, PARAM_CONTROL_POINT_X, Double.class);
+        double  controlPointY = getParameterValue(element, depth, PARAM_CONTROL_POINT_Y, Double.class);
+        double  endPointX     = getParameterValue(element, depth, PARAM_END_POINT_X, Double.class);
+        double  endPointY     = getParameterValue(element, depth, PARAM_END_POINT_Y, Double.class);
 
         return SVGPathCmdS
             .builder()
@@ -3323,9 +3320,9 @@ public class JsonMapper
      */
     private SVGPathCmdT transformSVGPathCmdT(PseudoElement element, int depth)
     {
-        Boolean relative  = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
-        Double  endPointX = getParameterValue(element, depth, PARAM_END_POINT_X, Double.class);
-        Double  endPointY = getParameterValue(element, depth, PARAM_END_POINT_Y, Double.class);
+        boolean relative  = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        double  endPointX = getParameterValue(element, depth, PARAM_END_POINT_X, Double.class);
+        double  endPointY = getParameterValue(element, depth, PARAM_END_POINT_Y, Double.class);
 
         return SVGPathCmdT
             .builder()
@@ -3344,8 +3341,8 @@ public class JsonMapper
      */
     private SVGPathCmdV transformSVGPathCmdV(PseudoElement element, int depth)
     {
-        Boolean relative = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
-        Double  y        = getParameterValue(element, depth, PARAM_Y, Double.class);
+        boolean relative = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        double  y        = getParameterValue(element, depth, PARAM_Y, Double.class);
 
         return SVGPathCmdV
             .builder()
@@ -3363,7 +3360,7 @@ public class JsonMapper
      */
     private SVGPathCmdZ transformSVGPathCmdZ(PseudoElement element, int depth)
     {
-        Boolean relative = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
+        boolean relative = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
 
         return SVGPathCmdZ
             .builder()
@@ -3380,24 +3377,23 @@ public class JsonMapper
      */
     private SVGText transformSVGText(PseudoElement element, int depth)
     {
-        ContainerParameters cpars      = resolveContainerBaseParameters(element, depth);
+        UiElementParameters cpars      = resolveUiElementBaseParameters(element, depth);
 
-        String              tooltip    = getParameterValue(element, depth, PARAM_TOOLTIP, String.class, DEFAULT_EMPTY_VAL);
         String              style      = getParameterValue(element, depth, PARAM_STYLE, String.class, DEFAULT_EMPTY_VAL);
         String              text       = getParameterValue(element, depth, PARAM_TEXT, String.class);
-        Double              x          = getParameterValue(element, depth, PARAM_X, Double.class, 0d);
-        Double              y          = getParameterValue(element, depth, PARAM_Y, Double.class, 0d);
-        Double              dx         = getParameterValue(element, depth, PARAM_DX, Double.class, 0d);
-        Double              dy         = getParameterValue(element, depth, PARAM_DY, Double.class, 0d);
-        Double              rotate     = getParameterValue(element, depth, PARAM_ROTATE, Double.class, 0d);
-        Double              textLength = getParameterValue(element, depth, PARAM_TEXT_LENGTH, Double.class, -1d);
+        double              x          = getParameterValue(element, depth, PARAM_X, Double.class, 0d);
+        double              y          = getParameterValue(element, depth, PARAM_Y, Double.class, 0d);
+        double              dx         = getParameterValue(element, depth, PARAM_DX, Double.class, 0d);
+        double              dy         = getParameterValue(element, depth, PARAM_DY, Double.class, 0d);
+        double              rotate     = getParameterValue(element, depth, PARAM_ROTATE, Double.class, 0d);
+        double              textLength = getParameterValue(element, depth, PARAM_TEXT_LENGTH, Double.class, -1d);
 
         return SVGText
             .builder()
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
-            .tooltip(tooltip)
+            .tooltip(cpars.tooltip())
             .style(style)
             .text(text)
             .x(x)

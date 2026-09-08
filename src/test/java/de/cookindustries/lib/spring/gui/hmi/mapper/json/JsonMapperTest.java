@@ -23,6 +23,7 @@ import de.cookindustries.lib.spring.gui.config.properties.CiLibResourcesProperti
 import de.cookindustries.lib.spring.gui.hmi.container.AudioContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.Button;
 import de.cookindustries.lib.spring.gui.hmi.container.ButtonClass;
+import de.cookindustries.lib.spring.gui.hmi.container.ButtonIcon;
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
 import de.cookindustries.lib.spring.gui.hmi.container.ContentContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.FormContainer;
@@ -94,6 +95,11 @@ public class JsonMapperTest
     private boolean checkDivTags(String html)
     {
         return checkTags("div", html);
+    }
+
+    private void checkToolTip(String content)
+    {
+        assertTrue(content.contains("data-tooltip=\"test tooltip\""), "expected tooltip parameter");
     }
 
     private boolean checkTags(String tag, String html)
@@ -325,6 +331,7 @@ public class JsonMapperTest
 
         String html = HtmlMapper.map(container);
         assertTrue(checkDivTags(html));
+        checkToolTip(html);
     }
 
     @Test
@@ -358,34 +365,14 @@ public class JsonMapperTest
 
         String html = HtmlMapper.map(container);
         assertTrue(checkDivTags(html));
+        checkToolTip(html);
     }
 
-    // @Test
-    void test_map_ButtonBarContainer()
-    {
-        // setup
-        JsonMapper mapper =
-            JsonMapper
-                .builder()
-                .srcPath("json-mapper/container/button-bar-container.ged")
-                .locale(Locale.ENGLISH)
-                .templateFileCache(templateFileCache)
-                .translationProvider(translationProvider)
-                .flatMappableDissector(flatMappableDissector)
-                .build();
-
-        // run
-        MapperResult result = mapper.map();
-
-        // verify
-        checkAgainstErrorContainer(result.getContainers().get(0));
-    }
-
-    // @Test
+    @Test
     void test_map_ButtonIconContainer()
     {
         // setup
-        JsonMapper mapper =
+        JsonMapper   mapper    =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/container/button-icon-container.ged")
@@ -396,10 +383,23 @@ public class JsonMapperTest
                 .build();
 
         // run
-        MapperResult result = mapper.map();
+        MapperResult result    = mapper.map();
 
         // verify
-        checkAgainstErrorContainer(result.getContainers().get(0));
+        Container    container = result.getContainers().get(0);
+        assertEquals(ButtonIcon.class, container.getClass());
+
+        ButtonIcon button = (ButtonIcon) container;
+        assertEquals("uid", button.getUid());
+        assertEquals(1, button.getClasses().size());
+        assertEquals(1, button.getDataAttributes().size());
+        assertEquals("/images/btn-icon.png", button.getIcon());
+        assertEquals("doShit()", button.getOnClick());
+        assertEquals(ButtonClass.SUCCESS, button.getBtnClass());
+
+        String html = HtmlMapper.map(container);
+        assertTrue(checkDivTags(html));
+        checkToolTip(html);
     }
 
     @Test
@@ -428,6 +428,7 @@ public class JsonMapperTest
 
         String html = HtmlMapper.map(container);
         assertTrue(checkDivTags(html));
+        checkToolTip(html);
     }
 
     @Test
@@ -515,6 +516,7 @@ public class JsonMapperTest
 
         String html = HtmlMapper.map(container);
         assertFalse(checkTags("img", html));
+        checkToolTip(html);
     }
 
     @Test
@@ -547,6 +549,7 @@ public class JsonMapperTest
 
         String html = HtmlMapper.map(container);
         assertTrue(checkDivTags(html));
+        checkToolTip(html);
     }
 
     @Test
@@ -665,6 +668,7 @@ public class JsonMapperTest
 
         String html = HtmlMapper.map(container);
         assertTrue(checkDivTags(html));
+        checkToolTip(html);
     }
 
     @Test
@@ -964,7 +968,7 @@ public class JsonMapperTest
         list.add(
             InputValue
                 .builder()
-                .id("id")
+                .uid("uid")
                 .text("text")
                 .value("value")
                 .build());

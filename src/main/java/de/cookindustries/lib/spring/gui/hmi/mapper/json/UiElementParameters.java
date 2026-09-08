@@ -10,7 +10,7 @@ package de.cookindustries.lib.spring.gui.hmi.mapper.json;
 import java.util.List;
 import java.util.Map;
 
-record ContainerParameters(String uid, List<String> classes, Map<String, String> attributes)
+record UiElementParameters(String uid, List<String> classes, Map<String, String> attributes, String tooltip)
 {
 
 }

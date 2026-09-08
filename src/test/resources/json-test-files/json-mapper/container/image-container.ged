@@ -8,7 +8,8 @@
         "key1": "value1"
     },
     "parameters": {
-        "src": "path/to/resource"
+        "src": "path/to/resource",
+        "tooltip": "test tooltip"
     },
     "children": []
 }

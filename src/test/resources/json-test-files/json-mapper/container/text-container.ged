@@ -8,6 +8,7 @@
         "key1": "value1"
     },
     "parameters": {
-        "text": "some text"
+        "text": "some text",
+        "tooltip": "test tooltip"
     }
 }

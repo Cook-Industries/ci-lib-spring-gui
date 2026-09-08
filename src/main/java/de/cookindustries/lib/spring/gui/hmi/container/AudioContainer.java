@@ -25,14 +25,14 @@ import lombok.extern.jackson.Jacksonized;
 public final class AudioContainer extends Container
 {
 
-    @NonNull
-    private final String  caption;
-
     /**
      * {@code source path} to the resource
      */
     @NonNull
     private final String  src;
+
+    @NonNull
+    private final String  caption;
 
     /**
      * whether if controls should be shown or not

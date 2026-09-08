@@ -9,6 +9,7 @@ package de.cookindustries.lib.spring.gui.hmi.mapper.html;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,10 +18,10 @@ import org.apache.commons.text.StringEscapeUtils;
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
-import lombok.Builder.Default;
 
 /**
  * Object to build a HTML representation.
@@ -95,7 +96,14 @@ public final class HtmlElement
             return "";
         }
 
-        StringConcat sc = new StringConcat();
+        StringConcat sc                       = new StringConcat();
+
+        boolean      hasVisibleDataAttributes =
+            dataAttributes
+                .values()
+                .stream()
+                .filter(Objects::nonNull)
+                .count() > 0;
 
         sc
             .append(StringAdapter.prefix(LT, tag))
@@ -106,7 +114,7 @@ public final class HtmlElement
             .append(!classes.isEmpty(), SPACE)
             .append(!classes.isEmpty(), StringAdapter.prefixAndSuffix("class=\"", StringAdapter.separate(classes, SPACE), QTM))
 
-            .append(!dataAttributes.isEmpty(), SPACE)
+            .append(hasVisibleDataAttributes, SPACE)
             .append(!dataAttributes.isEmpty(), getDataAttributes());
 
         if (isSingleTag)
@@ -133,7 +141,7 @@ public final class HtmlElement
     {
         return attributes
             .stream()
-            .map(att -> att.getHtmlRep())
+            .map(Attribute::getHtmlRep)
             .filter(str -> !str.isBlank())
             .collect(Collectors.joining(SPACE));
     }

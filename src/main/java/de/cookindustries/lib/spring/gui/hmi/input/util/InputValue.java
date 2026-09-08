@@ -7,14 +7,12 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input.util;
 
-import java.util.List;
-
-import lombok.Builder;
+import de.cookindustries.lib.spring.gui.hmi.UiElement;
 import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Singular;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 /**
  * An object representing various input values for checkboxes, selection and others.
@@ -22,31 +20,25 @@ import lombok.ToString;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-@Builder
+@SuperBuilder
 @Getter
 @ToString
-public class InputValue
+public class InputValue extends UiElement
 {
 
     /** The text to this input value */
-    @NonNull
-    @Default
-    private final String       id      = "";
+    private final String  submitAs;
 
     /** The text to this input value */
     @NonNull
-    private final String       text;
+    private final String  text;
 
     /** The value that gets transmitted at form-export */
     @NonNull
-    private final String       value;
+    private final String  value;
 
     /** Whether this input value is selected or not */
     @Default
-    private final boolean      checked = false;
-
-    /** Styling classes for this input value */
-    @Singular("clazz")
-    private final List<String> classes;
+    private final boolean checked = false;
 
 }

@@ -19,30 +19,34 @@ public final class TestHelper
     {
         List<AssertionError> errors = new ArrayList<>();
 
-        asserts.forEach(ass -> {
-            try
-            {
-                ass.run();
-            }
-            catch (AssertionError err)
-            {
-                errors.add(err);
-            }
+        asserts
+            .forEach(
+                ass -> {
+                    try
+                    {
+                        ass.run();
+                    }
+                    catch (AssertionError err)
+                    {
+                        errors.add(err);
+                    }
 
-            if (!errors.isEmpty())
-            {
-                StringBuilder sb = new StringBuilder("Multiple assertion failures:\n");
+                    if (!errors.isEmpty())
+                    {
+                        StringBuilder sb = new StringBuilder("Multiple assertion failures:\n");
 
-                errors.forEach(err -> {
-                    sb
-                        .append(" - ")
-                        .append(err.getMessage())
-                        .append("\n");
+                        errors
+                            .forEach(
+                                err -> {
+                                    sb
+                                        .append(" - ")
+                                        .append(err.getMessage())
+                                        .append("\n");
+                                });
+
+                        fail(sb.toString());
+                    }
                 });
-
-                fail(sb.toString());
-            }
-        });
     }
 
 }

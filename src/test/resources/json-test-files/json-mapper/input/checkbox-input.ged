@@ -18,6 +18,7 @@
                 {
                     "type": "INPUT_VALUE",
                     "parameters": {
+                        "submitAs": "checkbox-2",
                         "text": "checkbox 1",
                         "value": "1"
                     }
@@ -25,6 +26,7 @@
                 {
                     "type": "INPUT_VALUE",
                     "parameters": {
+                        "submitAs": "checkbox-2",
                         "text": "checkbox 2",
                         "value": "2"
                     }

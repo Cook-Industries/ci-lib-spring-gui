@@ -10,6 +10,8 @@
     "parameters": {
         "src": "path/to/resource",
         "controls": false,
-        "autoplay": true
+        "autoplay": true,
+        "tooltip": "test tooltip",
+        "caption": "test audio container"
     }
 }

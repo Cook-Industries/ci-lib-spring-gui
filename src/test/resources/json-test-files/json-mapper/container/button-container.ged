@@ -10,6 +10,7 @@
     "parameters": {
         "text": "this is a button",
         "onClick": "doShit()",
-        "btnClass": "success"
+        "btnClass": "success",
+        "tooltip": "test tooltip"
     }
 }

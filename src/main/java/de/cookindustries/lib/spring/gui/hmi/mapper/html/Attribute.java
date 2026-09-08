@@ -12,12 +12,12 @@ import org.apache.commons.text.StringEscapeUtils;
 import de.cookindustries.lib.spring.gui.html.HtmlExportable;
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Builder.Default;
 
 /**
- * Describes a HTML element attribute
+ * Describes a HTML element attribute. A {@code null} {@code Attribute#value} results in a empty html attribute, like 'controls'.
  * 
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
@@ -35,12 +35,17 @@ public final class Attribute implements HtmlExportable
     @Default
     private final String  value  = null;
 
-    /** whether this attribut should be active (inactive results in an empty result) */
+    /** whether this attribut should be active */
     @Default
-    @NonNull
-    private final Boolean active = true;
+    private final boolean active = true;
 
     /**
+     * Render this {@code Attribute}.
+     * <p>
+     * A {@code false} {@code Attribute#active} results in an empty {@code String}.
+     * <p>
+     * A {@code null} in {@code Attribute#value} results in a {@code Attribute#name} only {@code Attribute}, like 'checked'.
+     * <p>
      * {@inheritDoc}
      */
     @Override

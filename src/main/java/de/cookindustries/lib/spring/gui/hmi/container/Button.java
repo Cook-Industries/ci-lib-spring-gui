@@ -7,9 +7,9 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.container;
 
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -25,9 +25,6 @@ public final class Button extends Container
 
     @NonNull
     private final String      text;
-
-    @Default
-    private final String      title    = null;
 
     @NonNull
     private final String      onClick;
