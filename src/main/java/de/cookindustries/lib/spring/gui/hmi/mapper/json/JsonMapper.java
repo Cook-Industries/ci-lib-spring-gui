@@ -37,6 +37,7 @@ import de.cookindustries.lib.spring.gui.function.RegisterTagInput;
 import de.cookindustries.lib.spring.gui.function.SubmitFromModal;
 import de.cookindustries.lib.spring.gui.function.TagInputSettings;
 import de.cookindustries.lib.spring.gui.hmi.container.AudioContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.AudioContainer.Preload;
 import de.cookindustries.lib.spring.gui.hmi.container.BurgerContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.BurgerItem;
 import de.cookindustries.lib.spring.gui.hmi.container.Button;
@@ -131,6 +132,12 @@ import lombok.Singular;
 @Builder
 public class JsonMapper
 {
+
+    private static final String                                 PARAM_MUTED                    = "muted";
+
+    private static final String                                 PARAM_PRELOAD                  = "preload";
+
+    private static final String                                 PARAM_LOOP                     = "loop";
 
     private static final Logger                                 LOG                            =
         LoggerFactory.getLogger(JsonMapper.class);
@@ -1175,7 +1182,7 @@ public class JsonMapper
     private MapperResult transformInternalComponent(PseudoElement element, int depth, ContainerType... allowedTypes)
     {
         String       path         = getParameterValue(element, depth, PARAM_PATH, String.class);
-        Boolean      isSourceList = getParameterValue(element, depth, PARAM_IS_SOURCE_LIST, Boolean.class, false);
+        boolean      isSourceList = getParameterValue(element, depth, PARAM_IS_SOURCE_LIST, Boolean.class, false);
         String       sourceKey    = null;
         MapperResult result       = null;
 
@@ -1644,6 +1651,9 @@ public class JsonMapper
         String              caption  = getParameterValue(element, depth, PARAM_CAPTION, String.class);
         boolean             controls = getParameterValue(element, depth, PARAM_CONTROLS, Boolean.class, Boolean.FALSE);
         boolean             autoplay = getParameterValue(element, depth, PARAM_AUTOPLAY, Boolean.class, Boolean.FALSE);
+        boolean             loop     = getParameterValue(element, depth, PARAM_LOOP, Boolean.class, Boolean.FALSE);
+        boolean             muted    = getParameterValue(element, depth, PARAM_MUTED, Boolean.class, Boolean.FALSE);
+        Preload             preload  = getParameterValue(element, depth, PARAM_PRELOAD, Preload.class, Preload.AUTO);
 
         return AudioContainer
             .builder()
@@ -1655,6 +1665,9 @@ public class JsonMapper
             .caption(caption)
             .controls(controls)
             .autoplay(autoplay)
+            .looped(loop)
+            .muted(muted)
+            .preload(preload)
             .build();
     }
 
@@ -1988,7 +2001,7 @@ public class JsonMapper
         String              requestUrl              =
             getParameterValue(element, depth, PARAM_REQUEST_URL, String.class, DEFAULT_EMPTY_VAL);
 
-        Boolean             closeOnOverlayClick     =
+        boolean             closeOnOverlayClick     =
             getParameterValue(element, depth, PARAM_CLOSE_ON_OVERLAY_CLICK, Boolean.class, Boolean.FALSE);
 
         String              btnLeftName             =
@@ -2002,13 +2015,11 @@ public class JsonMapper
 
         try
         {
-            btnLeftFunction =
-                getParameterValue(element, depth, PARAM_BTN_LEFT_FUNCTION, AbsFunctionCall.class, new CloseModal());
+            btnLeftFunction = getParameterValue(element, depth, PARAM_BTN_LEFT_FUNCTION, AbsFunctionCall.class, new CloseModal());
         }
         catch (JsonParsingException ex)
         {
-            fallbackBtnLeftFunction =
-                getParameterValue(element, depth, PARAM_BTN_LEFT_FUNCTION, String.class, DEFAULT_EMPTY_VAL);
+            fallbackBtnLeftFunction = getParameterValue(element, depth, PARAM_BTN_LEFT_FUNCTION, String.class, DEFAULT_EMPTY_VAL);
         }
 
         String          btnCenterName             =
@@ -2022,13 +2033,11 @@ public class JsonMapper
 
         try
         {
-            btnCenterFunction =
-                getParameterValue(element, depth, PARAM_BTN_CENTER_FUNCTION, AbsFunctionCall.class);
+            btnCenterFunction = getParameterValue(element, depth, PARAM_BTN_CENTER_FUNCTION, AbsFunctionCall.class);
         }
         catch (JsonParsingException ex)
         {
-            fallbackBtnCenterFunction =
-                getParameterValue(element, depth, PARAM_BTN_CENTER_FUNCTION, String.class, DEFAULT_EMPTY_VAL);
+            fallbackBtnCenterFunction = getParameterValue(element, depth, PARAM_BTN_CENTER_FUNCTION, String.class, DEFAULT_EMPTY_VAL);
         }
 
         String          btnRightName             =
@@ -2042,8 +2051,7 @@ public class JsonMapper
 
         try
         {
-            btnRightFunction =
-                getParameterValue(element, depth, PARAM_BTN_RIGHT_FUNCTION, AbsFunctionCall.class, new SubmitFromModal());
+            btnRightFunction = getParameterValue(element, depth, PARAM_BTN_RIGHT_FUNCTION, AbsFunctionCall.class, new SubmitFromModal());
         }
         catch (JsonParsingException ex)
         {
@@ -2096,7 +2104,7 @@ public class JsonMapper
         Container           head   = null;
         Container           tail   = null;
         List<Container>     center = new ArrayList<>();
-        Integer             cnt    = 0;
+        int                 cnt    = 0;
 
         for (PseudoElement pe : element.getChildren())
         {
@@ -2183,7 +2191,7 @@ public class JsonMapper
         UiElementParameters cpars       = resolveUiElementBaseParameters(element, depth);
 
         String              name        = getParameterValue(element, depth, PARAM_NAME, String.class);
-        Boolean             sortable    = getParameterValue(element, depth, PARAM_SORTABLE, Boolean.class, false);
+        boolean             sortable    = getParameterValue(element, depth, PARAM_SORTABLE, Boolean.class, false);
         List<String>        columnNames = getParameterList(element, depth, PARAM_COLUMN_NAMES, String.class);
 
         List<Container>     rows        = new ArrayList<>();
@@ -2246,7 +2254,7 @@ public class JsonMapper
         UiElementParameters cpars  = resolveUiElementBaseParameters(element, depth);
 
         String              text   = getParameterValue(element, depth, PARAM_TEXT, String.class);
-        Boolean             inline = getParameterValue(element, depth, PARAM_INLINE, Boolean.class, false);
+        boolean             inline = getParameterValue(element, depth, PARAM_INLINE, Boolean.class, false);
 
         return TextContainer
             .builder()

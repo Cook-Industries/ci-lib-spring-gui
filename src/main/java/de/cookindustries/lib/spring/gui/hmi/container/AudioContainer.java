@@ -25,6 +25,15 @@ import lombok.extern.jackson.Jacksonized;
 public final class AudioContainer extends Container
 {
 
+    public enum Preload
+    {
+        NONE,
+
+        METADATA,
+
+        AUTO;
+    }
+
     /**
      * {@code source path} to the resource
      */
@@ -33,6 +42,18 @@ public final class AudioContainer extends Container
 
     @NonNull
     private final String  caption;
+
+    /**
+     * if the sound file should be looped
+     */
+    @Default
+    private final boolean looped   = false;
+
+    /**
+     * if the default sound level is 0
+     */
+    @Default
+    private final boolean muted    = false;
 
     /**
      * whether if controls should be shown or not
@@ -45,6 +66,10 @@ public final class AudioContainer extends Container
      */
     @Default
     private final boolean autoplay = false;
+
+    @Default
+    @NonNull
+    private final Preload preload  = Preload.AUTO;
 
     @Override
     protected ContainerType inferType()
