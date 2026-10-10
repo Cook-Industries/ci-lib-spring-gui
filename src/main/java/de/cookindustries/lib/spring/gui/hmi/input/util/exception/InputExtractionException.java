@@ -17,16 +17,11 @@ import lombok.Getter;
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Getter
-public final class InputExtractionException extends RuntimeException
+public final class InputExtractionException extends Exception
 {
 
-    private final InputExtractor inputExtractor;
-
-    public InputExtractionException(InputExtractor inEx)
+    public InputExtractionException()
     {
-        super();
-
-        this.inputExtractor = inEx;
     }
 
 }

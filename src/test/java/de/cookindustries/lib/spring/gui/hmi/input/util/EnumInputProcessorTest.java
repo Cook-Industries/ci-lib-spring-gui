@@ -12,17 +12,19 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import de.cookindustries.lib.spring.gui.hmi.input.util.exception.NullIgnoredException;
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
 
 class EnumInputProcessorTest
 {
 
-    private enum TestEnum {
+    private enum TestEnum
+    {
         TEST, TEST_2;
     }
 
     @Test
-    void test_check_inputNull()
+    void test_check_inputNull() throws NullIgnoredException
     {
         // setup
         EnumInputProcessor<TestEnum> processor =
@@ -42,7 +44,7 @@ class EnumInputProcessorTest
     }
 
     @Test
-    void test_check_simpleValue()
+    void test_check_simpleValue() throws NullIgnoredException
     {
         // setup
         EnumInputProcessor<TestEnum> processor      =
@@ -63,7 +65,7 @@ class EnumInputProcessorTest
     }
 
     @Test
-    void test_check_emmptyInput_noFallback()
+    void test_check_emmptyInput_noFallback() throws NullIgnoredException
     {
         // setup
         EnumInputProcessor<TestEnum> processor =
@@ -84,7 +86,7 @@ class EnumInputProcessorTest
     }
 
     @Test
-    void test_check_emmptyInput_withFallback()
+    void test_check_emmptyInput_withFallback() throws NullIgnoredException
     {
         // setup
         EnumInputProcessor<TestEnum> processor      =

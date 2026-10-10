@@ -9,6 +9,7 @@ package de.cookindustries.lib.spring.gui.config.properties;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
+import jakarta.validation.Valid;
 import lombok.Data;
 
 /**
@@ -20,6 +21,7 @@ import lombok.Data;
 public class CiLibResourcesProperties
 {
 
+    @Valid
     @NestedConfigurationProperty
     private CiLibResourcesPathProperties path = new CiLibResourcesPathProperties();
 

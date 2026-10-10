@@ -7,13 +7,24 @@
  */
 package de.cookindustries.lib.spring.gui.config;
 
+import java.util.List;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import de.cookindustries.lib.spring.gui.config.properties.CiLibProperties;
 import de.cookindustries.lib.spring.gui.hmi.util.GuiFactoryProperties;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
+import de.cookindustries.lib.spring.gui.util.file.AbstractFormCipher;
+import de.cookindustries.lib.spring.gui.util.file.AbstractReceiver;
+import de.cookindustries.lib.spring.gui.util.file.CompletionHandler;
+import de.cookindustries.lib.spring.gui.util.file.FileUploadCoordinator;
+import de.cookindustries.lib.spring.gui.util.file.NoOpFormCipher;
+import de.cookindustries.lib.spring.gui.util.file.UploadSessionLimits;
+import de.cookindustries.lib.spring.gui.util.file.UploadSessionPolicy;
+import de.cookindustries.lib.spring.gui.util.file.UploadSessionStore;
 
 /**
  * @since 1.0.0
@@ -45,6 +56,37 @@ class CiLibBeanConfig
     AbsTranslationProvider translationProvider()
     {
         return new StaticTranslationProvider();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(UploadSessionPolicy.class)
+    UploadSessionPolicy uploadSessionPolicy(CiLibProperties properties)
+    {
+        return new UploadSessionPolicy(properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(UploadSessionLimits.class)
+    UploadSessionLimits uploadSessionLimits(CiLibProperties properties)
+    {
+        return new UploadSessionLimits(
+            properties.getWeb().getUpload().getLimits().getMaxFileSize().toBytes(),
+            properties.getWeb().getUpload().getLimits().getMaxBatchSize().toBytes(),
+            properties.getWeb().getUpload().getLimits().getMaxTtl());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AbstractFormCipher.class)
+    AbstractFormCipher noopFormCipher()
+    {
+        return new NoOpFormCipher();
+    }
+
+    @Bean
+    FileUploadCoordinator fileUploadCoordinator(UploadSessionStore store, AbstractReceiver receiver, AbstractFormCipher cipher,
+        List<CompletionHandler<?, ?>> handlers, UploadSessionPolicy policy, UploadSessionLimits limits)
+    {
+        return new FileUploadCoordinator(store, receiver, cipher, handlers, policy, limits);
     }
 
 }

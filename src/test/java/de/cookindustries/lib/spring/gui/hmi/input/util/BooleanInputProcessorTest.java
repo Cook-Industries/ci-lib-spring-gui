@@ -12,13 +12,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import de.cookindustries.lib.spring.gui.hmi.input.util.exception.NullIgnoredException;
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
 
 class BooleanInputProcessorTest
 {
 
     @Test
-    void test_check_inputNull()
+    void test_check_inputNull() throws NullIgnoredException
     {
         // setup
         BooleanInputProcessor     processor =
@@ -37,7 +38,7 @@ class BooleanInputProcessorTest
     }
 
     @Test
-    void test_check_emptyInput_defaultFalse()
+    void test_check_emptyInput_defaultFalse() throws NullIgnoredException
     {
         // setup
         BooleanInputProcessor     processor      =
@@ -58,7 +59,7 @@ class BooleanInputProcessorTest
     }
 
     @Test
-    void test_check_emptyInput_defaultTrue()
+    void test_check_emptyInput_defaultTrue() throws NullIgnoredException
     {
         // setup
         BooleanInputProcessor     processor      =
@@ -79,7 +80,7 @@ class BooleanInputProcessorTest
     }
 
     @Test
-    void test_check_false()
+    void test_check_false() throws NullIgnoredException
     {
         // setup
         BooleanInputProcessor     processor      =
@@ -99,7 +100,7 @@ class BooleanInputProcessorTest
     }
 
     @Test
-    void test_check_true()
+    void test_check_true() throws NullIgnoredException
     {
         // setup
         BooleanInputProcessor     processor      =

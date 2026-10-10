@@ -551,7 +551,7 @@ public final class GUIFactory
      * @param inputExtractor to extract messages from
      * @return a response containing the markers raised by {@code inputExtractor}
      */
-    public NotificationResponse createNotificationActiveMarkerResponse(InputExtractor inputExtractor)
+    public NotificationResponse createNotificationActiveMarkerResponse(InputExtractor<?> inputExtractor)
     {
         List<ActivateMarkerMessage> messages = new ArrayList<>();
 

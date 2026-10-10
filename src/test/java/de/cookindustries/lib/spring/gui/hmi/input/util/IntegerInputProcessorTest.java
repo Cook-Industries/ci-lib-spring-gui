@@ -12,13 +12,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import de.cookindustries.lib.spring.gui.hmi.input.util.exception.NullIgnoredException;
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
 
 class IntegerInputProcessorTest
 {
 
     @Test
-    void test_check_inputNull()
+    void test_check_inputNull() throws NullIgnoredException
     {
         // setup
         IntegerInputProcessor     processor =
@@ -37,7 +38,7 @@ class IntegerInputProcessorTest
     }
 
     @Test
-    void test_check_simpleValue()
+    void test_check_simpleValue() throws NullIgnoredException
     {
         // setup
         IntegerInputProcessor     processor      =
@@ -57,7 +58,7 @@ class IntegerInputProcessorTest
     }
 
     @Test
-    void test_check_emptyInput_noFallback()
+    void test_check_emptyInput_noFallback() throws NullIgnoredException
     {
         // setup
         IntegerInputProcessor     processor =
@@ -76,7 +77,7 @@ class IntegerInputProcessorTest
     }
 
     @Test
-    void test_check_emptyInput_withFallback()
+    void test_check_emptyInput_withFallback() throws NullIgnoredException
     {
         // setup
         IntegerInputProcessor     processor      =
@@ -97,7 +98,7 @@ class IntegerInputProcessorTest
     }
 
     @Test
-    void test_check_inBounds_underLowerBound()
+    void test_check_inBounds_underLowerBound() throws NullIgnoredException
     {
         // setup
         IntegerInputProcessor     processor =
@@ -117,7 +118,7 @@ class IntegerInputProcessorTest
     }
 
     @Test
-    void test_check_inBounds_overLowerBound()
+    void test_check_inBounds_overLowerBound() throws NullIgnoredException
     {
         // setup
         IntegerInputProcessor     processor      =
@@ -138,7 +139,7 @@ class IntegerInputProcessorTest
     }
 
     @Test
-    void test_check_inBounds_underUpperBound()
+    void test_check_inBounds_underUpperBound() throws NullIgnoredException
     {
         // setup
         IntegerInputProcessor     processor      =
@@ -159,7 +160,7 @@ class IntegerInputProcessorTest
     }
 
     @Test
-    void test_check_inBounds_overUpperBound()
+    void test_check_inBounds_overUpperBound() throws NullIgnoredException
     {
         // setup
         IntegerInputProcessor     processor =
@@ -179,7 +180,7 @@ class IntegerInputProcessorTest
     }
 
     @Test
-    void test_check_blacklist()
+    void test_check_blacklist() throws NullIgnoredException
     {
         // setup
         IntegerInputProcessor     processor =
@@ -199,7 +200,7 @@ class IntegerInputProcessorTest
     }
 
     @Test
-    void test_check_whitelist_match()
+    void test_check_whitelist_match() throws NullIgnoredException
     {
         // setup
         IntegerInputProcessor     processor      =
@@ -220,7 +221,7 @@ class IntegerInputProcessorTest
     }
 
     @Test
-    void test_check_whitelist_noMatch()
+    void test_check_whitelist_noMatch() throws NullIgnoredException
     {
         // setup
         IntegerInputProcessor     processor =

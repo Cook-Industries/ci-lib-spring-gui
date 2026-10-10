@@ -12,6 +12,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
+import jakarta.validation.Valid;
 import lombok.Data;
 
 /**
@@ -26,12 +27,15 @@ import lombok.Data;
 public class CiLibProperties
 {
 
+    @Valid
     @NestedConfigurationProperty
     private CiLibResourcesProperties resources = new CiLibResourcesProperties();
 
+    @Valid
     @NestedConfigurationProperty
     private CiLibRuntimeProperties   runtime   = new CiLibRuntimeProperties();
 
+    @Valid
     @NestedConfigurationProperty
     private CiLibWebProperties       web       = new CiLibWebProperties();
 

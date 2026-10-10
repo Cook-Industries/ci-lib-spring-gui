@@ -12,13 +12,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import de.cookindustries.lib.spring.gui.hmi.input.util.exception.NullIgnoredException;
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
 
 class TagListInputProcessorTest
 {
 
     @Test
-    void test_check_inputNull()
+    void test_check_inputNull() throws NullIgnoredException
     {
         // setup
         TagListInputProcessor     processor =
@@ -37,7 +38,7 @@ class TagListInputProcessorTest
     }
 
     @Test
-    void test_check_inputNonJson()
+    void test_check_inputNonJson() throws NullIgnoredException
     {
         // setup
         TagListInputProcessor     processor =
@@ -56,7 +57,7 @@ class TagListInputProcessorTest
     }
 
     @Test
-    void test_check_simpleValue()
+    void test_check_simpleValue() throws NullIgnoredException
     {
         // setup
         TagListInputProcessor processor      =
@@ -77,7 +78,7 @@ class TagListInputProcessorTest
     }
 
     @Test
-    void test_check_emptyInput_notAllowed()
+    void test_check_emptyInput_notAllowed() throws NullIgnoredException
     {
         // setup
         TagListInputProcessor     processor =
@@ -97,7 +98,7 @@ class TagListInputProcessorTest
     }
 
     @Test
-    void test_check_emptyInput_emptyString()
+    void test_check_emptyInput_emptyString() throws NullIgnoredException
     {
         // setup
         TagListInputProcessor     processor      =
@@ -118,7 +119,7 @@ class TagListInputProcessorTest
     }
 
     @Test
-    void test_check_emptyInput_emptyJson()
+    void test_check_emptyInput_emptyJson() throws NullIgnoredException
     {
         // setup
         TagListInputProcessor     processor      =
@@ -139,7 +140,7 @@ class TagListInputProcessorTest
     }
 
     @Test
-    void test_check_emptyInput_allowed_noFallback()
+    void test_check_emptyInput_allowed_noFallback() throws NullIgnoredException
     {
         // setup
         TagListInputProcessor     processor      =
@@ -161,7 +162,7 @@ class TagListInputProcessorTest
     }
 
     @Test
-    void test_check_emptyInput_allowed_withFallback()
+    void test_check_emptyInput_allowed_withFallback() throws NullIgnoredException
     {
         // setup
         TagList fallback = new TagList();
@@ -189,7 +190,7 @@ class TagListInputProcessorTest
     }
 
     @Test
-    void test_check_whitelist()
+    void test_check_whitelist() throws NullIgnoredException
     {
         // setup
         TagListInputProcessor processor      =

@@ -13,7 +13,8 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-public enum MarkerType {
+public enum MarkerType
+{
 
     /** The value is expected but does not exist */
     NO_VALUE,

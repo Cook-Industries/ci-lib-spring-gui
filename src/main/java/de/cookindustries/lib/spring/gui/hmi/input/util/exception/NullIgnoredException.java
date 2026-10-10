@@ -13,7 +13,7 @@ package de.cookindustries.lib.spring.gui.hmi.input.util.exception;
  * @since 1.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
-public final class NullIgnoreException extends RuntimeException
+public final class NullIgnoredException extends Exception
 {
 
 }

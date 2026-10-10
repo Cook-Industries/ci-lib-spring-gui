@@ -14,13 +14,14 @@ import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 
+import de.cookindustries.lib.spring.gui.hmi.input.util.exception.NullIgnoredException;
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
 
 class StringInputProcessorTest
 {
 
     @Test
-    void test_check_inputNull()
+    void test_check_inputNull() throws NullIgnoredException
     {
         // setup
         StringInputProcessor     processor =
@@ -39,7 +40,7 @@ class StringInputProcessorTest
     }
 
     @Test
-    void test_check_simpleValue()
+    void test_check_simpleValue() throws NullIgnoredException
     {
         // setup
         StringInputProcessor     processor      =
@@ -59,7 +60,7 @@ class StringInputProcessorTest
     }
 
     @Test
-    void test_check_isEmpty_allowEmtpy()
+    void test_check_isEmpty_allowEmtpy() throws NullIgnoredException
     {
         // setup
         StringInputProcessor     processor      =
@@ -79,7 +80,7 @@ class StringInputProcessorTest
     }
 
     @Test
-    void test_check_isEmpty_denyEmtpy_noFallback()
+    void test_check_isEmpty_denyEmtpy_noFallback() throws NullIgnoredException
     {
         // setup
         StringInputProcessor     processor =
@@ -100,7 +101,7 @@ class StringInputProcessorTest
     }
 
     @Test
-    void test_check_isEmpty_denyEmtpy_withFallback()
+    void test_check_isEmpty_denyEmtpy_withFallback() throws NullIgnoredException
     {
         // setup
         StringInputProcessor     processor      =
@@ -122,7 +123,7 @@ class StringInputProcessorTest
     }
 
     @Test
-    void test_check_pattern_match()
+    void test_check_pattern_match() throws NullIgnoredException
     {
         // setup
         StringInputProcessor     processor      =
@@ -143,7 +144,7 @@ class StringInputProcessorTest
     }
 
     @Test
-    void test_check_pattern_noMatch()
+    void test_check_pattern_noMatch() throws NullIgnoredException
     {
         // setup
         StringInputProcessor     processor =
@@ -163,7 +164,7 @@ class StringInputProcessorTest
     }
 
     @Test
-    void test_check_blacklist_match_caseInsensitive()
+    void test_check_blacklist_match_caseInsensitive() throws NullIgnoredException
     {
         // setup
         StringInputProcessor     processor =
@@ -184,7 +185,7 @@ class StringInputProcessorTest
     }
 
     @Test
-    void test_check_blacklist_match_caseSensitive()
+    void test_check_blacklist_match_caseSensitive() throws NullIgnoredException
     {
         // setup
         StringInputProcessor     processor =
@@ -205,7 +206,7 @@ class StringInputProcessorTest
     }
 
     @Test
-    void test_check_whitlist_match_caseInsensitive()
+    void test_check_whitlist_match_caseInsensitive() throws NullIgnoredException
     {
         // setup
         StringInputProcessor     processor      =
@@ -227,7 +228,7 @@ class StringInputProcessorTest
     }
 
     @Test
-    void test_check_whitlist_match_caseSensitive()
+    void test_check_whitlist_match_caseSensitive() throws NullIgnoredException
     {
         // setup
         StringInputProcessor     processor      =
@@ -249,7 +250,7 @@ class StringInputProcessorTest
     }
 
     @Test
-    void test_check_whitlist_noMatch()
+    void test_check_whitlist_noMatch() throws NullIgnoredException
     {
         // setup
         StringInputProcessor     processor =
@@ -269,7 +270,7 @@ class StringInputProcessorTest
     }
 
     @Test
-    void test_prepare_sanitization()
+    void test_prepare_sanitization() throws NullIgnoredException
     {
         // setup
         StringInputProcessor     processor      =

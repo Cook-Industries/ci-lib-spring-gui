@@ -8,9 +8,9 @@
 package de.cookindustries.lib.spring.gui.response;
 
 import io.micrometer.common.lang.NonNull;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.ToString;
-import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -27,16 +27,15 @@ public final class ProgressResponse extends Response
 
     /** the {@code id} of the progress element */
     @NonNull
-    private final String  elementId;
+    private final String elementId;
 
     @NonNull
     @Default
-    private final String  text     = "loading";
+    private final String text     = "loading";
 
     /** percent value between 0-100 */
     @NonNull
-    @Default
-    private final Integer progress = 0;
+    private final int    progress = 0;
 
     @Override
     protected ResponseAction inferType()

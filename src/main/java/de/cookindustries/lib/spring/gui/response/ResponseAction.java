@@ -47,6 +47,9 @@ public enum ResponseAction
     /** send dynamic properties to the ui */
     PROPERTIES,
 
+    /** trigger a segmented file upload @since 4.0.0 */
+    FILE_UPLOAD,
+
     /** objects @since 3.6.0 */
     OBJECT;
 

@@ -14,13 +14,14 @@ import java.sql.Date;
 
 import org.junit.jupiter.api.Test;
 
+import de.cookindustries.lib.spring.gui.hmi.input.util.exception.NullIgnoredException;
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
 
 class DateInputProcessorTest
 {
 
     @Test
-    void test_check_inputNull()
+    void test_check_inputNull() throws NullIgnoredException
     {
         // setup
         DateInputProcessor     processor =
@@ -39,7 +40,7 @@ class DateInputProcessorTest
     }
 
     @Test
-    void test_check_simpleValue()
+    void test_check_simpleValue() throws NullIgnoredException
     {
         // setup
         DateInputProcessor     processor      =
@@ -59,7 +60,7 @@ class DateInputProcessorTest
     }
 
     @Test
-    void test_check_emptyInput_noFallback()
+    void test_check_emptyInput_noFallback() throws NullIgnoredException
     {
         // setup
         DateInputProcessor     processor =
@@ -78,7 +79,7 @@ class DateInputProcessorTest
     }
 
     @Test
-    void test_check_emptyInput_withFallback()
+    void test_check_emptyInput_withFallback() throws NullIgnoredException
     {
         // setup
         DateInputProcessor     processor      =
@@ -99,7 +100,7 @@ class DateInputProcessorTest
     }
 
     @Test
-    void test_check_inBounds_underLowerBound()
+    void test_check_inBounds_underLowerBound() throws NullIgnoredException
     {
         // setup
         DateInputProcessor     processor =
@@ -119,7 +120,7 @@ class DateInputProcessorTest
     }
 
     @Test
-    void test_check_inBounds_overLowerBound()
+    void test_check_inBounds_overLowerBound() throws NullIgnoredException
     {
         // setup
         DateInputProcessor     processor      =
@@ -140,7 +141,7 @@ class DateInputProcessorTest
     }
 
     @Test
-    void test_check_inBounds_underUpperBound()
+    void test_check_inBounds_underUpperBound() throws NullIgnoredException
     {
         // setup
         DateInputProcessor     processor      =
@@ -161,7 +162,7 @@ class DateInputProcessorTest
     }
 
     @Test
-    void test_check_inBounds_overUpperBound()
+    void test_check_inBounds_overUpperBound() throws NullIgnoredException
     {
         // setup
         DateInputProcessor     processor =

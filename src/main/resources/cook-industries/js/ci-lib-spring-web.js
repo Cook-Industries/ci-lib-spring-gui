@@ -48,6 +48,7 @@ $(document).ready(function () {
 
   // load properties if neccessary
   var propertiesUrl = $('#ui-properties-url').html().trim();
+
   if (propertiesUrl) {
     LOGGER.debug("properties are requested from ", propertiesUrl);
     GET(propertiesUrl);
@@ -565,6 +566,11 @@ function handleResponse(response) {
       FunctionRegistry.call(response.function, response.object);
       break;
     }
+
+    case "FILE_UPLOAD": {
+      startFileUpload(response);
+      break;
+    }
   }
 
   call(response.calls);
@@ -715,17 +721,35 @@ function contentResponse(response) {
 }
 
 function updateProgress(response) {
-  const $elem = $(`#${response.elementId}`);
-  const $bar = $elem.children(".loadbar");
-  const $text = $elem.children(".loader-text");
+  const $elem = $(`#global-loader-overlay`);
+  const $bar = $elem.find(".loadbar");
+  const $text = $elem.find(".loader-text");
 
-  if (!$bar.length) return;
+  if (!$bar.length) {
+    return;
+  }
 
   $bar
     .data("progress", response.progress)
     .css("--v", response.progress);
 
   $text.html(response.text);
+}
+
+function resetProgress() {
+  const $elem = $(`#global-loader-overlay`);
+  const $bar = $elem.find(".loadbar");
+  const $text = $elem.find(".loader-text");
+
+  if (!$bar.length) {
+    return;
+  }
+
+  $bar
+    .data("progress", 0)
+    .css("--v", 0);
+
+  $text.html("loading");
 }
 // === < content ===========================================================================================================================
 // === > global loader =====================================================================================================================
@@ -755,6 +779,8 @@ function hideGlobalLoader() {
   $("#global-loader-text").html("loading...");
   $("#global-loader-overlay").addClass(CLASS_HIDDEN);
   globalLoaderVisible = false;
+
+  resetProgress();
 
   toggleBodyScroll();
 }
@@ -1004,10 +1030,11 @@ function extractValuesToSubmit(target) {
           break;
 
         case "FILE":
-          const files = $(elem)[0].files;
-          for (var x = 0; x < files.length; x++) {
-            formData.append(id, files[x]);
-          }
+          const fileList = $(elem)[0].files;
+          files.set(id, Array.from(fileList));
+          formData.append(id, JSON.stringify(Array.from(fileList).map(f => (
+            { name: f.name, size: f.size, type: f.type }
+          ))));
           break;
 
         default:
@@ -1042,6 +1069,417 @@ function resetButton(btnId) {
   $btn.removeAttr('data-pending-change');
 }
 // === < form ==============================================================================================================================
+// === > file upload =======================================================================================================================
+/**
+ * Files selected in the forms that were submitted, by the id they are submitted as. Filled by extractValuesToSubmit() and consumed by
+ * startFileUpload().
+ */
+const files = new Map();
+
+/**
+ * Id of the progress element for uploads: the element that has the .loadbar and .loader-text children, the same kind of id the server
+ * sends in a ProgressResponse (see updateProgress()).
+ */
+const UPLOAD_PROGRESS_ID = "global-loader-overlay";
+
+/**
+ * Single handler that owns the loader text while uploads run. The part uploaders only send it a success message; it counts over all
+ * running uploads and renders at most once per frame, however many parts finish.
+ */
+const UploadProgress = (function () {
+  const jobs = new Set();
+  let total = 0;
+  let done = 0;
+  let renderScheduled = false;
+  let warned = false;
+
+  function schedule() {
+    if (renderScheduled) {
+      return;
+    }
+
+    renderScheduled = true;
+
+    const later = typeof requestAnimationFrame === "function" ? requestAnimationFrame : (fn) => setTimeout(fn, 16);
+
+    later(render);
+  }
+
+  function render() {
+    renderScheduled = false;
+
+    if (jobs.size === 0) {
+      return;
+    }
+
+    if (!warned && !$(`#${UPLOAD_PROGRESS_ID}`).find(".loadbar").length) {
+      warned = true;
+
+      LOGGER.warn("upload progress element has no .loadbar, progress will not be visible.", { elementId: UPLOAD_PROGRESS_ID });
+    }
+
+    // same shape as the server's ProgressResponse, so uploads and server-side progress take the same path
+    handleResponse({
+      action: "PROGRESS",
+      elementId: UPLOAD_PROGRESS_ID,
+      text: `uploaded parts ${done}/${total}`,
+      progress: total === 0 ? 100 : Math.floor((done / total) * 100),
+      messages: [],
+      calls: [],
+    });
+  }
+
+  return {
+    /** an upload starts; its parts count towards the shared total */
+    add(job) {
+      jobs.add(job);
+      total += job.totalParts;
+
+      schedule();
+    },
+
+    /** success message of the part uploader */
+    partUploaded(job) {
+      if (!jobs.has(job)) {
+        return;
+      }
+
+      job.doneParts++;
+      done++;
+
+      schedule();
+    },
+
+    /** an upload ended; a failed one leaves the count, a finished one stays in it so the bar never jumps back */
+    remove(job) {
+      if (!jobs.delete(job)) {
+        return;
+      }
+
+      if (job.failed) {
+        total -= job.totalParts;
+        done -= job.doneParts;
+      }
+
+      if (jobs.size === 0) {
+        total = 0;
+        done = 0;
+      }
+    },
+
+    idle() {
+      return jobs.size === 0;
+    },
+  };
+})();
+
+/**
+ * Decides which part is uploaded next, over all running uploads of the page. The server's limit for parallel uploads is per site, so it is
+ * shared: the strictest maxParallelUploadsGlobal of the running uploads is the cap, and every file may use up to its own
+ * maxParallelUploadsPerFile. Slots are handed out round robin, so the maximum is reached and no upload starves another.
+ */
+const UploadScheduler = (function () {
+  const jobs = new Set();
+  let inFlight = 0;
+
+  function cap() {
+    let min = Infinity;
+
+    for (const job of jobs) {
+      min = Math.min(min, job.policy.maxParallelUploadsGlobal);
+    }
+
+    return min;
+  }
+
+  function pump() {
+    const max = cap();
+    let started = true;
+
+    while (started) {
+      started = false;
+
+      for (const job of jobs) {
+        if (job.failed) {
+          continue;
+        }
+
+        for (const entry of job.entries) {
+          if (inFlight >= max) {
+            return;
+          }
+
+          if (entry.nextPart <= entry.totalParts && entry.inFlight < job.policy.maxParallelUploadsPerFile) {
+            start(job, entry, entry.nextPart++);
+            started = true;
+          }
+        }
+      }
+    }
+  }
+
+  function start(job, entry, partNumber) {
+    inFlight++;
+    entry.inFlight++;
+
+    _uploadPart(job, entry, partNumber).then(
+      () => {
+        inFlight--;
+        entry.inFlight--;
+        entry.done++;
+
+        UploadProgress.partUploaded(job);
+        _uploadMaybeFinish(job, entry);
+        pump();
+      },
+      (error) => {
+        inFlight--;
+        entry.inFlight--;
+
+        _uploadFailJob(job, error);
+        pump();
+      }
+    );
+  }
+
+  return {
+    add(job) {
+      jobs.add(job);
+      pump();
+    },
+
+    remove(job) {
+      jobs.delete(job);
+      pump();
+    },
+  };
+})();
+
+/**
+ * Uploads the files of a submitted form in parts, as instructed by the server. The server controls part length, parallelism and retries
+ * through the policy. A failed part is retried by the policy; if it still fails, the whole upload is aborted on the server. The page is
+ * blocked, several uploads may run at the same time and share the parallelism limit.
+ *
+ * Endpoints below response.uploadUrl:
+ *   PUT    /push?batchUuid&fileUuid&partNumber   body: the bytes of the part, numbered from 1
+ *   POST   /finish?batchUuid&fileUuid            after the last part of a file
+ *   POST   /complete?batchUuid                   after all files, answers with the final response
+ *   DELETE /abort?batchUuid                      on failure
+ *
+ * @param {object} response - StartFileUploadResponse
+ *
+ * @returns {Promise} settles when the upload is complete or aborted; never rejects
+ */
+function startFileUpload(response) {
+  const job = {
+    batchUuid: response.batchUuid,
+    base: response.uploadUrl.replace(/\/+$/, ""),
+    policy: response.uploadPolicy,
+    controller: new AbortController(),
+    fieldIds: [...new Set(response.fieldDescribtors.map((descriptor) => descriptor.fieldId))],
+    entries: [],
+    totalParts: 0,
+    doneParts: 0,
+    finishedFiles: 0,
+    failed: false,
+    error: null,
+    resolve: null,
+    reject: null,
+  };
+
+  return Promise.resolve()
+    .then(() => {
+      job.entries = _uploadBindFiles(response.fieldDescribtors, job.policy.partLength);
+      job.totalParts = job.entries.reduce((sum, entry) => sum + entry.totalParts, 0);
+
+      job.fieldIds.forEach((id) => files.delete(id));
+    })
+    .then(
+      () =>
+        new Promise((resolve, reject) => {
+          job.resolve = resolve;
+          job.reject = reject;
+
+          UploadProgress.add(job);
+          UploadScheduler.add(job);
+
+          // files without content have no parts that could trigger the finish
+          job.entries.forEach((entry) => _uploadMaybeFinish(job, entry));
+        })
+    )
+    .then(() => _uploadComplete(job))
+    .then(
+      () => _uploadFinalize(job),
+      (error) => _uploadAbort(job, error)
+    );
+}
+
+/**
+ * Matches the files announced by the server with the files selected by the user. The descriptors come back in the order they were sent,
+ * but the match is checked by name and size, so a changed selection cannot upload the wrong file.
+ */
+function _uploadBindFiles(descriptors, partLength) {
+  const used = new Set();
+
+  return descriptors.map((descriptor) => {
+    const candidates = files.get(descriptor.fieldId) || [];
+    const index = candidates.findIndex(
+      (file, i) => !used.has(`${descriptor.fieldId}:${i}`) && file.name === descriptor.filename && file.size === descriptor.expectedLength
+    );
+
+    if (index < 0) {
+      throw new Error(`selected file does not match the announced one: ${descriptor.filename}`);
+    }
+
+    used.add(`${descriptor.fieldId}:${index}`);
+
+    const file = candidates[index];
+
+    return {
+      uuid: descriptor.uuid,
+      file: file,
+      totalParts: Math.ceil(file.size / partLength),
+      nextPart: 1,
+      inFlight: 0,
+      done: 0,
+      finishing: false,
+    };
+  });
+}
+
+function _uploadPart(job, entry, partNumber) {
+  const partLength = job.policy.partLength;
+  const start = (partNumber - 1) * partLength;
+  const blob = entry.file.slice(start, Math.min(start + partLength, entry.file.size));
+  const url = _uploadUrl(job, "push", { fileUuid: entry.uuid, partNumber: partNumber });
+
+  return _uploadRetry(job, () => _uploadFetch("PUT", url, blob, job.controller.signal));
+}
+
+/**
+ * Closes a file on the server as soon as all its parts are in, and resolves the job after the last file.
+ */
+function _uploadMaybeFinish(job, entry) {
+  if (job.failed || entry.finishing || entry.done < entry.totalParts) {
+    return;
+  }
+
+  entry.finishing = true;
+
+  _uploadRetry(job, () => _uploadFetch("POST", _uploadUrl(job, "finish", { fileUuid: entry.uuid }), undefined, job.controller.signal)).then(
+    () => {
+      job.finishedFiles++;
+
+      if (job.finishedFiles === job.entries.length) {
+        job.resolve();
+      }
+    },
+    (error) => _uploadFailJob(job, error)
+  );
+}
+
+/**
+ * Not retried: after a lost answer the server has either completed the upload or refuses a second try.
+ */
+function _uploadComplete(job) {
+  return _uploadFetch("POST", _uploadUrl(job, "complete", {}))
+    .then((response) => response.json())
+    .then((json) => handleResponse(json));
+}
+
+function _uploadFailJob(job, error) {
+  if (job.failed) {
+    return;
+  }
+
+  job.failed = true;
+  job.error = error;
+  job.controller.abort();
+  job.reject(error);
+}
+
+function _uploadFinalize(job) {
+  UploadScheduler.remove(job);
+  UploadProgress.remove(job);
+}
+
+/**
+ * Stops everything of this upload that is still running, discards it on the server and tells the user. Other uploads go on.
+ */
+function _uploadAbort(job, error) {
+  const message = (error && error.message) || String(error);
+
+  LOGGER.error("file upload failed.", { batchUuid: job.batchUuid, message });
+
+  job.failed = true;
+  job.error = error;
+  job.controller.abort();
+  job.fieldIds.forEach((id) => files.delete(id));
+
+  return fetch(_uploadUrl(job, "abort", {}), { method: "DELETE" })
+    .catch((abortError) => LOGGER.warn("abort request failed, the server cleans up on expiry.", { batchUuid: job.batchUuid, abortError }))
+    .then(() => {
+      _uploadFinalize(job);
+
+      if (UploadProgress.idle()) {
+        hideGlobalLoader();
+      }
+
+      clientsideError(`file upload failed: ${message}`);
+    });
+}
+
+/**
+ * Runs an operation again after a delay if it failed in a way that can heal: network error, 5xx, 408 or 429.
+ */
+function _uploadRetry(job, operation, attempt = 0) {
+  if (job.failed) {
+    return Promise.reject(job.error);
+  }
+
+  return operation()
+    .catch((error) => {
+      if (!error.retryable || attempt >= job.policy.maxRetries) {
+        throw error;
+      }
+
+      const policy = job.policy;
+      const delay = Math.min(policy.retryMaxDelayMillis, policy.retryBaseDelayMillis * Math.pow(2, attempt)) * (0.5 + Math.random() * 0.5);
+
+      return new Promise((resolve) => setTimeout(resolve, delay)).then(() => _uploadRetry(job, operation, attempt + 1));
+    });
+}
+
+function _uploadFetch(method, url, body, signal) {
+  return fetch(url, {
+    method: method,
+    body: body,
+    signal: signal,
+    headers: body ? { "Content-Type": "application/octet-stream" } : undefined,
+  }).then(
+    (response) => {
+      if (!response.ok) {
+        const error = new Error(`HTTP error! Status: ${response.status}`);
+
+        error.retryable = response.status >= 500 || response.status === 408 || response.status === 429;
+
+        throw error;
+      }
+
+      return response;
+    },
+    (error) => {
+      error.retryable = error.name !== "AbortError";
+
+      throw error;
+    }
+  );
+}
+
+function _uploadUrl(job, path, params) {
+  return `${job.base}/${path}?${new URLSearchParams({ batchUuid: job.batchUuid, ...params })}`;
+}
+// === < file upload =======================================================================================================================
 // === > tags ==============================================================================================================================
 const tagifyInstances = new Map();
 const tagifyWhitelists = new Map();

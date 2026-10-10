@@ -9,7 +9,7 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
 
 import java.util.Optional;
 
-import de.cookindustries.lib.spring.gui.hmi.input.util.exception.NullIgnoreException;
+import de.cookindustries.lib.spring.gui.hmi.input.util.exception.NullIgnoredException;
 import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
@@ -117,14 +117,15 @@ public abstract class AbsInputProcessor<T>
      * 
      * @param input to process
      * @return a {@code InputCheckResult} representing the result of the processing
+     * @throws NullIgnoredException when a null value is allowed
      */
-    final InputCheckResult<T> process(String input)
+    final InputCheckResult<T> process(String input) throws NullIgnoredException
     {
         if (input == null)
         {
             if (ignoreNull)
             {
-                throw new NullIgnoreException();
+                throw new NullIgnoredException();
             }
 
             return createEmptyResult(InputCheckResultType.NOT_PRESENT);
