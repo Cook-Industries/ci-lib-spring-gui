@@ -9,6 +9,7 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -215,4 +216,24 @@ class TagListInputProcessorTest
         assertEquals(expectedOutput, result.getResult());
     }
 
+    @Test
+    void test_check_fallbackIsNotSharedBetweenResults() throws NullIgnoredException
+    {
+        // setup
+        TagListInputProcessor     processor =
+            TagListInputProcessor
+                .builder()
+                .build();
+        InputCheckResult<TagList> first     = processor.process("[]");
+        InputCheckResult<TagList> second;
+
+        first.getResult().add(new Tag("modified"));
+
+        // run
+        second = processor.process("[]");
+
+        // verify
+        assertEquals(InputCheckResultType.PASS, second.getType());
+        assertTrue(second.getResult().isEmpty());
+    }
 }

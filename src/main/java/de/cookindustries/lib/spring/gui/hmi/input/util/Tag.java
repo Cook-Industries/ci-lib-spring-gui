@@ -11,12 +11,14 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.ToString;
 import lombok.extern.jackson.Jacksonized;
 
 @Builder
 @Getter
 @EqualsAndHashCode
 @Jacksonized
+@ToString
 public final class Tag
 {
 

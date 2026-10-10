@@ -28,7 +28,7 @@ import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
 import de.cookindustries.lib.spring.gui.response.ContentResponse;
 import de.cookindustries.lib.spring.gui.util.TestHelper;
 
-public class GuiFactoryTest
+class GuiFactoryTest
 {
 
     private static final List<String> HTML_STRINGS =
@@ -58,7 +58,7 @@ public class GuiFactoryTest
     private GuiFactoryProperties      properties;
 
     @BeforeEach
-    public void init()
+    void init()
     {
         CiLibResourcesPathProperties resPath = new CiLibResourcesPathProperties();
         resPath.setTemplates("json-test-files");
@@ -112,12 +112,15 @@ public class GuiFactoryTest
     }
 
     @Test
-    void test_constructor()
+    void test_constructor_basic()
     {
         // setup
-        GUIFactory factory = basicFactory();
+        GUIFactory factory;
 
-        // run & verify
+        // run
+        factory = basicFactory();
+
+        // verify
         assertNotNull(factory);
     }
 
@@ -126,10 +129,12 @@ public class GuiFactoryTest
     {
         // setup
         GUIFactory factory = basicFactory();
+        Locale     locale1;
+        Locale     locale2;
 
         // run
-        Locale     locale1 = factory.createLocale("de");
-        Locale     locale2 = factory.createLocale("de_DE");
+        locale1 = factory.createLocale("de");
+        locale2 = factory.createLocale("de_DE");
 
         // verify
         assertEquals(new Locale("de"), locale1);
@@ -137,20 +142,21 @@ public class GuiFactoryTest
     }
 
     @Test
-    void test_getTranslatedText()
+    void test_getTranslatedText_missingKey()
     {
         // setup
         GUIFactory factory = basicFactory();
+        String     translated;
 
         // run
-        String translated = factory.getTranslatedText(Locale.ENGLISH, "test");
+        translated = factory.getTranslatedText(Locale.ENGLISH, "test");
 
         // verify
         assertEquals("I18N [test] not set.", translated);
     }
 
     @Test
-    void test_createHtmlSite()
+    void test_createHtmlSite_plainTitle()
     {
         // setup
         String           title   = "Test Site";
@@ -160,10 +166,11 @@ public class GuiFactoryTest
                 .locale(Locale.ENGLISH)
                 .sourcePath("json-mapper/root-component.ged")
                 .build();
-        GUIFactory       factory = basicFactory();
+        GUIFactory factory = basicFactory();
+        String     content;
 
         // run
-        String           content = factory.createHtmlSite(title, compSrc);
+        content = factory.createHtmlSite(title, compSrc);
 
         // verify
         assertNotNull(content);
@@ -184,10 +191,11 @@ public class GuiFactoryTest
                 .locale(Locale.ENGLISH)
                 .sourcePath("json-mapper/root-component.ged")
                 .build();
-        GUIFactory       factory = basicFactory();
+        GUIFactory factory = basicFactory();
+        String     content;
 
         // run
-        String           content = factory.createHtmlSite(title, compSrc);
+        content = factory.createHtmlSite(title, compSrc);
 
         // verify
         assertNotNull(content);
@@ -198,7 +206,7 @@ public class GuiFactoryTest
     }
 
     @Test
-    void test_createComponentResponse()
+    void test_createAppendComponentResponse_rootComponent()
     {
         // setup
         String           elementId = "test-id";
@@ -208,10 +216,11 @@ public class GuiFactoryTest
                 .locale(Locale.ENGLISH)
                 .sourcePath("json-mapper/root-component.ged")
                 .build();
-        GUIFactory       factory   = basicFactory();
+        GUIFactory      factory = basicFactory();
+        ContentResponse content;
 
         // run
-        ContentResponse  content   = factory.createAppendComponentResponse(elementId, compSrc);
+        content = factory.createAppendComponentResponse(elementId, compSrc);
 
         // verify
         assertNotNull(content);

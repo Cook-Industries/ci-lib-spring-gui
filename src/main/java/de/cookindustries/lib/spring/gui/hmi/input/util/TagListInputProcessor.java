@@ -11,11 +11,11 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
-import lombok.Builder.Default;
 
 /**
  * A processor to parse and check a {@code input} as {@link Boolean}.
@@ -46,7 +46,7 @@ public final class TagListInputProcessor extends AbsInputProcessor<TagList>
     @Override
     protected TagList parseRaw(String input)
     {
-        if (input.isEmpty() || input.equals("[]"))
+        if (input.isEmpty() || "[]".equals(input))
         {
             return new TagList();
         }
@@ -70,7 +70,7 @@ public final class TagListInputProcessor extends AbsInputProcessor<TagList>
             {
                 if (fallback != null)
                 {
-                    return createResult(InputCheckResultType.PASS, fallback);
+                    return createResult(InputCheckResultType.PASS, fallback.clone());
                 }
 
                 return createResult(InputCheckResultType.PASS, new TagList());

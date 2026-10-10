@@ -57,7 +57,7 @@ import de.cookindustries.lib.spring.gui.hmi.util.TemplateFileCache;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
 
-public class JsonMapperTest
+class JsonMapperTest
 {
 
     private TemplateFileCache      templateFileCache;
@@ -65,7 +65,7 @@ public class JsonMapperTest
     private AbsTranslationProvider translationProvider;
 
     @BeforeEach
-    public void init()
+    void init()
     {
         CiLibResourcesPathProperties resPath = new CiLibResourcesPathProperties();
         resPath.setTemplates("json-test-files");
@@ -130,8 +130,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result = mapper.map();
+        result = mapper.map();
 
         // verify
         assertNotNull(result);
@@ -158,8 +160,10 @@ public class JsonMapperTest
                 .tokenMap(tokenMap)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result   = mapper.map();
+        result = mapper.map();
 
         // verify
         assertNotNull(result);
@@ -189,8 +193,10 @@ public class JsonMapperTest
                 .tokenMap(tokenMap)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result   = mapper.map();
+        result = mapper.map();
 
         // verify
         assertNotNull(result);
@@ -220,8 +226,10 @@ public class JsonMapperTest
                 .tokenMap(tokenMap)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result   = mapper.map();
+        result = mapper.map();
 
         // verify
         assertFalse(
@@ -259,8 +267,10 @@ public class JsonMapperTest
                 .tokenMap(tokenMap)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container    container = result.getContainers().get(0);
@@ -293,8 +303,10 @@ public class JsonMapperTest
                 .tokenMap(tokenMap)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result   = mapper.map();
+        result = mapper.map();
 
         // verify
         assertEquals("testText", ((TextContainer) result.getContainers().get(0)).getText());
@@ -314,8 +326,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container    container = result.getContainers().get(0);
@@ -348,8 +362,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container    container = result.getContainers().get(0);
@@ -382,8 +398,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container    container = result.getContainers().get(0);
@@ -416,8 +434,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container    container = result.getContainers().get(0);
@@ -445,8 +465,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container    container = result.getContainers().get(0);
@@ -473,8 +495,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container    container = result.getContainers().get(0);
@@ -501,8 +525,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container    container = result.getContainers().get(0);
@@ -533,8 +559,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container    container = result.getContainers().get(0);
@@ -566,8 +594,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container    container = result.getContainers().get(0);
@@ -620,8 +650,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container    container = result.getContainers().get(0);
@@ -653,8 +685,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container    container = result.getContainers().get(0);
@@ -685,8 +719,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult  result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container     container = result.getContainers().get(0);
@@ -716,8 +752,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult  result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container     container = result.getContainers().get(0);
@@ -748,8 +786,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult  result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container     container = result.getContainers().get(0);
@@ -779,8 +819,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult  result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container     container = result.getContainers().get(0);
@@ -809,8 +851,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult  result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container     container = result.getContainers().get(0);
@@ -840,8 +884,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult  result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container     container = result.getContainers().get(0);
@@ -875,8 +921,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult  result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container     container = result.getContainers().get(0);
@@ -910,8 +958,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult  result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container     container = result.getContainers().get(0);
@@ -941,8 +991,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult  result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container     container = result.getContainers().get(0);
@@ -990,8 +1042,10 @@ public class JsonMapperTest
                 .tokenMap(map)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult  result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container     container = result.getContainers().get(0);
@@ -1030,8 +1084,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult  result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container     container = result.getContainers().get(0);
@@ -1061,8 +1117,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult  result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container     container = result.getContainers().get(0);
@@ -1092,8 +1150,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult  result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container     container = result.getContainers().get(0);
@@ -1125,8 +1185,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult  result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container     container = result.getContainers().get(0);
@@ -1156,8 +1218,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult  result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container     container = result.getContainers().get(0);
@@ -1187,8 +1251,10 @@ public class JsonMapperTest
                 .flatMappableDissector(flatMappableDissector)
                 .build();
 
+        MapperResult result;
+
         // run
-        MapperResult  result    = mapper.map();
+        result = mapper.map();
 
         // verify
         Container     container = result.getContainers().get(0);

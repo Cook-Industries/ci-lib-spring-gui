@@ -289,4 +289,25 @@ class StringInputProcessorTest
         assertEquals(InputCheckResultType.PASS, result.getType());
         assertEquals(expectedOutput, result.getResult());
     }
+
+    @Test
+    void test_check_failedCheckWithSanitization() throws NullIgnoredException
+    {
+        // setup
+        StringInputProcessor     processor =
+            StringInputProcessor
+                .builder()
+                .pattern(Pattern.compile("[0-9]+"))
+                .sanitazation(String::trim)
+                .build();
+        String                   input     = "letters";
+        InputCheckResult<String> result;
+
+        // run
+        result = processor.process(input);
+
+        // verify
+        assertEquals(InputCheckResultType.NO_PATTERN_MATCH, result.getType());
+        assertThrows(ValueNotPresentException.class, () -> result.getResult());
+    }
 }

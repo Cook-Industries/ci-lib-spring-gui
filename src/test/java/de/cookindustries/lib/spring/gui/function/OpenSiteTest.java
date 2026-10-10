@@ -15,14 +15,15 @@ class OpenSiteTest
 {
 
     @Test
-    void test_constructor()
+    void test_parseAsJS_openSite()
     {
         // setup
         String   requestUrl = "/test";
         OpenSite call       = new OpenSite(requestUrl, TestObject.builder().uid(2).build());
+        String   result;
 
         // run
-        String   result     = call.parseAsJS();
+        result = call.parseAsJS();
 
         // verify
         assertEquals("CILIB.FunctionRegistry.call('openSite', '/test', {\"uid\":2});", result);

@@ -184,7 +184,7 @@ public class FileUploadCoordinator
 
         try
         {
-            sealed = cipher.seal(batchUuid, completionHandlerKey, formDataSupplier, uploaded);
+            sealed = cipher.seal(batchUuid, completionHandlerKey, formDataSupplier.get(), uploaded);
         }
         catch (FormCipherException ex)
         {

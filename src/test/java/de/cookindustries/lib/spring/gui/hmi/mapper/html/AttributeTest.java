@@ -15,22 +15,21 @@ class AttributeTest
 {
 
     @Test
-    void test_attribute()
+    void test_attribute_withValue()
     {
         // setup
         String    input          = "test";
         String    value          = "value";
         String    expectedResult = "test=\"value\"";
-        String    result;
-
-        // run
-
         Attribute attribute      =
             Attribute
                 .builder()
                 .name(input)
                 .value(value)
                 .build();
+        String    result;
+
+        // run
         result = attribute.getHtmlRep();
 
         // verify
@@ -43,15 +42,14 @@ class AttributeTest
         // setup
         String    input          = "test";
         String    expectedResult = "test=\"test\"";
-        String    result;
-
-        // run
-
         Attribute attribute      =
             Attribute
                 .builder()
                 .name(input)
                 .build();
+        String    result;
+
+        // run
         result = attribute.getHtmlRep();
 
         // verify
@@ -63,16 +61,15 @@ class AttributeTest
     {
         // setup
         String    expectedResult = "";
-        String    result;
-
-        // run
-
         Attribute attribute      =
             Attribute
                 .builder()
                 .name("test")
                 .active(false)
                 .build();
+        String    result;
+
+        // run
         result = attribute.getHtmlRep();
 
         // verify

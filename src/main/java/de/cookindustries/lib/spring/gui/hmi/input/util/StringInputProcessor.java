@@ -12,11 +12,11 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
-import lombok.Builder.Default;
 
 /**
  * A processor to parse and check a {@code input} as {@link String}.
@@ -114,7 +114,7 @@ public final class StringInputProcessor extends AbsInputProcessor<String>
     @Override
     protected String prepare(String output)
     {
-        if (sanitazation != null)
+        if (sanitazation != null && output != null)
         {
             return sanitazation.apply(output);
         }

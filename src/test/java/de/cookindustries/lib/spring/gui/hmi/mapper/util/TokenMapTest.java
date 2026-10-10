@@ -31,8 +31,10 @@ class TokenMapTest
                 .value("val")
                 .build());
 
+        TokenMap map;
+
         // run
-        TokenMap map =
+        map =
             TokenMap.builder()
                 .value("list", inputValueList)
                 .value("integer", 1)
@@ -52,13 +54,17 @@ class TokenMapTest
     }
 
     @Test
-    void test_getPresedence()
+    void test_getPrecedence_default()
     {
         // setup
         TokenMap map = TokenMap.builder().build();
+        Integer  result;
 
-        // run & verify
-        assertEquals(Integer.valueOf(0), map.getPrecedence());
+        // run
+        result = map.getPrecedence();
+
+        // verify
+        assertEquals(Integer.valueOf(0), result);
     }
 
 }

@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-public class SVGPathTest
+class SVGPathTest
 {
 
     private static final Double D_1  = 1.003;
@@ -44,9 +44,16 @@ public class SVGPathTest
                 .endPointY(D_10)
                 .build();
 
-        // run & verify
-        assertEquals("A 1.003 1.003 1 1 10.003,10.003", cmdAbsolute.getCommandString());
-        assertEquals("a 1.003 1.003 1 1 10.003,10.003", cmdRelative.getCommandString());
+        String         resultAbsolute;
+        String         resultRelative;
+
+        // run
+        resultAbsolute = cmdAbsolute.getCommandString();
+        resultRelative = cmdRelative.getCommandString();
+
+        // verify
+        assertEquals("A 1.003 1.003 1 1 10.003,10.003", resultAbsolute);
+        assertEquals("a 1.003 1.003 1 1 10.003,10.003", resultRelative);
     }
 
     @Test
@@ -76,9 +83,16 @@ public class SVGPathTest
                 .endPointY(D_10)
                 .build();
 
-        // run & verify
-        assertEquals("C 10.003,10.003 10.003,10.003 10.003,10.003", cmdAbsolute.getCommandString());
-        assertEquals("c 10.003,10.003 10.003,10.003 10.003,10.003", cmdRelative.getCommandString());
+        String         resultAbsolute;
+        String         resultRelative;
+
+        // run
+        resultAbsolute = cmdAbsolute.getCommandString();
+        resultRelative = cmdRelative.getCommandString();
+
+        // verify
+        assertEquals("C 10.003,10.003 10.003,10.003 10.003,10.003", resultAbsolute);
+        assertEquals("c 10.003,10.003 10.003,10.003 10.003,10.003", resultRelative);
     }
 
     @Test
@@ -98,9 +112,16 @@ public class SVGPathTest
                 .x(D_1)
                 .build();
 
-        // run & verify
-        assertEquals("H 1.003", cmdAbsolute.getCommandString());
-        assertEquals("h 1.003", cmdRelative.getCommandString());
+        String         resultAbsolute;
+        String         resultRelative;
+
+        // run
+        resultAbsolute = cmdAbsolute.getCommandString();
+        resultRelative = cmdRelative.getCommandString();
+
+        // verify
+        assertEquals("H 1.003", resultAbsolute);
+        assertEquals("h 1.003", resultRelative);
     }
 
     @Test
@@ -122,9 +143,16 @@ public class SVGPathTest
                 .y(D_10)
                 .build();
 
-        // run & verify
-        assertEquals("L 1.003,10.003", cmdAbsolute.getCommandString());
-        assertEquals("l 1.003,10.003", cmdRelative.getCommandString());
+        String         resultAbsolute;
+        String         resultRelative;
+
+        // run
+        resultAbsolute = cmdAbsolute.getCommandString();
+        resultRelative = cmdRelative.getCommandString();
+
+        // verify
+        assertEquals("L 1.003,10.003", resultAbsolute);
+        assertEquals("l 1.003,10.003", resultRelative);
     }
 
     @Test
@@ -146,9 +174,16 @@ public class SVGPathTest
                 .y(D_10)
                 .build();
 
-        // run & verify
-        assertEquals("M 1.003,10.003", cmdAbsolute.getCommandString());
-        assertEquals("m 1.003,10.003", cmdRelative.getCommandString());
+        String         resultAbsolute;
+        String         resultRelative;
+
+        // run
+        resultAbsolute = cmdAbsolute.getCommandString();
+        resultRelative = cmdRelative.getCommandString();
+
+        // verify
+        assertEquals("M 1.003,10.003", resultAbsolute);
+        assertEquals("m 1.003,10.003", resultRelative);
     }
 
     @Test
@@ -174,9 +209,16 @@ public class SVGPathTest
                 .endPointY(D_10)
                 .build();
 
-        // run & verify
-        assertEquals("Q 1.003,10.003 1.003,10.003", cmdAbsolute.getCommandString());
-        assertEquals("q 1.003,10.003 1.003,10.003", cmdRelative.getCommandString());
+        String         resultAbsolute;
+        String         resultRelative;
+
+        // run
+        resultAbsolute = cmdAbsolute.getCommandString();
+        resultRelative = cmdRelative.getCommandString();
+
+        // verify
+        assertEquals("Q 1.003,10.003 1.003,10.003", resultAbsolute);
+        assertEquals("q 1.003,10.003 1.003,10.003", resultRelative);
     }
 
     @Test
@@ -202,9 +244,16 @@ public class SVGPathTest
                 .endPointY(D_10)
                 .build();
 
-        // run & verify
-        assertEquals("S 1.003,10.003 1.003,10.003", cmdAbsolute.getCommandString());
-        assertEquals("s 1.003,10.003 1.003,10.003", cmdRelative.getCommandString());
+        String         resultAbsolute;
+        String         resultRelative;
+
+        // run
+        resultAbsolute = cmdAbsolute.getCommandString();
+        resultRelative = cmdRelative.getCommandString();
+
+        // verify
+        assertEquals("S 1.003,10.003 1.003,10.003", resultAbsolute);
+        assertEquals("s 1.003,10.003 1.003,10.003", resultRelative);
     }
 
     @Test
@@ -226,9 +275,16 @@ public class SVGPathTest
                 .endPointY(D_10)
                 .build();
 
-        // run & verify
-        assertEquals("T 1.003,10.003", cmdAbsolute.getCommandString());
-        assertEquals("t 1.003,10.003", cmdRelative.getCommandString());
+        String         resultAbsolute;
+        String         resultRelative;
+
+        // run
+        resultAbsolute = cmdAbsolute.getCommandString();
+        resultRelative = cmdRelative.getCommandString();
+
+        // verify
+        assertEquals("T 1.003,10.003", resultAbsolute);
+        assertEquals("t 1.003,10.003", resultRelative);
     }
 
     @Test
@@ -248,9 +304,16 @@ public class SVGPathTest
                 .y(D_1)
                 .build();
 
-        // run & verify
-        assertEquals("V 1.003", cmdAbsolute.getCommandString());
-        assertEquals("v 1.003", cmdRelative.getCommandString());
+        String         resultAbsolute;
+        String         resultRelative;
+
+        // run
+        resultAbsolute = cmdAbsolute.getCommandString();
+        resultRelative = cmdRelative.getCommandString();
+
+        // verify
+        assertEquals("V 1.003", resultAbsolute);
+        assertEquals("v 1.003", resultRelative);
     }
 
     @Test
@@ -268,8 +331,15 @@ public class SVGPathTest
                 .relative(true)
                 .build();
 
-        // run & verify
-        assertEquals("Z", cmdAbsolute.getCommandString());
-        assertEquals("z", cmdRelative.getCommandString());
+        String         resultAbsolute;
+        String         resultRelative;
+
+        // run
+        resultAbsolute = cmdAbsolute.getCommandString();
+        resultRelative = cmdRelative.getCommandString();
+
+        // verify
+        assertEquals("Z", resultAbsolute);
+        assertEquals("z", resultRelative);
     }
 }

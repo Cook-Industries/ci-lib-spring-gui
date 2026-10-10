@@ -68,13 +68,14 @@ class FlatMappableDissectorTest
     }
 
     @Test
-    void test_valueTransfer()
+    void test_dissect_valueTransfer()
     {
         // setup
         TestObject testObject = new TestObject();
+        TokenMap   tokenMap;
 
         // run
-        TokenMap   tokenMap   = flatMappableDissector.dissect(testObject, 0, Locale.ENGLISH);
+        tokenMap = flatMappableDissector.dissect(testObject, 0, Locale.ENGLISH);
 
         // verify
         assertEquals(String.valueOf(testObject.getStrVal()), tokenMap.getValue("strVal"));
@@ -85,13 +86,14 @@ class FlatMappableDissectorTest
     }
 
     @Test
-    void test_blacklist()
+    void test_dissect_blacklist()
     {
         // setup
         TestObject testObject = new TestObject();
+        TokenMap   tokenMap;
 
         // run
-        TokenMap tokenMap = flatMappableDissector.dissect(testObject, 0, Locale.ENGLISH);
+        tokenMap = flatMappableDissector.dissect(testObject, 0, Locale.ENGLISH);
 
         // verify
         assertNotNull(tokenMap);

@@ -14,6 +14,18 @@ public final class TagList extends ArrayList<Tag>
 {
 
     @Override
+    public TagList clone()
+    {
+        TagList list = new TagList();
+
+        this
+            .stream()
+            .forEach(list::add);
+
+        return list;
+    }
+
+    @Override
     public String toString()
     {
         return this

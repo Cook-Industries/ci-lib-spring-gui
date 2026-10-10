@@ -18,7 +18,7 @@ class ResourceTranslationProviderTest
 {
 
     @Test
-    void test_initMaps()
+    void test_initMaps_withFaultyFiles()
     {
         // setup
         Locale                      locale                      = new Locale("de", "DE");

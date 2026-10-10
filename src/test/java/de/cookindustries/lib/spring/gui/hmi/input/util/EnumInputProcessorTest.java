@@ -86,7 +86,7 @@ class EnumInputProcessorTest
     }
 
     @Test
-    void test_check_emmptyInput_withFallback() throws NullIgnoredException
+    void test_check_emptyInput_withFallback() throws NullIgnoredException
     {
         // setup
         EnumInputProcessor<TestEnum> processor      =

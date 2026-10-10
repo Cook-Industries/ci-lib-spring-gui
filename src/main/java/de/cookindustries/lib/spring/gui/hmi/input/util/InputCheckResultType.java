@@ -35,7 +35,7 @@ public enum InputCheckResultType
     NOT_PRESENT(MarkerType.NO_VALUE, "input-check-result-not-present"),
 
     /** Indicates that the input value is not inside a set of allowed values */
-    NOT_ACCEPTED_VALUE(MarkerType.INVALID, "input-check-result-not-accpted"),
+    NOT_ACCEPTED_VALUE(MarkerType.INVALID, "input-check-result-not-accepted"),
 
     /** Indicated that the input value is a rejected (forbidden) value */
     REJECTED_VALUE(MarkerType.INVALID, "input-check-result-not-allowed"),

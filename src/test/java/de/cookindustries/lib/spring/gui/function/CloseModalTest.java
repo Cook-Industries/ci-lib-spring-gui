@@ -15,13 +15,14 @@ class CloseModalTest
 {
 
     @Test
-    void test_constructor()
+    void test_parseAsJS_closeModal()
     {
         // setup
         CloseModal call = new CloseModal();
+        String     result;
 
         // run
-        String result = call.parseAsJS();
+        result = call.parseAsJS();
 
         // verify
         assertEquals("CILIB.FunctionRegistry.call('closeModal');", result);

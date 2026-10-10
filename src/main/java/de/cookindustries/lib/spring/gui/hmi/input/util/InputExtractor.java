@@ -371,6 +371,11 @@ public final class InputExtractor<R>
         Objects.requireNonNull(completionHandlerKey, "completionHandlerKey");
         Objects.requireNonNull(formData, "form");
 
+        if (starter == null)
+        {
+            throw new IllegalStateException("files announced but no upload starter given");
+        }
+
         try
         {
             approveInputs();

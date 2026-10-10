@@ -33,8 +33,10 @@ class HtmlElementTest
             .isSingleTag(true)
             .build();
 
+        String html;
+
         // run
-        String      html     = element.html();
+        html = element.html();
 
         // verify
         assertEquals(expected, html);
@@ -60,8 +62,10 @@ class HtmlElementTest
             .content(TEST_VAL)
             .build();
 
+        String html;
+
         // run
-        String      html     = element.html();
+        html = element.html();
 
         // verify
         assertEquals(expected, html);

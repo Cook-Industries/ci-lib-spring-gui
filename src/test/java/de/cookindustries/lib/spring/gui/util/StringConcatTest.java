@@ -28,19 +28,19 @@ class StringConcatTest
     private StringConcat        stringConcat;
 
     @BeforeEach
-    public void init()
+    void init()
     {
         stringConcat = new StringConcat();
     }
 
     @Test
-    void test_nl()
+    void test_nl_newline()
     {
         // setup
-
+        String result;
         // run
         stringConcat.nl();
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals(NL, result);
@@ -51,10 +51,11 @@ class StringConcatTest
     {
         // setup
         String value = "test";
+        String result;
 
         // run
         stringConcat.append(value);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals(value, result);
@@ -65,10 +66,11 @@ class StringConcatTest
     {
         // setup
         String value = null;
+        String result;
 
         // run
         stringConcat.append(value);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("null", result);
@@ -79,10 +81,11 @@ class StringConcatTest
     {
         // setup
         String value = "test";
+        String result;
 
         // run
         stringConcat.appendnl(value);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals(value + NL, result);
@@ -93,10 +96,11 @@ class StringConcatTest
     {
         // setup
         String value = "test";
+        String result;
 
         // run
         stringConcat.append(false, value);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("", result);
@@ -107,10 +111,11 @@ class StringConcatTest
     {
         // setup
         String value = "test";
+        String result;
 
         // run
         stringConcat.append(true, value);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("test", result);
@@ -121,10 +126,11 @@ class StringConcatTest
     {
         // setup
         String value = "test";
+        String result;
 
         // run
         stringConcat.appendnl(false, value);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("", result);
@@ -135,10 +141,11 @@ class StringConcatTest
     {
         // setup
         String value = "test";
+        String result;
 
         // run
         stringConcat.appendnl(true, value);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("test" + NL, result);
@@ -149,10 +156,11 @@ class StringConcatTest
     {
         // setup
         Supplier<String> supplier = () -> "test";
+        String           result;
 
         // run
         stringConcat.append(false, supplier);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("", result);
@@ -163,10 +171,11 @@ class StringConcatTest
     {
         // setup
         Supplier<String> supplier = () -> "test";
+        String           result;
 
         // run
         stringConcat.append(true, supplier);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("test", result);
@@ -178,11 +187,12 @@ class StringConcatTest
         // setup
         Supplier<String> supplier     = () -> "test";
         Supplier<String> nullSupplier = null;
+        String           result;
 
         // run
         stringConcat.appendnl(false, supplier);
         stringConcat.appendnl(false, nullSupplier);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("", result);
@@ -194,11 +204,12 @@ class StringConcatTest
         // setup
         Supplier<String> supplier     = () -> "test";
         Supplier<String> nullSupplier = null;
+        String           result;
 
         // run
         stringConcat.appendnl(true, supplier);
         stringConcat.appendnl(true, nullSupplier);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("test" + NL, result);
@@ -208,10 +219,10 @@ class StringConcatTest
     void test_append_enum()
     {
         // setup
-
+        String result;
         // run
         stringConcat.append(TestEnum.TEST);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("TEST", result);
@@ -221,10 +232,10 @@ class StringConcatTest
     void test_appendnl_enum()
     {
         // setup
-
+        String result;
         // run
         stringConcat.appendnl(TestEnum.TEST);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("TEST" + NL, result);
@@ -235,10 +246,11 @@ class StringConcatTest
     {
         // setup
         Character value = Character.valueOf('a');
+        String    result;
 
         // run
         stringConcat.append(value);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("a", result);
@@ -249,10 +261,11 @@ class StringConcatTest
     {
         // setup
         Character value = Character.valueOf('a');
+        String    result;
 
         // run
         stringConcat.appendnl(value);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals(value + NL, result);
@@ -263,10 +276,11 @@ class StringConcatTest
     {
         // setup
         Integer value = Integer.valueOf(1);
+        String  result;
 
         // run
         stringConcat.append(value);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("1", result);
@@ -277,10 +291,11 @@ class StringConcatTest
     {
         // setup
         Integer value = Integer.valueOf(1);
+        String  result;
 
         // run
         stringConcat.appendnl(value);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals(value + NL, result);
@@ -294,10 +309,11 @@ class StringConcatTest
         list.add("a");
         list.add("b");
         String separator = "-";
+        String result;
 
         // run
         stringConcat.append(list, separator);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("a-b", result);
@@ -312,12 +328,13 @@ class StringConcatTest
         list.add("b");
         String       separator = "-";
         List<String> nullList  = null;
+        String       result;
 
         // run
         stringConcat.append(list, separator);
         stringConcat.append(nullList, separator);
         stringConcat.append(list, null);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("a-b", result);
@@ -329,10 +346,11 @@ class StringConcatTest
         // setup
         Object[] objects   = {"a", "b"};
         String   separator = "-";
+        String   result;
 
         // run
         stringConcat.append(objects, separator);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("a-b", result);
@@ -345,12 +363,13 @@ class StringConcatTest
         Object[] objects     = {"a", "b"};
         String   separator   = "-";
         Object[] nullObjects = null;
+        String   result;
 
         // run
         stringConcat.append(objects, separator);
         stringConcat.append(nullObjects, separator);
         stringConcat.append(objects, null);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("a-b", result);
@@ -361,66 +380,73 @@ class StringConcatTest
     {
         // setup
         String[] strings = {"a", "b"};
+        String   result;
 
         // run
         stringConcat.appendnl(strings);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("a" + NL + "b" + NL, result);
     }
 
     @Test
-    void test_removeLastChars()
+    void test_removeLastChars_single()
     {
         // setup
         String string = "a";
+        String result;
 
         // run
         stringConcat.append(string);
         stringConcat.removeLastChars(1);
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("", result);
     }
 
     @Test
-    void test_clear()
+    void test_clear_afterAppend()
     {
         // setup
         String string = "a";
+        String result;
 
         // run
         stringConcat.append(string);
         stringConcat.clear();
-        String result = stringConcat.toString();
+        result = stringConcat.toString();
 
         // verify
         assertEquals("", result);
     }
 
     @Test
-    void test_isEmpty()
+    void test_isEmpty_fresh()
     {
         // setup
+        boolean result;
 
         // run
+        result = stringConcat.isEmpty();
 
         // verify
-        assertEquals(true, stringConcat.isEmpty());
+        assertEquals(true, result);
     }
 
     @Test
-    void test_size()
+    void test_size_afterAppend()
     {
         // setup
         String string = "a";
+        int    result;
 
         // run
         stringConcat.append(string);
+        result = stringConcat.size();
 
         // verify
-        assertEquals(1, stringConcat.size());
+        assertEquals(1, result);
     }
 }

@@ -15,13 +15,14 @@ class VoidCallTest
 {
 
     @Test
-    void test_constructor()
+    void test_parseAsJS_voidCall()
     {
         // setup
         VoidCall call = new VoidCall();
+        String   result;
 
         // run
-        String result = call.parseAsJS();
+        result = call.parseAsJS();
 
         // verify
         assertEquals("CILIB.FunctionRegistry.call('noop');", result);

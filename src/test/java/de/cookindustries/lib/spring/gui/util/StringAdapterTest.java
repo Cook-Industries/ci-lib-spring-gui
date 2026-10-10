@@ -23,9 +23,10 @@ class StringAdapterTest
         // setup
         String prefix  = "* ";
         String content = "test";
+        String result;
 
         // run
-        String result  = StringAdapter.prefix(prefix, content);
+        result = StringAdapter.prefix(prefix, content);
 
         // verify
         assertEquals(prefix + content, result);
@@ -37,9 +38,10 @@ class StringAdapterTest
         // setup
         String suffix  = " *";
         String content = "test";
+        String result;
 
         // run
-        String result  = StringAdapter.suffix(content, suffix);
+        result = StringAdapter.suffix(content, suffix);
 
         // verify
         assertEquals(content + suffix, result);
@@ -52,9 +54,10 @@ class StringAdapterTest
         String prefix  = "* ";
         String suffix  = " *";
         String content = "test";
+        String result;
 
         // run
-        String result  = StringAdapter.prefixAndSuffix(prefix, content, suffix);
+        result = StringAdapter.prefixAndSuffix(prefix, content, suffix);
 
         // verify
         assertEquals(prefix + content + suffix, result);
@@ -64,14 +67,16 @@ class StringAdapterTest
     void test_prefix_collection()
     {
         // setup
-        String             prefix     = "* ";
-        String             content    = "test";
-        Collection<String> list       = List.of(content);
-        Collection<String> nullList   = null;
+        String             prefix   = "* ";
+        String             content  = "test";
+        Collection<String> list     = List.of(content);
+        Collection<String> nullList = null;
+        Collection<String> result;
+        Collection<String> nullResult;
 
         // run
-        Collection<String> result     = StringAdapter.prefix(list, prefix);
-        Collection<String> nullResult = StringAdapter.prefix(nullList, prefix);
+        result = StringAdapter.prefix(list, prefix);
+        nullResult = StringAdapter.prefix(nullList, prefix);
 
         // verify
         assertEquals(1, result.size());
@@ -83,14 +88,16 @@ class StringAdapterTest
     void test_suffix_collection()
     {
         // setup
-        String             suffix     = " *";
-        String             content    = "test";
-        Collection<String> list       = List.of(content);
-        Collection<String> nullList   = null;
+        String             suffix   = " *";
+        String             content  = "test";
+        Collection<String> list     = List.of(content);
+        Collection<String> nullList = null;
+        Collection<String> result;
+        Collection<String> nullResult;
 
         // run
-        Collection<String> result     = StringAdapter.suffix(list, suffix);
-        Collection<String> nullResult = StringAdapter.suffix(nullList, suffix);
+        result = StringAdapter.suffix(list, suffix);
+        nullResult = StringAdapter.suffix(nullList, suffix);
 
         // verify
         assertEquals(1, result.size());
@@ -102,15 +109,17 @@ class StringAdapterTest
     void test_prefixAndSuffix_collection()
     {
         // setup
-        String             prefix     = "* ";
-        String             suffix     = " *";
-        String             content    = "test";
-        Collection<String> list       = List.of(content);
-        Collection<String> nullList   = null;
+        String             prefix   = "* ";
+        String             suffix   = " *";
+        String             content  = "test";
+        Collection<String> list     = List.of(content);
+        Collection<String> nullList = null;
+        Collection<String> result;
+        Collection<String> nullResult;
 
         // run
-        Collection<String> result     = StringAdapter.prefixAndSuffix(list, prefix, suffix);
-        Collection<String> nullResult = StringAdapter.prefixAndSuffix(nullList, prefix, suffix);
+        result = StringAdapter.prefixAndSuffix(list, prefix, suffix);
+        nullResult = StringAdapter.prefixAndSuffix(nullList, prefix, suffix);
 
         // verify
         assertEquals(1, result.size());
@@ -122,14 +131,16 @@ class StringAdapterTest
     void test_separate_collection()
     {
         // setup
-        String             separator  = " * ";
-        String             content    = "test";
-        Collection<String> list       = List.of(content, content);
-        Collection<String> nullList   = null;
+        String             separator = " * ";
+        String             content   = "test";
+        Collection<String> list      = List.of(content, content);
+        Collection<String> nullList  = null;
+        String             result;
+        String             nullResult;
 
         // run
-        String             result     = StringAdapter.separate(list, separator);
-        String             nullResult = StringAdapter.separate(nullList, separator);
+        result = StringAdapter.separate(list, separator);
+        nullResult = StringAdapter.separate(nullList, separator);
 
         // verify
         assertEquals(content + separator + content, result);
@@ -140,14 +151,16 @@ class StringAdapterTest
     void test_separate_array()
     {
         // setup
-        String   separator  = " * ";
-        String   content    = "test";
-        Object[] array      = new Object[] {content, content};
-        Object[] nullArray  = null;
+        String   separator = " * ";
+        String   content   = "test";
+        Object[] array     = new Object[] {content, content};
+        Object[] nullArray = null;
+        String   result;
+        String   nullResult;
 
         // run
-        String   result     = StringAdapter.separate(separator, array);
-        String   nullResult = StringAdapter.separate(separator, nullArray);
+        result = StringAdapter.separate(separator, array);
+        nullResult = StringAdapter.separate(separator, nullArray);
 
         // verify
         assertEquals(content + separator + content, result);
@@ -158,13 +171,15 @@ class StringAdapterTest
     void test_from_collection()
     {
         // setup
-        String             content    = "test";
-        Collection<String> list       = List.of(content, content);
-        Collection<String> nullList   = null;
+        String             content  = "test";
+        Collection<String> list     = List.of(content, content);
+        Collection<String> nullList = null;
+        String             result;
+        String             nullResult;
 
         // run
-        String             result     = StringAdapter.from(list);
-        String             nullResult = StringAdapter.from(nullList);
+        result = StringAdapter.from(list);
+        nullResult = StringAdapter.from(nullList);
 
         // verify
         assertEquals(content + content, result);
@@ -175,13 +190,15 @@ class StringAdapterTest
     void test_from_array()
     {
         // setup
-        String   content    = "test";
-        Object[] array      = new Object[] {content, content};
-        Object[] nullArray  = null;
+        String   content   = "test";
+        Object[] array     = new Object[] {content, content};
+        Object[] nullArray = null;
+        String   result;
+        String   nullResult;
 
         // run
-        String   result     = StringAdapter.from(array);
-        String   nullResult = StringAdapter.from(nullArray);
+        result = StringAdapter.from(array);
+        nullResult = StringAdapter.from(nullArray);
 
         // verify
         assertEquals(content + content, result);

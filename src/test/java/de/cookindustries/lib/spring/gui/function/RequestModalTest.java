@@ -15,14 +15,15 @@ class RequestModalTest
 {
 
     @Test
-    void test_constructor()
+    void test_parseAsJS_requestModal()
     {
         // setup
         String       requestUrl = "/test";
         RequestModal call       = new RequestModal(requestUrl, TestObject.builder().uid(2).build());
+        String       result;
 
         // run
-        String       result     = call.parseAsJS();
+        result = call.parseAsJS();
 
         // verify
         assertEquals("CILIB.FunctionRegistry.call('requestModal', '/test', {\"uid\":2});", result);
