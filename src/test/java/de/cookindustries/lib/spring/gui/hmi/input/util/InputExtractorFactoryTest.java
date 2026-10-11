@@ -325,4 +325,24 @@ class InputExtractorFactoryTest
         // verify
         assertFalse(text.startsWith("I18N ["), () -> "missing translation for " + type);
     }
+
+    @Test
+    void test_approve_withoutFiles_startsAnUploadWithoutFiles()
+    {
+        // setup
+        InputExtractor<TestForm> extractor = create().checkFiles(KEY, true, false);
+        Response                 result;
+
+        // run
+        result = extractor.approve(HANDLER_KEY, () -> new TestForm("x"));
+
+        // verify
+        StartFileUploadResponse start = assertInstanceOf(StartFileUploadResponse.class, result);
+
+        assertTrue(start.getFieldDescribtors().isEmpty());
+        assertNotNull(fx.store.batch);
+        assertEquals(start.getBatchUuid(), fx.store.batch.batchUuid());
+        assertEquals(HANDLER_KEY, fx.store.batch.completeKey());
+        assertTrue(fx.store.files.isEmpty());
+    }
 }

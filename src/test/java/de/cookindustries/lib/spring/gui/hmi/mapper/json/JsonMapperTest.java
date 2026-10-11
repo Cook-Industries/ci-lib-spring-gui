@@ -1269,4 +1269,30 @@ class JsonMapperTest
         String html = HtmlMapper.map(container);
         assertTrue(checkDivTags(html));
     }
+    @Test
+    void test_map_CheckboxInput_boxesKeepTheirSubmitAs()
+    {
+        // setup
+        JsonMapper    mapper    =
+            JsonMapper
+                .builder()
+                .srcPath("json-mapper/input/checkbox-input.ged")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
+                .flatMappableDissector(flatMappableDissector)
+                .build();
+
+        MapperResult result;
+
+        // run
+        result = mapper.map();
+
+        // verify
+        FormContainer form     = (FormContainer) result.getContainers().get(0);
+        Checkbox      checkbox = (Checkbox) form.getInputs().get(0);
+
+        assertEquals("checkbox-2", checkbox.getBoxes().get(0).getSubmitAs());
+        assertEquals("checkbox-2", checkbox.getBoxes().get(1).getSubmitAs());
+    }
 }

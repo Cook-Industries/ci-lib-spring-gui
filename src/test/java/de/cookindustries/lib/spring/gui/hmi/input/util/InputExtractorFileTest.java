@@ -715,6 +715,26 @@ class InputExtractorFileTest
         assertThrows(IllegalStateException.class, () -> extractor.approve("handler", () -> "form"));
     }
 
+    @Test
+    void test_approveKey_withoutAnnouncedFiles_passesAnEmptyDeclarationListToTheStarter()
+    {
+        // setup
+        List<List<FileDeclaration>> seen      = new ArrayList<>();
+        InputExtractor<Object>      extractor =
+            limited((key, form, files) -> {
+                seen.add(files);
+
+                return startResult(files);
+            }).checkFiles(KEY, true, false);
+
+        // run
+        extractor.approve("handler", () -> "form");
+
+        // verify
+        assertEquals(1, seen.size());
+        assertTrue(seen.get(0).isEmpty());
+    }
+
     private StartResult startResult(List<FileDeclaration> files)
     {
         UUID                batch  = UUID.randomUUID();

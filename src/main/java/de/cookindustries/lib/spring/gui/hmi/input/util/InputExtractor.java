@@ -29,7 +29,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.cookindustries.lib.spring.gui.hmi.container.FormContainer;
 import de.cookindustries.lib.spring.gui.hmi.input.File;
-import de.cookindustries.lib.spring.gui.hmi.input.util.exception.FileUploadStartException;
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.InputExtractionException;
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.NullIgnoredException;
 import de.cookindustries.lib.spring.gui.response.NotificationResponse;
@@ -349,22 +348,22 @@ public final class InputExtractor<R>
     }
 
     /**
-     * Final check for this {@code InputExtractor} for a form that may announce files.
+     * Final check for this {@code InputExtractor} for a form that expects files. Use {@link #approve(Consumer, Supplier)} for forms without
+     * files.
      * <p>
-     * If {@code markers} where raised it a {@link NotificationResponse}, just like {@link #approve(Consumer, Supplier)}.
+     * If {@code markers} where raised it returns a {@link NotificationResponse}, just like {@link #approve(Consumer, Supplier)}.
      * <p>
-     * If the inputs are fine and files were announced with {@link #checkFiles(String, boolean, boolean)}, it starts the upload and throws a
-     * {@link FileUploadStartException}, which should be captured to create the {@code StartFileUploadResponse}. The form is then handled by
-     * the completion handler registered under {@code completionHandlerKey} after all files have arrived.
-     * <p>
-     * If no files were announced it simply returns and the form can be handled right away.
+     * Else it starts the upload for the files announced with {@link #checkFiles(String, boolean, boolean)} and returns the
+     * {@code StartFileUploadResponse}. The form is then handled by the completion handler registered under {@code completionHandlerKey}
+     * after all files have arrived. If no files were announced (possible for nullable file fields) the upload has no files and completes
+     * right away.
      * <p>
      * Note: {@code formData} at this point may not be valid! The {@code approve} call builds the response for the UI to handle the failed
      * checks. If no checks are failed and this approve runs normally THEN the form data is valid in the object.
      * 
      * @param completionHandlerKey key of the completion handler that takes over after the upload
      * @param formData supplies the extracted form data
-     * @throws IllegalStateException if files were announced, but this extractor cannot start uploads
+     * @throws IllegalStateException if this extractor cannot start uploads
      */
     public Response approve(String completionHandlerKey, Supplier<?> formData)
     {
@@ -373,7 +372,7 @@ public final class InputExtractor<R>
 
         if (starter == null)
         {
-            throw new IllegalStateException("files announced but no upload starter given");
+            throw new IllegalStateException("no upload starter given");
         }
 
         try

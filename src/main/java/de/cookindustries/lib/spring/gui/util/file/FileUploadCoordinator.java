@@ -98,7 +98,8 @@ public class FileUploadCoordinator
      * 
      * @param completionHandlerKey key of the {@link CompletionHandler} that takes over when the upload is complete
      * @param formDataSupplier the validated form data; must be an instance of the handler's form type
-     * @param declared the files the client announced
+     * @param declared the files the client announced; may be empty, the batch then has no files and the client can complete it right
+     *            away
      */
     public StartResult startUpload(String completionHandlerKey, Supplier<?> formDataSupplier, List<FileDeclaration> declared)
     {
@@ -116,10 +117,7 @@ public class FileUploadCoordinator
             throw new IllegalArgumentException("form is not a " + handler.formType().getName());
         }
 
-        if (declared == null || declared.isEmpty())
-        {
-            throw new UploadException(Status.BAD_REQUEST, "no files announced");
-        }
+        Objects.requireNonNull(declared, "declared");
 
         long total = 0;
 

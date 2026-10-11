@@ -39,15 +39,38 @@ const LOGGER = Logger.createFor("ci-lib-spring-web");
 
 const StompJs = { Client };
 
-function init() {
+/**
+ * Request settings applied to every call of the library (fetch and STOMP connect).
+ */
+const requestConfig = {
+  credentials: "same-origin",
+  headers: () => ({}),
+};
+
+/**
+ * @param {object} [options]
+ * @param {RequestCredentials} [options.credentials] - fetch credentials mode; use "include" if the API lives on another origin
+ *   (the server then needs CORS with allowCredentials).
+ * @param {object|function(): object} [options.headers] - headers added to every request and to the STOMP CONNECT frame, e.g.
+ *   { Authorization: `Bearer ${token}` }. A function is evaluated per request/connect, so rotating tokens are picked up.
+ */
+function init(options = {}) {
   window.CILIB = this;
+
+  if (options.credentials !== undefined) {
+    requestConfig.credentials = options.credentials;
+  }
+
+  if (options.headers !== undefined) {
+    requestConfig.headers = typeof options.headers === "function" ? options.headers : () => options.headers;
+  }
 }
 
 $(document).ready(function () {
   LOGGER.info("ci-lib-js: ", version);
 
   // load properties if neccessary
-  var propertiesUrl = $('#ui-properties-url').html().trim();
+  var propertiesUrl = ($('#ui-properties-url').html() || "").trim();
 
   if (propertiesUrl) {
     LOGGER.debug("properties are requested from ", propertiesUrl);
@@ -332,6 +355,43 @@ $(document).ready(function () {
 });
 
 // === > global functions ==================================================================================================================
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS", "TRACE"]);
+
+/**
+ * CSRF header for state changing requests. Supports Spring Security's cookie repository (XSRF-TOKEN cookie -> X-XSRF-TOKEN) and the
+ * _csrf / _csrf_header meta tags rendered by server side templates. Empty if the application uses neither.
+ */
+function _csrfHeaders(method) {
+  if (SAFE_METHODS.has(method)) {
+    return {};
+  }
+
+  const token = document.querySelector('meta[name="_csrf"]');
+
+  if (token && token.content) {
+    const header = document.querySelector('meta[name="_csrf_header"]');
+
+    return { [(header && header.content) || "X-CSRF-TOKEN"]: token.content };
+  }
+
+  const cookie = document.cookie.split("; ").find((entry) => entry.startsWith("XSRF-TOKEN="));
+
+  return cookie ? { "X-XSRF-TOKEN": decodeURIComponent(cookie.substring("XSRF-TOKEN=".length)) } : {};
+}
+
+/**
+ * fetch() with the library wide request settings. Headers of the call win over configured ones, which win over the CSRF header.
+ */
+function _request(url, options = {}) {
+  const method = (options.method || "GET").toUpperCase();
+
+  return fetch(url, {
+    credentials: requestConfig.credentials,
+    ...options,
+    headers: { ..._csrfHeaders(method), ...requestConfig.headers(), ...options.headers },
+  });
+}
+
 /**
  * Fetch data from a endpoint.
  * 
@@ -344,7 +404,7 @@ function _fetchHttp(method, endpointUrl) {
     throw new Error(`"${method} URL cannot be undefined/empty"`);
   }
 
-  return fetch(endpointUrl, {
+  return _request(endpointUrl, {
     method: method,
   })
     .then((response) => {
@@ -379,7 +439,7 @@ function _fetchHttpWithPayload(method, endpointUrl, dataToSend = {}) {
     throw new Error(`"${method} URL cannot be undefined/empty"`);
   }
 
-  return fetch(endpointUrl, {
+  return _request(endpointUrl, {
     method: method,
     headers: {
       "Content-Type": "application/json",
@@ -456,10 +516,10 @@ function PATCH(endpointUrl, dataToSend = {}) {
  */
 function POSTFormData(endpointUrl, formData = {}) {
   if (endpointUrl === undefined || endpointUrl === "") {
-    throw new Error(`"${method} URL cannot be undefined/empty"`);
+    throw new Error(`"POST URL cannot be undefined/empty"`);
   }
 
-  return fetch(endpointUrl, {
+  return _request(endpointUrl, {
     method: "POST",
     body: formData,
   })
@@ -946,6 +1006,10 @@ function radioClick(event) {
  * Hides the modal overlay and clears its remains
  */
 function closeModal() {
+  if (openModals <= 0) {
+    return;
+  }
+
   if ($(`#modal-overlay-${openModals}`).attr("data-lock-set") === "1") {
     $(`#modal-overlay-${openModals}`).attr("data-lock-set", "0");
     releaseLock();
@@ -1305,6 +1369,11 @@ function startFileUpload(response) {
 
           // files without content have no parts that could trigger the finish
           job.entries.forEach((entry) => _uploadMaybeFinish(job, entry));
+
+          // no files at all: nothing triggers the finish, the upload is complete as it starts
+          if (job.entries.length === 0) {
+            job.resolve();
+          }
         })
     )
     .then(() => _uploadComplete(job))
@@ -1416,7 +1485,7 @@ function _uploadAbort(job, error) {
   job.controller.abort();
   job.fieldIds.forEach((id) => files.delete(id));
 
-  return fetch(_uploadUrl(job, "abort", {}), { method: "DELETE" })
+  return _request(_uploadUrl(job, "abort", {}), { method: "DELETE" })
     .catch((abortError) => LOGGER.warn("abort request failed, the server cleans up on expiry.", { batchUuid: job.batchUuid, abortError }))
     .then(() => {
       _uploadFinalize(job);
@@ -1451,7 +1520,7 @@ function _uploadRetry(job, operation, attempt = 0) {
 }
 
 function _uploadFetch(method, url, body, signal) {
-  return fetch(url, {
+  return _request(url, {
     method: method,
     body: body,
     signal: signal,
@@ -1552,6 +1621,10 @@ const WebSocketManager = (function () {
       brokerURL: endpoint,
       reconnectDelay: reconnectInterval,
       connectHeaders: headers,
+      // evaluated on every (re)connect so that rotated tokens are used; a STOMP session is authenticated once by the CONNECT frame
+      beforeConnect: (c) => {
+        c.connectHeaders = { ..._csrfHeaders("CONNECT"), ...requestConfig.headers(), ...headers };
+      },
       debug: () => { },
 
       onConnect: frame => {

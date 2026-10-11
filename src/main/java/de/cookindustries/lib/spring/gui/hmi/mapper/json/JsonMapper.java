@@ -1374,15 +1374,17 @@ public class JsonMapper
      */
     private InputValue transformInputValue(PseudoElement element, int depth)
     {
-        List<String> classes = resolveClasses(element.getClasses(), depth);
-        String       uid     = getParameterValue(element, depth, PARAM_ID, String.class, DEFAULT_EMPTY_VAL);
-        String       text    = getParameterValue(element, depth, PARAM_TEXT, String.class, BasicText.NO_TEXT_SET.getText());
-        String       value   = getParameterValue(element, depth, PARAM_VALUE, String.class, BasicText.NO_VALUE_SET.getText());
-        boolean      checked = getParameterValue(element, depth, PARAM_CHECKED, Boolean.class, Boolean.FALSE);
+        List<String> classes  = resolveClasses(element.getClasses(), depth);
+        String       uid      = getParameterValue(element, depth, PARAM_ID, String.class, DEFAULT_EMPTY_VAL);
+        String       submitAs = getParameterValue(element, depth, PARAM_SUBMIT_AS, String.class, DEFAULT_EMPTY_VAL);
+        String       text     = getParameterValue(element, depth, PARAM_TEXT, String.class, BasicText.NO_TEXT_SET.getText());
+        String       value    = getParameterValue(element, depth, PARAM_VALUE, String.class, BasicText.NO_VALUE_SET.getText());
+        boolean      checked  = getParameterValue(element, depth, PARAM_CHECKED, Boolean.class, Boolean.FALSE);
 
         return InputValue
             .builder()
             .uid(uid)
+            .submitAs(submitAs)
             .text(text)
             .value(value)
             .checked(checked)
