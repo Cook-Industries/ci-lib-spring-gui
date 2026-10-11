@@ -161,6 +161,7 @@ public class JsonMapper
     private static final String                                 PARAM_CLOSE_ON_OVERLAY_CLICK   = "closeOnOverlayClick";
     private static final String                                 PARAM_CONNECTED_BTN            = "connectedBtn";
     private static final String                                 PARAM_CONTROLS                 = "controls";
+    private static final String                                 PARAM_CUSTOM_VALUES            = "customValues";
     private static final String                                 PARAM_CAPTION                  = "caption";
     private static final String                                 PARAM_CONTROL_POINT_1_X        = "controlPoint1X";
     private static final String                                 PARAM_CONTROL_POINT_1_Y        = "controlPoint1Y";
@@ -187,6 +188,7 @@ public class JsonMapper
     private static final String                                 PARAM_INLINE                   = "inline";
     private static final String                                 PARAM_IS_SOURCE_LIST           = "isSourceList";
     private static final String                                 PARAM_MANDATORY                = "mandatory";
+    private static final String                                 PARAM_MARKS                    = "marks";
     private static final String                                 PARAM_MAX                      = "max";
     private static final String                                 PARAM_STEP                     = "step";
     private static final String                                 PARAM_MAX_CHARS                = "maxChars";
@@ -2739,37 +2741,88 @@ public class JsonMapper
      */
     private Slider transformSliderInput(PseudoElement element, int depth)
     {
-        UiElementParameters cpars      = resolveUiElementBaseParameters(element, depth);
-        InputParameters     ipars      = resolveInputBaseParameters(element, depth);
+        UiElementParameters  cpars        = resolveUiElementBaseParameters(element, depth);
+        InputParameters      ipars        = resolveInputBaseParameters(element, depth);
 
-        java.lang.Number    value      = getParameterValue(element, depth, PARAM_VALUE, java.lang.Number.class, BigInteger.ZERO);
+        java.io.Serializable value;
+        java.lang.Number     min          = null;
+        java.lang.Number     max          = null;
+        java.lang.Number     step         = null;
+        Integer              marks        = null;
+        List<String>         customValues = null;
 
-        java.lang.Number    minDef     =
-            value.getClass().equals(BigInteger.class)
-                ? new BigInteger(String.valueOf(Integer.MIN_VALUE))
-                : new BigDecimal(Double.MIN_VALUE);
-
-        java.lang.Number    maxDef     =
-            value.getClass().equals(BigInteger.class)
-                ? new BigInteger(String.valueOf(Integer.MAX_VALUE))
-                : new BigDecimal(Double.MAX_VALUE);
-
-        java.lang.Number    stepDef    =
-            value.getClass().equals(BigInteger.class)
-                ? new BigInteger("1")
-                : new BigDecimal(1.0d);
-
-        java.lang.Number    min        = getParameterValue(element, depth, PARAM_MIN, java.lang.Number.class, minDef);
-        java.lang.Number    max        = getParameterValue(element, depth, PARAM_MAX, java.lang.Number.class, maxDef);
-        java.lang.Number    step       = getParameterValue(element, depth, PARAM_STEP, java.lang.Number.class, stepDef);
-
-        Class<?>            valueClass = value.getClass();
-
-        if (!min.getClass().equals(valueClass)
-            || !max.getClass().equals(valueClass)
-            || !step.getClass().equals(valueClass))
+        if (element.getParameters().containsKey(PARAM_CUSTOM_VALUES))
         {
-            throw new JsonMapperException("mismatch between expected slider value type and min/max/step types");
+            for (String numericParam : List.of(PARAM_MIN, PARAM_MAX, PARAM_STEP, PARAM_MARKS))
+            {
+                if (element.getParameters().containsKey(numericParam))
+                {
+                    throw new JsonParsingException(cpars.uid(), depth, this.count,
+                        String.format("parameter [%s] conflicts with [%s]", numericParam, PARAM_CUSTOM_VALUES));
+                }
+            }
+
+            customValues = getParameterList(element, depth, PARAM_CUSTOM_VALUES, String.class);
+
+            if (customValues.size() < 2 || new HashSet<>(customValues).size() != customValues.size())
+            {
+                throw new JsonParsingException(cpars.uid(), depth, this.count,
+                    String.format("parameter [%s] needs at least two distinct values", PARAM_CUSTOM_VALUES));
+            }
+
+            value = getParameterValue(element, depth, PARAM_VALUE, String.class, customValues.get(0));
+
+            if (!customValues.contains(value))
+            {
+                throw new JsonParsingException(cpars.uid(), depth, this.count,
+                    String.format("parameter [%s] must be one of [%s]", PARAM_VALUE, PARAM_CUSTOM_VALUES));
+            }
+        }
+        else
+        {
+            java.lang.Number numericValue = getParameterValue(element, depth, PARAM_VALUE, java.lang.Number.class, BigInteger.ZERO);
+
+            java.lang.Number minDef       =
+                numericValue.getClass().equals(BigInteger.class)
+                    ? new BigInteger(String.valueOf(Integer.MIN_VALUE))
+                    : new BigDecimal(Double.MIN_VALUE);
+
+            java.lang.Number maxDef       =
+                numericValue.getClass().equals(BigInteger.class)
+                    ? new BigInteger(String.valueOf(Integer.MAX_VALUE))
+                    : new BigDecimal(Double.MAX_VALUE);
+
+            java.lang.Number stepDef      =
+                numericValue.getClass().equals(BigInteger.class)
+                    ? new BigInteger("1")
+                    : new BigDecimal(1.0d);
+
+            min   = getParameterValue(element, depth, PARAM_MIN, java.lang.Number.class, minDef);
+            max   = getParameterValue(element, depth, PARAM_MAX, java.lang.Number.class, maxDef);
+            step  = getParameterValue(element, depth, PARAM_STEP, java.lang.Number.class, stepDef);
+            value = numericValue;
+
+            Class<?> valueClass = numericValue.getClass();
+
+            if (!min.getClass().equals(valueClass)
+                || !max.getClass().equals(valueClass)
+                || !step.getClass().equals(valueClass))
+            {
+                throw new JsonMapperException("mismatch between expected slider value type and min/max/step types");
+            }
+
+            if (element.getParameters().containsKey(PARAM_MARKS))
+            {
+                BigInteger marksValue = getParameterValue(element, depth, PARAM_MARKS, BigInteger.class);
+
+                if (marksValue.compareTo(BigInteger.TWO) < 0)
+                {
+                    throw new JsonParsingException(cpars.uid(), depth, this.count,
+                        String.format("parameter [%s] needs at least two marks", PARAM_MARKS));
+                }
+
+                marks = marksValue.intValue();
+            }
         }
 
         return Slider
@@ -2790,6 +2843,8 @@ public class JsonMapper
             .min(min)
             .max(max)
             .step(step)
+            .marks(marks)
+            .customValues(customValues)
             .build();
     }
 

@@ -7,6 +7,9 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.mapper.html;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
@@ -73,66 +76,72 @@ import lombok.Data;
 public final class HtmlMapper
 {
 
-    private static final String        TAG_DIV                 = "div";
-    private static final String        TAG_LABEL               = "label";
-    private static final String        TAG_INPUT               = "input";
-    private static final String        TAG_SELECT              = "select";
-    private static final String        TAG_OPTION              = "option";
-    private static final String        TAG_SVG                 = "svg";
-    private static final String        TAG_LINE                = "line";
-    private static final String        TAG_TEXT                = "text";
-    private static final String        TAG_GROUP               = "g";
-    private static final String        TAG_PATH                = "path";
-    private static final String        TAG_SPAN                = "span";
-    private static final String        TAG_P                   = "p";
-    private static final String        TAG_FIGURE              = "figure";
-    private static final String        TAG_AUDIO               = "audio";
-    private static final String        TAG_FIGCAPTION          = "figcaption";
+    private static final String        TAG_DIV                        = "div";
+    private static final String        TAG_LABEL                      = "label";
+    private static final String        TAG_INPUT                      = "input";
+    private static final String        TAG_SELECT                     = "select";
+    private static final String        TAG_OPTION                     = "option";
+    private static final String        TAG_SVG                        = "svg";
+    private static final String        TAG_LINE                       = "line";
+    private static final String        TAG_TEXT                       = "text";
+    private static final String        TAG_GROUP                      = "g";
+    private static final String        TAG_PATH                       = "path";
+    private static final String        TAG_SPAN                       = "span";
+    private static final String        TAG_P                          = "p";
+    private static final String        TAG_FIGURE                     = "figure";
+    private static final String        TAG_AUDIO                      = "audio";
+    private static final String        TAG_FIGCAPTION                 = "figcaption";
 
-    private static final String        ATT_ID                  = "id";
-    private static final String        ATT_NAME                = "name";
-    private static final String        ATT_TYPE                = "type";
-    private static final String        ATT_FOR                 = "for";
-    private static final String        ATT_ON_INPUT            = "oninput";
-    private static final String        ATT_ON_CLICK            = "onclick";
-    private static final String        ATT_CHECKED             = "checked";
-    private static final String        ATT_SELECTED            = "selected";
-    private static final String        ATT_MIN                 = "min";
-    private static final String        ATT_MAX                 = "max";
-    private static final String        ATT_STEP                = "step";
-    private static final String        ATT_PLACEHOLDER         = "placeholder";
-    private static final String        ATT_HREF                = "href";
-    private static final String        ATT_TARGET              = "target";
-    private static final String        ATT_SRC                 = "src";
-    private static final String        ATT_VALUE               = "value";
-    private static final String        ATT_ON_KEY_DOWN         = "onkeydown";
-    private static final String        ATT_STYLE               = "style";
-    private static final String        ATT_WIDTH               = "width";
-    private static final String        ATT_HEIGHT              = "height";
-    private static final String        ATT_D                   = "d";
-    private static final String        ATT_DISABLED            = "disabled";
-    private static final String        ATT_CONTROLS            = "controls";
-    private static final String        ATT_AUTOPLAY            = "autoplay";
+    private static final String        ATT_ID                         = "id";
+    private static final String        ATT_NAME                       = "name";
+    private static final String        ATT_TYPE                       = "type";
+    private static final String        ATT_ARIA_VALUETEXT             = "aria-valuetext";
+    private static final String        ATT_FOR                        = "for";
+    private static final String        ATT_ON_INPUT                   = "oninput";
+    private static final String        ATT_ON_CLICK                   = "onclick";
+    private static final String        ATT_CHECKED                    = "checked";
+    private static final String        ATT_SELECTED                   = "selected";
+    private static final String        ATT_MIN                        = "min";
+    private static final String        ATT_MAX                        = "max";
+    private static final String        ATT_STEP                       = "step";
+    private static final String        ATT_PLACEHOLDER                = "placeholder";
+    private static final String        ATT_HREF                       = "href";
+    private static final String        ATT_TARGET                     = "target";
+    private static final String        ATT_SRC                        = "src";
+    private static final String        ATT_VALUE                      = "value";
+    private static final String        ATT_ON_KEY_DOWN                = "onkeydown";
+    private static final String        ATT_STYLE                      = "style";
+    private static final String        ATT_WIDTH                      = "width";
+    private static final String        ATT_HEIGHT                     = "height";
+    private static final String        ATT_D                          = "d";
+    private static final String        ATT_DISABLED                   = "disabled";
+    private static final String        ATT_CONTROLS                   = "controls";
+    private static final String        ATT_AUTOPLAY                   = "autoplay";
+    private static final String        ATT_ROLE                       = "role";
 
-    private static final String        CLASS_INPUT_LEGEND      = "input-legend";
-    private static final String        CLASS_FORM_CONTROL      = "form-control";
-    private static final String        CLASS_HIDDEN            = "hidden";
-    private static final String        CLASS_USER_SELECT_NONE  = "user-select-none";
-    private static final String        CLASS_FORM_CHECK        = "form-checkbox";
-    private static final String        CLASS_FORM_CHECK_INPUT  = "form-checkbox-input";
-    private static final String        CLASS_FORM_CHECK_LABEL  = "form-checkbox-label";
-    private static final String        CLASS_FORM_SELECT       = "form-select";
+    private static final String        CLASS_INPUT_LEGEND             = "input-legend";
+    private static final String        CLASS_FORM_CONTROL             = "form-control";
+    private static final String        CLASS_HIDDEN                   = "hidden";
+    private static final String        CLASS_USER_SELECT_NONE         = "user-select-none";
+    private static final String        CLASS_FORM_CHECK               = "form-checkbox";
+    private static final String        CLASS_FORM_CHECK_INPUT         = "form-checkbox-input";
+    private static final String        CLASS_FORM_CHECK_LABEL         = "form-checkbox-label";
+    private static final String        CLASS_FORM_SELECT              = "form-select";
 
-    private static final String        INPUT_CONTAINER         = "input-container";
+    private static final String        INPUT_CONTAINER                = "input-container";
 
-    private static final String        DATA_ATT_SUBMIT_ID      = "submit-id";
-    private static final String        DATA_ATT_SUBMIT_AS      = "submit-as";
-    private static final String        DATA_ATT_VALUE_TYPE     = "value-type";
-    private static final String        DATA_ATT_MAX_CHARACTERS = "max-characters";
-    private static final String        DATA_ATT_ON_ENTER_PRESS = "on-enter-press";
-    private static final String        DATA_ATT_TOOLTIP        = "tooltip";
+    private static final String        DATA_ATT_SUBMIT_ID             = "submit-id";
+    private static final String        DATA_ATT_SUBMIT_AS             = "submit-as";
+    private static final String        DATA_ATT_VALUE_TYPE            = "value-type";
+    private static final String        DATA_ATT_MAX_CHARACTERS        = "max-characters";
+    private static final String        DATA_ATT_ON_ENTER_PRESS        = "on-enter-press";
+    private static final String        DATA_ATT_TOOLTIP               = "tooltip";
 
-    private static final DecimalFormat DOUBLE_FORMATER         = new DecimalFormat("0.000", DecimalFormatSymbols.getInstance(Locale.ROOT));
+    private static final int           SLIDER_MAX_TICK_INTERVALS      = 20;
+    private static final int           SLIDER_FALLBACK_TICK_INTERVALS = 10;
+
+    private static final DecimalFormat DOUBLE_FORMATER                =
+        new DecimalFormat("0.000", DecimalFormatSymbols.getInstance(Locale.ROOT));
 
     /**
      * Internal constructor
@@ -170,6 +179,8 @@ public final class HtmlMapper
             .map(mapper::render)
             .toList();
     }
+
+    // === > helper functions ==============================================================================================================
 
     /**
      * A temporary result for not yet implemented objects.
@@ -209,6 +220,100 @@ public final class HtmlMapper
     {
         return StringEscapeUtils.escapeHtml4(text);
     }
+
+    private static BigDecimal toBigDecimal(java.lang.Number number)
+    {
+        if (number instanceof BigDecimal decimal)
+        {
+            return decimal;
+        }
+
+        if (number instanceof BigInteger integer)
+        {
+            return new BigDecimal(integer);
+        }
+
+        return new BigDecimal(number.toString());
+    }
+
+    private static String plain(java.lang.Number number)
+    {
+        return toBigDecimal(number).toPlainString();
+    }
+
+    private static int sliderIndex(Slider slider)
+    {
+        return Math.max(slider.getCustomValues().indexOf(slider.getValue()), 0);
+    }
+
+    /**
+     * Position of the slider's value between its bounds, from {@code 0} to {@code 1}. The stylesheet uses it to fill the track up to the
+     * thumb.
+     */
+    private static String sliderRatio(Slider slider)
+    {
+        BigDecimal min;
+        BigDecimal range;
+        BigDecimal position;
+
+        if (slider.isCustom())
+        {
+            min      = BigDecimal.ZERO;
+            range    = BigDecimal.valueOf(slider.getCustomValues().size() - 1L);
+            position = BigDecimal.valueOf(sliderIndex(slider));
+        }
+        else
+        {
+            min      = toBigDecimal(slider.getMin());
+            range    = toBigDecimal(slider.getMax()).subtract(min);
+            position = toBigDecimal((java.lang.Number) slider.getValue());
+        }
+
+        if (range.signum() <= 0)
+        {
+            return "0";
+        }
+
+        BigDecimal ratio = position.subtract(min).divide(range, 4, RoundingMode.HALF_UP);
+
+        return ratio.max(BigDecimal.ZERO).min(BigDecimal.ONE).toPlainString();
+    }
+
+    /**
+     * Number of gaps between the scale marks. Custom values get one mark each, a numeric slider the requested number of marks. Without a
+     * request it gets one mark per step as long as that stays readable, otherwise a fixed number of evenly spread marks.
+     */
+    private static int sliderTickIntervals(Slider slider)
+    {
+        if (slider.isCustom())
+        {
+            return Math.max(slider.getCustomValues().size() - 1, 1);
+        }
+
+        if (slider.getMarks() != null)
+        {
+            return Math.max(slider.getMarks() - 1, 1);
+        }
+
+        BigDecimal range = toBigDecimal(slider.getMax()).subtract(toBigDecimal(slider.getMin()));
+        BigDecimal step  = toBigDecimal(slider.getStep());
+
+        if (range.signum() <= 0 || step.signum() <= 0)
+        {
+            return 1;
+        }
+
+        BigDecimal intervals = range.divide(step, 0, RoundingMode.DOWN);
+
+        if (intervals.compareTo(BigDecimal.valueOf(SLIDER_MAX_TICK_INTERVALS)) > 0)
+        {
+            return SLIDER_FALLBACK_TICK_INTERVALS;
+        }
+
+        return Math.max(intervals.intValue(), 1);
+    }
+
+    // === < helper functions ==============================================================================================================
 
     /**
      * Render a {@link Container} as HTML component
@@ -964,10 +1069,24 @@ public final class HtmlMapper
     private String createInputWrapper(String legend, String mandatoryIcon, String warningIcon, String errorIcon, String infoIcon,
         String input)
     {
-        return HtmlElement
-            .builder()
-            .tag(TAG_DIV)
-            .clazz(INPUT_CONTAINER)
+        return createInputWrapper("", legend, mandatoryIcon, warningIcon, errorIcon, infoIcon, input);
+    }
+
+    private String createInputWrapper(String additionalClass, String legend, String mandatoryIcon, String warningIcon, String errorIcon,
+        String infoIcon, String input)
+    {
+        HtmlElement.HtmlElementBuilder wrapper =
+            HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .clazz(INPUT_CONTAINER);
+
+        if (!additionalClass.isBlank())
+        {
+            wrapper.clazz(additionalClass);
+        }
+
+        return wrapper
             .content(legend)
             .content(mandatoryIcon)
             .content(warningIcon)
@@ -1471,7 +1590,10 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_VALUE)
-                        .value(String.valueOf(slider.getValue()))
+                        .value(
+                            slider.isCustom()
+                                ? String.valueOf(sliderIndex(slider))
+                                : plain((java.lang.Number) slider.getValue()))
                         .build())
                 .attribute(
                     Attribute
@@ -1483,21 +1605,38 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_MIN)
-                        .value(String.valueOf(slider.getMin()))
+                        .value(slider.isCustom() ? "0" : plain(slider.getMin()))
                         .build())
                 .attribute(
                     Attribute
                         .builder()
                         .name(ATT_MAX)
-                        .value(String.valueOf(slider.getMax()))
+                        .value(
+                            slider.isCustom()
+                                ? String.valueOf(slider.getCustomValues().size() - 1)
+                                : plain(slider.getMax()))
                         .build())
                 .attribute(
                     Attribute
                         .builder()
                         .name(ATT_STEP)
-                        .value(String.valueOf(slider.getStep()))
+                        .value(slider.isCustom() ? "1" : plain(slider.getStep()))
                         .build())
-                .clazz("form-range")
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_DISABLED)
+                        .value(ATT_DISABLED)
+                        .active(slider.isDisabled())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_ARIA_VALUETEXT)
+                        .value(String.valueOf(slider.getValue()))
+                        .active(slider.isCustom())
+                        .build())
+                .clazz("form-slider-input")
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
                 .dataAttribute(DATA_ATT_SUBMIT_AS, slider.getSubmitAs())
                 .dataAttribute(DATA_ATT_VALUE_TYPE, slider.getType().name())
@@ -1505,18 +1644,139 @@ public final class HtmlMapper
                 .build()
                 .html();
 
+        String ticks  =
+            HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .clazz("input-slider-ticks")
+                .build()
+                .html();
+
+        String style  = String.format("--ci-slider-ratio: %s; --ci-slider-ticks: %d", sliderRatio(slider), sliderTickIntervals(slider));
+
+        String field  =
+            slider.isCustom()
+                ? renderCustomSliderField(slider, input, ticks, style)
+                : renderNumericSliderField(slider, input, ticks, style);
+
         return createInputWrapper(
             legend,
             resolveMandatoryIcon(slider.isMandatory(), formId, slider.getSubmitAs(), slider.getMandatoryText()),
             resolveWarningIcon(formId, slider.getSubmitAs()),
             resolveErrorIcon(formId, slider.getSubmitAs()),
             resolveInfoIcon(formId, slider.getSubmitAs(), slider.getInfoText(), slider.getInfoUrl()),
-            input);
+            field);
+    }
+
+    private String renderNumericSliderField(Slider slider, String input, String ticks, String style)
+    {
+        String min    =
+            HtmlElement
+                .builder()
+                .tag("span")
+                .clazz("input-slider-min")
+                .content(plain(slider.getMin()))
+                .build()
+                .html();
+
+        String value  =
+            HtmlElement
+                .builder()
+                .tag("output")
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_FOR)
+                        .value(slider.getUid())
+                        .build())
+                .clazz("input-slider-value")
+                .content(plain((java.lang.Number) slider.getValue()))
+                .build()
+                .html();
+
+        String max    =
+            HtmlElement
+                .builder()
+                .tag("span")
+                .clazz("input-slider-max")
+                .content(plain(slider.getMax()))
+                .build()
+                .html();
+
+        return HtmlElement
+            .builder()
+            .tag(TAG_DIV)
+            .attribute(
+                Attribute
+                    .builder()
+                    .name(ATT_STYLE)
+                    .value(style)
+                    .build())
+            .clazz("input-slider")
+            .content(min)
+            .content(input)
+            .content(max)
+            .content(ticks)
+            .content(value)
+            .build()
+            .html();
+    }
+
+    private String renderCustomSliderField(Slider slider, String input, String ticks, String style)
+    {
+        StringBuilder labels = new StringBuilder();
+        List<String>  values = slider.getCustomValues();
+        int           active = sliderIndex(slider);
+
+        for (int i = 0; i < values.size(); i++)
+        {
+            labels
+                .append(
+                    HtmlElement
+                        .builder()
+                        .tag("span")
+                        .attribute(
+                            Attribute
+                                .builder()
+                                .name(ATT_STYLE)
+                                .value("--ci-slider-index: " + i)
+                                .build())
+                        .clazz(i == active ? "input-slider-label input-slider-label-active" : "input-slider-label")
+                        .content(htmlEscape(values.get(i)))
+                        .build()
+                        .html());
+        }
+
+        String labelRow =
+            HtmlElement
+                .builder()
+                .tag(TAG_DIV)
+                .clazz("input-slider-labels")
+                .content(labels.toString())
+                .build()
+                .html();
+
+        return HtmlElement
+            .builder()
+            .tag(TAG_DIV)
+            .attribute(
+                Attribute
+                    .builder()
+                    .name(ATT_STYLE)
+                    .value(style)
+                    .build())
+            .clazz("input-slider")
+            .clazz("input-slider-custom")
+            .content(input)
+            .content(ticks)
+            .content(labelRow)
+            .build()
+            .html();
     }
 
     private String render(Switch switch1, String formId)
     {
-        String      input         =
+        String input  =
             HtmlElement
                 .builder()
                 .isSingleTag(true)
@@ -1536,6 +1796,12 @@ public final class HtmlMapper
                 .attribute(
                     Attribute
                         .builder()
+                        .name(ATT_ROLE)
+                        .value("switch")
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
                         .name(ATT_ON_INPUT)
                         .value(switch1.getOnInput())
                         .build())
@@ -1545,7 +1811,16 @@ public final class HtmlMapper
                         .name(ATT_CHECKED)
                         .active(switch1.getChecked())
                         .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_DISABLED)
+                        .value(ATT_DISABLED)
+                        .active(switch1.isDisabled())
+                        .build())
                 .clazz(CLASS_FORM_CHECK_INPUT)
+                .clazz("form-switch-input")
+                .clazz("input-field")
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
                 .dataAttribute(DATA_ATT_SUBMIT_AS, switch1.getSubmitAs())
                 .dataAttribute(DATA_ATT_VALUE_TYPE, switch1.getType().name())
@@ -1553,21 +1828,18 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String      legend        =
+        String legend =
             createLegend(switch1)
                 .html();
 
-        HtmlElement elementMapper =
-            HtmlElement
-                .builder()
-                .tag(TAG_DIV)
-                .clazz(CLASS_FORM_CHECK)
-                .clazz("form-switch")
-                .content(input)
-                .content(legend)
-                .build();
-
-        return elementMapper.html();
+        return createInputWrapper(
+            "input-container-switch",
+            legend,
+            resolveMandatoryIcon(switch1.isMandatory(), formId, switch1.getSubmitAs(), switch1.getMandatoryText()),
+            resolveWarningIcon(formId, switch1.getSubmitAs()),
+            resolveErrorIcon(formId, switch1.getSubmitAs()),
+            resolveInfoIcon(formId, switch1.getSubmitAs(), switch1.getInfoText(), switch1.getInfoUrl()),
+            input);
     }
 
     private String render(Tag tag, String formId)

@@ -115,7 +115,7 @@ $(document).ready(function () {
         if (event.shiftKey) {
           reload();
         } else {
-          clientsideError("F5 key isblocked to prevent reload events while waiting on a result. To enforce a reload press SHIFT + F5.");
+          clientsideError("F5 key is blocked to prevent reload events while waiting on a result. To enforce a reload press SHIFT + F5.");
         }
       }
     }
@@ -127,6 +127,26 @@ $(document).ready(function () {
     var btnId = $container.data('connected-btn');
 
     updateButton(btnId);
+  });
+
+  // keep the value display and the track fill of a slider in line with its thumb
+  $(document).on('input', 'input.form-slider-input', function () {
+    updateSlider(this);
+  });
+
+  // jump to the value of a clicked label on a custom value slider
+  $(document).on('click', '.input-slider-label', function () {
+    setSliderValue(this.closest('.input-slider').querySelector('input.form-slider-input'), $(this).index());
+  });
+
+  // jump to the clicked position on the scale
+  $(document).on('click', '.input-slider-ticks', function (e) {
+    const slider = this.closest('.input-slider').querySelector('input.form-slider-input');
+    const rect = this.getBoundingClientRect();
+    const ratio = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+    const min = parseFloat(slider.min);
+
+    setSliderValue(slider, min + ratio * (parseFloat(slider.max) - min));
   });
 
   // trigger hover on input field icons
@@ -1070,6 +1090,13 @@ function extractValuesToSubmit(target) {
           formData.append(id, $(elem).val());
           break;
 
+        case "SLIDER": {
+          const label = $(elem).closest(".input-slider").find(".input-slider-label").eq(parseInt($(elem).val(), 10));
+
+          formData.append(id, label.length > 0 ? label.text() : $(elem).val());
+          break;
+        }
+
         case "CURRENCY":
           break;
 
@@ -1549,6 +1576,34 @@ function _uploadUrl(job, path, params) {
   return `${job.base}/${path}?${new URLSearchParams({ batchUuid: job.batchUuid, ...params })}`;
 }
 // === < file upload =======================================================================================================================
+// === > slider ============================================================================================================================
+// the browser rounds the value to the slider's step
+function setSliderValue(slider, value) {
+  slider.value = value;
+  slider.dispatchEvent(new Event('input', { bubbles: true }));
+  slider.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+function updateSlider(slider) {
+  const min = parseFloat(slider.min);
+  const max = parseFloat(slider.max);
+  const ratio = max > min ? Math.min(Math.max((parseFloat(slider.value) - min) / (max - min), 0), 1) : 0;
+  const field = slider.closest(".input-slider");
+
+  field.style.setProperty("--ci-slider-ratio", ratio);
+
+  const labels = field.querySelectorAll(".input-slider-label");
+
+  if (labels.length > 0) {
+    const index = Math.round(parseFloat(slider.value));
+
+    labels.forEach((label, i) => label.classList.toggle("input-slider-label-active", i === index));
+    slider.setAttribute("aria-valuetext", labels[index].textContent);
+  } else {
+    field.querySelector(".input-slider-value").textContent = slider.value;
+  }
+}
+// === < slider ============================================================================================================================
 // === > tags ==============================================================================================================================
 const tagifyInstances = new Map();
 const tagifyWhitelists = new Map();

@@ -10,8 +10,10 @@ package de.cookindustries.lib.spring.gui.hmi.mapper.json;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.Locale;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -1104,6 +1106,73 @@ class JsonMapperTest
     }
 
     @Test
+    void test_map_SliderInput_customValues()
+    {
+        // run
+        Slider slider = (Slider) mapSliderInput("json-mapper/input/slider-custom-input.ged");
+
+        // verify
+        assertTrue(slider.isCustom());
+        assertEquals(List.of("off", "low", "medium", "high"), slider.getCustomValues());
+        assertEquals("medium", slider.getValue());
+        assertNull(slider.getMin());
+        assertNull(slider.getMax());
+        assertNull(slider.getStep());
+        assertNull(slider.getMarks());
+    }
+
+    @Test
+    void test_map_SliderInput_customValuesWithoutValue_selectsFirst()
+    {
+        // run
+        Slider slider = (Slider) mapSliderInput("json-mapper/input/slider-custom-default-input.ged");
+
+        // verify
+        assertEquals("off", slider.getValue());
+    }
+
+    @Test
+    void test_map_SliderInput_customValuesWithNumericParameter_fails()
+    {
+        // run
+        Input input = mapSliderInput("json-mapper/input/slider-custom-conflict-input.ged");
+
+        // verify
+        assertEquals(Textbox.class, input.getClass());
+    }
+
+    @Test
+    void test_map_SliderInput_customValuesWithUnknownValue_fails()
+    {
+        // run
+        Input input = mapSliderInput("json-mapper/input/slider-custom-unknown-value-input.ged");
+
+        // verify
+        assertEquals(Textbox.class, input.getClass());
+    }
+
+    @Test
+    void test_map_SliderInput_marks()
+    {
+        // run
+        Slider slider = (Slider) mapSliderInput("json-mapper/input/slider-marks-input.ged");
+
+        // verify
+        assertFalse(slider.isCustom());
+        assertEquals(5, slider.getMarks());
+    }
+
+    @Test
+    void test_map_SliderInput_tooFewMarks_fails()
+    {
+        // run
+        Input input = mapSliderInput("json-mapper/input/slider-marks-too-few-input.ged");
+
+        // verify
+        assertEquals(Textbox.class, input.getClass());
+    }
+
+    @Test
     void test_map_SwitchInput()
     {
         // setup
@@ -1294,5 +1363,20 @@ class JsonMapperTest
 
         assertEquals("checkbox-2", checkbox.getBoxes().get(0).getSubmitAs());
         assertEquals("checkbox-2", checkbox.getBoxes().get(1).getSubmitAs());
+    }
+
+    private Input mapSliderInput(String srcPath)
+    {
+        JsonMapper mapper =
+            JsonMapper
+                .builder()
+                .srcPath(srcPath)
+                .locale(Locale.ENGLISH)
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
+                .flatMappableDissector(flatMappableDissector)
+                .build();
+
+        return ((FormContainer) mapper.map().getContainers().get(0)).getInputs().get(0);
     }
 }

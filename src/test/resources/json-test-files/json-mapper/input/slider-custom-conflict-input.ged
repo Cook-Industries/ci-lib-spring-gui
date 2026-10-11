@@ -1,0 +1,21 @@
+{
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "SLIDER",
+            "classes": [],
+            "attributes": {},
+            "parameters": {
+                "name": "name",
+                "submitAs": "slider",
+                "mandatory": true,
+                "customValues": ["off", "low", "medium", "high"],
+                "min": 0
+            }
+        }
+    ]
+}
