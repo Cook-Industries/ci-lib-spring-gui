@@ -28,6 +28,19 @@ public final class BasicUiFunction
         return new ResetForm(formId);
     }
 
+    /**
+     * Reset the button that was marked as having pending changes by the form it is connected to.
+     * <p>
+     * The ui never resets it on its own, add this to the response once the server has accepted the form data.
+     *
+     * @param btnId id of the button
+     * @return the function call
+     */
+    public static ResetBtn resetBtn(String btnId)
+    {
+        return new ResetBtn(btnId);
+    }
+
     public static GetComponent getComponent(String url)
     {
         return new GetComponent(url);
