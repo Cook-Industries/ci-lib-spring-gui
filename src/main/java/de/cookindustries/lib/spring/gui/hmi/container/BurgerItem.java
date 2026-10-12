@@ -25,8 +25,11 @@ public final class BurgerItem
     @NonNull
     private final String icon;
 
+    /**
+     * icon size in {@code rem}, {@code 0} keeps the size of the stylesheet
+     */
     @Default
-    private final int    iconSize = 2;
+    private final int    iconSize = 0;
 
     @NonNull
     private final String url;

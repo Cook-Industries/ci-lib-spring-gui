@@ -61,10 +61,19 @@ public enum BasicText
 
     INPUT_CHECK_RESULT_TOO_FEW("input-check-result-too-few", "[{0}] has too few entries, expected min. [{1}]"),
 
-    INPUT_CHECK_RESULT_TOO_MANY("input-check-result-too-many", "[{0}] has too many entries, expected max. [{1}]");
+    INPUT_CHECK_RESULT_TOO_MANY("input-check-result-too-many", "[{0}] has too many entries, expected max. [{1}]"),
 
-    private final String key;
-    private final String text;
+    /** Shown by the browser when F5 is pressed while the loader blocks the page */
+    UI_F5_BLOCKED("ui-f5-blocked",
+        "F5 key is blocked to prevent reload events while waiting on a result. To enforce a reload press SHIFT + F5.",
+        TranslationScope.CLIENT),
+
+    /** Shown by the browser next to an input whose value does not match its pattern */
+    UI_INPUT_PATTERN_MISMATCH("ui-input-pattern-mismatch", "value does not match the expected format [{0}]", TranslationScope.CLIENT);
+
+    private final String           key;
+    private final String           text;
+    private final TranslationScope scope;
 
     /**
      * Basic constructor
@@ -74,8 +83,21 @@ public enum BasicText
      */
     BasicText(String key, String text)
     {
+        this(key, text, TranslationScope.SERVER);
+    }
+
+    /**
+     * Constructor with a scope
+     * 
+     * @param key of this text block
+     * @param text to use as a fallback
+     * @param scope where this text may be used
+     */
+    BasicText(String key, String text, TranslationScope scope)
+    {
         this.key = key;
         this.text = text;
+        this.scope = scope;
     }
 
     /**
@@ -96,5 +118,15 @@ public enum BasicText
     public final String getText()
     {
         return text;
+    }
+
+    /**
+     * Get the scope of this text block
+     * 
+     * @return where this text may be used
+     */
+    public final TranslationScope getScope()
+    {
+        return scope;
     }
 }

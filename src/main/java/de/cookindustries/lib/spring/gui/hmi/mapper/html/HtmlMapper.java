@@ -118,6 +118,11 @@ public final class HtmlMapper
     private static final String        ATT_CONTROLS                   = "controls";
     private static final String        ATT_AUTOPLAY                   = "autoplay";
     private static final String        ATT_ROLE                       = "role";
+    private static final String        ATT_LOOP                       = "loop";
+    private static final String        ATT_MUTED                      = "muted";
+    private static final String        ATT_PRELOAD                    = "preload";
+    private static final String        ATT_PATTERN                    = "pattern";
+    private static final String        ATT_ARIA_LABEL                 = "aria-label";
 
     private static final String        CLASS_INPUT_LEGEND             = "input-legend";
     private static final String        CLASS_FORM_CONTROL             = "form-control";
@@ -127,6 +132,7 @@ public final class HtmlMapper
     private static final String        CLASS_FORM_CHECK_INPUT         = "form-checkbox-input";
     private static final String        CLASS_FORM_CHECK_LABEL         = "form-checkbox-label";
     private static final String        CLASS_FORM_SELECT              = "form-select";
+    private static final String        CLASS_INPUT_CHECKS_WRAPPER     = "input-checkboxes-wrapper";
 
     private static final String        INPUT_CONTAINER                = "input-container";
 
@@ -258,15 +264,15 @@ public final class HtmlMapper
 
         if (slider.isCustom())
         {
-            min      = BigDecimal.ZERO;
-            range    = BigDecimal.valueOf(slider.getCustomValues().size() - 1L);
+            min = BigDecimal.ZERO;
+            range = BigDecimal.valueOf(slider.getCustomValues().size() - 1L);
             position = BigDecimal.valueOf(sliderIndex(slider));
         }
         else
         {
-            min      = toBigDecimal(slider.getMin());
-            range    = toBigDecimal(slider.getMax()).subtract(min);
-            position = toBigDecimal((java.lang.Number) slider.getValue());
+            min = toBigDecimal(slider.getMin());
+            range = toBigDecimal(slider.getMax()).subtract(min);
+            position = new BigDecimal(slider.getValue());
         }
 
         if (range.signum() <= 0)
@@ -311,6 +317,22 @@ public final class HtmlMapper
         }
 
         return Math.max(intervals.intValue(), 1);
+    }
+
+    /**
+     * Stylesheet classes that lay out the children of a container in {@code direction}. {@link Direction#NONE} leaves the layout to the
+     * browser default.
+     */
+    private static List<String> directionClasses(Direction direction)
+    {
+        return switch (direction)
+        {
+            case HORIZONTAL -> List.of("container-direction-row");
+            case HORIZONTAL_REVERSE -> List.of("container-direction-row-reverse");
+            case VERTICAL -> List.of("container-direction-column");
+            case VERTICAL_REVERSE -> List.of("container-direction-column-reverse");
+            case NONE -> List.of();
+        };
     }
 
     // === < helper functions ==============================================================================================================
@@ -360,7 +382,7 @@ public final class HtmlMapper
                 HtmlElement
                     .builder()
                     .tag(TAG_FIGCAPTION)
-                    .dataAttribute(DATA_ATT_TOOLTIP, audio.getTooltip().isBlank() ? null : htmlEscape(audio.getTooltip()))
+                    .dataAttribute(DATA_ATT_TOOLTIP, audio.getTooltip().isBlank() ? null : audio.getTooltip())
                     .content(audio.getCaption())
                     .build()
                     .html())
@@ -392,6 +414,26 @@ public final class HtmlMapper
                             .active(audio.isAutoplay())
                             .name(ATT_AUTOPLAY)
                             .build())
+                    .attribute(
+                        Attribute
+                            .builder()
+                            .active(audio.isLooped())
+                            .name(ATT_LOOP)
+                            .build())
+                    .attribute(
+                        Attribute
+                            .builder()
+                            .active(audio.isMuted())
+                            .name(ATT_MUTED)
+                            .build())
+                    .attribute(
+                        Attribute
+                            .builder()
+                            .name(ATT_PRELOAD)
+                            .value(audio.getPreload().name().toLowerCase())
+                            .build())
+                    .classes(audio.getClasses())
+                    .dataAttributes(audio.getDataAttributes())
                     .build()
                     .html())
             .build()
@@ -408,8 +450,8 @@ public final class HtmlMapper
                     .builder()
                     .tag(TAG_DIV)
                     .clazz("burger-item")
-                    .dataAttribute("burger-url", htmlEscape(item.getUrl()))
-                    .dataAttribute("burger-method", htmlEscape(item.getMethod()))
+                    .dataAttribute("burger-url", item.getUrl())
+                    .dataAttribute("burger-method", item.getMethod())
                     .content(
                         HtmlElement
                             .builder()
@@ -421,6 +463,13 @@ public final class HtmlMapper
                                     .tag("i")
                                     .clazz("bi")
                                     .clazz(item.getIcon())
+                                    .attribute(
+                                        Attribute
+                                            .builder()
+                                            .name(ATT_STYLE)
+                                            .value(String.format("font-size: %drem", item.getIconSize()))
+                                            .active(item.getIconSize() > 0)
+                                            .build())
                                     .inactive(item.getIcon().isBlank())
                                     .build()
                                     .html())
@@ -449,6 +498,7 @@ public final class HtmlMapper
                         .value(burger.getUid())
                         .build())
                 .clazz("burger-menu")
+                .clazz(burger.getBtnClass().getClassName())
                 .classes(burger.getClasses())
                 .dataAttributes(burger.getDataAttributes())
                 .content(
@@ -457,7 +507,8 @@ public final class HtmlMapper
                         .tag("i")
                         .clazz("burger-icon")
                         .clazz("bi")
-                        .clazz("bi-list")
+                        .clazz(burger.getIcon())
+                        .inactive(burger.getIcon().isBlank())
                         .build()
                         .html())
                 .content(
@@ -478,7 +529,7 @@ public final class HtmlMapper
         return HtmlElement
             .builder()
             .tag("button")
-            .dataAttribute(DATA_ATT_TOOLTIP, button.getTooltip().isBlank() ? null : htmlEscape(button.getTooltip()))
+            .dataAttribute(DATA_ATT_TOOLTIP, button.getTooltip().isBlank() ? null : button.getTooltip())
             .attribute(
                 Attribute
                     .builder()
@@ -511,7 +562,7 @@ public final class HtmlMapper
             .clazz(buttonIcon.getBtnClass().getClassName())
             .classes(buttonIcon.getClasses())
             .dataAttributes(buttonIcon.getDataAttributes())
-            .dataAttribute(DATA_ATT_TOOLTIP, buttonIcon.getTooltip().isBlank() ? null : htmlEscape(buttonIcon.getTooltip()))
+            .dataAttribute(DATA_ATT_TOOLTIP, buttonIcon.getTooltip().isBlank() ? null : buttonIcon.getTooltip())
             .attribute(
                 Attribute
                     .builder()
@@ -524,6 +575,13 @@ public final class HtmlMapper
                     .name(ATT_ON_CLICK)
                     .active(!buttonIcon.getOnClick().isBlank())
                     .value(buttonIcon.getOnClick())
+                    .build())
+            .attribute(
+                Attribute
+                    .builder()
+                    .name(ATT_ARIA_LABEL)
+                    .active(isFilled(buttonIcon::getAlt))
+                    .value(buttonIcon.getAlt())
                     .build())
             .content(
                 HtmlElement
@@ -550,13 +608,14 @@ public final class HtmlMapper
         return HtmlElement
             .builder()
             .tag(TAG_DIV)
-            .dataAttribute(DATA_ATT_TOOLTIP, contentContainer.getTooltip().isBlank() ? null : htmlEscape(contentContainer.getTooltip()))
+            .dataAttribute(DATA_ATT_TOOLTIP, contentContainer.getTooltip().isBlank() ? null : contentContainer.getTooltip())
             .attribute(
                 Attribute
                     .builder()
                     .name(ATT_ID)
                     .value(contentContainer.getUid())
                     .build())
+            .classes(directionClasses(contentContainer.getDirection()))
             .classes(contentContainer.getClasses())
             .dataAttributes(contentContainer.getDataAttributes())
             .content(content)
@@ -584,7 +643,14 @@ public final class HtmlMapper
                         .value(formContainer.getUid())
                         .build())
                 .clazz("form-container")
-                .clazz(formContainer.getDirection() == Direction.HORIZONTAL ? "form-container-row" : "form-container-column")
+                .clazz(
+                    switch (formContainer.getDirection())
+                                              {
+                                                  case HORIZONTAL -> "form-container-row";
+                                                  case HORIZONTAL_REVERSE -> "form-container-row-reverse";
+                                                  case VERTICAL_REVERSE -> "form-container-column-reverse";
+                                                  case VERTICAL, NONE -> "form-container-column";
+                                              })
                 .classes(formContainer.getClasses())
                 .dataAttributes(formContainer.getDataAttributes())
                 .content(content)
@@ -642,7 +708,7 @@ public final class HtmlMapper
                         .build())
                 .classes(imageContainer.getClasses())
                 .dataAttributes(imageContainer.getDataAttributes())
-                .dataAttribute(DATA_ATT_TOOLTIP, imageContainer.getTooltip().isBlank() ? null : htmlEscape(imageContainer.getTooltip()))
+                .dataAttribute(DATA_ATT_TOOLTIP, imageContainer.getTooltip().isBlank() ? null : imageContainer.getTooltip())
                 .build();
 
         return elementMapper.html();
@@ -674,7 +740,7 @@ public final class HtmlMapper
                         .build())
                 .classes(linkContainer.getClasses())
                 .dataAttributes(linkContainer.getDataAttributes())
-                .dataAttribute(DATA_ATT_TOOLTIP, linkContainer.getTooltip().isBlank() ? null : htmlEscape(linkContainer.getTooltip()))
+                .dataAttribute(DATA_ATT_TOOLTIP, linkContainer.getTooltip().isBlank() ? null : linkContainer.getTooltip())
                 .content(render(linkContainer.getContent()))
                 .build();
 
@@ -792,6 +858,7 @@ public final class HtmlMapper
                         .build())
                 .clazz("d-flex")
                 .clazz("justify-content-between")
+                .classes(directionClasses(splittedContainer.getDirection()))
                 .classes(splittedContainer.getClasses())
                 .dataAttributes(splittedContainer.getDataAttributes())
                 .content(head)
@@ -955,7 +1022,7 @@ public final class HtmlMapper
                     .build())
             .classes(textContainer.getClasses())
             .dataAttributes(textContainer.getDataAttributes())
-            .dataAttribute(DATA_ATT_TOOLTIP, textContainer.getTooltip().isBlank() ? null : htmlEscape(textContainer.getTooltip()))
+            .dataAttribute(DATA_ATT_TOOLTIP, textContainer.getTooltip().isBlank() ? null : textContainer.getTooltip())
             .content(htmlEscape(textContainer.getText()))
             .build()
             .html();
@@ -975,7 +1042,7 @@ public final class HtmlMapper
             .classes(textHeaderContainer.getClasses())
             .dataAttributes(textHeaderContainer.getDataAttributes())
             .dataAttribute(DATA_ATT_TOOLTIP,
-                textHeaderContainer.getTooltip().isBlank() ? null : htmlEscape(textHeaderContainer.getTooltip()))
+                textHeaderContainer.getTooltip().isBlank() ? null : textHeaderContainer.getTooltip())
             .content(htmlEscape(textHeaderContainer.getText()))
             .build()
             .html();
@@ -1020,7 +1087,7 @@ public final class HtmlMapper
                     .build())
             .clazz(formClass)
             .clazz(CLASS_USER_SELECT_NONE)
-            .dataAttribute(DATA_ATT_TOOLTIP, input.getTooltip().isBlank() ? null : htmlEscape(input.getTooltip()))
+            .dataAttribute(DATA_ATT_TOOLTIP, input.getTooltip().isBlank() ? null : input.getTooltip())
             .content(htmlEscape(input.getName()))
             .build();
     }
@@ -1059,6 +1126,7 @@ public final class HtmlMapper
                     .build())
             .clazz(formClass)
             .clazz("input-field")
+            .classes(input.getClasses())
             .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
             .dataAttribute(DATA_ATT_SUBMIT_AS, input.getSubmitAs())
             .dataAttribute(DATA_ATT_VALUE_TYPE, input.getType().name())
@@ -1140,7 +1208,15 @@ public final class HtmlMapper
                                     .name(ATT_CHECKED)
                                     .active(box.isChecked())
                                     .build())
+                            .attribute(
+                                Attribute
+                                    .builder()
+                                    .name(ATT_DISABLED)
+                                    .value(ATT_DISABLED)
+                                    .active(checkbox.isDisabled())
+                                    .build())
                             .clazz(CLASS_FORM_CHECK_INPUT)
+                            .classes(checkbox.getClasses())
                             .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
                             .dataAttribute(DATA_ATT_SUBMIT_AS, submitId)
                             .dataAttribute(DATA_ATT_VALUE_TYPE, checkbox.getType().name())
@@ -1184,7 +1260,7 @@ public final class HtmlMapper
             HtmlElement
                 .builder()
                 .tag(TAG_DIV)
-                .clazz("input-checkboxes-wrapper")
+                .clazz(CLASS_INPUT_CHECKS_WRAPPER)
                 .contents(boxes)
                 .build()
                 .html();
@@ -1198,7 +1274,7 @@ public final class HtmlMapper
                 .content(resolveMandatoryIcon(checkbox.isMandatory(), formId, checkbox.getSubmitAs(), checkbox.getMandatoryText()))
                 .content(resolveErrorIcon(formId, checkbox.getSubmitAs()))
                 .content(resolveWarningIcon(formId, checkbox.getSubmitAs()))
-                .content(resolveInfoIcon(formId, checkbox.getUid(), checkbox.getInfoText(), checkbox.getInfoUrl()))
+                .content(resolveInfoIcon(formId, checkbox.getSubmitAs(), checkbox.getInfoText(), checkbox.getInfoUrl()))
                 .content(checkboxes)
                 .build();
 
@@ -1219,6 +1295,26 @@ public final class HtmlMapper
                         .builder()
                         .name(ATT_VALUE)
                         .value(date.getValue())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_MIN)
+                        .value(date.getMin())
+                        .active(isFilled(date::getMin))
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_MAX)
+                        .value(date.getMax())
+                        .active(isFilled(date::getMax))
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_STEP)
+                        .value(String.valueOf(date.getStep()))
                         .build())
                 .build()
                 .html();
@@ -1288,9 +1384,10 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_VALUE)
-                        .value(htmlEscape(hidden.getValue()))
+                        .value(hidden.getValue())
                         .build())
                 .clazz(CLASS_HIDDEN)
+                .classes(hidden.getClasses())
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
                 .dataAttribute(DATA_ATT_SUBMIT_AS, hidden.getSubmitAs())
                 .dataAttribute(DATA_ATT_VALUE_TYPE, hidden.getType().name())
@@ -1327,7 +1424,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_PLACEHOLDER)
-                        .value(htmlEscape(number.getPlaceholder()))
+                        .value(number.getPlaceholder())
                         .build())
                 .attribute(
                     Attribute
@@ -1379,7 +1476,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_PLACEHOLDER)
-                        .value(htmlEscape(password.getPlaceholder()))
+                        .value(password.getPlaceholder())
                         .build())
                 .dataAttribute(DATA_ATT_ON_ENTER_PRESS, password.getOnEnterPress())
                 .build()
@@ -1416,7 +1513,7 @@ public final class HtmlMapper
                     .builder()
                     .isSingleTag(true)
                     .tag(TAG_INPUT)
-                    .dataAttribute(DATA_ATT_TOOLTIP, box.getTooltip().isBlank() ? null : htmlEscape(box.getTooltip()))
+                    .dataAttribute(DATA_ATT_TOOLTIP, box.getTooltip().isBlank() ? null : box.getTooltip())
                     .attribute(
                         Attribute
                             .builder()
@@ -1433,7 +1530,7 @@ public final class HtmlMapper
                         Attribute
                             .builder()
                             .name(ATT_VALUE)
-                            .value(htmlEscape(box.getValue()))
+                            .value(box.getValue())
                             .build())
                     .attribute(
                         Attribute
@@ -1452,6 +1549,13 @@ public final class HtmlMapper
                             .builder()
                             .name(ATT_CHECKED)
                             .active(checkFirst || box.isChecked())
+                            .build())
+                    .attribute(
+                        Attribute
+                            .builder()
+                            .name(ATT_DISABLED)
+                            .value(ATT_DISABLED)
+                            .active(radio.isDisabled())
                             .build())
                     .clazz(CLASS_FORM_CHECK_INPUT)
                     .build()
@@ -1488,29 +1592,37 @@ public final class HtmlMapper
             buttons.add(innerDiv.html());
         }
 
-        String      legend   =
+        String legend =
             createLegend(radio)
                 .html();
 
-        HtmlElement outerDiv =
+        String group  =
             HtmlElement
                 .builder()
                 .tag(TAG_DIV)
-                .clazz(CLASS_FORM_CHECK)
                 .attribute(
                     Attribute
                         .builder()
                         .name(ATT_ID)
                         .value(radio.getUid())
                         .build())
+                .clazz(CLASS_INPUT_CHECKS_WRAPPER)
+                .classes(radio.getClasses())
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
                 .dataAttribute(DATA_ATT_SUBMIT_AS, radio.getSubmitAs())
                 .dataAttribute(DATA_ATT_VALUE_TYPE, radio.getType().name())
-                .content(legend)
+                .dataAttributes(radio.getDataAttributes())
                 .contents(buttons)
-                .build();
+                .build()
+                .html();
 
-        return outerDiv.html();
+        return createInputWrapper(
+            legend,
+            resolveMandatoryIcon(radio.isMandatory(), formId, radio.getSubmitAs(), radio.getMandatoryText()),
+            resolveWarningIcon(formId, radio.getSubmitAs()),
+            resolveErrorIcon(formId, radio.getSubmitAs()),
+            resolveInfoIcon(formId, radio.getSubmitAs(), radio.getInfoText(), radio.getInfoUrl()),
+            group);
     }
 
     private String render(Select select, String formId)
@@ -1523,12 +1635,12 @@ public final class HtmlMapper
                 HtmlElement
                     .builder()
                     .tag(TAG_OPTION)
-                    .dataAttribute(DATA_ATT_TOOLTIP, option.getTooltip().isBlank() ? null : htmlEscape(option.getTooltip()))
+                    .dataAttribute(DATA_ATT_TOOLTIP, option.getTooltip().isBlank() ? null : option.getTooltip())
                     .attribute(
                         Attribute
                             .builder()
                             .name(ATT_VALUE)
-                            .value(htmlEscape(option.getValue()))
+                            .value(option.getValue())
                             .build())
                     .attribute(
                         Attribute
@@ -1593,7 +1705,7 @@ public final class HtmlMapper
                         .value(
                             slider.isCustom()
                                 ? String.valueOf(sliderIndex(slider))
-                                : plain((java.lang.Number) slider.getValue()))
+                                : slider.getValue())
                         .build())
                 .attribute(
                     Attribute
@@ -1633,10 +1745,11 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_ARIA_VALUETEXT)
-                        .value(String.valueOf(slider.getValue()))
+                        .value(slider.getValue())
                         .active(slider.isCustom())
                         .build())
                 .clazz("form-slider-input")
+                .classes(slider.getClasses())
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
                 .dataAttribute(DATA_ATT_SUBMIT_AS, slider.getSubmitAs())
                 .dataAttribute(DATA_ATT_VALUE_TYPE, slider.getType().name())
@@ -1670,7 +1783,7 @@ public final class HtmlMapper
 
     private String renderNumericSliderField(Slider slider, String input, String ticks, String style)
     {
-        String min    =
+        String min   =
             HtmlElement
                 .builder()
                 .tag("span")
@@ -1679,7 +1792,7 @@ public final class HtmlMapper
                 .build()
                 .html();
 
-        String value  =
+        String value =
             HtmlElement
                 .builder()
                 .tag("output")
@@ -1690,11 +1803,11 @@ public final class HtmlMapper
                         .value(slider.getUid())
                         .build())
                 .clazz("input-slider-value")
-                .content(plain((java.lang.Number) slider.getValue()))
+                .content(slider.getValue())
                 .build()
                 .html();
 
-        String max    =
+        String max   =
             HtmlElement
                 .builder()
                 .tag("span")
@@ -1821,6 +1934,7 @@ public final class HtmlMapper
                 .clazz(CLASS_FORM_CHECK_INPUT)
                 .clazz("form-switch-input")
                 .clazz("input-field")
+                .classes(switch1.getClasses())
                 .dataAttribute(DATA_ATT_SUBMIT_ID, formId)
                 .dataAttribute(DATA_ATT_SUBMIT_AS, switch1.getSubmitAs())
                 .dataAttribute(DATA_ATT_VALUE_TYPE, switch1.getType().name())
@@ -1856,11 +1970,10 @@ public final class HtmlMapper
                         .builder()
                         .name(ATT_VALUE)
                         .value(
-                            htmlEscape(
-                                tag
-                                    .getTags()
-                                    .stream()
-                                    .collect(Collectors.joining(","))))
+                            tag
+                                .getTags()
+                                .stream()
+                                .collect(Collectors.joining(",")))
                         .build())
                 .attribute(
                     Attribute
@@ -1896,7 +2009,7 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_PLACEHOLDER)
-                        .value(htmlEscape(textarea.getPlaceholder()))
+                        .value(textarea.getPlaceholder())
                         .build())
                 .attribute(
                     Attribute
@@ -1938,7 +2051,7 @@ public final class HtmlMapper
                 .builder()
                 .tag(TAG_LABEL)
                 .clazz(CLASS_USER_SELECT_NONE)
-                .dataAttribute(DATA_ATT_TOOLTIP, textbox.getTooltip().isBlank() ? null : htmlEscape(textbox.getTooltip()))
+                .dataAttribute(DATA_ATT_TOOLTIP, textbox.getTooltip().isBlank() ? null : textbox.getTooltip())
                 .content(htmlEscape(textbox.getName()))
                 .build()
                 .html();
@@ -1976,19 +2089,26 @@ public final class HtmlMapper
                     Attribute
                         .builder()
                         .name(ATT_VALUE)
-                        .value(htmlEscape(textfield.getValue()))
+                        .value(textfield.getValue())
                         .build())
                 .attribute(
                     Attribute
                         .builder()
                         .name(ATT_PLACEHOLDER)
-                        .value(htmlEscape(textfield.getPlaceholder()))
+                        .value(textfield.getPlaceholder())
                         .build())
                 .attribute(
                     Attribute
                         .builder()
                         .name(ATT_ON_KEY_DOWN)
                         .value(textfield.getOnKeydown())
+                        .build())
+                .attribute(
+                    Attribute
+                        .builder()
+                        .name(ATT_PATTERN)
+                        .value(textfield.getPattern())
+                        .active(isFilled(textfield::getPattern))
                         .build())
                 .clazz(CLASS_FORM_CONTROL)
                 .dataAttribute(DATA_ATT_MAX_CHARACTERS, String.valueOf(textfield.getMaxCharacters()))

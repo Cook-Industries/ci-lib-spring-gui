@@ -13,7 +13,7 @@
                 "name": "name",
                 "submitAs": "tag",
                 "mandatory": true,
-                "value": [
+                "tags": [
                     "test",
                     "germany"
                 ],

@@ -14,6 +14,7 @@ import java.util.Locale;
 
 import org.springframework.stereotype.Component;
 
+import de.cookindustries.lib.spring.gui.config.properties.CiLibProperties;
 import de.cookindustries.lib.spring.gui.function.AbsFunctionCall;
 import de.cookindustries.lib.spring.gui.function.BasicUiFunction;
 import de.cookindustries.lib.spring.gui.hmi.container.Button;
@@ -61,19 +62,26 @@ public final class GUIFactory
     private final AbsTranslationProvider translationProvider;
     private final FlatMappableDissector  flatMappableDissector;
     private final SiteImports            basicImports;
+    private final String                 jsUiTranslationsUrl;
 
     /**
      * Construct a GUIFactory instance
      * 
+     * @param globalProperties
      * @param properties to incorporate
+     * @param templateFileCache
      * @param translationProvider to fetch translated text from
+     * @param flatMappableDissector
      */
-    public GUIFactory(GuiFactoryProperties properties, TemplateFileCache templateFileCache, AbsTranslationProvider translationProvider,
+    public GUIFactory(CiLibProperties globalProperties, GuiFactoryProperties properties, TemplateFileCache templateFileCache,
+        AbsTranslationProvider translationProvider,
         FlatMappableDissector flatMappableDissector)
     {
         this.templateFileCache = templateFileCache;
         this.translationProvider = translationProvider;
         this.flatMappableDissector = flatMappableDissector;
+
+        this.jsUiTranslationsUrl = globalProperties.getWeb().getTranslation().getUrl();
 
         List<CSSLink> cssLinks =
             properties
@@ -227,6 +235,20 @@ public final class GUIFactory
                     .uid("ui-properties-url")
                     .clazz("hidden")
                     .text(imports.getJsPropertiesUrl())
+                    .build())
+            .container(
+                TextContainer
+                    .builder()
+                    .uid("ui-translations-url")
+                    .clazz("hidden")
+                    .text(jsUiTranslationsUrl)
+                    .build())
+            .container(
+                TextContainer
+                    .builder()
+                    .uid("ui-locale")
+                    .clazz("hidden")
+                    .text(compSrc.getLocale() == null ? "" : compSrc.getLocale().toLanguageTag())
                     .build())
             .container(
                 ContentContainer

@@ -23,10 +23,14 @@ public class CiLibWebProperties
 
     @Valid
     @NestedConfigurationProperty
-    private CiLibWebPathProperties   path   = new CiLibWebPathProperties();
+    private CiLibServerPathProperties  path        = new CiLibServerPathProperties();
 
     @Valid
     @NestedConfigurationProperty
-    private CiLibWebUploadProperties upload = new CiLibWebUploadProperties();
+    private CiLibWebUploadProperties   upload      = new CiLibWebUploadProperties();
+
+    @Valid
+    @NestedConfigurationProperty
+    private CiLibTranslationProperties translation = new CiLibTranslationProperties();
 
 }

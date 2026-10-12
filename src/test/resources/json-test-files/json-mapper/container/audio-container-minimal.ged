@@ -1,0 +1,14 @@
+{
+    "uid": "uid",
+    "type": "AUDIO",
+    "classes": [
+        "class1"
+    ],
+    "attributes": {
+        "key1": "value1"
+    },
+    "parameters": {
+        "src": "path/to/resource",
+        "caption": "audio caption"
+    }
+}

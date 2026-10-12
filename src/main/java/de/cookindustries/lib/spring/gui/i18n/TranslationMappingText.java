@@ -8,6 +8,7 @@
 package de.cookindustries.lib.spring.gui.i18n;
 
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.jackson.Jacksonized;
@@ -29,5 +30,10 @@ public class TranslationMappingText
     /** the translated text */
     @NonNull
     private final String text;
+
+    /** where the translation may be used, defaults to {@link TranslationScope#SERVER} */
+    @NonNull
+    @Default
+    private final TranslationScope scope = TranslationScope.SERVER;
 
 }

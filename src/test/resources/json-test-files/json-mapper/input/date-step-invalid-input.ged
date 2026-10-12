@@ -1,0 +1,21 @@
+{
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "DATE",
+            "classes": [],
+            "attributes": {},
+            "parameters": {
+                "name": "name",
+                "mandatory": true,
+                "submitAs": "date",
+                "value": "2026-05-01",
+                "step": 0
+            }
+        }
+    ]
+}

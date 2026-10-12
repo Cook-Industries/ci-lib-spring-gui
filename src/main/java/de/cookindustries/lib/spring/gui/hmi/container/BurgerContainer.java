@@ -30,7 +30,7 @@ public class BurgerContainer extends Container
 
     @NonNull
     @Default
-    private final String           icon     = "bi-three-dots-vertical";
+    private final String           icon     = "bi-list";
 
     @Singular
     private final List<BurgerItem> items;

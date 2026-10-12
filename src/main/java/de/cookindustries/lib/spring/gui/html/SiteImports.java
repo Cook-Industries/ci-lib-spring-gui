@@ -10,9 +10,9 @@ package de.cookindustries.lib.spring.gui.html;
 import java.util.List;
 
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.Singular;
-import lombok.Builder.Default;
 
 @Builder
 @Getter

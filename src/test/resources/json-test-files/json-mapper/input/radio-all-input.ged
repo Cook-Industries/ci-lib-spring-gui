@@ -1,0 +1,49 @@
+{
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "RADIO",
+            "classes": [
+                "class1",
+                "class2"
+            ],
+            "attributes": {
+                "key1": "value1"
+            },
+            "parameters": {
+                "name": "name",
+                "submitAs": "submit",
+                "tooltip": "tip",
+                "onInput": "inp()",
+                "infoText": "info text",
+                "infoUrl": "/info/url",
+                "disabled": true,
+                "mandatory": true
+            },
+            "children": [
+                {
+                    "type": "INPUT_VALUE",
+                    "classes": [],
+                    "parameters": {
+                        "id": "box-1",
+                        "text": "first",
+                        "value": "1",
+                        "checked": true
+                    }
+                },
+                {
+                    "type": "INPUT_VALUE",
+                    "classes": [],
+                    "parameters": {
+                        "text": "second",
+                        "value": "2"
+                    }
+                }
+            ]
+        }
+    ]
+}

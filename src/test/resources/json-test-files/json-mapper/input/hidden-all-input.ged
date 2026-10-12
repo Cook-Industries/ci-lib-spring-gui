@@ -1,0 +1,25 @@
+{
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "HIDDEN",
+            "classes": [
+                "class1",
+                "class2"
+            ],
+            "attributes": {
+                "key1": "value1"
+            },
+            "parameters": {
+                "submitAs": "submit",
+                "value": "secret",
+                "disabled": true,
+                "mandatory": true
+            }
+        }
+    ]
+}

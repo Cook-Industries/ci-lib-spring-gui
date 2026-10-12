@@ -1,5 +1,6 @@
 import { Client } from '/webjars/stomp__stompjs/esm6/index.js';
 import { Logger } from '/js/ci-lib-logger.js';
+import { Translations } from '/js/ci-lib-translations.js';
 
 export {
   init,
@@ -79,6 +80,16 @@ $(document).ready(function () {
     LOGGER.debug("no properties fetch url present, skip.");
   }
 
+  // load translations if neccessary
+  var translationUrl = ($('#ui-translations-url').html() || "").trim();
+
+  if (translationUrl) {
+    LOGGER.debug("translations are checked at ", translationUrl);
+    Translations.init({ url: translationUrl, request: _request, locale: ($('#ui-locale').html() || "").trim() });
+  } else {
+    LOGGER.debug("no translation url present, skip.");
+  }
+
   // close modal on overlay click
   $(document).on("click", ".modal-overlay", function (event) {
     if (event.target === this) {
@@ -115,7 +126,7 @@ $(document).ready(function () {
         if (event.shiftKey) {
           reload();
         } else {
-          clientsideError("F5 key is blocked to prevent reload events while waiting on a result. To enforce a reload press SHIFT + F5.");
+          clientsideError(Translations.translate("ui-f5-blocked"));
         }
       }
     }
@@ -132,6 +143,11 @@ $(document).ready(function () {
   // keep the value display and the track fill of a slider in line with its thumb
   $(document).on('input', 'input.form-slider-input', function () {
     updateSlider(this);
+  });
+
+  // native pattern validation only reports on a form submit, which the lib never triggers
+  $(document).on('input change', 'input[data-value-type="TEXTFIELD"][pattern]', function () {
+    checkPattern(this);
   });
 
   // jump to the value of a clicked label on a custom value slider
@@ -1135,6 +1151,26 @@ function extractValuesToSubmit(target) {
   }
 
   return formData;
+}
+
+/**
+ * Shows the error marker of a text input while its value violates its pattern, hides it again once it matches.
+ *
+ * @param {HTMLInputElement} input - a text input with a pattern attribute
+ */
+function checkPattern(input) {
+  const marker = document.getElementById(`input-icon-${input.dataset.submitId}-error-${input.dataset.submitAs}`);
+
+  if (marker === null) {
+    return;
+  }
+
+  if (input.validity.patternMismatch) {
+    $(marker).find(".input-icon-text").text(Translations.translate("ui-input-pattern-mismatch", input.validationMessage, input.pattern));
+    marker.classList.remove(CLASS_HIDDEN);
+  } else {
+    marker.classList.add(CLASS_HIDDEN);
+  }
 }
 
 function updateButton(btnId) {

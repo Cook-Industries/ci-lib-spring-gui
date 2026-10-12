@@ -147,6 +147,7 @@ public class JsonMapper
     private static final String                                 PARAM_ANGLE_LARGE_ARC_FLAG     = "angleLargeArcFlag";
     private static final String                                 PARAM_AUTOPLAY                 = "autoplay";
     private static final String                                 PARAM_BOXES                    = "boxes";
+    private static final String                                 PARAM_ALT                      = "alt";
     private static final String                                 PARAM_BTN_CENTER_CLASS         = "btnCenterClass";
     private static final String                                 PARAM_BTN_CENTER_FUNCTION      = "btnCenterFunction";
     private static final String                                 PARAM_BTN_CENTER_NAME          = "btnCenterName";
@@ -159,6 +160,7 @@ public class JsonMapper
     private static final String                                 PARAM_BTN_RIGHT_NAME           = "btnRightName";
     private static final String                                 PARAM_CHECKED                  = "checked";
     private static final String                                 PARAM_CLOSE_ON_OVERLAY_CLICK   = "closeOnOverlayClick";
+    private static final String                                 PARAM_COLS                     = "cols";
     private static final String                                 PARAM_CONNECTED_BTN            = "connectedBtn";
     private static final String                                 PARAM_CONTROLS                 = "controls";
     private static final String                                 PARAM_CUSTOM_VALUES            = "customValues";
@@ -182,6 +184,7 @@ public class JsonMapper
     private static final String                                 PARAM_HEIGHT                   = "height";
     private static final String                                 PARAM_HREF                     = "href";
     private static final String                                 PARAM_ICON                     = "icon";
+    private static final String                                 PARAM_ICON_SIZE                = "iconSize";
     private static final String                                 PARAM_ID                       = "id";
     private static final String                                 PARAM_INFO_TEXT                = "infoText";
     private static final String                                 PARAM_INFO_URL                 = "infoUrl";
@@ -200,12 +203,14 @@ public class JsonMapper
     private static final String                                 PARAM_ON_CLICK                 = "onClick";
     private static final String                                 PARAM_ON_ENTER_PRESS           = "onEnterPress";
     private static final String                                 PARAM_ON_INPUT                 = "onInput";
+    private static final String                                 PARAM_ON_KEYDOWN               = "onKeydown";
     private static final String                                 PARAM_PATH                     = "path";
     private static final String                                 PARAM_PATTERN                  = "pattern";
     private static final String                                 PARAM_PLACEHOLDER              = "placeholder";
     private static final String                                 PARAM_RELATIVE                 = "relative";
     private static final String                                 PARAM_REQUEST_URL              = "requestUrl";
     private static final String                                 PARAM_ROTATE                   = "rotate";
+    private static final String                                 PARAM_ROWS                     = "rows";
     private static final String                                 PARAM_RX                       = "rx";
     private static final String                                 PARAM_RY                       = "ry";
     private static final String                                 PARAM_SEARCH_URL               = "searchUrl";
@@ -214,6 +219,7 @@ public class JsonMapper
     private static final String                                 PARAM_STYLE                    = "style";
     private static final String                                 PARAM_SUBMIT_AS                = "submitAs";
     private static final String                                 PARAM_SWEEP_FLAG               = "sweepFlag";
+    private static final String                                 PARAM_TAGS                     = "tags";
     private static final String                                 PARAM_TARGET                   = "target";
     private static final String                                 PARAM_TEXT                     = "text";
     private static final String                                 PARAM_TEXT_LENGTH              = "textLength";
@@ -239,9 +245,10 @@ public class JsonMapper
     private static final String                                 DEFAULT_DATE                   = "0000-00-00";
     private static final String                                 DEFAULT_EMPTY_VAL              = "";
     private static final String                                 DEFAULT_TARGET_SELF            = "_self";
-    private static final String                                 DEFAULT_BURGER_ICON            = "bi-caret-right-fill";
+    private static final String                                 DEFAULT_BURGER_ICON            = "bi-list";
     private static final String                                 DEFAULT_VALUE_NOT_SET          = "value not set";
     private static final String                                 DEFAULT_NOT_SELECTED           = "NOT_SELECTED";
+    private static final int                                    DEFAULT_TEXTAREA_ROWS          = 5;
 
     private static final String                                 BASE_INDICATOR_START           = "$$";
     private static final String                                 INDICATOR_SEPARATOR            = "$";
@@ -1653,7 +1660,7 @@ public class JsonMapper
 
         String              src      = getParameterValue(element, depth, PARAM_SRC, String.class);
         String              caption  = getParameterValue(element, depth, PARAM_CAPTION, String.class);
-        boolean             controls = getParameterValue(element, depth, PARAM_CONTROLS, Boolean.class, Boolean.FALSE);
+        boolean             controls = getParameterValue(element, depth, PARAM_CONTROLS, Boolean.class, Boolean.TRUE);
         boolean             autoplay = getParameterValue(element, depth, PARAM_AUTOPLAY, Boolean.class, Boolean.FALSE);
         boolean             loop     = getParameterValue(element, depth, PARAM_LOOP, Boolean.class, Boolean.FALSE);
         boolean             muted    = getParameterValue(element, depth, PARAM_MUTED, Boolean.class, Boolean.FALSE);
@@ -1684,11 +1691,14 @@ public class JsonMapper
      */
     private BurgerContainer transformBurgerContainer(PseudoElement element, int depth)
     {
-        UiElementParameters cpars = resolveUiElementBaseParameters(element, depth);
+        UiElementParameters cpars    = resolveUiElementBaseParameters(element, depth);
 
-        String              icon  = getParameterValue(element, depth, PARAM_ICON, String.class, DEFAULT_BURGER_ICON);
+        String              icon     = getParameterValue(element, depth, PARAM_ICON, String.class, DEFAULT_BURGER_ICON);
 
-        List<BurgerItem>    items =
+        ButtonClass         btnClass =
+            getParameterValue(element, depth, PARAM_BTN_CLASS, ButtonClass.class, ButtonClass.DEFAULT);
+
+        List<BurgerItem>    items    =
             element
                 .getChildren()
                 .stream()
@@ -1703,6 +1713,7 @@ public class JsonMapper
             .dataAttributes(cpars.attributes())
             .tooltip(cpars.tooltip())
             .icon(icon)
+            .btnClass(btnClass)
             .items(items)
             .build();
     }
@@ -1725,6 +1736,7 @@ public class JsonMapper
         }
 
         String     icon         = getParameterValue(element, depth, PARAM_ICON, String.class, DEFAULT_EMPTY_VAL);
+        Integer    iconSize     = getOptionalPositiveInteger(element, depth, uid, PARAM_ICON_SIZE);
         String     url          = getParameterValue(element, depth, PARAM_URL, String.class);
         String     text         = getParameterValue(element, depth, PARAM_TEXT, String.class);
         String     methodString =
@@ -1744,13 +1756,20 @@ public class JsonMapper
                                     }
                                 };
 
-        return BurgerItem
-            .builder()
-            .icon(icon)
-            .url(url)
-            .text(text)
-            .method(method.name())
-            .build();
+        BurgerItem.BurgerItemBuilder item =
+            BurgerItem
+                .builder()
+                .icon(icon)
+                .url(url)
+                .text(text)
+                .method(method.name());
+
+        if (iconSize != null)
+        {
+            item.iconSize(iconSize);
+        }
+
+        return item.build();
     }
 
     /**
@@ -1805,6 +1824,7 @@ public class JsonMapper
         UiElementParameters cpars               = resolveUiElementBaseParameters(element, depth);
 
         String              icon                = getParameterValue(element, depth, PARAM_ICON, String.class);
+        String              alt                 = getParameterValue(element, depth, PARAM_ALT, String.class, DEFAULT_EMPTY_VAL);
 
         ButtonClass         btnClass            =
             getParameterValue(element, depth, PARAM_BTN_CLASS, ButtonClass.class, ButtonClass.DEFAULT);
@@ -1828,6 +1848,7 @@ public class JsonMapper
             .dataAttributes(cpars.attributes())
             .tooltip(cpars.tooltip())
             .icon(icon)
+            .alt(alt)
             .btnClass(btnClass)
             .onClick(btnFunction == null ? fallbackBtnFunction : btnFunction.parseAsJS())
             .build();
@@ -1842,9 +1863,12 @@ public class JsonMapper
      */
     private ContentContainer transformContentContainer(PseudoElement element, int depth)
     {
-        UiElementParameters cpars    = resolveUiElementBaseParameters(element, depth);
+        UiElementParameters cpars     = resolveUiElementBaseParameters(element, depth);
 
-        List<Container>     contents = new ArrayList<>();
+        Direction           direction =
+            getParameterValue(element, depth, PARAM_DIRECTION, Direction.class, Direction.NONE);
+
+        List<Container>     contents  = new ArrayList<>();
 
         element
             .getChildren()
@@ -1857,6 +1881,7 @@ public class JsonMapper
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
             .tooltip(cpars.tooltip())
+            .direction(direction)
             .contents(contents)
             .build();
     }
@@ -2103,12 +2128,15 @@ public class JsonMapper
      */
     private SplittedContainer transformSplittedContainer(PseudoElement element, int depth)
     {
-        UiElementParameters cpars  = resolveUiElementBaseParameters(element, depth);
+        UiElementParameters cpars     = resolveUiElementBaseParameters(element, depth);
 
-        Container           head   = null;
-        Container           tail   = null;
-        List<Container>     center = new ArrayList<>();
-        int                 cnt    = 0;
+        Direction           direction =
+            getParameterValue(element, depth, PARAM_DIRECTION, Direction.class, Direction.NONE);
+
+        Container           head      = null;
+        Container           tail      = null;
+        List<Container>     center    = new ArrayList<>();
+        int                 cnt       = 0;
 
         for (PseudoElement pe : element.getChildren())
         {
@@ -2133,6 +2161,7 @@ public class JsonMapper
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
+            .direction(direction)
             .head(head)
             .center(center)
             .tail(tail)
@@ -2285,7 +2314,7 @@ public class JsonMapper
         String              text  = getParameterValue(element, depth, PARAM_TEXT, String.class);
         int                 size  = getParameterValue(element, depth, PARAM_SIZE, BigInteger.class, BigInteger.ONE).intValue();
 
-        size = size < 0
+        size = size < 1
             ? 1
             : size > 6
                 ? 6
@@ -2398,17 +2427,45 @@ public class JsonMapper
      */
     private int ensurePositiveInteger(String elementName, String fieldName, int value, int fallback)
     {
-        if (value < 0)
+        if (value > 0)
         {
             return value;
         }
         else
         {
-            LOG.warn("[{}]:[{}]: value for [{}]:[{}] must be positive instead of [{}] serving [{}] instead", uuid, elementName,
-                fieldName, value, fallback);
+            LOG.warn("[{}]:[{}]: value for [{}] must be positive instead of [{}] serving [{}] instead", uuid, elementName, fieldName,
+                value, fallback);
 
             return fallback;
         }
+    }
+
+    /**
+     * Read an optional, positive integer parameter.
+     * 
+     * @param element to read from
+     * @param depth of the recursive operation
+     * @param elementName to report on
+     * @param key of the parameter
+     * @return the value, or {@code null} if it is not set or not positive
+     */
+    private Integer getOptionalPositiveInteger(PseudoElement element, int depth, String elementName, String key)
+    {
+        if (element.getParameters().get(key) == null)
+        {
+            return null;
+        }
+
+        int value = getParameterValue(element, depth, key, BigInteger.class).intValue();
+
+        if (value > 0)
+        {
+            return value;
+        }
+
+        LOG.warn("[{}]:[{}]: value for [{}] must be positive instead of [{}] ignoring it", uuid, elementName, key, value);
+
+        return null;
     }
 
     /**
@@ -2744,7 +2801,7 @@ public class JsonMapper
         UiElementParameters  cpars        = resolveUiElementBaseParameters(element, depth);
         InputParameters      ipars        = resolveInputBaseParameters(element, depth);
 
-        java.io.Serializable value;
+        String               value;
         java.lang.Number     min          = null;
         java.lang.Number     max          = null;
         java.lang.Number     step         = null;
@@ -2797,10 +2854,10 @@ public class JsonMapper
                     ? new BigInteger("1")
                     : new BigDecimal(1.0d);
 
-            min   = getParameterValue(element, depth, PARAM_MIN, java.lang.Number.class, minDef);
-            max   = getParameterValue(element, depth, PARAM_MAX, java.lang.Number.class, maxDef);
-            step  = getParameterValue(element, depth, PARAM_STEP, java.lang.Number.class, stepDef);
-            value = numericValue;
+            min = getParameterValue(element, depth, PARAM_MIN, java.lang.Number.class, minDef);
+            max = getParameterValue(element, depth, PARAM_MAX, java.lang.Number.class, maxDef);
+            step = getParameterValue(element, depth, PARAM_STEP, java.lang.Number.class, stepDef);
+            value = numericValue instanceof BigDecimal decimal ? decimal.toPlainString() : numericValue.toString();
 
             Class<?> valueClass = numericValue.getClass();
 
@@ -2891,7 +2948,7 @@ public class JsonMapper
         UiElementParameters cpars            = resolveUiElementBaseParameters(element, depth);
         InputParameters     ipars            = resolveInputBaseParameters(element, depth);
 
-        List<String>        tags             = getParameterList(element, depth, PARAM_VALUE, String.class, List.of());
+        List<String>        tags             = getParameterList(element, depth, PARAM_TAGS, String.class, List.of());
         String              pattern          = getParameterValue(element, depth, PARAM_PATTERN, String.class, DEFAULT_EMPTY_VAL);
         String              fetchUrl         = getParameterValue(element, depth, PARAM_FETCH_URL, String.class, DEFAULT_EMPTY_VAL);
         String              searchUrl        = getParameterValue(element, depth, PARAM_SEARCH_URL, String.class, DEFAULT_EMPTY_VAL);
@@ -2945,9 +3002,18 @@ public class JsonMapper
 
         String              value       = getParameterValue(element, depth, PARAM_VALUE, String.class, DEFAULT_EMPTY_VAL);
         String              placeholder = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
+        String              onKeydown   = getParameterValue(element, depth, PARAM_ON_KEYDOWN, String.class, DEFAULT_EMPTY_VAL);
+        Integer             cols        = getOptionalPositiveInteger(element, depth, ipars.name(), PARAM_COLS);
 
         int                 maxChars    =
             getParameterValue(element, depth, PARAM_MAX_CHARS, BigInteger.class, BIG_INTEGER_MAX_INTEGER_VALUE).intValue();
+
+        int                 rows        =
+            ensurePositiveInteger(
+                ipars.name(),
+                PARAM_ROWS,
+                getParameterValue(element, depth, PARAM_ROWS, BigInteger.class, BigInteger.valueOf(DEFAULT_TEXTAREA_ROWS)).intValue(),
+                DEFAULT_TEXTAREA_ROWS);
 
         return Textarea
             .builder()
@@ -2966,6 +3032,9 @@ public class JsonMapper
             .value(value)
             .maxCharacters(maxChars)
             .placeholder(placeholder)
+            .onKeydown(onKeydown)
+            .rows(rows)
+            .cols(cols)
             .build();
     }
 
@@ -2988,6 +3057,7 @@ public class JsonMapper
             .uid(cpars.uid())
             .classes(cpars.classes())
             .dataAttributes(cpars.attributes())
+            .tooltip(cpars.tooltip())
             .name(name)
             .text(text)
             .build();
@@ -3009,6 +3079,7 @@ public class JsonMapper
         String              placeholder  = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
         String              pattern      = getParameterValue(element, depth, PARAM_PATTERN, String.class, DEFAULT_EMPTY_VAL);
         String              onEnterPress = getParameterValue(element, depth, PARAM_ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
+        String              onKeydown    = getParameterValue(element, depth, PARAM_ON_KEYDOWN, String.class, DEFAULT_EMPTY_VAL);
 
         int                 maxChars     =
             getParameterValue(element, depth, PARAM_MAX_CHARS, BigInteger.class, new BigInteger("150")).intValue();
@@ -3031,6 +3102,7 @@ public class JsonMapper
             .placeholder(placeholder)
             .maxCharacters(maxChars)
             .pattern(pattern)
+            .onKeydown(onKeydown)
             .onEnterPress(onEnterPress)
             .build();
     }

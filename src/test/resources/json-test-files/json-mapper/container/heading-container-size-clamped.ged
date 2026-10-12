@@ -1,0 +1,14 @@
+{
+    "uid": "uid",
+    "type": "HEADING",
+    "classes": [
+        "class1"
+    ],
+    "attributes": {
+        "key1": "value1"
+    },
+    "parameters": {
+        "text": "some heading",
+        "size": 9
+    }
+}

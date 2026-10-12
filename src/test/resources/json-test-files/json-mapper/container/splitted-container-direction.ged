@@ -1,0 +1,35 @@
+{
+    "uid": "uid",
+    "type": "SPLITTED",
+    "classes": [],
+    "attributes": {},
+    "parameters": {
+        "direction": "horizontal_reverse"
+    },
+    "children": [
+        {
+            "type": "COMPONENT",
+            "parameters": {
+                "path": "json-test-files/json-mapper/container/content-container.ged"
+            }
+        },
+        {
+            "type": "COMPONENT",
+            "parameters": {
+                "path": "json-test-files/json-mapper/container/content-container.ged"
+            }
+        },
+        {
+            "type": "COMPONENT",
+            "parameters": {
+                "path": "json-test-files/json-mapper/container/content-container.ged"
+            }
+        },
+        {
+            "type": "COMPONENT",
+            "parameters": {
+                "path": "json-test-files/json-mapper/container/content-container.ged"
+            }
+        }
+    ]
+}

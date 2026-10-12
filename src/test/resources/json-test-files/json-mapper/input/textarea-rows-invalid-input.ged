@@ -1,0 +1,21 @@
+{
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "TEXTAREA",
+            "classes": [],
+            "attributes": {},
+            "parameters": {
+                "name": "name",
+                "mandatory": true,
+                "submitAs": "textarea",
+                "rows": 0,
+                "cols": 0
+            }
+        }
+    ]
+}

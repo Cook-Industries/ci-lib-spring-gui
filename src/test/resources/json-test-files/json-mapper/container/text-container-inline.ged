@@ -1,0 +1,14 @@
+{
+    "uid": "uid",
+    "type": "TEXT",
+    "classes": [
+        "class1"
+    ],
+    "attributes": {
+        "key1": "value1"
+    },
+    "parameters": {
+        "text": "some text",
+        "inline": true
+    }
+}

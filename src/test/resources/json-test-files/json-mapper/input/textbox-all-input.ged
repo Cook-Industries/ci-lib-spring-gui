@@ -1,0 +1,23 @@
+{
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "TEXTBOX",
+            "classes": [
+                "class1",
+                "class2"
+            ],
+            "attributes": {
+                "key1": "value1"
+            },
+            "parameters": {
+                "name": "name",
+                "text": "some text"
+            }
+        }
+    ]
+}

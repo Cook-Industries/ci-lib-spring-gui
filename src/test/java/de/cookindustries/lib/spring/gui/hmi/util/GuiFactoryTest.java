@@ -47,11 +47,14 @@ class GuiFactoryTest
             "<script src=\"/webjars/yaireo__tagify/dist/tagify.js\"></script>",
             "<script src=\"/webjars/stomp__stompjs/esm6/index.js\"></script>",
             "<p id=\"ui-properties-url\" class=\"hidden\"></p>",
+            "<p id=\"ui-translations-url\" class=\"hidden\">/api/translations</p>",
+            "<p id=\"ui-locale\" class=\"hidden\">en</p>",
             "<div id=\"modal-container\" class=\"hidden\"></div>",
             "<div id=\"global-loader-overlay\" class=\"d-flex justify-content-center align-items-center vh-100\"><div id=\"global-loader\" class=\"d-flex flex-column justify-items-center align-items-center\"><div id=\"_lcsptp\" class=\"loader-circle spinner-border text-primary\"></div><p id=\"global-loader-text\" class=\"loader-text\">loading...</p><div id=\"global-loader-bar\" class=\"loadbar\"></div></div></div>",
             "<div id=\"error-overlay\" class=\"hidden\"><div id=\"error-container\"><div id=\"error-holder\"></div><button id=\"_eob\" onclick=\"CILIB.FunctionRegistry.call('dismissErrors');\" class=\"btn btn-primary\">OK</button></div></div>",
             "<div id=\"popup-holder\"></div>");
 
+    private CiLibProperties           libProperties;
     private TemplateFileCache         templateFileCache;
     private FlatMappableDissector     flatMappableDissector;
     private AbsTranslationProvider    translationProvider;
@@ -66,8 +69,9 @@ class GuiFactoryTest
         CiLibResourcesProperties res = new CiLibResourcesProperties();
         res.setPath(resPath);
 
-        CiLibProperties libProperties = new CiLibProperties();
+        libProperties = new CiLibProperties();
         libProperties.setResources(res);
+        libProperties.getWeb().getTranslation().setUrl("/api/translations");
 
         templateFileCache = new TemplateFileCache(libProperties);
         templateFileCache.init();
@@ -94,7 +98,7 @@ class GuiFactoryTest
 
     private GUIFactory basicFactory()
     {
-        return new GUIFactory(properties, templateFileCache, translationProvider, flatMappableDissector);
+        return new GUIFactory(libProperties, properties, templateFileCache, translationProvider, flatMappableDissector);
     }
 
     private boolean checkTags(String tag, String html)

@@ -10,9 +10,9 @@ package de.cookindustries.lib.spring.gui.hmi.container;
 import java.util.Set;
 
 import io.micrometer.common.lang.NonNull;
-import lombok.Singular;
 import lombok.Builder.Default;
 import lombok.Getter;
+import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -30,8 +30,10 @@ public final class TabContainer extends Container
 
     @Singular
     private Set<Tab>       tabs;
+
     @Singular
     private Set<Container> bodies;
+
     @NonNull
     @Default
     private boolean        disabled = false;

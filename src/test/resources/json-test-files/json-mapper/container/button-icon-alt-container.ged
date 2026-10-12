@@ -1,0 +1,11 @@
+{
+    "uid": "uid",
+    "type": "BUTTON_ICON",
+    "classes": [],
+    "attributes": {},
+    "parameters": {
+        "icon": "bi-x",
+        "onClick": "close()",
+        "alt": "close dialog"
+    }
+}

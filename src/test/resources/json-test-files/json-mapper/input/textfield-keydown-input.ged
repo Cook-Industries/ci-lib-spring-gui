@@ -1,0 +1,20 @@
+{
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "TEXTFIELD",
+            "classes": [],
+            "attributes": {},
+            "parameters": {
+                "name": "name",
+                "mandatory": true,
+                "submitAs": "textfield",
+                "onKeydown": "onKey()"
+            }
+        }
+    ]
+}

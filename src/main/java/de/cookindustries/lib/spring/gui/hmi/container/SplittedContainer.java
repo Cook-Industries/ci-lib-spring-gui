@@ -23,7 +23,7 @@ import lombok.extern.jackson.Jacksonized;
 @SuperBuilder
 @Getter
 @Jacksonized
-public final class SplittedContainer extends Container
+public final class SplittedContainer extends DirectionalContainer
 {
 
     @NonNull

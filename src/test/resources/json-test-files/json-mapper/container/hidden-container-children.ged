@@ -1,0 +1,31 @@
+{
+    "uid": "uid",
+    "type": "HIDDEN",
+    "classes": [
+        "class1"
+    ],
+    "attributes": {
+        "key1": "value1"
+    },
+    "parameters": {},
+    "children": [
+        {
+            "uid": "first",
+            "type": "TEXT",
+            "classes": [],
+            "attributes": {},
+            "parameters": {
+                "text": "first text"
+            }
+        },
+        {
+            "uid": "second",
+            "type": "TEXT",
+            "classes": [],
+            "attributes": {},
+            "parameters": {
+                "text": "second text"
+            }
+        }
+    ]
+}

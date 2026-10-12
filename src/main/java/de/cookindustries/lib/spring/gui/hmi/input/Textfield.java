@@ -27,24 +27,24 @@ public final class Textfield extends SubmittableInput
 
     @NonNull
     @Default
-    private final String  value         = "";
+    private final String value         = "";
 
     @NonNull
     @Default
-    private final String  placeholder   = "";
+    private final String placeholder   = "";
 
     @Default
-    private final Integer maxCharacters = Integer.MAX_VALUE;
+    private final int    maxCharacters = 150;
 
     @Default
-    final String          pattern       = null;
+    final String         pattern       = null;
 
     @Default
-    private final String  onKeydown     = "";
+    private final String onKeydown     = "";
 
     @NonNull
     @Default
-    private final String  onEnterPress  = "";
+    private final String onEnterPress  = "";
 
     @Override
     protected InputType inferType()

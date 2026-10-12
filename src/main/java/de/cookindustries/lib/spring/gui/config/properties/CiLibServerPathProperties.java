@@ -11,12 +11,12 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
- * Path properties in relation to web interfaces.
+ * Path properties in relation to server folders.
  * 
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
  */
 @Data
-public class CiLibWebPathProperties
+public class CiLibServerPathProperties
 {
 
     /** A path for static content on the system */

@@ -445,6 +445,47 @@
             }
         },
         {
+            "selector": ".form-container-column-reverse",
+            "attributes": {
+                "flex-direction": "column-reverse"
+            }
+        },
+        {
+            "selector": ".form-container-row-reverse",
+            "attributes": {
+                "flex-direction": "row-reverse",
+                "gap": "1rem"
+            }
+        },
+        {
+            "selector": ".container-direction-row",
+            "attributes": {
+                "display": "flex",
+                "flex-direction": "row"
+            }
+        },
+        {
+            "selector": ".container-direction-row-reverse",
+            "attributes": {
+                "display": "flex",
+                "flex-direction": "row-reverse"
+            }
+        },
+        {
+            "selector": ".container-direction-column",
+            "attributes": {
+                "display": "flex",
+                "flex-direction": "column"
+            }
+        },
+        {
+            "selector": ".container-direction-column-reverse",
+            "attributes": {
+                "display": "flex",
+                "flex-direction": "column-reverse"
+            }
+        },
+        {
             "selector": ".form-label",
             "attributes": {
                 "margin-top": "1rem",

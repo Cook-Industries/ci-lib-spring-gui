@@ -24,7 +24,7 @@ import lombok.extern.jackson.Jacksonized;
 @SuperBuilder
 @Getter
 @Jacksonized
-public final class FormContainer extends Container
+public final class FormContainer extends DirectionalContainer
 {
 
     /**

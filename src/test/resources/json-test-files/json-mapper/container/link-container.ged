@@ -9,7 +9,17 @@
     },
     "parameters": {
         "href": "link/to/somewhere",
-        "tooltip": "test tooltip"
+        "target": "_blank"
     },
-    "children": []
+    "children": [
+        {
+            "uid": "label",
+            "type": "TEXT",
+            "classes": [],
+            "attributes": {},
+            "parameters": {
+                "text": "link label"
+            }
+        }
+    ]
 }

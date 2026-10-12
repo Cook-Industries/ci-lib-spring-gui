@@ -1,0 +1,10 @@
+{
+    "uid": "uid",
+    "type": "CONTENT",
+    "classes": [],
+    "attributes": {},
+    "parameters": {
+        "direction": "vertical_reverse"
+    },
+    "children": []
+}

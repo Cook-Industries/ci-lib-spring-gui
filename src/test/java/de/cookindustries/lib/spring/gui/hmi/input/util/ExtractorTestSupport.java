@@ -169,6 +169,7 @@ final class ExtractorTestSupport
         {
             GUIFactory            guiFactory =
                 new GUIFactory(
+                    properties,
                     GuiFactoryProperties.builder().build(),
                     new TemplateFileCache(properties),
                     translations,

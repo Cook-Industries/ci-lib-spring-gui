@@ -7,7 +7,6 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input;
 
-import java.io.Serializable;
 import java.util.List;
 
 import lombok.Getter;
@@ -29,7 +28,7 @@ public final class Slider extends SubmittableInput
 {
 
     @NonNull
-    private final Serializable     value;
+    private final String          value;
 
     private final java.lang.Number min;
 

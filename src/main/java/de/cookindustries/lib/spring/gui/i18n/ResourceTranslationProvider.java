@@ -53,7 +53,7 @@ public final class ResourceTranslationProvider extends AbsTranslationProvider
                 {
                     try
                     {
-                        addTranslation(locale, text.getKey(), text.getText());
+                        addTranslation(locale, text.getKey(), text.getText(), text.getScope());
                     }
                     catch (Exception ex)
                     {

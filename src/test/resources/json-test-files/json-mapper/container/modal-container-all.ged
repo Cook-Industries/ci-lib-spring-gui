@@ -1,0 +1,35 @@
+{
+    "uid": "uid",
+    "type": "MODAL",
+    "classes": [
+        "class1"
+    ],
+    "attributes": {
+        "key1": "value1"
+    },
+    "parameters": {
+        "name": "modal name",
+        "requestUrl": "/modal/request",
+        "closeOnOverlayClick": true,
+        "btnLeftName": "left",
+        "btnLeftClass": "danger",
+        "btnLeftFunction": "leftFn()",
+        "btnCenterName": "center",
+        "btnCenterClass": "success",
+        "btnCenterFunction": "centerFn()",
+        "btnRightName": "right",
+        "btnRightClass": "warning",
+        "btnRightFunction": "rightFn()"
+    },
+    "children": [
+        {
+            "uid": "body",
+            "type": "TEXT",
+            "classes": [],
+            "attributes": {},
+            "parameters": {
+                "text": "modal body"
+            }
+        }
+    ]
+}

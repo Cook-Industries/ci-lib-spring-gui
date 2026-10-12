@@ -1,0 +1,15 @@
+{
+    "uid": "uid",
+    "type": "FORM",
+    "classes": [
+        "class1"
+    ],
+    "attributes": {
+        "key1": "value1"
+    },
+    "parameters": {
+        "direction": "horizontal",
+        "connectedBtn": "btn-1"
+    },
+    "children": []
+}

@@ -1,0 +1,34 @@
+{
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "FILE",
+            "classes": [
+                "class1",
+                "class2"
+            ],
+            "attributes": {
+                "key1": "value1"
+            },
+            "parameters": {
+                "name": "name",
+                "submitAs": "submit",
+                "tooltip": "tip",
+                "onInput": "inp()",
+                "infoText": "info text",
+                "infoUrl": "/info/url",
+                "disabled": true,
+                "mandatory": true,
+                "multiple": true,
+                "accept": [
+                    ".png",
+                    ".pdf"
+                ]
+            }
+        }
+    ]
+}

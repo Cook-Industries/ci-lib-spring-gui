@@ -1,0 +1,17 @@
+{
+    "uid": "uid",
+    "type": "BURGER",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "type": "BURGER_ITEM",
+            "parameters": {
+                "icon": "bi-x",
+                "text": "first",
+                "url": "/first"
+            }
+        }
+    ]
+}

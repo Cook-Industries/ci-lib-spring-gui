@@ -1,0 +1,14 @@
+{
+    "uid": "uid",
+    "type": "MODAL",
+    "classes": [
+        "class1"
+    ],
+    "attributes": {
+        "key1": "value1"
+    },
+    "parameters": {
+        "name": "modal name"
+    },
+    "children": []
+}

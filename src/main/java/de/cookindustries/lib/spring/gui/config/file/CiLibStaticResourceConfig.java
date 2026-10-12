@@ -104,7 +104,7 @@ public class CiLibStaticResourceConfig implements WebMvcConfigurer
      */
     private void copyJsLibs(String basePath) throws IOException
     {
-        List<String> paths = List.of("ci-lib-spring-web.js", "ci-lib-logger.js");
+        List<String> paths = List.of("ci-lib-spring-web.js", "ci-lib-logger.js", "ci-lib-browser-cache.js", "ci-lib-translations.js");
 
         paths.forEach(path -> {
             try

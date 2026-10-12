@@ -17,6 +17,7 @@ import de.cookindustries.lib.spring.gui.config.properties.CiLibProperties;
 import de.cookindustries.lib.spring.gui.hmi.util.GuiFactoryProperties;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
+import de.cookindustries.lib.spring.gui.i18n.UiTranslationResolver;
 import de.cookindustries.lib.spring.gui.util.file.AbstractFormCipher;
 import de.cookindustries.lib.spring.gui.util.file.AbstractReceiver;
 import de.cookindustries.lib.spring.gui.util.file.CompletionHandler;
@@ -56,6 +57,12 @@ class CiLibBeanConfig
     AbsTranslationProvider translationProvider()
     {
         return new StaticTranslationProvider();
+    }
+
+    @Bean
+    UiTranslationResolver uiTranslationResolver(AbsTranslationProvider translationProvider)
+    {
+        return new UiTranslationResolver(translationProvider);
     }
 
     @Bean

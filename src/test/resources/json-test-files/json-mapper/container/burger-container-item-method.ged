@@ -1,0 +1,39 @@
+{
+    "uid": "uid",
+    "type": "BURGER",
+    "classes": [
+        "class1"
+    ],
+    "attributes": {
+        "key1": "value1"
+    },
+    "parameters": {},
+    "children": [
+        {
+            "type": "BURGER_ITEM",
+            "parameters": {
+                "icon": "bi-x",
+                "text": "first",
+                "url": "/first",
+                "method": "get"
+            }
+        },
+        {
+            "type": "BURGER_ITEM",
+            "parameters": {
+                "icon": "bi-y",
+                "text": "second",
+                "url": "/second"
+            }
+        },
+        {
+            "type": "BURGER_ITEM",
+            "parameters": {
+                "icon": "bi-z",
+                "text": "third",
+                "url": "/third",
+                "method": "bogus"
+            }
+        }
+    ]
+}

@@ -68,7 +68,7 @@ public final class ModalContainer extends Container
     private final List<Container> contents;
 
     @Default
-    private final boolean         closeOnOverlayClick = Boolean.FALSE;
+    private final boolean         closeOnOverlayClick = false;
 
     @Override
     protected ContainerType inferType()

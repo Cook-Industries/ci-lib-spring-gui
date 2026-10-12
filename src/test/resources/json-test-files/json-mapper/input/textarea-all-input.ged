@@ -1,0 +1,35 @@
+{
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "TEXTAREA",
+            "classes": [
+                "class1",
+                "class2"
+            ],
+            "attributes": {
+                "key1": "value1"
+            },
+            "parameters": {
+                "name": "name",
+                "submitAs": "submit",
+                "tooltip": "tip",
+                "onInput": "inp()",
+                "infoText": "info text",
+                "infoUrl": "/info/url",
+                "disabled": true,
+                "mandatory": true,
+                "value": "body",
+                "placeholder": "ph",
+                "maxChars": 100,
+                "onKeydown": "key()",
+                "rows": 3,
+                "cols": 20
+            }
+        }
+    ]
+}

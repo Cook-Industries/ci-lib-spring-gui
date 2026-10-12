@@ -15,6 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,16 +24,23 @@ import org.junit.jupiter.api.Test;
 import de.cookindustries.lib.spring.gui.config.properties.CiLibProperties;
 import de.cookindustries.lib.spring.gui.config.properties.CiLibResourcesPathProperties;
 import de.cookindustries.lib.spring.gui.config.properties.CiLibResourcesProperties;
+import de.cookindustries.lib.spring.gui.function.CloseModal;
+import de.cookindustries.lib.spring.gui.function.SubmitFromModal;
 import de.cookindustries.lib.spring.gui.hmi.container.AudioContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.BurgerContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.Button;
 import de.cookindustries.lib.spring.gui.hmi.container.ButtonClass;
 import de.cookindustries.lib.spring.gui.hmi.container.ButtonIcon;
 import de.cookindustries.lib.spring.gui.hmi.container.Container;
 import de.cookindustries.lib.spring.gui.hmi.container.ContentContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.Direction;
+import de.cookindustries.lib.spring.gui.hmi.container.EmptyContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.FormContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.HeadingContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.HiddenContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.ImageContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.LinkContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.ModalContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.SplittedContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.TableContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.TextContainer;
@@ -45,6 +54,7 @@ import de.cookindustries.lib.spring.gui.hmi.input.Password;
 import de.cookindustries.lib.spring.gui.hmi.input.Radio;
 import de.cookindustries.lib.spring.gui.hmi.input.Select;
 import de.cookindustries.lib.spring.gui.hmi.input.Slider;
+import de.cookindustries.lib.spring.gui.hmi.input.SubmittableInput;
 import de.cookindustries.lib.spring.gui.hmi.input.Switch;
 import de.cookindustries.lib.spring.gui.hmi.input.Tag;
 import de.cookindustries.lib.spring.gui.hmi.input.Textarea;
@@ -122,7 +132,7 @@ class JsonMapperTest
     void test_map_withComponent()
     {
         // setup
-        JsonMapper mapper =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/root-component.ged")
@@ -251,14 +261,14 @@ class JsonMapperTest
     @Test
     void test_map_attributes()
     {
-        TokenMap     tokenMap  =
+        TokenMap     tokenMap =
             TokenMap
                 .builder()
                 .value("test", "replaced-key")
                 .build();
 
         // setup
-        JsonMapper   mapper    =
+        JsonMapper   mapper   =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/map-attributes.ged")
@@ -275,7 +285,7 @@ class JsonMapperTest
         result = mapper.map();
 
         // verify
-        Container    container = result.getContainers().get(0);
+        Container container = result.getContainers().get(0);
         assertNotNull(container);
         assertEquals(4, container.getDataAttributes().size());
         assertNotNull(container.getDataAttributes().get("key1"));
@@ -318,7 +328,7 @@ class JsonMapperTest
     void test_map_AudioContainer()
     {
         // setup
-        JsonMapper   mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/container/audio-container.ged")
@@ -334,7 +344,7 @@ class JsonMapperTest
         result = mapper.map();
 
         // verify
-        Container    container = result.getContainers().get(0);
+        Container container = result.getContainers().get(0);
         assertEquals(AudioContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -354,7 +364,7 @@ class JsonMapperTest
     void test_map_Button()
     {
         // setup
-        JsonMapper   mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/container/button-container.ged")
@@ -370,7 +380,7 @@ class JsonMapperTest
         result = mapper.map();
 
         // verify
-        Container    container = result.getContainers().get(0);
+        Container container = result.getContainers().get(0);
         assertEquals(Button.class, container.getClass());
 
         Button button = (Button) container;
@@ -390,7 +400,7 @@ class JsonMapperTest
     void test_map_ButtonIconContainer()
     {
         // setup
-        JsonMapper   mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/container/button-icon-container.ged")
@@ -406,7 +416,7 @@ class JsonMapperTest
         result = mapper.map();
 
         // verify
-        Container    container = result.getContainers().get(0);
+        Container container = result.getContainers().get(0);
         assertEquals(ButtonIcon.class, container.getClass());
 
         ButtonIcon button = (ButtonIcon) container;
@@ -426,7 +436,7 @@ class JsonMapperTest
     void test_map_ContentContainer()
     {
         // setup
-        JsonMapper   mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/container/content-container.ged")
@@ -442,7 +452,7 @@ class JsonMapperTest
         result = mapper.map();
 
         // verify
-        Container    container = result.getContainers().get(0);
+        Container container = result.getContainers().get(0);
         assertEquals(ContentContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -457,7 +467,7 @@ class JsonMapperTest
     void test_map_FormContainer()
     {
         // setup
-        JsonMapper   mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/container/form-container.ged")
@@ -473,7 +483,7 @@ class JsonMapperTest
         result = mapper.map();
 
         // verify
-        Container    container = result.getContainers().get(0);
+        Container container = result.getContainers().get(0);
         assertEquals(FormContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -487,7 +497,7 @@ class JsonMapperTest
     void test_map_HiddenContainer()
     {
         // setup
-        JsonMapper   mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/container/hidden-container.ged")
@@ -503,7 +513,7 @@ class JsonMapperTest
         result = mapper.map();
 
         // verify
-        Container    container = result.getContainers().get(0);
+        Container container = result.getContainers().get(0);
         assertEquals(HiddenContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -517,7 +527,7 @@ class JsonMapperTest
     void test_map_ImageContainer()
     {
         // setup
-        JsonMapper   mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/container/image-container.ged")
@@ -533,7 +543,7 @@ class JsonMapperTest
         result = mapper.map();
 
         // verify
-        Container    container = result.getContainers().get(0);
+        Container container = result.getContainers().get(0);
         assertEquals(ImageContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -551,42 +561,24 @@ class JsonMapperTest
     void test_map_LinkContainer()
     {
         // setup
-        JsonMapper   mapper    =
-            JsonMapper
-                .builder()
-                .srcPath("json-mapper/container/link-container.ged")
-                .locale(Locale.ENGLISH)
-                .templateFileCache(templateFileCache)
-                .translationProvider(translationProvider)
-                .flatMappableDissector(flatMappableDissector)
-                .build();
-
-        MapperResult result;
+        String    srcPath = "json-mapper/container/link-container.ged";
+        Container container;
 
         // run
-        result = mapper.map();
+        container = mapContainer(srcPath);
 
         // verify
-        Container    container = result.getContainers().get(0);
-        assertEquals(LinkContainer.class, container.getClass());
-        assertEquals("uid", container.getUid());
-        assertEquals(1, container.getClasses().size());
-        assertEquals(1, container.getDataAttributes().size());
-
-        LinkContainer linkContainer = (LinkContainer) container;
-        assertEquals("link/to/somewhere", linkContainer.getHref());
-        assertEquals("_self", linkContainer.getTarget());
-
-        String html = HtmlMapper.map(container);
-        assertTrue(checkDivTags(html));
-        checkToolTip(html);
+        LinkContainer link = (LinkContainer) container;
+        assertEquals("_blank", link.getTarget());
+        assertEquals(TextContainer.class, link.getContent().getClass());
+        assertEquals("link label", ((TextContainer) link.getContent()).getText());
     }
 
     @Test
     void test_map_SplittedContainer()
     {
         // setup
-        JsonMapper   mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/container/splitted-container.ged")
@@ -602,7 +594,7 @@ class JsonMapperTest
         result = mapper.map();
 
         // verify
-        Container    container = result.getContainers().get(0);
+        Container container = result.getContainers().get(0);
         assertEquals(SplittedContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -642,7 +634,7 @@ class JsonMapperTest
     void test_map_TableContainer()
     {
         // setup
-        JsonMapper   mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/container/table-container.ged")
@@ -658,7 +650,7 @@ class JsonMapperTest
         result = mapper.map();
 
         // verify
-        Container    container = result.getContainers().get(0);
+        Container container = result.getContainers().get(0);
         assertEquals(TableContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -677,7 +669,7 @@ class JsonMapperTest
     void test_map_TextContainer()
     {
         // setup
-        JsonMapper   mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/container/text-container.ged")
@@ -693,7 +685,7 @@ class JsonMapperTest
         result = mapper.map();
 
         // verify
-        Container    container = result.getContainers().get(0);
+        Container container = result.getContainers().get(0);
         assertEquals(TextContainer.class, container.getClass());
         assertEquals("uid", container.getUid());
         assertEquals(1, container.getClasses().size());
@@ -711,7 +703,7 @@ class JsonMapperTest
     void test_map_CheckboxInput()
     {
         // setup
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/checkbox-input.ged")
@@ -744,7 +736,7 @@ class JsonMapperTest
     void test_map_DateInput()
     {
         // setup
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/date-input.ged")
@@ -778,7 +770,7 @@ class JsonMapperTest
     void test_map_FileInput()
     {
         // setup
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/file-input.ged")
@@ -811,7 +803,7 @@ class JsonMapperTest
     void test_map_HiddenInput()
     {
         // setup
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/hidden-input.ged")
@@ -843,7 +835,7 @@ class JsonMapperTest
     void test_map_NumberInput()
     {
         // setup
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/number-input.ged")
@@ -876,7 +868,7 @@ class JsonMapperTest
     void test_map_NumberInputInteger()
     {
         // setup
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/number-input-integer.ged")
@@ -913,7 +905,7 @@ class JsonMapperTest
     void test_map_NumberInputDouble()
     {
         // setup
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/number-input-double.ged")
@@ -950,7 +942,7 @@ class JsonMapperTest
     void test_map_PasswordInput()
     {
         // setup
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/password-input.ged")
@@ -983,7 +975,7 @@ class JsonMapperTest
     void test_map_RadioInput()
     {
         // setup
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/radio-input.ged")
@@ -1027,13 +1019,13 @@ class JsonMapperTest
                 .value("value")
                 .build());
 
-        TokenMap      map       =
+        TokenMap     map    =
             TokenMap
                 .builder()
                 .value("list", list)
                 .build();
 
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/select-input.ged")
@@ -1076,7 +1068,7 @@ class JsonMapperTest
     void test_map_SliderInput()
     {
         // setup
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/slider-input.ged")
@@ -1109,7 +1101,7 @@ class JsonMapperTest
     void test_map_SliderInput_customValues()
     {
         // run
-        Slider slider = (Slider) mapSliderInput("json-mapper/input/slider-custom-input.ged");
+        Slider slider = (Slider) mapInput("json-mapper/input/slider-custom-input.ged");
 
         // verify
         assertTrue(slider.isCustom());
@@ -1125,7 +1117,7 @@ class JsonMapperTest
     void test_map_SliderInput_customValuesWithoutValue_selectsFirst()
     {
         // run
-        Slider slider = (Slider) mapSliderInput("json-mapper/input/slider-custom-default-input.ged");
+        Slider slider = (Slider) mapInput("json-mapper/input/slider-custom-default-input.ged");
 
         // verify
         assertEquals("off", slider.getValue());
@@ -1135,7 +1127,7 @@ class JsonMapperTest
     void test_map_SliderInput_customValuesWithNumericParameter_fails()
     {
         // run
-        Input input = mapSliderInput("json-mapper/input/slider-custom-conflict-input.ged");
+        Input input = mapInput("json-mapper/input/slider-custom-conflict-input.ged");
 
         // verify
         assertEquals(Textbox.class, input.getClass());
@@ -1145,7 +1137,7 @@ class JsonMapperTest
     void test_map_SliderInput_customValuesWithUnknownValue_fails()
     {
         // run
-        Input input = mapSliderInput("json-mapper/input/slider-custom-unknown-value-input.ged");
+        Input input = mapInput("json-mapper/input/slider-custom-unknown-value-input.ged");
 
         // verify
         assertEquals(Textbox.class, input.getClass());
@@ -1155,7 +1147,7 @@ class JsonMapperTest
     void test_map_SliderInput_marks()
     {
         // run
-        Slider slider = (Slider) mapSliderInput("json-mapper/input/slider-marks-input.ged");
+        Slider slider = (Slider) mapInput("json-mapper/input/slider-marks-input.ged");
 
         // verify
         assertFalse(slider.isCustom());
@@ -1166,7 +1158,7 @@ class JsonMapperTest
     void test_map_SliderInput_tooFewMarks_fails()
     {
         // run
-        Input input = mapSliderInput("json-mapper/input/slider-marks-too-few-input.ged");
+        Input input = mapInput("json-mapper/input/slider-marks-too-few-input.ged");
 
         // verify
         assertEquals(Textbox.class, input.getClass());
@@ -1176,7 +1168,7 @@ class JsonMapperTest
     void test_map_SwitchInput()
     {
         // setup
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/switch-input.ged")
@@ -1209,7 +1201,7 @@ class JsonMapperTest
     void test_map_TagInput()
     {
         // setup
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/tag-input.ged")
@@ -1244,7 +1236,7 @@ class JsonMapperTest
     void test_map_TextareaInput()
     {
         // setup
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/textarea-input.ged")
@@ -1277,7 +1269,7 @@ class JsonMapperTest
     void test_map_TextboxInput()
     {
         // setup
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/textbox-input.ged")
@@ -1310,7 +1302,7 @@ class JsonMapperTest
     void test_map_TextfieldInput()
     {
         // setup
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/textfield-input.ged")
@@ -1338,11 +1330,12 @@ class JsonMapperTest
         String html = HtmlMapper.map(container);
         assertTrue(checkDivTags(html));
     }
+
     @Test
     void test_map_CheckboxInput_boxesKeepTheirSubmitAs()
     {
         // setup
-        JsonMapper    mapper    =
+        JsonMapper   mapper =
             JsonMapper
                 .builder()
                 .srcPath("json-mapper/input/checkbox-input.ged")
@@ -1365,7 +1358,189 @@ class JsonMapperTest
         assertEquals("checkbox-2", checkbox.getBoxes().get(1).getSubmitAs());
     }
 
-    private Input mapSliderInput(String srcPath)
+    @Test
+    void test_map_ContentContainer_direction()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/content-container-direction.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        assertEquals(Direction.VERTICAL_REVERSE, ((ContentContainer) container).getDirection());
+    }
+
+    @Test
+    void test_map_SplittedContainer_direction()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/splitted-container-direction.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        assertEquals(Direction.HORIZONTAL_REVERSE, ((SplittedContainer) container).getDirection());
+    }
+
+    @Test
+    void test_map_BurgerContainer_iconButtonClassAndItemIconSize()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/burger-container-options.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        BurgerContainer burger = (BurgerContainer) container;
+        assertEquals("bi-list", burger.getIcon());
+        assertEquals(ButtonClass.DANGER, burger.getBtnClass());
+        assertEquals(2, burger.getItems().size());
+        assertEquals(3, burger.getItems().get(0).getIconSize());
+        assertEquals(0, burger.getItems().get(1).getIconSize());
+    }
+
+    @Test
+    void test_map_BurgerContainer_defaultIcon()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/burger-container-default.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        assertEquals("bi-list", ((BurgerContainer) container).getIcon());
+    }
+
+    @Test
+    void test_map_BurgerContainer_nonPositiveIconSize_isIgnored()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/burger-container-icon-size-invalid.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        assertEquals(0, ((BurgerContainer) container).getItems().get(0).getIconSize());
+    }
+
+    @Test
+    void test_map_ButtonIconContainer_alt()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/button-icon-alt-container.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        assertEquals("close dialog", ((ButtonIcon) container).getAlt());
+    }
+
+    @Test
+    void test_map_TextfieldInput_onKeydown()
+    {
+        // setup
+        String srcPath = "json-mapper/input/textfield-keydown-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        assertEquals("onKey()", ((Textfield) input).getOnKeydown());
+    }
+
+    @Test
+    void test_map_TextareaInput_onKeydownRowsAndCols()
+    {
+        // setup
+        String srcPath = "json-mapper/input/textarea-sized-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        Textarea textarea = (Textarea) input;
+        assertEquals("onKey()", textarea.getOnKeydown());
+        assertEquals(8, textarea.getRows());
+        assertEquals(40, textarea.getCols());
+    }
+
+    @Test
+    void test_map_TextareaInput_nonPositiveRowsAndCols_fallBack()
+    {
+        // setup
+        String srcPath = "json-mapper/input/textarea-rows-invalid-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        Textarea textarea = (Textarea) input;
+        assertEquals(5, textarea.getRows());
+        assertNull(textarea.getCols());
+    }
+
+    @Test
+    void test_map_DateInput_minMaxAndStep()
+    {
+        // setup
+        String srcPath = "json-mapper/input/date-step-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        Date date = (Date) input;
+        assertEquals("2026-01-01", date.getMin());
+        assertEquals("2026-12-31", date.getMax());
+        assertEquals(7, date.getStep());
+    }
+
+    @Test
+    void test_map_DateInput_nonPositiveStep_fallsBackToOne()
+    {
+        // setup
+        String srcPath = "json-mapper/input/date-step-invalid-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        assertEquals(1, ((Date) input).getStep());
+    }
+
+    private Container mapContainer(String srcPath)
+    {
+        JsonMapper mapper =
+            JsonMapper
+                .builder()
+                .srcPath(srcPath)
+                .locale(Locale.ENGLISH)
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
+                .flatMappableDissector(flatMappableDissector)
+                .build();
+
+        return mapper.map().getContainers().get(0);
+    }
+
+    private Input mapInput(String srcPath)
     {
         JsonMapper mapper =
             JsonMapper
@@ -1378,5 +1553,556 @@ class JsonMapperTest
                 .build();
 
         return ((FormContainer) mapper.map().getContainers().get(0)).getInputs().get(0);
+    }
+
+    @Test
+    void test_map_AudioContainer_allParameters()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/audio-container-all.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        AudioContainer audio = (AudioContainer) container;
+        assertEquals("uid", audio.getUid());
+        assertEquals(Set.of("class1"), audio.getClasses());
+        assertEquals(Map.of("key1", "value1"), audio.getDataAttributes());
+        assertEquals("tip", audio.getTooltip());
+        assertEquals("path/to/resource", audio.getSrc());
+        assertEquals("audio caption", audio.getCaption());
+        assertTrue(audio.isControls());
+        assertTrue(audio.isAutoplay());
+        assertTrue(audio.isLooped());
+        assertTrue(audio.isMuted());
+        assertEquals(AudioContainer.Preload.METADATA, audio.getPreload());
+    }
+
+    @Test
+    void test_map_AudioContainer_defaults()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/audio-container-minimal.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        AudioContainer audio = (AudioContainer) container;
+        assertFalse(audio.isAutoplay());
+        assertFalse(audio.isLooped());
+        assertFalse(audio.isMuted());
+        assertEquals(AudioContainer.Preload.AUTO, audio.getPreload());
+    }
+
+    @Test
+    void test_map_BurgerContainer_itemTextUrlAndMethod()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/burger-container-item-method.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        BurgerContainer burger = (BurgerContainer) container;
+        assertEquals(3, burger.getItems().size());
+        assertEquals("first", burger.getItems().get(0).getText());
+        assertEquals("/first", burger.getItems().get(0).getUrl());
+        assertEquals("bi-x", burger.getItems().get(0).getIcon());
+        assertEquals("GET", burger.getItems().get(0).getMethod());
+        assertEquals("POST", burger.getItems().get(1).getMethod());
+        assertEquals("POST", burger.getItems().get(2).getMethod());
+    }
+
+    @Test
+    void test_map_ContentContainer_children()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/content-container-children.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        ContentContainer content = (ContentContainer) container;
+        assertEquals(2, content.getContents().size());
+        assertEquals("first text", ((TextContainer) content.getContents().get(0)).getText());
+        assertEquals("second text", ((TextContainer) content.getContents().get(1)).getText());
+    }
+
+    @Test
+    void test_map_HiddenContainer_children()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/hidden-container-children.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        HiddenContainer hidden = (HiddenContainer) container;
+        assertEquals(2, hidden.getChildren().size());
+        assertEquals("first text", ((TextContainer) hidden.getChildren().get(0)).getText());
+        assertEquals("second text", ((TextContainer) hidden.getChildren().get(1)).getText());
+    }
+
+    @Test
+    void test_map_FormContainer_direction()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/form-container-direction.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        assertEquals(Direction.HORIZONTAL, ((FormContainer) container).getDirection());
+    }
+
+    @Test
+    void test_map_FormContainer_connectedBtn()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/form-container-direction.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        assertEquals("btn-1", container.getDataAttributes().get("connected-btn"));
+    }
+
+    @Test
+    void test_map_TextContainer_inline()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/text-container-inline.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        assertTrue(((TextContainer) container).isInline());
+    }
+
+    @Test
+    void test_map_HeadingContainer_allParameters()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/heading-container.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        HeadingContainer heading = (HeadingContainer) container;
+        assertEquals("uid", heading.getUid());
+        assertEquals(Set.of("class1"), heading.getClasses());
+        assertEquals(Map.of("key1", "value1"), heading.getDataAttributes());
+        assertEquals("tip", heading.getTooltip());
+        assertEquals("some heading", heading.getText());
+        assertEquals(3, heading.getSize());
+    }
+
+    @Test
+    void test_map_HeadingContainer_sizeAboveSix_isClamped()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/heading-container-size-clamped.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        assertEquals(6, ((HeadingContainer) container).getSize());
+    }
+
+    @Test
+    void test_map_EmptyContainer()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/empty-container.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        assertEquals(EmptyContainer.class, container.getClass());
+    }
+
+    @Test
+    void test_map_ModalContainer_allParameters()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/modal-container-all.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        ModalContainer modal = (ModalContainer) container;
+        assertEquals("uid", modal.getUid());
+        assertEquals(Set.of("class1"), modal.getClasses());
+        assertEquals(Map.of("key1", "value1"), modal.getDataAttributes());
+        assertEquals("modal name", modal.getName());
+        assertEquals("/modal/request", modal.getRequestUrl());
+        assertTrue(modal.isCloseOnOverlayClick());
+        assertEquals("left", modal.getBtnNameLeft());
+        assertEquals(ButtonClass.DANGER, modal.getBtnClassLeft());
+        assertEquals("leftFn()", modal.getBtnFunctionLeft());
+        assertEquals("center", modal.getBtnNameCenter());
+        assertEquals(ButtonClass.SUCCESS, modal.getBtnClassCenter());
+        assertEquals("centerFn()", modal.getBtnFunctionCenter());
+        assertEquals("right", modal.getBtnNameRight());
+        assertEquals(ButtonClass.WARNING, modal.getBtnClassRight());
+        assertEquals("rightFn()", modal.getBtnFunctionRight());
+        assertEquals(1, modal.getContents().size());
+        assertEquals(1, ((ContentContainer) modal.getContents().get(0)).getContents().size());
+    }
+
+    @Test
+    void test_map_ModalContainer_defaults()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/modal-container-minimal.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        ModalContainer modal = (ModalContainer) container;
+        assertEquals("", modal.getRequestUrl());
+        assertFalse(modal.isCloseOnOverlayClick());
+        assertEquals("cancel", modal.getBtnNameLeft());
+        assertEquals(ButtonClass.DEFAULT, modal.getBtnClassLeft());
+        assertEquals(new CloseModal().parseAsJS(), modal.getBtnFunctionLeft());
+        assertEquals("", modal.getBtnNameCenter());
+        assertEquals(ButtonClass.DEFAULT, modal.getBtnClassCenter());
+        assertEquals("", modal.getBtnFunctionCenter());
+        assertEquals("submit", modal.getBtnNameRight());
+        assertEquals(ButtonClass.DEFAULT, modal.getBtnClassRight());
+        assertEquals(new SubmitFromModal().parseAsJS(), modal.getBtnFunctionRight());
+    }
+
+    @Test
+    void test_map_CheckboxInput_allParameters()
+    {
+        // setup
+        String srcPath = "json-mapper/input/checkbox-all-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        Checkbox checkbox = (Checkbox) input;
+        assertSubmittableBase(checkbox);
+        assertEquals(2, checkbox.getBoxes().size());
+        assertEquals("box-1", checkbox.getBoxes().get(0).getUid());
+        assertEquals("sub-1", checkbox.getBoxes().get(0).getSubmitAs());
+        assertEquals("first", checkbox.getBoxes().get(0).getText());
+        assertEquals("1", checkbox.getBoxes().get(0).getValue());
+        assertTrue(checkbox.getBoxes().get(0).isChecked());
+        assertEquals("second", checkbox.getBoxes().get(1).getText());
+        assertFalse(checkbox.getBoxes().get(1).isChecked());
+    }
+
+    @Test
+    void test_map_DateInput_allParameters()
+    {
+        // setup
+        String srcPath = "json-mapper/input/date-all-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        Date date = (Date) input;
+        assertSubmittableBase(date);
+        assertEquals("2026-05-01", date.getValue());
+        assertEquals("2026-01-01", date.getMin());
+        assertEquals("2026-12-31", date.getMax());
+        assertEquals(7, date.getStep());
+    }
+
+    @Test
+    void test_map_FileInput_allParameters()
+    {
+        // setup
+        String srcPath = "json-mapper/input/file-all-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        File file = (File) input;
+        assertSubmittableBase(file);
+        assertTrue(file.getMultiple());
+        assertEquals(List.of(".png", ".pdf"), file.getAccepts());
+    }
+
+    @Test
+    void test_map_HiddenInput_allParameters()
+    {
+        // setup
+        String srcPath = "json-mapper/input/hidden-all-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        Hidden hidden = (Hidden) input;
+        assertEquals("uid", hidden.getUid());
+        assertEquals(Set.of("class1", "class2"), hidden.getClasses());
+        assertEquals(Map.of("key1", "value1"), hidden.getDataAttributes());
+        assertEquals("submit", hidden.getSubmitAs());
+        assertEquals("secret", hidden.getValue());
+        assertTrue(hidden.isDisabled());
+        assertTrue(hidden.isMandatory());
+    }
+
+    @Test
+    void test_map_NumberInput_allParameters()
+    {
+        // setup
+        String srcPath = "json-mapper/input/number-all-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        Number number = (Number) input;
+        assertSubmittableBase(number);
+        assertEquals("5", String.valueOf(number.getValue()));
+        assertEquals("1", String.valueOf(number.getMin()));
+        assertEquals("10", String.valueOf(number.getMax()));
+        assertEquals("2", String.valueOf(number.getStep()));
+        assertEquals("ph", number.getPlaceholder());
+        assertEquals("enter()", number.getOnEnterPress());
+    }
+
+    @Test
+    void test_map_PasswordInput_allParameters()
+    {
+        // setup
+        String srcPath = "json-mapper/input/password-all-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        Password password = (Password) input;
+        assertSubmittableBase(password);
+        assertEquals("pw", password.getPlaceholder());
+        assertEquals("enter()", password.getOnEnterPress());
+    }
+
+    @Test
+    void test_map_RadioInput_allParameters()
+    {
+        // setup
+        String srcPath = "json-mapper/input/radio-all-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        Radio radio = (Radio) input;
+        assertSubmittableBase(radio);
+        assertEquals(2, radio.getBoxes().size());
+        assertEquals("box-1", radio.getBoxes().get(0).getUid());
+        assertEquals("first", radio.getBoxes().get(0).getText());
+        assertEquals("1", radio.getBoxes().get(0).getValue());
+        assertTrue(radio.getBoxes().get(0).isChecked());
+        assertEquals("second", radio.getBoxes().get(1).getText());
+        assertFalse(radio.getBoxes().get(1).isChecked());
+    }
+
+    @Test
+    void test_map_SelectInput_allParameters()
+    {
+        // setup
+        String srcPath = "json-mapper/input/select-all-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        Select select = (Select) input;
+        assertSubmittableBase(select);
+        assertEquals("2", select.getSelected());
+        assertEquals(2, select.getValues().size());
+        assertEquals("first", select.getValues().get(0).getText());
+        assertEquals("2", select.getValues().get(1).getValue());
+    }
+
+    @Test
+    void test_map_SliderInput_allParameters()
+    {
+        // setup
+        String srcPath = "json-mapper/input/slider-all-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        Slider slider = (Slider) input;
+        assertSubmittableBase(slider);
+        assertEquals("5", slider.getValue());
+        assertEquals("0", String.valueOf(slider.getMin()));
+        assertEquals("10", String.valueOf(slider.getMax()));
+        assertEquals("1", String.valueOf(slider.getStep()));
+    }
+
+    @Test
+    void test_map_SwitchInput_allParameters()
+    {
+        // setup
+        String srcPath = "json-mapper/input/switch-all-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        Switch switchInput = (Switch) input;
+        assertSubmittableBase(switchInput);
+        assertTrue(switchInput.getChecked());
+    }
+
+    @Test
+    void test_map_TagInput_allParameters()
+    {
+        // setup
+        String srcPath = "json-mapper/input/tag-all-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        Tag tag = (Tag) input;
+        assertSubmittableBase(tag);
+        assertEquals(List.of("one", "two"), tag.getTags());
+        assertEquals("[a-z]+", tag.getPattern());
+        assertEquals("uid", tag.getSettings().getId());
+        assertEquals(3, tag.getSettings().getMaxTags());
+        assertEquals("/tags/fetch", tag.getSettings().getFetchWhitelistUrl());
+        assertEquals("/tags/search", tag.getSettings().getSearchTagsUrl());
+        assertTrue(tag.getSettings().isEnforceWhitelist());
+    }
+
+    @Test
+    void test_map_TagInput_tags()
+    {
+        // setup
+        String srcPath = "json-mapper/input/tag-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        assertEquals(List.of("test", "germany"), ((Tag) input).getTags());
+    }
+
+    @Test
+    void test_map_TextareaInput_allParameters()
+    {
+        // setup
+        String srcPath = "json-mapper/input/textarea-all-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        Textarea textarea = (Textarea) input;
+        assertSubmittableBase(textarea);
+        assertEquals("body", textarea.getValue());
+        assertEquals("ph", textarea.getPlaceholder());
+        assertEquals(100, textarea.getMaxCharacters());
+        assertEquals("key()", textarea.getOnKeydown());
+        assertEquals(3, textarea.getRows());
+        assertEquals(20, textarea.getCols());
+    }
+
+    @Test
+    void test_map_TextboxInput_allParameters()
+    {
+        // setup
+        String srcPath = "json-mapper/input/textbox-all-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        Textbox textbox = (Textbox) input;
+        assertEquals("uid", textbox.getUid());
+        assertEquals(Set.of("class1", "class2"), textbox.getClasses());
+        assertEquals(Map.of("key1", "value1"), textbox.getDataAttributes());
+        assertEquals("name", textbox.getName());
+        assertEquals("some text", textbox.getText());
+    }
+
+    @Test
+    void test_map_TextfieldInput_allParameters()
+    {
+        // setup
+        String srcPath = "json-mapper/input/textfield-all-input.ged";
+        Input  input;
+
+        // run
+        input = mapInput(srcPath);
+
+        // verify
+        Textfield textfield = (Textfield) input;
+        assertSubmittableBase(textfield);
+        assertEquals("init", textfield.getValue());
+        assertEquals("ph", textfield.getPlaceholder());
+        assertEquals(20, textfield.getMaxCharacters());
+        assertEquals("[a-z]+", textfield.getPattern());
+        assertEquals("key()", textfield.getOnKeydown());
+        assertEquals("enter()", textfield.getOnEnterPress());
+    }
+
+    private void assertSubmittableBase(SubmittableInput input)
+    {
+        assertEquals("uid", input.getUid());
+        assertEquals(Set.of("class1", "class2"), input.getClasses());
+        assertEquals(Map.of("key1", "value1"), input.getDataAttributes());
+        assertEquals("name", input.getName());
+        assertEquals("submit", input.getSubmitAs());
+        assertEquals("tip", input.getTooltip());
+        assertEquals("inp()", input.getOnInput());
+        assertEquals("info text", input.getInfoText());
+        assertEquals("/info/url", input.getInfoUrl());
+        assertEquals("input is mandatory", input.getMandatoryText());
+        assertTrue(input.isDisabled());
+        assertTrue(input.isMandatory());
     }
 }

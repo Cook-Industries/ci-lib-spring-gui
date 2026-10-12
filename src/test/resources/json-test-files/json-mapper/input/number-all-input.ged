@@ -1,0 +1,35 @@
+{
+    "type": "FORM",
+    "classes": [],
+    "attributes": {},
+    "parameters": {},
+    "children": [
+        {
+            "uid": "uid",
+            "type": "NUMBER",
+            "classes": [
+                "class1",
+                "class2"
+            ],
+            "attributes": {
+                "key1": "value1"
+            },
+            "parameters": {
+                "name": "name",
+                "submitAs": "submit",
+                "tooltip": "tip",
+                "onInput": "inp()",
+                "infoText": "info text",
+                "infoUrl": "/info/url",
+                "disabled": true,
+                "mandatory": true,
+                "value": 5,
+                "min": 1,
+                "max": 10,
+                "step": 2,
+                "placeholder": "ph",
+                "onEnterPress": "enter()"
+            }
+        }
+    ]
+}
