@@ -165,6 +165,8 @@ final class ExtractorTestSupport
 
         final InputExtractorFactory  factory;
 
+        final InputExtractorFactory  factoryWithoutUploads;
+
         Fixture()
         {
             GUIFactory            guiFactory =
@@ -185,6 +187,7 @@ final class ExtractorTestSupport
                     limits);
 
             factory = new InputExtractorFactory(guiFactory, coordinator, properties, limits);
+            factoryWithoutUploads = new InputExtractorFactory(guiFactory, null, properties, limits);
         }
     }
 

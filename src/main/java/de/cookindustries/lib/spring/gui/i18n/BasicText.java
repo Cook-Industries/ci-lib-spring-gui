@@ -45,7 +45,7 @@ public enum BasicText
 
     INPUT_CHECK_RESULT_NO_PATTERN_MATCH("input-check-result-no-pattern-match", "[{0}] does not conform to expected pattern [{1}]"),
 
-    INPUT_CHECK_RESULT_OUT_OF_RANGE("input-check-result-out-of-range", "[{0}] is out of range [{1}]-[{2}]"),
+    INPUT_CHECK_RESULT_OUT_OF_RANGE("input-check-result-out-of-range", "value is out of range [{0}]-[{1}]"),
 
     INPUT_CHECK_RESULT_NOT_PRESENT("input-check-result-not-present", "value is not present/null"),
 

@@ -345,4 +345,14 @@ class InputExtractorFactoryTest
         assertEquals(HANDLER_KEY, fx.store.batch.completeKey());
         assertTrue(fx.store.files.isEmpty());
     }
+
+    @Test
+    void test_approve_withoutUploadSetup_isRejected()
+    {
+        // setup
+        InputExtractor<TestForm> extractor = fx.factoryWithoutUploads.create(inputs, Locale.ENGLISH, () -> new TestForm("x"));
+
+        // run & verify
+        assertThrows(IllegalStateException.class, () -> extractor.approve(HANDLER_KEY, () -> new TestForm("x")));
+    }
 }

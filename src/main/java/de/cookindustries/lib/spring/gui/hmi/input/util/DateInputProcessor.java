@@ -10,10 +10,9 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
 import java.sql.Date;
 
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.ValueNotPresentException;
-
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
-import lombok.Builder.Default;
 
 /**
  * A processor to parse and check a {@code input} as {@link Integer}.
@@ -59,7 +58,7 @@ public class DateInputProcessor extends AbsInputProcessor<Date>
     {
         if ((lowerBound != null && input.before(lowerBound)) || (upperBound != null && input.after(upperBound)))
         {
-            return createEmptyResult(InputCheckResultType.OUT_OF_BOUNDS);
+            return createEmptyResult(InputCheckResultType.OUT_OF_BOUNDS, lowerBound, upperBound);
         }
 
         return createResult(InputCheckResultType.PASS, input);

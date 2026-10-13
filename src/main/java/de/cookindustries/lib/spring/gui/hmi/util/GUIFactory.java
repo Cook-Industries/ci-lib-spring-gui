@@ -56,7 +56,8 @@ import de.cookindustries.lib.spring.gui.util.PathAdapter;
 public final class GUIFactory
 {
 
-    private static final SiteImports     EMPTY_IMPORTS = SiteImports.builder().build();
+    private static final SiteImports     EMPTY_IMPORTS    = SiteImports.builder().build();
+    private static final String          TEXT_PLACEHOLDER = "$$text$";
 
     private final TemplateFileCache      templateFileCache;
     private final AbsTranslationProvider translationProvider;
@@ -214,8 +215,8 @@ public final class GUIFactory
         calls.addAll(compSrc.getFunctionCalls());
 
         String resolvedTitle =
-            title.startsWith("$$")
-                ? translationProvider.getText(compSrc.getLocale(), title)
+            title.startsWith(TEXT_PLACEHOLDER)
+                ? translationProvider.getText(compSrc.getLocale(), title.substring(TEXT_PLACEHOLDER.length()))
                 : title;
 
         return HtmlSite

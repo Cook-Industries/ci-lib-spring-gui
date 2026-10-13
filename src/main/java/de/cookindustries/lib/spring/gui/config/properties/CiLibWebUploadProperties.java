@@ -18,7 +18,6 @@ import org.springframework.util.unit.DataUnit;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
@@ -30,7 +29,6 @@ import lombok.Data;
 public class CiLibWebUploadProperties
 {
 
-    @NotBlank
     private String                         url;
 
     /** upload part size in MB */

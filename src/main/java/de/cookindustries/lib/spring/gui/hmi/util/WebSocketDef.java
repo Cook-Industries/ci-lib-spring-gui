@@ -10,11 +10,11 @@ package de.cookindustries.lib.spring.gui.hmi.util;
 import java.util.List;
 
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
 import lombok.ToString;
-import lombok.Builder.Default;
 
 /**
  * @since 3.3.2
@@ -37,6 +37,6 @@ public final class WebSocketDef
 
     @NonNull
     @Default
-    private final Integer      reconnectionTimeOut = 5000;
+    private final Integer      reconnectInterval = 5000;
 
 }

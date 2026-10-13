@@ -9,6 +9,7 @@ package de.cookindustries.lib.spring.gui.config;
 
 import java.util.List;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -90,6 +91,7 @@ class CiLibBeanConfig
     }
 
     @Bean
+    @ConditionalOnBean({ UploadSessionStore.class, AbstractReceiver.class })
     FileUploadCoordinator fileUploadCoordinator(UploadSessionStore store, AbstractReceiver receiver, AbstractFormCipher cipher,
         List<CompletionHandler<?, ?>> handlers, UploadSessionPolicy policy, UploadSessionLimits limits)
     {

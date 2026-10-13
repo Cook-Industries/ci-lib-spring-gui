@@ -156,7 +156,11 @@ public final class FlatMappableDissector
                     Class<?> type    = method.getReturnType();
                     String   stripped;
 
-                    if (rawName.startsWith("get"))
+                    if (excludedMethods.contains(rawName))
+                    {
+                        throw new SkipFieldDissectionException();
+                    }
+                    else if (rawName.startsWith("get"))
                     {
                         stripped = rawName.substring(3);
                     }

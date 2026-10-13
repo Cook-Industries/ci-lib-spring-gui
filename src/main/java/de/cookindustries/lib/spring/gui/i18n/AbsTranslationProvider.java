@@ -119,6 +119,7 @@ public abstract class AbsTranslationProvider
      * 
      * @param locale to associate
      * @param key to fetch
+     * @param values placeholder fill-in values
      * @return either the associated text, or "I18N [{@code key}] not set." if no associate exists
      * @throws IllegalArgumentException if {@code locale} is null, or if {@code key} is null or empty
      */
@@ -230,6 +231,6 @@ public abstract class AbsTranslationProvider
                 args.length);
         }
 
-        return MessageFormat.format(template, args);
+        return new MessageFormat(template, args);
     }
 }

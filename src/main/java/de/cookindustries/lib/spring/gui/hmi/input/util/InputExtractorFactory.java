@@ -10,6 +10,7 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
 import java.util.Locale;
 import java.util.function.Supplier;
 
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 
@@ -25,8 +26,9 @@ import de.cookindustries.lib.spring.gui.util.file.UploadSessionLimits;
 /**
  * Creates {@link InputExtractor}s with the application's file upload setup, if available.
  * <p>
- * Without an upload setup in the application context, the extractors are created without upload support. File sizes are not limited and
- * {@link InputExtractor#approve(String, java.util.function.Supplier)} refuses forms that carry files.
+ * The upload setup is active if the application context holds an {@code UploadSessionStore} and an {@code AbstractReceiver}. Without it, the
+ * extractors are created without upload support: {@link InputExtractor#approve(String, java.util.function.Supplier)} throws an
+ * {@code IllegalStateException}. Announced file sizes are checked against {@link UploadSessionLimits} either way.
  *
  * @since 4.0.0
  * @author <a href="mailto:development@cook-industries.de">sebastian koch</a>
@@ -40,11 +42,13 @@ public final class InputExtractorFactory
     private final String              uploadUrl;
     private final UploadSessionLimits limits;
 
-    public InputExtractorFactory(GUIFactory guiFactory, FileUploadCoordinator coordinator, CiLibProperties properties,
+    public InputExtractorFactory(GUIFactory guiFactory, @Nullable FileUploadCoordinator coordinator, CiLibProperties properties,
         UploadSessionLimits limits)
     {
         this.guiFactory = guiFactory;
-        this.starter = coordinator::startUpload;
+        this.starter = coordinator == null
+            ? null
+            : coordinator::startUpload;
         this.uploadUrl = properties.getWeb().getUpload().getUrl();
         this.limits = limits;
     }

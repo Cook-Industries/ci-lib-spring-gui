@@ -79,7 +79,7 @@ public final class DoubleInputProcessor extends AbsInputProcessor<Double>
     {
         if (input < lowerBound || input > upperBound)
         {
-            return createEmptyResult(InputCheckResultType.OUT_OF_BOUNDS);
+            return createEmptyResult(InputCheckResultType.OUT_OF_BOUNDS, lowerBound, upperBound);
         }
 
         return createResult(InputCheckResultType.PASS, input);

@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -397,7 +398,7 @@ public class JsonMapper
     @Singular
     private final List<TokenMap>                                tokenMaps;
 
-    private final Set<TokenMap>                                 finalizedTokenMaps             = new HashSet<>();
+    private final Set<TokenMap>                                 finalizedTokenMaps             = new LinkedHashSet<>();
 
     private final Map<Integer, TokenMap>                        tempTokenMaps                  = new HashMap<>();
 
@@ -1735,28 +1736,29 @@ public class JsonMapper
             return null;
         }
 
-        String     icon         = getParameterValue(element, depth, PARAM_ICON, String.class, DEFAULT_EMPTY_VAL);
-        Integer    iconSize     = getOptionalPositiveInteger(element, depth, uid, PARAM_ICON_SIZE);
-        String     url          = getParameterValue(element, depth, PARAM_URL, String.class);
-        String     text         = getParameterValue(element, depth, PARAM_TEXT, String.class);
-        String     methodString =
+        String                       icon         = getParameterValue(element, depth, PARAM_ICON, String.class, DEFAULT_EMPTY_VAL);
+        Integer                      iconSize     = getOptionalPositiveInteger(element, depth, uid, PARAM_ICON_SIZE);
+        String                       url          = getParameterValue(element, depth, PARAM_URL, String.class);
+        String                       text         = getParameterValue(element, depth, PARAM_TEXT, String.class);
+        String                       methodString =
             getParameterValue(element, depth, PARAM_METHOD, String.class, HttpMethod.POST.name()).toUpperCase();
 
-        HttpMethod method       = switch (methodString)
-                                {
-                                    case "POST" -> HttpMethod.POST;
-                                    case "GET" -> HttpMethod.GET;
-                                    case "DELETE" -> HttpMethod.DELETE;
-                                    case "PUT" -> HttpMethod.PUT;
-                                    case "PATCH" -> HttpMethod.PATCH;
-                                    default -> {
-                                        LOG.error("illegal method [{}] at BurgerItem [{}] default to POST", methodString, uid);
+        HttpMethod                   method       = switch (methodString)
+                                                  {
+                                                      case "POST" -> HttpMethod.POST;
+                                                      case "GET" -> HttpMethod.GET;
+                                                      case "DELETE" -> HttpMethod.DELETE;
+                                                      case "PUT" -> HttpMethod.PUT;
+                                                      case "PATCH" -> HttpMethod.PATCH;
+                                                      default -> {
+                                                          LOG.error("illegal method [{}] at BurgerItem [{}] default to POST", methodString,
+                                                              uid);
 
-                                        yield HttpMethod.POST;
-                                    }
-                                };
+                                                          yield HttpMethod.POST;
+                                                      }
+                                                  };
 
-        BurgerItem.BurgerItemBuilder item =
+        BurgerItem.BurgerItemBuilder item         =
             BurgerItem
                 .builder()
                 .icon(icon)
@@ -2798,15 +2800,15 @@ public class JsonMapper
      */
     private Slider transformSliderInput(PseudoElement element, int depth)
     {
-        UiElementParameters  cpars        = resolveUiElementBaseParameters(element, depth);
-        InputParameters      ipars        = resolveInputBaseParameters(element, depth);
+        UiElementParameters cpars        = resolveUiElementBaseParameters(element, depth);
+        InputParameters     ipars        = resolveInputBaseParameters(element, depth);
 
-        String               value;
-        java.lang.Number     min          = null;
-        java.lang.Number     max          = null;
-        java.lang.Number     step         = null;
-        Integer              marks        = null;
-        List<String>         customValues = null;
+        String              value;
+        java.lang.Number    min          = null;
+        java.lang.Number    max          = null;
+        java.lang.Number    step         = null;
+        Integer             marks        = null;
+        List<String>        customValues = null;
 
         if (element.getParameters().containsKey(PARAM_CUSTOM_VALUES))
         {

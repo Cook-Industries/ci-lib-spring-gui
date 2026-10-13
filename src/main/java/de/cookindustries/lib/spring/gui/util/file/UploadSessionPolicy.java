@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2016-2026 sebastian koch/Cook Industries.
+ * <p>
+ * Licensed under the MIT License.
+ * <p>
+ * See LICENSE file in the project root for full license information.
+ */
 package de.cookindustries.lib.spring.gui.util.file;
 
 import de.cookindustries.lib.spring.gui.config.properties.CiLibProperties;
@@ -17,9 +24,9 @@ public final class UploadSessionPolicy
 
     private final int  maxRetries;
 
-    private final int  retryBaseDelayMillis;
+    private final long retryBaseDelayMillis;
 
-    private final int  retryMaxDelayMillis;
+    private final long retryMaxDelayMillis;
 
     public UploadSessionPolicy(CiLibProperties properties)
     {
@@ -27,8 +34,8 @@ public final class UploadSessionPolicy
         this.maxParallelUploadsPerFile = properties.getWeb().getUpload().getMaxPerFileParallel();
         this.maxParallelUploadsGlobal = properties.getWeb().getUpload().getMaxGlobalParallel();
         this.maxRetries = properties.getWeb().getUpload().getMaxRetries();
-        this.retryBaseDelayMillis = properties.getWeb().getUpload().getRetryBaseDelay().toMillisPart();
-        this.retryMaxDelayMillis = properties.getWeb().getUpload().getRetryMaxDelay().toMillisPart();
+        this.retryBaseDelayMillis = properties.getWeb().getUpload().getRetryBaseDelay().toMillis();
+        this.retryMaxDelayMillis = properties.getWeb().getUpload().getRetryMaxDelay().toMillis();
 
         if (partLength <= 0)
         {
