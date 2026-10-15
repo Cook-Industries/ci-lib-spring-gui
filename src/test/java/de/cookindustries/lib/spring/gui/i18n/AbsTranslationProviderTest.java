@@ -10,6 +10,7 @@ package de.cookindustries.lib.spring.gui.i18n;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Locale;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +27,20 @@ class AbsTranslationProviderTest
             public AbsTranslationProvider initMaps()
             {
                 addTranslation(locale, KEY, text);
+
+                return this;
+            }
+        }.initMaps();
+    }
+
+    private static AbsTranslationProvider providerWith(Map<Locale, String> texts)
+    {
+        return new AbsTranslationProvider() {
+
+            @Override
+            public AbsTranslationProvider initMaps()
+            {
+                texts.forEach((locale, text) -> addTranslation(locale, KEY, text));
 
                 return this;
             }
@@ -96,5 +111,90 @@ class AbsTranslationProviderTest
 
         // verify
         assertEquals("10,485,760 bytes", result);
+    }
+
+    @Test
+    void test_getText_exactLocaleWins()
+    {
+        // setup
+        AbsTranslationProvider provider = providerWith(Map.of(Locale.GERMAN, "allgemein", Locale.GERMANY, "deutschland"));
+        String                 result;
+
+        // run
+        result = provider.getText(Locale.GERMANY, KEY);
+
+        // verify
+        assertEquals("deutschland", result);
+    }
+
+    @Test
+    void test_getText_languageWithoutCountry()
+    {
+        // setup
+        AbsTranslationProvider provider = providerWith(Locale.GERMANY, "text");
+        String                 result;
+
+        // run
+        result = provider.getText(Locale.GERMAN, KEY);
+
+        // verify
+        assertEquals("text", result);
+    }
+
+    @Test
+    void test_getText_otherCountrySameLanguage()
+    {
+        // setup
+        AbsTranslationProvider provider = providerWith(Locale.GERMANY, "text");
+        Locale                 austria  = new Locale("de", "AT");
+        String                 result;
+
+        // run
+        result = provider.getText(austria, KEY);
+
+        // verify
+        assertEquals("text", result);
+    }
+
+    @Test
+    void test_getText_fallsBackToEnglish()
+    {
+        // setup
+        AbsTranslationProvider provider = providerWith(Locale.US, "english");
+        String                 result;
+
+        // run
+        result = provider.getText(Locale.GERMANY, KEY);
+
+        // verify
+        assertEquals("english", result);
+    }
+
+    @Test
+    void test_getText_libraryKeyFallsBackToBasicText()
+    {
+        // setup
+        AbsTranslationProvider provider = providerWith(Locale.GERMANY, "text");
+        String                 result;
+
+        // run
+        result = provider.getText(Locale.GERMANY, BasicText.INPUT_MANDATORY.getKey());
+
+        // verify
+        assertEquals(BasicText.INPUT_MANDATORY.getText(), result);
+    }
+
+    @Test
+    void test_getText_unknownKeyIsNotSet()
+    {
+        // setup
+        AbsTranslationProvider provider = providerWith(Locale.GERMANY, "text");
+        String                 result;
+
+        // run
+        result = provider.getText(Locale.GERMANY, "unknown");
+
+        // verify
+        assertEquals("I18N [unknown] not set.", result);
     }
 }

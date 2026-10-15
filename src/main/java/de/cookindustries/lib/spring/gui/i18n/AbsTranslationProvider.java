@@ -8,7 +8,11 @@
 package de.cookindustries.lib.spring.gui.i18n;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +20,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +35,11 @@ public abstract class AbsTranslationProvider
 {
 
     private static final Logger                    LOG         = LoggerFactory.getLogger(AbsTranslationProvider.class);
+
+    private static final Map<String, String>       BASIC_TEXTS =
+        Arrays
+            .stream(BasicText.values())
+            .collect(Collectors.toUnmodifiableMap(BasicText::getKey, BasicText::getText));
 
     private final Pattern                          PLACEHOLDER = Pattern.compile("\\{(\\d+)}");
 
@@ -116,6 +126,9 @@ public abstract class AbsTranslationProvider
 
     /**
      * Get a translation from a {@link Locale} and a {@code key}
+     * <p>
+     * The {@code key} is looked up in the exact {@code locale}, then in the language without country, then in other locales of the same
+     * language (lowest by {@code toString}), then in English, and at last in the {@link BasicText} defaults.
      * 
      * @param locale to associate
      * @param key to fetch
@@ -135,23 +148,65 @@ public abstract class AbsTranslationProvider
             throw new IllegalArgumentException("translation key can not be null/empty");
         }
 
-        Map<String, String> map = translations.get(locale);
-        String              translation;
+        String template = findTemplate(locale, key);
 
-        if (map != null && map.containsKey(key))
+        if (template == null)
         {
-            String template = map.get(key);
-
-            translation = format(key, locale, template, values);
-        }
-        else
-        {
-            translation = String.format("I18N [%s] not set.", key);
-
             LOG.warn("no translation defined for [{}]-[{}]", key, locale);
+
+            return String.format("I18N [%s] not set.", key);
         }
 
-        return translation;
+        return format(key, locale, template, values);
+    }
+
+    private String findTemplate(Locale locale, String key)
+    {
+        Map<String, String> exact = translations.get(locale);
+
+        if (exact != null && exact.containsKey(key))
+        {
+            return exact.get(key);
+        }
+
+        Set<Locale> candidates = new LinkedHashSet<>();
+
+        candidates.addAll(localesOfLanguage(locale.getLanguage()));
+        candidates.addAll(localesOfLanguage(Locale.ENGLISH.getLanguage()));
+
+        for (Locale candidate : candidates)
+        {
+            Map<String, String> map = translations.get(candidate);
+
+            if (map.containsKey(key))
+            {
+                LOG.debug("translation for [{}]-[{}] taken from [{}]", key, locale, candidate);
+
+                return map.get(key);
+            }
+        }
+
+        String basicText = BASIC_TEXTS.get(key);
+
+        if (basicText != null)
+        {
+            LOG.debug("translation for [{}]-[{}] taken from the library defaults", key, locale);
+        }
+
+        return basicText;
+    }
+
+    private List<Locale> localesOfLanguage(String language)
+    {
+        return translations
+            .keySet()
+            .stream()
+            .filter(candidate -> candidate.getLanguage().equals(language))
+            .sorted(
+                Comparator
+                    .comparing((Locale candidate) -> !candidate.getCountry().isEmpty())
+                    .thenComparing(Locale::toString))
+            .toList();
     }
 
     /**
