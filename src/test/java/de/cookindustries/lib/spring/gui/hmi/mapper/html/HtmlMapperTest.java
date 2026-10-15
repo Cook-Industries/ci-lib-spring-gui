@@ -2465,4 +2465,50 @@ class HtmlMapperTest
         // verify
         assertTrue(html.contains("a&lt;b</figcaption>"));
     }
+
+    @Test
+    void test_map_modalContainer_escapesNameOnce()
+    {
+        // setup
+        ModalContainer container =
+            ModalContainer
+                .builder()
+                .uid("m")
+                .name("Löschen & Co")
+                .btnNameRight("OK")
+                .build();
+        String         html;
+
+        // run
+        html = HtmlMapper.map(container);
+
+        // verify
+        assertTrue(html.contains(">L&ouml;schen &amp; Co</p>"));
+        assertFalse(html.contains("&amp;ouml;"));
+    }
+
+    @Test
+    void test_map_modalContainer_escapesButtonNamesOnce()
+    {
+        // setup
+        ModalContainer container =
+            ModalContainer
+                .builder()
+                .uid("m")
+                .name("Title")
+                .btnNameRight("Übernehmen")
+                .btnNameCenter("a<b")
+                .btnNameLeft("Schließen")
+                .build();
+        String         html;
+
+        // run
+        html = HtmlMapper.map(container);
+
+        // verify
+        assertTrue(html.contains(">&Uuml;bernehmen</button>"));
+        assertTrue(html.contains(">a&lt;b</button>"));
+        assertTrue(html.contains(">Schlie&szlig;en</button>"));
+        assertFalse(html.contains("&amp;"));
+    }
 }

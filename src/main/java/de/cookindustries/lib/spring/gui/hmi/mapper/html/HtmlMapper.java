@@ -758,7 +758,7 @@ public final class HtmlMapper
                 .builder()
                 .uid(modalContainer.getUid() + "-right-btn")
                 .btnClass(modalContainer.getBtnClassRight())
-                .text(htmlEscape(modalContainer.getBtnNameRight()))
+                .text(modalContainer.getBtnNameRight())
                 .onClick(modalContainer.getBtnFunctionRight())
                 .build());
 
@@ -769,7 +769,7 @@ public final class HtmlMapper
                     .builder()
                     .uid(modalContainer.getUid() + "-center-btn")
                     .btnClass(modalContainer.getBtnClassCenter())
-                    .text(htmlEscape(modalContainer.getBtnNameCenter()))
+                    .text(modalContainer.getBtnNameCenter())
                     .onClick(modalContainer.getBtnFunctionCenter())
                     .build());
         }
@@ -781,7 +781,7 @@ public final class HtmlMapper
                     .builder()
                     .uid(modalContainer.getUid() + "-left-btn")
                     .btnClass(modalContainer.getBtnClassLeft())
-                    .text(htmlEscape(modalContainer.getBtnNameLeft()))
+                    .text(modalContainer.getBtnNameLeft())
                     .onClick(modalContainer.getBtnFunctionLeft())
                     .build());
         }
@@ -802,7 +802,7 @@ public final class HtmlMapper
                         .builder()
                         .clazz("modal-name")
                         .clazz("text-bold")
-                        .text(htmlEscape(modalContainer.getName()))
+                        .text(modalContainer.getName())
                         .build())
                 .content(
                     ContentContainer
