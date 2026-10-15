@@ -1,0 +1,16 @@
+{
+    "uid": "content",
+    "type": "content",
+    "children": [
+        {
+            "uid": "text",
+            "type": "text",
+            "parameters": {
+                "active": "$$value$missingActive",
+                "tooltip": "$$value$missingTooltip",
+                "inline": "$$value$missingInline",
+                "text": "text"
+            }
+        }
+    ]
+}

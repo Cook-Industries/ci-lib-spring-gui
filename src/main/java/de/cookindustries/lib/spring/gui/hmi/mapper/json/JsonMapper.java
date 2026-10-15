@@ -998,7 +998,23 @@ public class JsonMapper
 
         LOG.trace("[{}]:[{}]: parameter is [{}]:[{}]", uuid, depth, rawValue.getClass().getSimpleName(), String.valueOf(rawValue));
 
-        return resolveSingleValue(uid, depth, key, rawValue, expectedType, processPlaceholder);
+        T value = resolveSingleValue(uid, depth, key, rawValue, expectedType, processPlaceholder);
+
+        if (value != null)
+        {
+            return value;
+        }
+
+        if (fallback == null)
+        {
+            throw new JsonParsingException(uid, depth, this.count,
+                String.format("placeholder [%s] of parameter [%s] could not be resolved and no fallback given", rawValue, key));
+        }
+
+        LOG.warn("[{}]:[{}]: placeholder [{}] of parameter [{}] in [{}] could not be resolved, serving [{}] instead", uuid, depth, rawValue,
+            key, srcPathSanitized, fallback);
+
+        return fallback;
     }
 
     /**
@@ -1081,7 +1097,15 @@ public class JsonMapper
 
         for (Object rawElement : rawList)
         {
-            result.add(resolveSingleValue(uid, depth, key, rawElement, elementType, processPlaceholder));
+            T value = resolveSingleValue(uid, depth, key, rawElement, elementType, processPlaceholder);
+
+            if (value == null)
+            {
+                throw new JsonParsingException(uid, depth, this.count,
+                    String.format("placeholder [%s] in list parameter [%s] could not be resolved", rawElement, key));
+            }
+
+            result.add(value);
         }
 
         return result;
@@ -1452,20 +1476,20 @@ public class JsonMapper
 
         String          uid            = resolveUid(element, depth);
 
-        boolean         processElement = shouldProcess(element, uid, depth);
-
-        if (!processElement)
-        {
-            LOG.debug("[{}]:[{}]: skip CONTAINER [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth, uid);
-
-            return List.of(EmptyContainer.builder().build());
-        }
-
-        LOG.trace("[{}]:[{}]: start transform >", uuid, depth);
-        LOG.trace("[{}]:[{}]: map [{}] with allowed types [{}]", uuid, depth, uid, allowedTypes);
-
         try
         {
+            boolean processElement = shouldProcess(element, uid, depth);
+
+            if (!processElement)
+            {
+                LOG.debug("[{}]:[{}]: skip CONTAINER [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth, uid);
+
+                return List.of(EmptyContainer.builder().build());
+            }
+
+            LOG.trace("[{}]:[{}]: start transform >", uuid, depth);
+            LOG.trace("[{}]:[{}]: map [{}] with allowed types [{}]", uuid, depth, uid, allowedTypes);
+
             List<Container> componentResult = resolveComponentLink(element, depth, allowedTypes);
 
             if (Objects.nonNull(componentResult))

@@ -2160,6 +2160,40 @@ class JsonMapperTest
         assertEquals(List.of("leader b"), texts(containers.get(1)));
     }
 
+    @Test
+    void test_map_unresolvedPlaceholder_usesFallback()
+    {
+        // setup
+        String    srcPath = "json-mapper/unresolved-optional-parameters.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        ContentContainer content = (ContentContainer) container;
+        assertEquals(1, content.getContents().size());
+
+        TextContainer text = (TextContainer) content.getContents().get(0);
+        assertEquals("text", text.getText());
+        assertEquals("", text.getTooltip());
+        assertFalse(text.isInline());
+    }
+
+    @Test
+    void test_map_unresolvedPlaceholder_requiredParameter_failsElement()
+    {
+        // setup
+        String    srcPath = "json-mapper/unresolved-required-parameter.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        checkAgainstErrorContainer(container);
+    }
+
     private TokenMap groupsTokenMap()
     {
         return TokenMap

@@ -1,0 +1,7 @@
+{
+    "uid": "text",
+    "type": "text",
+    "parameters": {
+        "text": "$$value$missingText"
+    }
+}
