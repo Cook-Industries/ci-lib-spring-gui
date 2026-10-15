@@ -317,7 +317,7 @@ public class FileUploadCoordinator
             throw new UploadException(Status.FAILED, "no completion handler registered on this instance for: " + batch.completeKey());
         }
 
-        if (!store.tryClaimCompletion(batchUuid))
+        if (!store.tryClaimCompletion(batchUuid, Instant.now().plus(limits.completionTimeout())))
         {
             throw new UploadException(Status.CONFLICT, "upload is already being completed");
         }
@@ -381,7 +381,8 @@ public class FileUploadCoordinator
     }
 
     /**
-     * Cleans up batches that nobody finished in time. Call this periodically from any scheduler; every instance may call it.
+     * Cleans up batches that nobody finished in time, including completions that did not end within the completion timeout. Call this
+     * periodically from any scheduler; every instance may call it.
      *
      * @return number of batches removed by this call
      */

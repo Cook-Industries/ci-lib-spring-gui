@@ -236,4 +236,25 @@ class TagListInputProcessorTest
         assertEquals(InputCheckResultType.PASS, second.getType());
         assertTrue(second.getResult().isEmpty());
     }
+
+    @Test
+    void test_check_whitelist_nothingLeft_notAllowed() throws NullIgnoredException
+    {
+        // setup
+        TagListInputProcessor     processor =
+            TagListInputProcessor
+                .builder()
+                .allowEmpty(false)
+                .whitelist(new Tag("test"))
+                .build();
+        String                    input     = "[{\"value\":\"test_2\"}]";
+        InputCheckResult<TagList> result;
+
+        // run
+        result = processor.process(input);
+
+        // verify
+        assertEquals(InputCheckResultType.EMPTY_BUT_EXPECTED, result.getType());
+        assertThrows(ValueNotPresentException.class, () -> result.getResult());
+    }
 }

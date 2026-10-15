@@ -12,7 +12,7 @@ import java.time.Duration;
 /**
  * Server limits that are not part of the policy sent to the client.
  */
-public record UploadSessionLimits(long maxFileLength, long maxBatchLength, Duration sessionTtl)
+public record UploadSessionLimits(long maxFileLength, long maxBatchLength, Duration sessionTtl, Duration completionTimeout)
 {
 
     public UploadSessionLimits
@@ -25,6 +25,11 @@ public record UploadSessionLimits(long maxFileLength, long maxBatchLength, Durat
         if (sessionTtl == null || sessionTtl.isZero() || sessionTtl.isNegative())
         {
             throw new IllegalArgumentException("sessionTtl must be positive: " + sessionTtl);
+        }
+
+        if (completionTimeout == null || completionTimeout.isZero() || completionTimeout.isNegative())
+        {
+            throw new IllegalArgumentException("completionTimeout must be positive: " + completionTimeout);
         }
     }
 }

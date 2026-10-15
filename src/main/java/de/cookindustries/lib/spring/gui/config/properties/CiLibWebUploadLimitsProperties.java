@@ -29,14 +29,18 @@ public class CiLibWebUploadLimitsProperties
 
     /** upload part size in MB */
     @DataSizeUnit(DataUnit.MEGABYTES)
-    private DataSize maxFileSize  = DataSize.ofMegabytes(10);
+    private DataSize maxFileSize       = DataSize.ofMegabytes(10);
 
     /** upload part size in MB */
     @DataSizeUnit(DataUnit.MEGABYTES)
-    private DataSize maxBatchSize = DataSize.ofBytes(maxFileSize.toBytes() * 3);
+    private DataSize maxBatchSize      = DataSize.ofBytes(maxFileSize.toBytes() * 3);
 
     @DurationFormat(DurationStyle.SIMPLE)
-    private Duration maxTtl       = Duration.ofMinutes(10);
+    private Duration maxTtl            = Duration.ofMinutes(10);
+
+    /** time a completion handler may run before the batch is reclaimed by the sweep */
+    @DurationFormat(DurationStyle.SIMPLE)
+    private Duration completionTimeout = Duration.ofMinutes(10);
 
     @AssertTrue(message = "maxBatchSize must be greater than or equal to maxFileSize")
     public boolean isBatchSizeValid()

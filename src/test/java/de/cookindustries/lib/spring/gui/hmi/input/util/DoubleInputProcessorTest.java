@@ -199,4 +199,42 @@ class DoubleInputProcessorTest
         assertEquals(InputCheckResultType.OUT_OF_BOUNDS, result.getType());
         assertThrows(ValueNotPresentException.class, () -> result.getResult());
     }
+
+    @Test
+    void test_check_inputNaN() throws NullIgnoredException
+    {
+        // setup
+        DoubleInputProcessor     processor =
+            DoubleInputProcessor
+                .builder()
+                .build();
+        String                   input     = "NaN";
+        InputCheckResult<Double> result;
+
+        // run
+        result = processor.process(input);
+
+        // verify
+        assertEquals(InputCheckResultType.NOT_PARSABLE, result.getType());
+        assertThrows(ValueNotPresentException.class, () -> result.getResult());
+    }
+
+    @Test
+    void test_check_inputInfinity() throws NullIgnoredException
+    {
+        // setup
+        DoubleInputProcessor     processor =
+            DoubleInputProcessor
+                .builder()
+                .build();
+        String                   input     = "Infinity";
+        InputCheckResult<Double> result;
+
+        // run
+        result = processor.process(input);
+
+        // verify
+        assertEquals(InputCheckResultType.OUT_OF_BOUNDS, result.getType());
+        assertThrows(ValueNotPresentException.class, () -> result.getResult());
+    }
 }

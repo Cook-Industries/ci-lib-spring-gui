@@ -26,7 +26,7 @@ class RequestModalTest
         result = call.parseAsJS();
 
         // verify
-        assertEquals("CILIB.FunctionRegistry.call('requestModal', '/test', {\"uid\":2});", result);
+        assertEquals("CILIB.FunctionRegistry.call('requestModal', '\\/test', {\"uid\":2});", result);
     }
 
 }

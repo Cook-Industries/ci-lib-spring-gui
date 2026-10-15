@@ -25,6 +25,8 @@ import lombok.experimental.SuperBuilder;
 public class DateInputProcessor extends AbsInputProcessor<Date>
 {
 
+    private static final String UNBOUNDED = "\u221E";
+
     /** Fallback value if an empty {@code input} is detected and not wanted */
     @Default
     private final Date fallback   = null;
@@ -58,7 +60,10 @@ public class DateInputProcessor extends AbsInputProcessor<Date>
     {
         if ((lowerBound != null && input.before(lowerBound)) || (upperBound != null && input.after(upperBound)))
         {
-            return createEmptyResult(InputCheckResultType.OUT_OF_BOUNDS, lowerBound, upperBound);
+            return createEmptyResult(
+                InputCheckResultType.OUT_OF_BOUNDS,
+                lowerBound == null ? "-" + UNBOUNDED : lowerBound.toString(),
+                upperBound == null ? UNBOUNDED : upperBound.toString());
         }
 
         return createResult(InputCheckResultType.PASS, input);

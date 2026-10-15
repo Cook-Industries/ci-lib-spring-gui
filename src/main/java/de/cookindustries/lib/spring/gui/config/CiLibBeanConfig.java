@@ -80,7 +80,8 @@ class CiLibBeanConfig
         return new UploadSessionLimits(
             properties.getWeb().getUpload().getLimits().getMaxFileSize().toBytes(),
             properties.getWeb().getUpload().getLimits().getMaxBatchSize().toBytes(),
-            properties.getWeb().getUpload().getLimits().getMaxTtl());
+            properties.getWeb().getUpload().getLimits().getMaxTtl(),
+            properties.getWeb().getUpload().getLimits().getCompletionTimeout());
     }
 
     @Bean

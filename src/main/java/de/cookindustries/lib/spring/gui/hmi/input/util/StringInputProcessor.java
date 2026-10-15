@@ -83,13 +83,9 @@ public final class StringInputProcessor extends AbsInputProcessor<String>
             return createEmptyResult(InputCheckResultType.EMPTY_BUT_EXPECTED);
         }
 
-        if (pattern != null)
+        if (pattern != null
+            && !pattern.matcher(input).matches())
         {
-            if (pattern.matcher(input).matches())
-            {
-                return createResult(InputCheckResultType.PASS, input);
-            }
-
             return createEmptyResult(InputCheckResultType.NO_PATTERN_MATCH);
         }
 

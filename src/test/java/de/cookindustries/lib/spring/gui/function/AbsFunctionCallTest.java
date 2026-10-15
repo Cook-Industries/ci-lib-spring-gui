@@ -139,4 +139,64 @@ class AbsFunctionCallTest
         // verify
         assertEquals("CILIB.FunctionRegistry.call('test', true, 0.1);", result, "Parmameter not set correctly");
     }
+
+    @Test
+    void test_parseAsJS_stringWithApostrophe_isEscaped()
+    {
+        // setup
+        functionCall.setParam("it's");
+
+        String result;
+
+        // run
+        result = functionCall.parseAsJS();
+
+        // verify
+        assertEquals("CILIB.FunctionRegistry.call('test', 'it\\'s');", result);
+    }
+
+    @Test
+    void test_parseAsJS_stringWithBackslash_isEscaped()
+    {
+        // setup
+        functionCall.setParam("a\\");
+
+        String result;
+
+        // run
+        result = functionCall.parseAsJS();
+
+        // verify
+        assertEquals("CILIB.FunctionRegistry.call('test', 'a\\\\');", result);
+    }
+
+    @Test
+    void test_parseAsJS_stringWithLineBreaks_isEscaped()
+    {
+        // setup
+        functionCall.setParam("a\nb\rc");
+
+        String result;
+
+        // run
+        result = functionCall.parseAsJS();
+
+        // verify
+        assertEquals("CILIB.FunctionRegistry.call('test', 'a\\nb\\rc');", result);
+    }
+
+    @Test
+    void test_parseAsJS_stringWithClosingScriptTag_isEscaped()
+    {
+        // setup
+        functionCall.setParam("</script>");
+
+        String result;
+
+        // run
+        result = functionCall.parseAsJS();
+
+        // verify
+        assertEquals("CILIB.FunctionRegistry.call('test', '<\\/script>');", result);
+    }
 }

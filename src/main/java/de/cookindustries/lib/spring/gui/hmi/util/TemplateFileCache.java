@@ -9,6 +9,9 @@ package de.cookindustries.lib.spring.gui.hmi.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -88,7 +91,8 @@ public class TemplateFileCache
 
             LOG.debug("load resources under [{}]", searchPath);
 
-            Resource[] resources = resolver.getResources(searchPath);
+            List<String> roots     = resolveRoots(resolver);
+            Resource[]   resources = resolver.getResources(searchPath);
 
             expected = resources.length;
 
@@ -98,14 +102,7 @@ public class TemplateFileCache
 
                 try (InputStream is = resource.getInputStream())
                 {
-                    String fullPath     = resource.getURL().getPath();
-
-                    int    index        = fullPath.indexOf(path);
-
-                    String relativePath =
-                        index >= 0
-                            ? fullPath.substring(index + path.length())
-                            : resource.getFilename();
+                    String relativePath = toRelativePath(resource, roots);
 
                     LOG.debug("read template [{}]", relativePath);
 
@@ -129,6 +126,42 @@ public class TemplateFileCache
         }
 
         LOG.info("init finished with [{}] files from [{}] expected", cnt, expected);
+    }
+
+    private List<String> resolveRoots(PathMatchingResourcePatternResolver resolver) throws IOException
+    {
+        return Arrays
+            .stream(resolver.getResources("classpath*:" + path))
+            .map(
+                root ->
+                {
+                    try
+                    {
+                        String uri = root.getURI().toString();
+
+                        return uri.endsWith("/") ? uri : uri + "/";
+                    }
+                    catch (IOException ex)
+                    {
+                        throw new UncheckedIOException(ex);
+                    }
+                })
+            .toList();
+    }
+
+    private String toRelativePath(Resource resource, List<String> roots) throws IOException
+    {
+        String uri = resource.getURI().toString();
+
+        for (String root : roots)
+        {
+            if (uri.startsWith(root))
+            {
+                return uri.substring(root.length());
+            }
+        }
+
+        return resource.getFilename();
     }
 
     /**

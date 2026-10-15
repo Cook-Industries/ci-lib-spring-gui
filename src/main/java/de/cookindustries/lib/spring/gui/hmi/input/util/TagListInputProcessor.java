@@ -92,6 +92,12 @@ public final class TagListInputProcessor extends AbsInputProcessor<TagList>
             tagList.addAll(input);
         }
 
+        if (tagList.isEmpty()
+            && !allowEmpty)
+        {
+            return createEmptyResult(InputCheckResultType.EMPTY_BUT_EXPECTED);
+        }
+
         return createResult(InputCheckResultType.PASS, tagList);
     }
 

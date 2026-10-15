@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import de.cookindustries.lib.spring.gui.config.properties.CiLibProperties;
@@ -27,6 +28,7 @@ import de.cookindustries.lib.spring.gui.util.ResourceLoader;
 import jakarta.annotation.PostConstruct;
 
 @Component
+@DependsOn("ciLibStaticResourceConfig")
 final class CiLibStaticFileCreator
 {
 
@@ -60,15 +62,22 @@ final class CiLibStaticFileCreator
 
         CssConfig userConfig   = null;
 
-        try
+        if (ResourceLoader.exists(FileAndFolderPaths.USER_FILE_CONFIG_CSS))
         {
-            userConfig = ResourceLoader.loadJsonFrom(FileAndFolderPaths.USER_FILE_CONFIG_CSS, CssConfig.class);
+            try
+            {
+                userConfig = ResourceLoader.loadJsonFrom(FileAndFolderPaths.USER_FILE_CONFIG_CSS, CssConfig.class);
 
-            LOG.debug("found css-config to load");
+                LOG.debug("found css-config to load");
+            }
+            catch (Exception ex)
+            {
+                LOG.warn("could not load css-config", ex);
+            }
         }
-        catch (Exception ex)
+        else
         {
-            LOG.warn("could not load/find css-config", ex);
+            LOG.debug("no css-config found, use defaults");
         }
 
         if (userConfig == null)

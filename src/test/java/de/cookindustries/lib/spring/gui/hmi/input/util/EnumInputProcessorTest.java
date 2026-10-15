@@ -10,6 +10,10 @@ package de.cookindustries.lib.spring.gui.hmi.input.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.Locale;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import de.cookindustries.lib.spring.gui.hmi.input.util.exception.NullIgnoredException;
@@ -20,7 +24,21 @@ class EnumInputProcessorTest
 
     private enum TestEnum
     {
-        TEST, TEST_2;
+        TEST, TEST_2, INFO;
+    }
+
+    private Locale originalLocale;
+
+    @BeforeEach
+    void init()
+    {
+        originalLocale = Locale.getDefault();
+    }
+
+    @AfterEach
+    void cleanup()
+    {
+        Locale.setDefault(originalLocale);
     }
 
     @Test
@@ -98,6 +116,29 @@ class EnumInputProcessorTest
         String                       input          = "";
         TestEnum                     expectedOutput = TestEnum.TEST_2;
         InputCheckResult<TestEnum>   result;
+
+        // run
+        result = processor.process(input);
+
+        // verify
+        assertEquals(InputCheckResultType.PASS, result.getType());
+        assertEquals(expectedOutput, result.getResult());
+    }
+
+    @Test
+    void test_check_simpleValue_turkishDefaultLocale() throws NullIgnoredException
+    {
+        // setup
+        EnumInputProcessor<TestEnum> processor      =
+            EnumInputProcessor
+                .<TestEnum>builder()
+                .enumClass(TestEnum.class)
+                .build();
+        String                       input          = "info";
+        TestEnum                     expectedOutput = TestEnum.INFO;
+        InputCheckResult<TestEnum>   result;
+
+        Locale.setDefault(Locale.forLanguageTag("tr-TR"));
 
         // run
         result = processor.process(input);

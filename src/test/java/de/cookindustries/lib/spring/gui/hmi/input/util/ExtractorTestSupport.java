@@ -133,6 +133,12 @@ final class ExtractorTestSupport
         }
 
         @Override
+        public boolean tryClaimCompletion(UUID batchUuid, Instant deadline)
+        {
+            return false;
+        }
+
+        @Override
         public boolean touch(UUID batchUuid, Instant newExpiry)
         {
             return false;
@@ -155,7 +161,7 @@ final class ExtractorTestSupport
 
         final CiLibProperties        properties   = properties();
 
-        final UploadSessionLimits    limits       = new UploadSessionLimits(MAX_FILE, MAX_BATCH, Duration.ofMinutes(10));
+        final UploadSessionLimits    limits       = new UploadSessionLimits(MAX_FILE, MAX_BATCH, Duration.ofMinutes(10), Duration.ofMinutes(10));
 
         final UploadSessionPolicy    policy       = new UploadSessionPolicy(properties);
 

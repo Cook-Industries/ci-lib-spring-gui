@@ -57,6 +57,21 @@ public final class ResourceLoader
     }
 
     /**
+     * Check if a resource exists.
+     * 
+     * @param path to the resource file
+     * @return {@code true} if the resource can be resolved
+     */
+    public static boolean exists(String path)
+    {
+        Objects.requireNonNull(path);
+
+        return loader
+            .getResource(path)
+            .exists();
+    }
+
+    /**
      * Read a single object from a JSON file.
      * 
      * @param <T> the expected type of the object

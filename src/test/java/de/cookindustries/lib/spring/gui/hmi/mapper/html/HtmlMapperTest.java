@@ -2401,4 +2401,68 @@ class HtmlMapperTest
         assertTrue(html.contains("oninput=\"inp()\""));
         assertTrue(html.contains("data-tooltip=\"box tip\""));
     }
+
+    @Test
+    void test_map_radioInput_escapesBoxText()
+    {
+        // setup
+        Radio  input =
+            Radio
+                .builder()
+                .uid("rd")
+                .name("plan")
+                .submitAs("plan")
+                .mandatoryText("required")
+                .box(InputValue.builder().text("a<b").value("a").build())
+                .build();
+        String html;
+
+        // run
+        html = mapInForm(input);
+
+        // verify
+        assertTrue(html.contains("a&lt;b</label>"));
+    }
+
+    @Test
+    void test_map_selectInput_escapesOptionText()
+    {
+        // setup
+        Select input =
+            Select
+                .builder()
+                .uid("in")
+                .name("label")
+                .submitAs("sa")
+                .mandatoryText("required")
+                .values(List.of(InputValue.builder().text("a<b").value("a").build()))
+                .build();
+        String html;
+
+        // run
+        html = mapInForm(input);
+
+        // verify
+        assertTrue(html.contains(">a&lt;b</option>"));
+    }
+
+    @Test
+    void test_map_audioContainer_escapesCaption()
+    {
+        // setup
+        AudioContainer container =
+            AudioContainer
+                .builder()
+                .uid("au")
+                .src("/a.mp3")
+                .caption("a<b")
+                .build();
+        String         html;
+
+        // run
+        html = HtmlMapper.map(container);
+
+        // verify
+        assertTrue(html.contains("a&lt;b</figcaption>"));
+    }
 }

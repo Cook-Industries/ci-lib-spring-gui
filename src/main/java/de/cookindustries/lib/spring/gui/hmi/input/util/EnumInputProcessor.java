@@ -8,6 +8,7 @@
 package de.cookindustries.lib.spring.gui.hmi.input.util;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -45,7 +46,7 @@ public final class EnumInputProcessor<T extends Enum<T>> extends AbsInputProcess
             .stream(enumClass.getEnumConstants())
             .filter(
                 t -> input
-                    .toUpperCase()
+                    .toUpperCase(Locale.ROOT)
                     .replace(" ", "_")
                     .equals(t.name()))
             .findFirst()

@@ -140,78 +140,86 @@ public final class FlatMappableDissector
             return;
         }
 
-        String   indent  = INDENT.repeat(depth);
-
-        Class<?> current = obj.getClass();
+        String indent = INDENT.repeat(depth);
 
         LOG.trace("{}dissect object, type [{}]", indent, obj.getClass().getSimpleName());
 
-        while (current != null && current != Object.class)
+        for (Method method : obj.getClass().getMethods())
         {
-            for (Method method : current.getMethods())
+            try
             {
-                try
+                String   rawName = method.getName();
+                Class<?> type    = method.getReturnType();
+                String   stripped;
+
+                if (excludedMethods.contains(rawName))
                 {
-                    String   rawName = method.getName();
-                    Class<?> type    = method.getReturnType();
-                    String   stripped;
-
-                    if (excludedMethods.contains(rawName))
-                    {
-                        throw new SkipFieldDissectionException();
-                    }
-                    else if (rawName.startsWith("get"))
-                    {
-                        stripped = rawName.substring(3);
-                    }
-                    else if (rawName.startsWith("is"))
-                    {
-                        stripped = rawName.substring(2);
-                    }
-                    else if (includedMethods.contains(rawName))
-                    {
-                        stripped = rawName;
-                    }
-                    else
-                    {
-                        throw new SkipFieldDissectionException();
-                    }
-
-                    if (stripped.length() < 1)
-                    {
-                        throw new SkipFieldDissectionException();
-                    }
-
-                    if (BLACKLIST_PATTERNS
-                        .stream()
-                        .anyMatch(p -> p.matcher(stripped).matches()))
-                    {
-                        LOG.trace("{}ignore [{}] due to globally blacklisted", indent, stripped);
-
-                        throw new SkipFieldDissectionException();
-                    }
-
-                    String fieldName = Character.toLowerCase(stripped.charAt(0)) + stripped.substring(1);
-
-                    if (method.getParameterCount() > 0)
-                    {
-                        throw new SkipFieldDissectionException();
-                    }
-
-                    dissectField(obj, method, type, prefix, fieldName, indent, result, locale, depth);
+                    throw new SkipFieldDissectionException();
                 }
-                catch (SkipFieldDissectionException ex)
+                else if (isGetterName(rawName))
                 {
-                    continue;
+                    stripped = rawName.substring(3);
                 }
-                catch (Exception ex)
+                else if (isBooleanGetterName(rawName, type))
                 {
-                    LOG.error("method eval failed", ex);
+                    stripped = rawName.substring(2);
                 }
+                else if (includedMethods.contains(rawName))
+                {
+                    stripped = rawName;
+                }
+                else
+                {
+                    throw new SkipFieldDissectionException();
+                }
+
+                if (stripped.length() < 1)
+                {
+                    throw new SkipFieldDissectionException();
+                }
+
+                if (BLACKLIST_PATTERNS
+                    .stream()
+                    .anyMatch(p -> p.matcher(stripped).matches()))
+                {
+                    LOG.trace("{}ignore [{}] due to globally blacklisted", indent, stripped);
+
+                    throw new SkipFieldDissectionException();
+                }
+
+                String fieldName = Character.toLowerCase(stripped.charAt(0)) + stripped.substring(1);
+
+                if (method.getParameterCount() > 0)
+                {
+                    throw new SkipFieldDissectionException();
+                }
+
+                dissectField(obj, method, type, prefix, fieldName, indent, result, locale, depth);
             }
-
-            current = current.getSuperclass();
+            catch (SkipFieldDissectionException ex)
+            {
+                continue;
+            }
+            catch (Exception ex)
+            {
+                LOG.error("method eval failed", ex);
+            }
         }
+    }
+
+    private static boolean isGetterName(String name)
+    {
+        return name.length() > 3
+            && name.startsWith("get")
+            && !Character.isLowerCase(name.charAt(3));
+    }
+
+    private static boolean isBooleanGetterName(String name, Class<?> returnType)
+    {
+        return name.length() > 2
+            && name.startsWith("is")
+            && !Character.isLowerCase(name.charAt(2))
+            && (returnType == boolean.class || returnType == Boolean.class);
     }
 
     /**

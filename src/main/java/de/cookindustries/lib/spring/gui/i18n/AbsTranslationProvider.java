@@ -231,6 +231,6 @@ public abstract class AbsTranslationProvider
                 args.length);
         }
 
-        return new MessageFormat(template, args);
+        return new MessageFormat(template.replace("'", "''"), locale).format(args);
     }
 }

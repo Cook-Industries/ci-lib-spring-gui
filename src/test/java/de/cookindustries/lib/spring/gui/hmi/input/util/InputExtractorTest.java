@@ -740,7 +740,7 @@ class InputExtractorTest
         extractor.checkAndConsumeAsDouble("key", processor, result::add);
 
         // verify
-        assertMarker(singleMarker(extractor), "key", InputCheckResultType.OUT_OF_BOUNDS, MarkerType.OUT_OF_RANGE);
+        assertMarker(singleMarker(extractor), "key", InputCheckResultType.OUT_OF_BOUNDS, MarkerType.OUT_OF_RANGE, 0.0, 10.0);
         assertTrue(result.isEmpty());
     }
 
@@ -819,7 +819,7 @@ class InputExtractorTest
         extractor.checkAndConsumeAsDate("key", processor, result::add);
 
         // verify
-        assertMarker(singleMarker(extractor), "key", InputCheckResultType.OUT_OF_BOUNDS, MarkerType.OUT_OF_RANGE);
+        assertMarker(singleMarker(extractor), "key", InputCheckResultType.OUT_OF_BOUNDS, MarkerType.OUT_OF_RANGE, "2024-01-01", "2024-12-31");
         assertTrue(result.isEmpty());
     }
 

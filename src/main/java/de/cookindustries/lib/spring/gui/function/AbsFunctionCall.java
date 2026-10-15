@@ -10,6 +10,7 @@ package de.cookindustries.lib.spring.gui.function;
 import java.util.Arrays;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.commons.text.StringEscapeUtils;
 
 import de.cookindustries.lib.spring.gui.util.StringAdapter;
 import de.cookindustries.lib.spring.gui.util.StringConcat;
@@ -151,7 +152,7 @@ public abstract class AbsFunctionCall
                     .map(a -> {
                         if (a instanceof String s)
                         {
-                            return StringAdapter.prefixAndSuffix("'", s.replace("'", "\'"), "'");
+                            return StringAdapter.prefixAndSuffix("'", StringEscapeUtils.escapeEcmaScript(s), "'");
                         }
                         else if (a instanceof AbsFunctionArgs args)
                         {

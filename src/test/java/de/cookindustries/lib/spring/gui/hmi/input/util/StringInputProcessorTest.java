@@ -310,4 +310,46 @@ class StringInputProcessorTest
         assertEquals(InputCheckResultType.NO_PATTERN_MATCH, result.getType());
         assertThrows(ValueNotPresentException.class, () -> result.getResult());
     }
+
+    @Test
+    void test_check_pattern_match_butRejected() throws NullIgnoredException
+    {
+        // setup
+        StringInputProcessor     processor =
+            StringInputProcessor
+                .builder()
+                .pattern(Pattern.compile("[t]{3}"))
+                .reject("ttt")
+                .build();
+        String                   input     = "ttt";
+        InputCheckResult<String> result;
+
+        // run
+        result = processor.process(input);
+
+        // verify
+        assertEquals(InputCheckResultType.REJECTED_VALUE, result.getType());
+        assertThrows(ValueNotPresentException.class, () -> result.getResult());
+    }
+
+    @Test
+    void test_check_pattern_match_butNotAccepted() throws NullIgnoredException
+    {
+        // setup
+        StringInputProcessor     processor =
+            StringInputProcessor
+                .builder()
+                .pattern(Pattern.compile("[t]{3}"))
+                .accept("abc")
+                .build();
+        String                   input     = "ttt";
+        InputCheckResult<String> result;
+
+        // run
+        result = processor.process(input);
+
+        // verify
+        assertEquals(InputCheckResultType.NOT_ACCEPTED_VALUE, result.getType());
+        assertThrows(ValueNotPresentException.class, () -> result.getResult());
+    }
 }

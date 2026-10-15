@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.List;
 import java.util.Locale;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -97,5 +98,178 @@ class FlatMappableDissectorTest
 
         // verify
         assertNotNull(tokenMap);
+    }
+
+    private class ExcludingTestObject implements FlatMappable
+    {
+
+        public String getFirst()
+        {
+            return "a";
+        }
+
+        public String getSecond()
+        {
+            return "b";
+        }
+
+        public String getHidden()
+        {
+            return "x";
+        }
+
+        public String getThird()
+        {
+            return "c";
+        }
+
+        public String getFourth()
+        {
+            return "d";
+        }
+
+        @Override
+        public List<String> fmExcludedMethods()
+        {
+            return List.of("getHidden");
+        }
+    }
+
+    @Test
+    void test_dissect_excludedMethod_skipsOnlyThatMethod()
+    {
+        // setup
+        ExcludingTestObject testObject = new ExcludingTestObject();
+        TokenMap            tokenMap;
+
+        // run
+        tokenMap = flatMappableDissector.dissect(testObject, 0, Locale.ENGLISH);
+
+        // verify
+        assertNull(tokenMap.getValue("hidden"));
+        assertEquals("a", tokenMap.getValue("first"));
+        assertEquals("b", tokenMap.getValue("second"));
+        assertEquals("c", tokenMap.getValue("third"));
+        assertEquals("d", tokenMap.getValue("fourth"));
+    }
+
+    private class CountingBase
+    {
+
+        private int calls = 0;
+
+        public String getCounted()
+        {
+            calls++;
+
+            return "v";
+        }
+
+        int calls()
+        {
+            return calls;
+        }
+    }
+
+    private class CountingTestObject extends CountingBase implements FlatMappable
+    {
+    }
+
+    @Test
+    void test_dissect_inheritedGetter_invokedOnce()
+    {
+        // setup
+        CountingTestObject testObject = new CountingTestObject();
+        TokenMap           tokenMap;
+
+        // run
+        tokenMap = flatMappableDissector.dissect(testObject, 0, Locale.ENGLISH);
+
+        // verify
+        assertEquals("v", tokenMap.getValue("counted"));
+        assertEquals(1, testObject.calls());
+    }
+
+    private class NamingTestObject implements FlatMappable
+    {
+
+        public String issue()
+        {
+            return "i";
+        }
+
+        public String getaway()
+        {
+            return "g";
+        }
+
+        public String isText()
+        {
+            return "t";
+        }
+
+        public boolean isActive()
+        {
+            return true;
+        }
+
+        public Boolean isWrapped()
+        {
+            return Boolean.TRUE;
+        }
+
+        public String getValid()
+        {
+            return "v";
+        }
+    }
+
+    @Test
+    void test_dissect_namesWithoutBeanConvention_areSkipped()
+    {
+        // setup
+        NamingTestObject testObject = new NamingTestObject();
+        TokenMap         tokenMap;
+
+        // run
+        tokenMap = flatMappableDissector.dissect(testObject, 0, Locale.ENGLISH);
+
+        // verify
+        assertNull(tokenMap.getValue("sue"));
+        assertNull(tokenMap.getValue("away"));
+        assertNull(tokenMap.getValue("text"));
+        assertEquals(Boolean.TRUE, tokenMap.getValue("active"));
+        assertEquals(Boolean.TRUE, tokenMap.getValue("wrapped"));
+        assertEquals("v", tokenMap.getValue("valid"));
+    }
+
+    private class IncludingTestObject implements FlatMappable
+    {
+
+        public String issue()
+        {
+            return "i";
+        }
+
+        @Override
+        public List<String> fmIncludedMethods()
+        {
+            return List.of("issue");
+        }
+    }
+
+    @Test
+    void test_dissect_includedMethodWithGetterLikePrefix_keepsFullName()
+    {
+        // setup
+        IncludingTestObject testObject = new IncludingTestObject();
+        TokenMap            tokenMap;
+
+        // run
+        tokenMap = flatMappableDissector.dissect(testObject, 0, Locale.ENGLISH);
+
+        // verify
+        assertEquals("i", tokenMap.getValue("issue"));
+        assertNull(tokenMap.getValue("sue"));
     }
 }

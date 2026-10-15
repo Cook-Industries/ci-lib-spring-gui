@@ -383,7 +383,7 @@ public final class HtmlMapper
                     .builder()
                     .tag(TAG_FIGCAPTION)
                     .dataAttribute(DATA_ATT_TOOLTIP, audio.getTooltip().isBlank() ? null : audio.getTooltip())
-                    .content(audio.getCaption())
+                    .content(htmlEscape(audio.getCaption()))
                     .build()
                     .html())
             .content(
@@ -1573,7 +1573,7 @@ public final class HtmlMapper
                             .build())
                     .clazz(CLASS_FORM_CHECK_LABEL)
                     .clazz(CLASS_USER_SELECT_NONE)
-                    .content(box.getText())
+                    .content(htmlEscape(box.getText()))
                     .build()
                     .html();
 
@@ -1648,7 +1648,7 @@ public final class HtmlMapper
                             .name(ATT_SELECTED)
                             .active(option.getValue().equals(select.getSelected()))
                             .build())
-                    .content(option.getText())
+                    .content(htmlEscape(option.getText()))
                     .build()
                     .html());
         }

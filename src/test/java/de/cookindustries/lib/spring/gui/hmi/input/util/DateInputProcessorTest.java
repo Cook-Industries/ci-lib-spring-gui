@@ -7,6 +7,7 @@
  */
 package de.cookindustries.lib.spring.gui.hmi.input.util;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -181,4 +182,41 @@ class DateInputProcessorTest
         assertThrows(ValueNotPresentException.class, () -> result.getResult());
     }
 
+    @Test
+    void test_check_outOfBounds_onlyUpperBound_placeholders() throws NullIgnoredException
+    {
+        // setup
+        DateInputProcessor     processor =
+            DateInputProcessor
+                .builder()
+                .upperBound(Date.valueOf("2025-02-10"))
+                .build();
+        String                 input     = "2025-02-20";
+        InputCheckResult<Date> result;
+
+        // run
+        result = processor.process(input);
+
+        // verify
+        assertArrayEquals(new Object[] { "-\u221E", "2025-02-10" }, result.getTranslationPlaceholderValues());
+    }
+
+    @Test
+    void test_check_outOfBounds_onlyLowerBound_placeholders() throws NullIgnoredException
+    {
+        // setup
+        DateInputProcessor     processor =
+            DateInputProcessor
+                .builder()
+                .lowerBound(Date.valueOf("2025-02-10"))
+                .build();
+        String                 input     = "2025-02-01";
+        InputCheckResult<Date> result;
+
+        // run
+        result = processor.process(input);
+
+        // verify
+        assertArrayEquals(new Object[] { "2025-02-10", "\u221E" }, result.getTranslationPlaceholderValues());
+    }
 }

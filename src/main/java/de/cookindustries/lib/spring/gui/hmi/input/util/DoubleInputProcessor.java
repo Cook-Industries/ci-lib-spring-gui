@@ -60,6 +60,11 @@ public final class DoubleInputProcessor extends AbsInputProcessor<Double>
 
         Double value = Double.parseDouble(input);
 
+        if (value.isNaN())
+        {
+            throw new NumberFormatException("NaN is not a number");
+        }
+
         if (decimalPlaces != null)
         {
             BigDecimal rounded =

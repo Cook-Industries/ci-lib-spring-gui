@@ -16,15 +16,13 @@ import java.util.UUID;
  * Persistence SPI for chunked upload sessions.
  * <p>
  * Design rule: this interface contains only <b>small primitives</b>. Every method that decides a race ({@link #registerPart},
- * {@link #markFileFinished}, {@link #transition}, {@link #claimExpired}) returns the <b>outcome of the winning/losing</b> as its return
- * value. Callers must act only on that return value, never on a prior read ("check, then write" is always wrong when several instances
- * share one store).
+ * {@link #markFileFinished}, {@link #transition}, {@link #tryClaimCompletion}, {@link #claimExpired}) returns the <b>outcome of the
+ * winning/losing</b> as its return value. Callers must act only on that return value, never on a prior read ("check, then write" is always
+ * wrong when several instances share one store).
  * <p>
  * All business logic (validation, state machine, "are all parts there?") lives in the coordinator, not here. An implementation therefore
  * only has to map each method onto <b>one atomic step</b> of its backend (one conditional SQL statement, one Lua script, one compareAndSet,
  * ...).
- * <p>
- * Every implementation must pass {@code AbstractUploadSessionStoreTest} against the real backend.
  */
 public interface UploadSessionStore
 {
@@ -87,12 +85,12 @@ public interface UploadSessionStore
     boolean transition(UUID batchUuid, UploadBatchState from, UploadBatchState to);
 
     /**
-     * Convenience: exactly one caller gets true and may run the on-complete handler.
+     * Atomically moves an OPEN batch to COMPLETING and sets its expiry to {@code deadline}. Exactly one caller gets true and may run the
+     * on-complete handler. If that caller dies, {@link #claimExpired} reclaims the batch once the deadline has passed.
+     *
+     * @return true only if the batch was OPEN
      */
-    default boolean tryClaimCompletion(UUID batchUuid)
-    {
-        return transition(batchUuid, UploadBatchState.OPEN, UploadBatchState.COMPLETING);
-    }
+    boolean tryClaimCompletion(UUID batchUuid, Instant deadline);
 
     /**
      * Moves the expiry of an OPEN batch (call on every received part). @return false if batch is not OPEN
@@ -100,8 +98,8 @@ public interface UploadSessionStore
     boolean touch(UUID batchUuid, Instant newExpiry);
 
     /**
-     * Claims up to {@code limit} expired OPEN batches (OPEN -> EXPIRED). A batch is returned to exactly one caller, so exactly one instance
-     * cleans it up. Not a read: it changes state.
+     * Claims up to {@code limit} OPEN or COMPLETING batches whose expiry has passed (-> EXPIRED). A batch is returned to exactly one caller,
+     * so exactly one instance cleans it up. Not a read: it changes state.
      */
     List<UUID> claimExpired(Instant now, int limit);
 
