@@ -1,0 +1,8 @@
+{
+    "uid": "uid",
+    "type": "HEADING",
+    "parameters": {
+        "text": "heading",
+        "size": "$$value$level"
+    }
+}

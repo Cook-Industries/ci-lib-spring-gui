@@ -1,0 +1,16 @@
+{
+    "type": "FORM",
+    "children": [
+        {
+            "uid": "uid",
+            "type": "NUMBER",
+            "parameters": {
+                "name": "name",
+                "value": "$$value$value",
+                "min": "$$value$min",
+                "max": "$$value$max",
+                "step": "$$value$step"
+            }
+        }
+    ]
+}

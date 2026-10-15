@@ -13,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -41,6 +43,7 @@ import de.cookindustries.lib.spring.gui.hmi.container.HiddenContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.ImageContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.LinkContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.ModalContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.SVGContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.SplittedContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.TableContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.TextContainer;
@@ -67,6 +70,7 @@ import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappable;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableDissector;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableList;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.TokenMap;
+import de.cookindustries.lib.spring.gui.hmi.svg.SVGLine;
 import de.cookindustries.lib.spring.gui.hmi.util.TemplateFileCache;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
@@ -2192,6 +2196,143 @@ class JsonMapperTest
 
         // verify
         checkAgainstErrorContainer(container);
+    }
+
+    @Test
+    void test_map_NumberInput_integerTokens()
+    {
+        // setup
+        TokenMap tokenMap =
+            TokenMap
+                .builder()
+                .value("value", 5)
+                .value("min", 0)
+                .value("max", 10L)
+                .value("step", 1)
+                .build();
+        Number   number;
+
+        // run
+        number = (Number) mapInput("json-mapper/input/number-token-input.ged", tokenMap);
+
+        // verify
+        assertEquals(BigInteger.valueOf(5), number.getValue());
+        assertEquals(BigInteger.valueOf(0), number.getMin());
+        assertEquals(BigInteger.valueOf(10), number.getMax());
+        assertEquals(BigInteger.valueOf(1), number.getStep());
+    }
+
+    @Test
+    void test_map_NumberInput_decimalTokenWithIntegerBounds()
+    {
+        // setup
+        TokenMap tokenMap =
+            TokenMap
+                .builder()
+                .value("price", 1.5)
+                .build();
+        Number   number;
+
+        // run
+        number = (Number) mapInput("json-mapper/input/number-mixed-input.ged", tokenMap);
+
+        // verify
+        assertEquals(new BigDecimal("1.5"), number.getValue());
+        assertEquals(new BigDecimal("0"), number.getMin());
+        assertEquals(new BigDecimal("10"), number.getMax());
+        assertEquals(new BigDecimal("1"), number.getStep());
+    }
+
+    @Test
+    void test_map_SliderInput_decimalTokenValue()
+    {
+        // setup
+        TokenMap tokenMap =
+            TokenMap
+                .builder()
+                .value("ratio", 0.5)
+                .build();
+        Slider   slider;
+
+        // run
+        slider = (Slider) mapInput("json-mapper/input/slider-token-input.ged", tokenMap);
+
+        // verify
+        assertEquals("0.5", slider.getValue());
+        assertEquals(new BigDecimal("0"), slider.getMin());
+        assertEquals(new BigDecimal("1"), slider.getMax());
+        assertEquals(new BigDecimal("0.1"), slider.getStep());
+    }
+
+    @Test
+    void test_map_HeadingContainer_sizeFromToken()
+    {
+        // setup
+        TokenMap         tokenMap =
+            TokenMap
+                .builder()
+                .value("level", 3)
+                .build();
+        HeadingContainer heading;
+
+        // run
+        heading = (HeadingContainer) mapContainer("json-mapper/container/heading-token-container.ged", tokenMap);
+
+        // verify
+        assertEquals(3, heading.getSize());
+    }
+
+    @Test
+    void test_map_SVGContainer_literalNumbers()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/svg-line-container.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        SVGContainer svg = (SVGContainer) container;
+        assertEquals(1, svg.getElements().size());
+
+        SVGLine line = (SVGLine) svg.getElements().get(0);
+        assertEquals(0.0, line.getX1());
+        assertEquals(0.5, line.getY1());
+        assertEquals(100.0, line.getX2());
+        assertEquals(49.5, line.getY2());
+    }
+
+    private Container mapContainer(String srcPath, TokenMap tokenMap)
+    {
+        JsonMapper mapper =
+            JsonMapper
+                .builder()
+                .srcPath(srcPath)
+                .locale(Locale.ENGLISH)
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
+                .flatMappableDissector(flatMappableDissector)
+                .tokenMap(tokenMap)
+                .build();
+
+        return mapper.map().getContainers().get(0);
+    }
+
+    private Input mapInput(String srcPath, TokenMap tokenMap)
+    {
+        JsonMapper mapper =
+            JsonMapper
+                .builder()
+                .srcPath(srcPath)
+                .locale(Locale.ENGLISH)
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
+                .flatMappableDissector(flatMappableDissector)
+                .tokenMap(tokenMap)
+                .build();
+
+        return ((FormContainer) mapper.map().getContainers().get(0)).getInputs().get(0);
     }
 
     private TokenMap groupsTokenMap()

@@ -1,0 +1,16 @@
+{
+    "type": "FORM",
+    "children": [
+        {
+            "uid": "uid",
+            "type": "SLIDER",
+            "parameters": {
+                "name": "name",
+                "value": "$$value$ratio",
+                "min": 0,
+                "max": 1,
+                "step": 0.1
+            }
+        }
+    ]
+}

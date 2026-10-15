@@ -1,0 +1,15 @@
+{
+    "type": "FORM",
+    "children": [
+        {
+            "uid": "uid",
+            "type": "NUMBER",
+            "parameters": {
+                "name": "name",
+                "value": "$$value$price",
+                "min": 0,
+                "max": 10
+            }
+        }
+    ]
+}

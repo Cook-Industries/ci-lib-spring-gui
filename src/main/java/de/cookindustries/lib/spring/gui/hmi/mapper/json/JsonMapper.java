@@ -745,9 +745,11 @@ public class JsonMapper
         }
 
         Object obj =
-            tempResult.isEmpty()
-                ? result.get()
-                : tempResult.get();
+            convertNumber(
+                tempResult.isEmpty()
+                    ? result.get()
+                    : tempResult.get(),
+                expectedType);
 
         if (expectedType.isInstance(obj))
         {
@@ -1150,9 +1152,11 @@ public class JsonMapper
         }
 
         // resolve anything else
-        if (expectedType.isInstance(rawValue))
+        Object value = convertNumber(rawValue, expectedType);
+
+        if (expectedType.isInstance(value))
         {
-            return expectedType.cast(rawValue);
+            return expectedType.cast(value);
         }
         // ---> ... AND HERE.
 
@@ -1202,6 +1206,95 @@ public class JsonMapper
 
         throw new JsonParsingException(uid, depth, 0,
             String.format("could not transform [%s] to the expected type [%s]", value, expectedType));
+    }
+
+    /**
+     * Convert a {@link java.lang.Number} to the numeric type used for {@code expectedType}.
+     * <p>
+     * Integral numbers become {@link BigInteger} and floating point numbers {@link BigDecimal}, the types the template parser produces.
+     * 
+     * @param value to convert
+     * @param expectedType the expected result type
+     * @return the converted number, or {@code value} if no conversion applies
+     */
+    private static Object convertNumber(Object value, Class<?> expectedType)
+    {
+        if (!(value instanceof java.lang.Number number))
+        {
+            return value;
+        }
+
+        boolean integral = number instanceof Byte || number instanceof Short || number instanceof Integer || number instanceof Long;
+
+        if (expectedType.equals(Double.class))
+        {
+            return number.doubleValue();
+        }
+
+        if (expectedType.equals(BigDecimal.class))
+        {
+            return toBigDecimal(number);
+        }
+
+        if (expectedType.equals(BigInteger.class) && integral)
+        {
+            return BigInteger.valueOf(number.longValue());
+        }
+
+        if (expectedType.equals(java.lang.Number.class))
+        {
+            if (integral)
+            {
+                return BigInteger.valueOf(number.longValue());
+            }
+
+            if (number instanceof Float || number instanceof Double)
+            {
+                return toBigDecimal(number);
+            }
+        }
+
+        return value;
+    }
+
+    /**
+     * Convert a {@link java.lang.Number} to {@link BigDecimal} without binary floating point artifacts.
+     * 
+     * @param number to convert
+     * @return the converted number
+     */
+    private static BigDecimal toBigDecimal(java.lang.Number number)
+    {
+        if (number instanceof BigDecimal decimal)
+        {
+            return decimal;
+        }
+
+        if (number instanceof BigInteger integer)
+        {
+            return new BigDecimal(integer);
+        }
+
+        return new BigDecimal(number.toString());
+    }
+
+    /**
+     * Bring numbers to one type: all stay {@link BigInteger} if they are, otherwise all become {@link BigDecimal}.
+     * 
+     * @param numbers to align
+     * @return the aligned numbers in the given order
+     */
+    private static java.lang.Number[] alignNumberTypes(java.lang.Number... numbers)
+    {
+        boolean decimal =
+            Arrays
+                .stream(numbers)
+                .anyMatch(number -> !(number instanceof BigInteger));
+
+        return Arrays
+            .stream(numbers)
+            .map(number -> decimal ? toBigDecimal(number) : number)
+            .toArray(java.lang.Number[]::new);
     }
 
     /**
@@ -2684,14 +2777,7 @@ public class JsonMapper
         String              placeholder  = getParameterValue(element, depth, PARAM_PLACEHOLDER, String.class, DEFAULT_EMPTY_VAL);
         String              onEnterPress = getParameterValue(element, depth, PARAM_ON_ENTER_PRESS, String.class, DEFAULT_EMPTY_VAL);
 
-        Class<?>            valueClass   = value.getClass();
-
-        if (!min.getClass().equals(valueClass)
-            || !max.getClass().equals(valueClass)
-            || !step.getClass().equals(valueClass))
-        {
-            throw new JsonMapperException("mismatch between expected value type and min/max/step types");
-        }
+        java.lang.Number[]  aligned      = alignNumberTypes(value, min, max, step);
 
         return Number
             .builder()
@@ -2707,10 +2793,10 @@ public class JsonMapper
             .infoUrl(ipars.infoUrl())
             .disabled(ipars.disabled())
             .mandatory(ipars.mandatory())
-            .value(value)
-            .min(min)
-            .max(max)
-            .step(step)
+            .value(aligned[0])
+            .min(aligned[1])
+            .max(aligned[2])
+            .step(aligned[3])
             .placeholder(placeholder)
             .onEnterPress(onEnterPress)
             .build();
@@ -2891,19 +2977,17 @@ public class JsonMapper
                     ? new BigInteger("1")
                     : new BigDecimal(1.0d);
 
-            min = getParameterValue(element, depth, PARAM_MIN, java.lang.Number.class, minDef);
-            max = getParameterValue(element, depth, PARAM_MAX, java.lang.Number.class, maxDef);
-            step = getParameterValue(element, depth, PARAM_STEP, java.lang.Number.class, stepDef);
-            value = numericValue instanceof BigDecimal decimal ? decimal.toPlainString() : numericValue.toString();
+            java.lang.Number[] aligned =
+                alignNumberTypes(
+                    numericValue,
+                    getParameterValue(element, depth, PARAM_MIN, java.lang.Number.class, minDef),
+                    getParameterValue(element, depth, PARAM_MAX, java.lang.Number.class, maxDef),
+                    getParameterValue(element, depth, PARAM_STEP, java.lang.Number.class, stepDef));
 
-            Class<?> valueClass = numericValue.getClass();
-
-            if (!min.getClass().equals(valueClass)
-                || !max.getClass().equals(valueClass)
-                || !step.getClass().equals(valueClass))
-            {
-                throw new JsonMapperException("mismatch between expected slider value type and min/max/step types");
-            }
+            min = aligned[1];
+            max = aligned[2];
+            step = aligned[3];
+            value = aligned[0] instanceof BigDecimal decimal ? decimal.toPlainString() : aligned[0].toString();
 
             if (element.getParameters().containsKey(PARAM_MARKS))
             {
