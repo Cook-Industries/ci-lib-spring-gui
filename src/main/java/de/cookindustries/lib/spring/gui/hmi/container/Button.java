@@ -27,7 +27,8 @@ public final class Button extends Container
     private final String      text;
 
     @NonNull
-    private final String      onClick;
+    @Default
+    private final String      onClick  = "";
 
     @NonNull
     @Default

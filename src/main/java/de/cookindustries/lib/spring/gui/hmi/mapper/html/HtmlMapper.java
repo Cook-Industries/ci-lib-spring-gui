@@ -770,7 +770,7 @@ public final class HtmlMapper
                     .uid(modalContainer.getUid() + "-center-btn")
                     .btnClass(modalContainer.getBtnClassCenter())
                     .text(modalContainer.getBtnNameCenter())
-                    .onClick(modalContainer.getBtnFunctionCenter())
+                    .onClick(Objects.requireNonNullElse(modalContainer.getBtnFunctionCenter(), ""))
                     .build());
         }
 

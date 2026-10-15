@@ -2498,6 +2498,7 @@ class HtmlMapperTest
                 .name("Title")
                 .btnNameRight("Übernehmen")
                 .btnNameCenter("a<b")
+                .btnFunctionCenter("mid()")
                 .btnNameLeft("Schließen")
                 .build();
         String         html;
@@ -2510,5 +2511,27 @@ class HtmlMapperTest
         assertTrue(html.contains(">a&lt;b</button>"));
         assertTrue(html.contains(">Schlie&szlig;en</button>"));
         assertFalse(html.contains("&amp;"));
+    }
+
+    @Test
+    void test_map_modalContainer_centerButtonWithoutFunction()
+    {
+        // setup
+        ModalContainer container =
+            ModalContainer
+                .builder()
+                .uid("m")
+                .name("Title")
+                .btnNameRight("OK")
+                .btnNameCenter("Mid")
+                .build();
+        String         html;
+
+        // run
+        html = HtmlMapper.map(container);
+
+        // verify
+        assertTrue(html.contains("<button id=\"m-center-btn\" class=\"btn "));
+        assertTrue(html.contains(">Mid</button>"));
     }
 }
