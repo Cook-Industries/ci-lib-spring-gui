@@ -829,7 +829,7 @@ function updateProgress(response) {
     .data("progress", response.progress)
     .css("--v", response.progress);
 
-  $text.html(response.text);
+  $text.text(response.text);
 }
 
 function resetProgress() {
@@ -845,7 +845,7 @@ function resetProgress() {
     .data("progress", 0)
     .css("--v", 0);
 
-  $text.html("loading");
+  $text.text("loading");
 }
 // === < content ===========================================================================================================================
 // === > global loader =====================================================================================================================
@@ -860,7 +860,7 @@ var globalLoaderVisible = false;
 function showGlobalLoader(text = "loading...") {
   globalLoaderVisible = true;
 
-  $("#global-loader-text").html(text);
+  $("#global-loader-text").text(text);
   $("#global-loader-overlay").removeClass(CLASS_HIDDEN);
 
   toggleBodyScroll();
@@ -872,7 +872,7 @@ function showGlobalLoader(text = "loading...") {
  * @returns {undefined}
  */
 function hideGlobalLoader() {
-  $("#global-loader-text").html("loading...");
+  $("#global-loader-text").text("loading...");
   $("#global-loader-overlay").addClass(CLASS_HIDDEN);
   globalLoaderVisible = false;
 
@@ -882,7 +882,7 @@ function hideGlobalLoader() {
 }
 
 function changeGlobalLoaderText(text) {
-  $("#global-loader-text").html(text);
+  $("#global-loader-text").text(text);
 }
 // === < global loader =====================================================================================================================
 // === > notifications =====================================================================================================================
@@ -925,15 +925,24 @@ function handleMessages(messages, btnName = "ok") {
 }
 
 function handleModalMsg(msg) {
-  $("#error-holder").append(`<div class="message-container alert ${msg.type.toLowerCase()}"><i class="bi ${msg.icon}"></i><div>${msg.msg}</div></div>`);
+  $("#error-holder").append(
+    $("<div>")
+      .addClass(`message-container alert ${msg.type.toLowerCase()}`)
+      .append($("<i>").addClass(`bi ${msg.icon}`))
+      .append($("<div>").text(msg.msg))
+  );
 }
 
 function handlePopupMsg(msg) {
-  $("#popup-holder").append(`<div class="pop-up pop-up-fade-out"><div class="${msg.type.toLowerCase()}">${msg.msg}</div></div>`);
+  $("#popup-holder").append(
+    $("<div>")
+      .addClass("pop-up pop-up-fade-out")
+      .append($("<div>").addClass(msg.type.toLowerCase()).text(msg.msg))
+  );
 }
 
 function handleMarkerMsg(msg) {
-  $(`#${msg.uid}-text`).html(msg.text);
+  $(`#${msg.uid}-text`).text(msg.text);
   $(`#${msg.uid}`).removeClass(CLASS_HIDDEN);
 }
 
