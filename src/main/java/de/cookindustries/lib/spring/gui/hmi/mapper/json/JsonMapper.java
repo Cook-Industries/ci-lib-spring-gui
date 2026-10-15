@@ -9,10 +9,12 @@ package de.cookindustries.lib.spring.gui.hmi.mapper.json;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -400,7 +402,7 @@ public class JsonMapper
 
     private final Set<TokenMap>                                 finalizedTokenMaps             = new LinkedHashSet<>();
 
-    private final Map<Integer, TokenMap>                        tempTokenMaps                  = new HashMap<>();
+    private final Deque<TokenMap>                               tempTokenMaps                  = new ArrayDeque<>();
 
     private final List<AbsFunctionCall>                         functions                      = new ArrayList<>();
 
@@ -722,7 +724,6 @@ public class JsonMapper
     {
         Optional<Object> tempResult =
             tempTokenMaps
-                .values()
                 .stream()
                 .filter(Objects::nonNull)
                 .map(m -> m.getValue(objName))
@@ -783,7 +784,6 @@ public class JsonMapper
     {
         Optional<String> tempResult =
             tempTokenMaps
-                .values()
                 .stream()
                 .filter(Objects::nonNull)
                 .map(m -> m.getClazz(objName))
@@ -821,7 +821,6 @@ public class JsonMapper
     {
         Optional<AbsFunctionCall> tempResult =
             tempTokenMaps
-                .values()
                 .stream()
                 .filter(Objects::nonNull)
                 .map(m -> m.getFunction(objName))
@@ -862,7 +861,6 @@ public class JsonMapper
 
         boolean tempResult =
             tempTokenMaps
-                .values()
                 .stream()
                 .filter(Objects::nonNull)
                 .map(m -> m.isUidActive(uid))
@@ -1226,14 +1224,13 @@ public class JsonMapper
                                     .srcPath(path)
                                     .locale(locale)
                                     .tokenMaps(tokenMaps)
-                                    .tokenMap(flatMappableDissector.dissect(src, depth, locale))
                                     .depth0AllowedTypes(allowedTypes)
                                     .build();
 
                             LOG.trace("[{}]:[{}]: map linked component list element [{}] @ mapper [{}]", uuid, depth, path,
                                 internalMapper.uuid);
 
-                            internalMapper.tempTokenMaps.putAll(tempTokenMaps);
+                            passTempTokenMaps(internalMapper, flatMappableDissector.dissect(src, depth, locale));
 
                             results.add(internalMapper.map());
                         });
@@ -1267,13 +1264,12 @@ public class JsonMapper
                         .srcPath(path)
                         .locale(locale)
                         .tokenMaps(tokenMaps)
-                        .tokenMap(flatMappableDissector.dissect(srcElement, depth, locale))
                         .depth0AllowedTypes(allowedTypes)
                         .build();
 
                 LOG.trace("[{}]:[{}]: map linked sourced component [{}] @ mapper [{}]", uuid, depth, path, internalMapper.uuid);
 
-                internalMapper.tempTokenMaps.putAll(tempTokenMaps);
+                passTempTokenMaps(internalMapper, flatMappableDissector.dissect(srcElement, depth, locale));
 
                 result = internalMapper.map();
             }
@@ -1294,12 +1290,28 @@ public class JsonMapper
 
             LOG.trace("[{}]:[{}]: map linked component [{}] @ mapper [{}]", uuid, depth, path, internalMapper.uuid);
 
-            internalMapper.tempTokenMaps.putAll(tempTokenMaps);
+            passTempTokenMaps(internalMapper, null);
 
             result = internalMapper.map();
         }
 
         return result;
+    }
+
+    /**
+     * Hand the temporary token maps of this mapper to an internal mapper, keeping their order.
+     * 
+     * @param internalMapper to receive the temporary token maps
+     * @param sourceTokenMap the token map of the component source, put on top so it wins over the inherited ones, can be {@code null}
+     */
+    private void passTempTokenMaps(JsonMapper internalMapper, TokenMap sourceTokenMap)
+    {
+        internalMapper.tempTokenMaps.addAll(tempTokenMaps);
+
+        if (sourceTokenMap != null)
+        {
+            internalMapper.tempTokenMaps.push(sourceTokenMap);
+        }
     }
 
     /**
@@ -1578,7 +1590,7 @@ public class JsonMapper
 
         for (int i = 0; i < rrp.repetitions(); i++)
         {
-            int tempTokemMapHash = 0;
+            boolean tempTokenMapPushed = false;
 
             try
             {
@@ -1595,9 +1607,9 @@ public class JsonMapper
 
                 if (tempTokenMap != null)
                 {
-                    tempTokemMapHash = tempTokenMap.hashCode();
+                    tempTokenMaps.push(tempTokenMap);
 
-                    tempTokenMaps.put(tempTokemMapHash, tempTokenMap);
+                    tempTokenMapPushed = true;
                 }
 
                 if (LOG.isTraceEnabled() && !tempTokenMaps.isEmpty())
@@ -1605,7 +1617,6 @@ public class JsonMapper
                     LOG.debug("[{}]:[{}]: with following temp token maps", uuid, depth);
 
                     tempTokenMaps
-                        .values()
                         .stream()
                         .filter(Objects::nonNull)
                         .map(TokenMap::toString)
@@ -1623,9 +1634,9 @@ public class JsonMapper
             }
             finally
             {
-                if (tempTokemMapHash != 0)
+                if (tempTokenMapPushed)
                 {
-                    tempTokenMaps.remove(tempTokemMapHash);
+                    tempTokenMaps.pop();
                 }
             }
         }

@@ -1,0 +1,17 @@
+{
+    "uid": "row",
+    "type": "content",
+    "parameters": {
+        "elementSource": "groups",
+        "elementSourceIsList": true
+    },
+    "children": [
+        {
+            "type": "COMPONENT",
+            "parameters": {
+                "path": "json-mapper/component-source-name.ged",
+                "src": "leader"
+            }
+        }
+    ]
+}

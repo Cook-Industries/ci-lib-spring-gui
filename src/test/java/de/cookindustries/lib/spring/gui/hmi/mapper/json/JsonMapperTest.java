@@ -63,7 +63,9 @@ import de.cookindustries.lib.spring.gui.hmi.input.Textfield;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValueList;
 import de.cookindustries.lib.spring.gui.hmi.mapper.html.HtmlMapper;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappable;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableDissector;
+import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableList;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.TokenMap;
 import de.cookindustries.lib.spring.gui.hmi.util.TemplateFileCache;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
@@ -2104,5 +2106,125 @@ class JsonMapperTest
         assertEquals("input is mandatory", input.getMandatoryText());
         assertTrue(input.isDisabled());
         assertTrue(input.isMandatory());
+    }
+
+    @Test
+    void test_map_nestedRepetition_innerItemShadowsOuter()
+    {
+        // setup
+        JsonMapper      mapper     =
+            JsonMapper
+                .builder()
+                .srcPath("json-mapper/nested-repetition.ged")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
+                .flatMappableDissector(flatMappableDissector)
+                .tokenMap(groupsTokenMap())
+                .build();
+
+        List<Container> containers;
+
+        // run
+        containers = mapper.map().getContainers();
+
+        // verify
+        assertEquals(2, containers.size());
+        assertEquals(List.of("group a", "member a1", "member a2"), texts(containers.get(0)));
+        assertEquals(List.of("group b", "member b1", "member b2"), texts(containers.get(1)));
+    }
+
+    @Test
+    void test_map_componentSource_shadowsRepetitionItem()
+    {
+        // setup
+        JsonMapper      mapper     =
+            JsonMapper
+                .builder()
+                .srcPath("json-mapper/component-source-in-repetition.ged")
+                .locale(Locale.ENGLISH)
+                .templateFileCache(templateFileCache)
+                .translationProvider(translationProvider)
+                .flatMappableDissector(flatMappableDissector)
+                .tokenMap(groupsTokenMap())
+                .build();
+
+        List<Container> containers;
+
+        // run
+        containers = mapper.map().getContainers();
+
+        // verify
+        assertEquals(2, containers.size());
+        assertEquals(List.of("leader a"), texts(containers.get(0)));
+        assertEquals(List.of("leader b"), texts(containers.get(1)));
+    }
+
+    private TokenMap groupsTokenMap()
+    {
+        return TokenMap
+            .builder()
+            .value(
+                "groups",
+                new FlatMappableList<>(
+                    List.of(
+                        new Group("group a", new Member("leader a"), List.of(new Member("member a1"), new Member("member a2"))),
+                        new Group("group b", new Member("leader b"), List.of(new Member("member b1"), new Member("member b2"))))))
+            .build();
+    }
+
+    private List<String> texts(Container container)
+    {
+        return ((ContentContainer) container)
+            .getContents()
+            .stream()
+            .map(content -> ((TextContainer) content).getText())
+            .toList();
+    }
+
+    public static class Member implements FlatMappable
+    {
+
+        private final String name;
+
+        Member(String name)
+        {
+            this.name = name;
+        }
+
+        public String getName()
+        {
+            return name;
+        }
+    }
+
+    public static class Group implements FlatMappable
+    {
+
+        private final String       name;
+        private final Member       leader;
+        private final List<Member> members;
+
+        Group(String name, Member leader, List<Member> members)
+        {
+            this.name = name;
+            this.leader = leader;
+            this.members = members;
+        }
+
+        public String getName()
+        {
+            return name;
+        }
+
+        public Member getLeader()
+        {
+            return leader;
+        }
+
+        public List<Member> getMembers()
+        {
+            return members;
+        }
     }
 }

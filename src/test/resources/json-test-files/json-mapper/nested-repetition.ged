@@ -1,0 +1,26 @@
+{
+    "uid": "outer",
+    "type": "content",
+    "parameters": {
+        "elementSource": "groups",
+        "elementSourceIsList": true
+    },
+    "children": [
+        {
+            "uid": "outer-name",
+            "type": "text",
+            "parameters": {
+                "text": "$$value$name"
+            }
+        },
+        {
+            "uid": "inner",
+            "type": "text",
+            "parameters": {
+                "elementSource": "members",
+                "elementSourceIsList": true,
+                "text": "$$value$name"
+            }
+        }
+    ]
+}

@@ -1,0 +1,7 @@
+{
+    "uid": "leader-name",
+    "type": "text",
+    "parameters": {
+        "text": "$$value$name"
+    }
+}
