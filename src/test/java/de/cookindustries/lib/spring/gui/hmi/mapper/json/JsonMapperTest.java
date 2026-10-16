@@ -2303,6 +2303,41 @@ class JsonMapperTest
         assertEquals(49.5, line.getY2());
     }
 
+    @Test
+    void test_map_BurgerContainer_inactiveItemsSkipped()
+    {
+        // setup
+        TokenMap        tokenMap =
+            TokenMap
+                .builder()
+                .deactivateUid("hidden-item")
+                .build();
+        BurgerContainer burger;
+
+        // run
+        burger = (BurgerContainer) mapContainer("json-mapper/container/burger-container-inactive-items.ged", tokenMap);
+
+        // verify
+        assertEquals(1, burger.getItems().size());
+        assertEquals("visible", burger.getItems().get(0).getText());
+    }
+
+    @Test
+    void test_map_BurgerContainer_nonItemChildSkipped()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/burger-container-wrong-child.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        BurgerContainer burger = (BurgerContainer) container;
+        assertEquals(1, burger.getItems().size());
+        assertEquals("item", burger.getItems().get(0).getText());
+    }
+
     private Container mapContainer(String srcPath, TokenMap tokenMap)
     {
         JsonMapper mapper =

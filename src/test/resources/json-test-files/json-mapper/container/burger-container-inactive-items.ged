@@ -1,0 +1,29 @@
+{
+    "uid": "uid",
+    "type": "BURGER",
+    "children": [
+        {
+            "type": "burger_item",
+            "parameters": {
+                "text": "visible",
+                "url": "/visible"
+            }
+        },
+        {
+            "type": "burger_item",
+            "parameters": {
+                "active": false,
+                "text": "inactive",
+                "url": "/inactive"
+            }
+        },
+        {
+            "uid": "hidden-item",
+            "type": "burger_item",
+            "parameters": {
+                "text": "deactivated",
+                "url": "/deactivated"
+            }
+        }
+    ]
+}

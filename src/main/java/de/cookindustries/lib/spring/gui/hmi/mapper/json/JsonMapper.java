@@ -243,7 +243,6 @@ public class JsonMapper
 
     private static final String                                 RANDOM_ID                      = "randomid";
     private static final String                                 CONNECTED_BTN                  = "connected-btn";
-    private static final String                                 TYPE_ITEM                      = "burger-item";
 
     private static final String                                 DEFAULT_DATE                   = "0000-00-00";
     private static final String                                 DEFAULT_EMPTY_VAL              = "";
@@ -1474,13 +1473,14 @@ public class JsonMapper
             switch (targetEnumType.getSimpleName())
             {
                 case "InputValue":
-                    if ("INPUT_VALUE".equals(pe.getType().toUpperCase()))
+                    if (SubElementType.INPUT_VALUE.matches(pe.getType()))
                     {
                         values.add(returnType.cast(transformInputValue(pe, depth + 1)));
                     }
                     else
                     {
-                        LOG.warn("[{}]:[{}]: the child transform of [{}] failed due to not be of type [INPUT_VALUE]", uuid, depth, uid);
+                        LOG.warn("[{}]:[{}]: the child transform of [{}] failed due to not be of type [{}]", uuid, depth, uid,
+                            SubElementType.INPUT_VALUE);
                     }
                     break;
 
@@ -1856,11 +1856,20 @@ public class JsonMapper
      */
     private BurgerItem transformEntry(PseudoElement element, int depth)
     {
-        String  uid            = element.getUid() == null ? RANDOM_ID : element.getUid();
-        boolean processElement = shouldProcess(element, uid, depth);
+        String uid = element.getUid() == null ? RANDOM_ID : element.getUid();
 
-        if (!processElement && !TYPE_ITEM.equalsIgnoreCase(element.getType()))
+        if (!SubElementType.BURGER_ITEM.matches(element.getType()))
         {
+            LOG.warn("[{}]:[{}]: skip burger child [{}] of type [{}], expected [{}]", uuid, depth, uid, element.getType(),
+                SubElementType.BURGER_ITEM);
+
+            return null;
+        }
+
+        if (!shouldProcess(element, uid, depth))
+        {
+            LOG.trace("[{}]:[{}]: skip burger item [{}] due to parameter [active] is [false] or [uid] is deactivated", uuid, depth, uid);
+
             return null;
         }
 

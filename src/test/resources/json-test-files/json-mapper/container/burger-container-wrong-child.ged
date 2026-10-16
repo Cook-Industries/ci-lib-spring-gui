@@ -1,0 +1,19 @@
+{
+    "uid": "uid",
+    "type": "BURGER",
+    "children": [
+        {
+            "type": "text",
+            "parameters": {
+                "text": "not an item"
+            }
+        },
+        {
+            "type": "burger_item",
+            "parameters": {
+                "text": "item",
+                "url": "/item"
+            }
+        }
+    ]
+}
