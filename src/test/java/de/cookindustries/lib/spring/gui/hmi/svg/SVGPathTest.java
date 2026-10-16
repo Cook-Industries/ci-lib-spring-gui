@@ -52,8 +52,8 @@ class SVGPathTest
         resultRelative = cmdRelative.getCommandString();
 
         // verify
-        assertEquals("A 1.003 1.003 1 1 10.003,10.003", resultAbsolute);
-        assertEquals("a 1.003 1.003 1 1 10.003,10.003", resultRelative);
+        assertEquals("A 1.003 1.003 0.000 1 1 10.003,10.003", resultAbsolute);
+        assertEquals("a 1.003 1.003 0.000 1 1 10.003,10.003", resultRelative);
     }
 
     @Test

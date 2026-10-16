@@ -234,6 +234,7 @@ public class JsonMapper
     private static final String                                 PARAM_X                        = "x";
     private static final String                                 PARAM_X1                       = "x1";
     private static final String                                 PARAM_X2                       = "x2";
+    private static final String                                 PARAM_X_AXIS_ROTATION          = "xAxisRotation";
     private static final String                                 PARAM_Y                        = "y";
     private static final String                                 PARAM_Y1                       = "y1";
     private static final String                                 PARAM_Y2                       = "y2";
@@ -3421,6 +3422,7 @@ public class JsonMapper
         boolean relative          = getParameterValue(element, depth, PARAM_RELATIVE, Boolean.class, false);
         double  rx                = getParameterValue(element, depth, PARAM_RX, Double.class);
         double  ry                = getParameterValue(element, depth, PARAM_RY, Double.class);
+        double  xAxisRotation     = getParameterValue(element, depth, PARAM_X_AXIS_ROTATION, Double.class, 0d);
         boolean angleLargeArcFlag = getParameterValue(element, depth, PARAM_ANGLE_LARGE_ARC_FLAG, Boolean.class, false);
         boolean sweepFlag         = getParameterValue(element, depth, PARAM_SWEEP_FLAG, Boolean.class, false);
         double  endPointX         = getParameterValue(element, depth, PARAM_END_POINT_X, Double.class);
@@ -3431,6 +3433,7 @@ public class JsonMapper
             .relative(relative)
             .rx(rx)
             .ry(ry)
+            .xAxisRotation(xAxisRotation)
             .angleLargeArcFlag(angleLargeArcFlag)
             .sweepFlag(sweepFlag)
             .endPointX(endPointX)

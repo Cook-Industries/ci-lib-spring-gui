@@ -27,6 +27,10 @@ public class SVGPathCmdA extends SVGPathCommand
     @NonNull
     private final Double  ry;
 
+    @NonNull
+    @Default
+    private final Double  xAxisRotation     = 0d;
+
     @Default
     private final boolean angleLargeArcFlag = false;
 
@@ -42,7 +46,7 @@ public class SVGPathCmdA extends SVGPathCommand
     @Override
     public String getCommandString()
     {
-        return String.format(Locale.US, "%s %.3f %.3f %s %s %.3f,%.3f", commandChar(), rx, ry,
+        return String.format(Locale.US, "%s %.3f %.3f %.3f %s %s %.3f,%.3f", commandChar(), rx, ry, xAxisRotation,
             angleLargeArcFlag ? 1 : 0, sweepFlag ? 1 : 0, endPointX, endPointY);
     }
 

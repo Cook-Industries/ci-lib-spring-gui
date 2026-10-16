@@ -33,6 +33,7 @@ import de.cookindustries.lib.spring.gui.hmi.container.HiddenContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.ImageContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.LinkContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.ModalContainer;
+import de.cookindustries.lib.spring.gui.hmi.container.SVGContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.SplittedContainer;
 import de.cookindustries.lib.spring.gui.hmi.container.TextContainer;
 import de.cookindustries.lib.spring.gui.hmi.input.Checkbox;
@@ -51,6 +52,9 @@ import de.cookindustries.lib.spring.gui.hmi.input.Textarea;
 import de.cookindustries.lib.spring.gui.hmi.input.Textbox;
 import de.cookindustries.lib.spring.gui.hmi.input.Textfield;
 import de.cookindustries.lib.spring.gui.hmi.input.util.InputValue;
+import de.cookindustries.lib.spring.gui.hmi.svg.SVGPath;
+import de.cookindustries.lib.spring.gui.hmi.svg.SVGPathCmdA;
+import de.cookindustries.lib.spring.gui.hmi.svg.SVGText;
 
 class HtmlMapperTest
 {
@@ -2533,5 +2537,71 @@ class HtmlMapperTest
         // verify
         assertTrue(html.contains("<button id=\"m-center-btn\" class=\"btn "));
         assertTrue(html.contains(">Mid</button>"));
+    }
+
+    @Test
+    void test_map_svgText_rendersTextContent()
+    {
+        // setup
+        SVGContainer container =
+            SVGContainer
+                .builder()
+                .uid("svg")
+                .width(100)
+                .height(50)
+                .element(
+                    SVGText
+                        .builder()
+                        .uid("t")
+                        .text("a<b")
+                        .dy(2d)
+                        .textLength(10d)
+                        .build())
+                .build();
+        String       html;
+
+        // run
+        html = HtmlMapper.map(container);
+
+        // verify
+        assertTrue(html.contains(">a&lt;b</text>"));
+        assertTrue(html.contains("dy=\"2.000\""));
+        assertTrue(html.contains("textLength=\"10.000\""));
+        assertFalse(html.contains("y2="));
+    }
+
+    @Test
+    void test_map_svgPath_arcWithXAxisRotation()
+    {
+        // setup
+        SVGContainer container =
+            SVGContainer
+                .builder()
+                .uid("svg")
+                .width(100)
+                .height(50)
+                .element(
+                    SVGPath
+                        .builder()
+                        .uid("p")
+                        .command(
+                            SVGPathCmdA
+                                .builder()
+                                .rx(5d)
+                                .ry(5d)
+                                .xAxisRotation(30d)
+                                .angleLargeArcFlag(true)
+                                .endPointX(10d)
+                                .endPointY(10d)
+                                .build())
+                        .build())
+                .build();
+        String       html;
+
+        // run
+        html = HtmlMapper.map(container);
+
+        // verify
+        assertTrue(html.contains("d=\"A 5.000 5.000 30.000 1 0 10.000,10.000\""));
     }
 }

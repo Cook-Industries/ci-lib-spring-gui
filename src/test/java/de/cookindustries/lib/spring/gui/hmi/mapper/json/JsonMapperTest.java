@@ -71,6 +71,8 @@ import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableDissector;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.FlatMappableList;
 import de.cookindustries.lib.spring.gui.hmi.mapper.util.TokenMap;
 import de.cookindustries.lib.spring.gui.hmi.svg.SVGLine;
+import de.cookindustries.lib.spring.gui.hmi.svg.SVGPath;
+import de.cookindustries.lib.spring.gui.hmi.svg.SVGPathCmdA;
 import de.cookindustries.lib.spring.gui.hmi.util.TemplateFileCache;
 import de.cookindustries.lib.spring.gui.i18n.AbsTranslationProvider;
 import de.cookindustries.lib.spring.gui.i18n.StaticTranslationProvider;
@@ -2336,6 +2338,23 @@ class JsonMapperTest
         BurgerContainer burger = (BurgerContainer) container;
         assertEquals(1, burger.getItems().size());
         assertEquals("item", burger.getItems().get(0).getText());
+    }
+
+    @Test
+    void test_map_SVGPath_arcXAxisRotation()
+    {
+        // setup
+        String    srcPath = "json-mapper/container/svg-path-arc-container.ged";
+        Container container;
+
+        // run
+        container = mapContainer(srcPath);
+
+        // verify
+        SVGContainer svg  = (SVGContainer) container;
+        SVGPath      path = (SVGPath) svg.getElements().get(0);
+        SVGPathCmdA  arc  = (SVGPathCmdA) path.getCommands().get(0);
+        assertEquals(30.0, arc.getXAxisRotation());
     }
 
     private Container mapContainer(String srcPath, TokenMap tokenMap)

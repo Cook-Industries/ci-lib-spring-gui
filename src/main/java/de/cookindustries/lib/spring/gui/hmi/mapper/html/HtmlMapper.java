@@ -2394,7 +2394,6 @@ public final class HtmlMapper
             HtmlElement
                 .builder()
                 .tag(TAG_TEXT)
-                .isSingleTag(true)
                 .attribute(
                     Attribute
                         .builder()
@@ -2429,7 +2428,7 @@ public final class HtmlMapper
                 .attribute(
                     Attribute
                         .builder()
-                        .name("y2")
+                        .name("dy")
                         .value(DOUBLE_FORMATER.format(line.getDy()))
                         .build())
                 .attribute(
@@ -2441,13 +2440,14 @@ public final class HtmlMapper
                 .attribute(
                     Attribute
                         .builder()
-                        .name("y2")
+                        .name("textLength")
                         .active(line.getTextLength() > 0d)
                         .value(DOUBLE_FORMATER.format(line.getTextLength()))
                         .build())
                 .classes(line.getClasses())
                 .dataAttributes(line.getDataAttributes())
                 .dataAttribute(DATA_ATT_TOOLTIP, line.getTooltip().isBlank() ? null : line.getTooltip())
+                .content(htmlEscape(line.getText()))
                 .build();
 
         return elementMapper.html();
